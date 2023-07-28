@@ -73,70 +73,76 @@ export default () => {
   }
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          onRefresh={onRefetchClub}
-          refreshing={isRefetchingClub}
-        />
-      }
-      className={`flex-1 rounded-lg ${
-        colorTheme === "dark" ? `bg-dark` : "bg-light"
-      }`}
-    >
-      <SafeAreaView
+    <SafeAreaView className="flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            onRefresh={onRefetchClub}
+            refreshing={isRefetchingClub}
+          />
+        }
         className={`flex-1 rounded-lg ${
           colorTheme === "dark" ? `bg-dark` : "bg-light"
         }`}
-        style={{
-          gap: theme.Tokens.SPACING.xs,
-          marginHorizontal: theme.Tokens.SPACING.xs,
-          flex: 1,
-        }}
       >
-        <MarketStatusCard />
-        <TeamBanner team={club} />
         <View
-          className={`flex-row gap-2 ${
+          className={`flex-1 rounded-lg ${
             colorTheme === "dark" ? `bg-dark` : "bg-light"
           }`}
+          style={{
+            gap: theme.Tokens.SPACING.xs,
+            marginHorizontal: theme.Tokens.SPACING.xs,
+            flex: 1,
+          }}
         >
-          <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
-            <Text className="font-semibold">Total de Pontos</Text>
-            <Text className="font-semibold text-xl">{totalScore}</Text>
-            <Text className="font-light">Pts</Text>
+          <MarketStatusCard />
+          <TeamBanner team={club} />
+          <View
+            className={`flex-row gap-2 ${
+              colorTheme === "dark" ? `bg-dark` : "bg-light"
+            }`}
+          >
+            <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
+              <Text className="font-semibold">Total de Pontos</Text>
+              <Text className="font-semibold text-xl">{totalScore}</Text>
+              <Text className="font-light">Pts</Text>
+            </View>
+
+            <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
+              <Text className="font-semibold">Patrim.</Text>
+              <Text className="font-semibold text-xl">{totalPatrimony}</Text>
+              <Text className="font-light">C$</Text>
+            </View>
           </View>
 
-          <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
-            <Text className="font-semibold">Patrim.</Text>
-            <Text className="font-semibold text-xl">{totalPatrimony}</Text>
-            <Text className="font-light">C$</Text>
+          <View
+            className={`flex-row gap-2 ${
+              colorTheme === "dark" ? `bg-dark` : "bg-light"
+            }`}
+          >
+            <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
+              <Text className="font-semibold">Maior Pontuação</Text>
+              <Text className="font-semibold text-xl text-blue-500">
+                {numberToString(highestScore?.pontos as number)}
+              </Text>
+              <Text className="font-light">
+                Rodada {highestScore?.rodada_id}
+              </Text>
+            </View>
+
+            <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
+              <Text className="font-semibold">Menor Pontuação</Text>
+              <Text className="font-semibold text-xl text-red-500">
+                {numberToString(lowestScore?.pontos as number)}
+              </Text>
+              <Text className="font-light">
+                Rodada {lowestScore?.rodada_id}
+              </Text>
+            </View>
           </View>
         </View>
-
-        <View
-          className={`flex-row gap-2 ${
-            colorTheme === "dark" ? `bg-dark` : "bg-light"
-          }`}
-        >
-          <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
-            <Text className="font-semibold">Maior Pontuação</Text>
-            <Text className="font-semibold text-xl text-blue-500">
-              {numberToString(highestScore?.pontos as number)}
-            </Text>
-            <Text className="font-light">Rodada {highestScore?.rodada_id}</Text>
-          </View>
-
-          <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
-            <Text className="font-semibold">Menor Pontuação</Text>
-            <Text className="font-semibold text-xl text-red-500">
-              {numberToString(lowestScore?.pontos as number)}
-            </Text>
-            <Text className="font-light">Rodada {lowestScore?.rodada_id}</Text>
-          </View>
-        </View>
-      </SafeAreaView>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };

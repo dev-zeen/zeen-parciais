@@ -47,9 +47,7 @@ export function TopPlayerCard({ player }: TopPlayerCardProps) {
           </View>
 
           <View>
-            <Text className="font-medium text-base text-blue-500">
-              {totalLineups}
-            </Text>
+            <Text className="font-medium text-base">{totalLineups}</Text>
           </View>
         </View>
       </View>

@@ -10,7 +10,7 @@ type TeamBannerProps = {
 
 export function TeamBanner({ team }: TeamBannerProps) {
   return (
-    <View className="flex-1 gap-x-1 flex-row items-center rounded-lg p-2">
+    <View className="flex-1 flex-row items-center rounded-lg p-2">
       <Image
         source={{
           uri: team.time.url_escudo_png,
@@ -18,7 +18,7 @@ export function TeamBanner({ team }: TeamBannerProps) {
         className="w-16 h-16"
         alt={`Escudo do ${team.time.nome}`}
       />
-      <View className="gap-1">
+      <View className="gap-1 pl-4">
         {team.time.assinante ? (
           <Image
             source={cartolaProImage}

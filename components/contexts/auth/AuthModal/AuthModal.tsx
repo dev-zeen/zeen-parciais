@@ -50,7 +50,7 @@ export function ModalAuth({
           source={{
             uri: URL_AUTH,
           }}
-          className="rounded-lg mt-16 mx-4"
+          className="rounded-lg mx-4"
           injectedJavaScript={INJECT_AUTH_LOGIN}
           onMessage={handleWebViewMessage}
           onNavigationStateChange={(event: any) => {

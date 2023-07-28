@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { ImageBackground, Modal } from "react-native";
 
+import footballField from "@/assets/images/field.png";
 import { PlayerFootballField } from "@/components/contexts/team/player-football-field";
 import { FormationPlayer, ISchema } from "@/models/Formations";
-import footballField from "@assets/images/field.png";
 
 import { AddPlayerButton } from "@/components/contexts/team/add-player-button";
 

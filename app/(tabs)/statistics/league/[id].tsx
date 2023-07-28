@@ -1,0 +1,267 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FlatList,
+  Image,
+  ListRenderItemInfo,
+  RefreshControl,
+  SafeAreaView,
+  useColorScheme,
+} from "react-native";
+
+import { useLocalSearchParams } from "expo-router";
+
+import { ClubCard } from "@/components/contexts/statistics/leagues/club/ClubCard";
+import { Loading } from "@/components/structure/Loading";
+import { ITabs, Tabs } from "@/components/structure/Tabs";
+import { League, TeamLeague } from "@/models/Leagues";
+import { PlayersStats } from "@/models/Stats";
+import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues";
+
+import { Text, View } from "@/components/Themed";
+import { DialogComponent } from "@/components/structure/Dialog";
+import Colors from "@/constants/Colors";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { MarketStatus } from "@/models/Market";
+import { useGetMarketStatus } from "@/queries/market";
+import { useGetScoredPlayers } from "@/queries/stats";
+import theme from "@/styles/theme";
+import {
+  mergeSort,
+  onGetLeagueWithPartials,
+  orderByOptions,
+} from "./leagues.helper";
+
+export interface ClubByLeague extends TeamLeague {
+  playersHavePlayed?: number;
+}
+
+export default () => {
+  const colorTheme = useColorScheme();
+
+  const { id: slug } = useLocalSearchParams();
+
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const marketIsClosed =
+    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+
+  const { data: playersStats, refetch: onRefetchStats } = useGetScoredPlayers();
+
+  const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
+  const [orderBy, setOrderBy] = useState(orderByOptions.RODADA);
+
+  const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
+
+  const {
+    data: league,
+    refetch: onRefetchLeague,
+    isRefetching: isRefetchingLeague,
+  } = useGetLeague(slug as string);
+
+  const onRefetch = useCallback(async () => {
+    await onRefetchLeague();
+    await onRefetchStats();
+  }, [onRefetchLeague, onRefetchStats]);
+
+  const isRefetching = isRefetchingLeague;
+
+  const { data: clubsByLeague } = useGetClubsByLeagueId(league?.liga.liga_id);
+
+  const handleConfirmDialog = () => {
+    setShowModalPublicLeague(false);
+  };
+
+  const handleOrderByPatrimony = useCallback(() => {
+    const newOrderBy =
+      league &&
+      league.times.sort((a: TeamLeague, b: TeamLeague) => {
+        return b.patrimonio - a.patrimonio;
+      });
+
+    return newOrderBy;
+  }, [league]);
+
+  const handleSortClubs = useCallback(
+    (sortBy: string) => {
+      const compareFn = (a: ClubByLeague, b: ClubByLeague) =>
+        ((b.pontos as any)[sortBy] as number) -
+        ((a.pontos as any)[sortBy] as number);
+
+      if (marketIsClosed && clubsByLeague) {
+        const leagueWithPartials = onGetLeagueWithPartials(
+          league as League,
+          clubsByLeague,
+          playersStats as PlayersStats
+        );
+        const sortedClubs = mergeSort(leagueWithPartials, compareFn);
+        setClubs(sortedClubs);
+      } else {
+        const clubByLeagues = league?.times?.sort((a, b) => compareFn(a, b));
+        setClubs(clubByLeagues);
+      }
+    },
+    [league, clubsByLeague]
+  );
+
+  const handleOnPressOrderBy = useCallback(
+    (sortProp: string) => {
+      if (sortProp === orderBy) return;
+      setOrderBy(sortProp);
+
+      if (sortProp === orderByOptions.PATRIMONIO) {
+        const newOrderByPatrimony = handleOrderByPatrimony();
+        setClubs(newOrderByPatrimony);
+        return;
+      }
+
+      handleSortClubs(sortProp);
+    },
+    [league, clubsByLeague, orderBy]
+  );
+
+  useEffect(() => {
+    if (league && orderBy === orderByOptions.PATRIMONIO) {
+      handleOrderByPatrimony();
+      return;
+    }
+    handleSortClubs(orderBy);
+  }, [league, clubsByLeague]);
+
+  useEffect(() => {
+    if (league && !league?.liga.time_dono_id) {
+      setShowModalPublicLeague(true);
+    }
+  }, [league]);
+
+  const tabs: ITabs[] = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Rodada",
+        onPress() {
+          const sortProp = orderByOptions.RODADA;
+          handleOnPressOrderBy(sortProp);
+        },
+      },
+      {
+        id: 2,
+        title: "Total",
+        onPress() {
+          const sortProp = orderByOptions.CAMPEONATO;
+          handleOnPressOrderBy(sortProp);
+        },
+      },
+      {
+        id: 3,
+        title: "Turno",
+        onPress() {
+          const sortProp = orderByOptions.TURNO;
+          handleOnPressOrderBy(sortProp);
+        },
+      },
+      {
+        id: 4,
+        title: "Mês",
+        onPress() {
+          const sortProp = orderByOptions.MES;
+          handleOnPressOrderBy(sortProp);
+        },
+      },
+
+      {
+        id: 5,
+        title: "C$",
+        onPress() {
+          const sortProp = orderByOptions.PATRIMONIO;
+          handleOnPressOrderBy(sortProp);
+        },
+      },
+    ],
+    [orderBy, handleOnPressOrderBy]
+  );
+
+  const renderItem = useCallback(
+    ({ item, index }: ListRenderItemInfo<TeamLeague>) => {
+      return (
+        <ClubCard
+          club={item}
+          league={league as League}
+          position={index + 1}
+          orderBy={orderBy}
+          firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
+          marketStatus={marketStatus as MarketStatus}
+          marketIsClosed={marketIsClosed}
+        />
+      );
+    },
+    [clubs, orderBy]
+  );
+
+  const keyExtractor = useCallback((item: TeamLeague) => item.nome_cartola, []);
+
+  const isLoading = !clubs;
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  return (
+    <SafeAreaView
+      className={`flex-1 px-2 rounded-lg ${
+        colorTheme === "dark" ? `bg-dark` : "bg-light"
+      }`}
+    >
+      <View className="flex-row justify-center items-center p-3">
+        <Image
+          source={{
+            uri: league?.liga.url_flamula_png,
+          }}
+          style={{ width: theme.Tokens.SIZE.sm, height: theme.Tokens.SIZE.sm }}
+          alt={`Imagem da liga ${league?.liga.nome}`}
+        />
+        <Text
+          style={{
+            fontWeight: "700",
+            fontSize: theme.Tokens.TEXT.md,
+            textTransform: "uppercase",
+          }}
+        >
+          {league?.liga.nome}
+        </Text>
+      </View>
+
+      <Tabs tabs={tabs} />
+
+      <FlatList
+        refreshControl={
+          <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
+        }
+        data={clubs}
+        renderItem={(data) => renderItem(data)}
+        keyExtractor={keyExtractor}
+        initialNumToRender={15}
+        removeClippedSubviews={true}
+        windowSize={5}
+        getItemLayout={(_data, index) => ({
+          length: 40,
+          offset: 40 * index,
+          index,
+        })}
+        maxToRenderPerBatch={15}
+        contentContainerStyle={{
+          backgroundColor:
+            colorTheme === "dark"
+              ? Colors.dark.background
+              : Colors.light.background,
+        }}
+      />
+      {showModalPublicLeague && (
+        <DialogComponent
+          isVisible={showModalPublicLeague}
+          onPressConfirm={handleConfirmDialog}
+          subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
+        />
+      )}
+    </SafeAreaView>
+  );
+};

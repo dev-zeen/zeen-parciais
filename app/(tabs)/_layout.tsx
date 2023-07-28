@@ -46,6 +46,17 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="statistics"
+        options={{
+          tabBarLabel: "Estatísticas",
+          headerTitle: "Estatísticas",
+          headerShown: false,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="bar-chart-2" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile/[id]"
         options={{
           tabBarLabel: "Perfil",

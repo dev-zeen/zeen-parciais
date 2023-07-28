@@ -4,16 +4,18 @@ import {
   ListRenderItemInfo,
   RefreshControl,
   TextInput,
+  useColorScheme,
 } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { PlayerCard } from "@/components/contexts/stats/players/PlayerCard/PlayerCard";
+import { PlayerCard } from "@/components/contexts/statistics/players/PlayerCard/PlayerCard";
 import { Loading } from "@/components/structure/Loading";
+import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { IPlayersStats, Player, PlayersStats } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market";
 import { GRAY_OPACITY } from "@/styles/colors";
-import { FontAwesome } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { QueryObserverResult } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -29,6 +31,8 @@ export function PlayersList({
   onRefetch,
   isRefetchingStats,
 }: PlayersListProps) {
+  const colorTheme = useColorScheme();
+
   const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
     useGetMarketStatus();
 
@@ -115,21 +119,16 @@ export function PlayersList({
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO) {
     return (
-      <View className="items-center mt-4">
-        <View className="flex-row justify-center items-center bg-white rounded-lg mx-2 p-10">
-          <Text className="font-medium italic">
-            {" "}
-            Mercado Aberto até {`${marketCloseDate}`}
-          </Text>
-        </View>
-
-        <View className="flex-row justify-center items-center bg-white rounded-lg mx-8 mt-1 py-4 px-8">
-          <FontAwesome name="info-circle" size={20} />
-          <Text className="text-gray-600 text-sm ml-2">
-            Os jogadores serão exibidos assim que obtiverem pontuação durante os
-            jogos.
-          </Text>
-        </View>
+      <View className="flex-row p-4 items-center rounded-lg justify-center mt-4">
+        <Feather
+          name="info"
+          size={20}
+          color={colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint}
+        />
+        <Text className="text-sm ml-2">
+          Os jogadores serão exibidos assim que obtiverem pontuação durante os
+          jogos.
+        </Text>
       </View>
     );
   }
