@@ -195,7 +195,7 @@ export default () => {
         refreshControl={
           <RefreshControl onRefresh={onRefetch} refreshing={isRefetchingClub} />
         }
-        className={`flex-1 rounded-lg ${
+        className={`rounded-lg ${
           colorTheme === "dark" ? `bg-dark` : "bg-light"
         }`}
       >

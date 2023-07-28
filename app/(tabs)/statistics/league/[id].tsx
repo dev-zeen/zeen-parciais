@@ -4,7 +4,6 @@ import {
   Image,
   ListRenderItemInfo,
   RefreshControl,
-  SafeAreaView,
   useColorScheme,
 } from "react-native";
 
@@ -19,6 +18,7 @@ import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues";
 
 import { Text, View } from "@/components/Themed";
 import { DialogComponent } from "@/components/structure/Dialog";
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { MarketStatus } from "@/models/Market";
@@ -197,7 +197,7 @@ export default () => {
     [clubs, orderBy]
   );
 
-  const keyExtractor = useCallback((item: TeamLeague) => item.nome_cartola, []);
+  const keyExtractor = useCallback((item: TeamLeague) => `${item.time_id}`, []);
 
   const isLoading = !clubs;
 
@@ -206,11 +206,7 @@ export default () => {
   }
 
   return (
-    <SafeAreaView
-      className={`flex-1 px-2 rounded-lg ${
-        colorTheme === "dark" ? `bg-dark` : "bg-light"
-      }`}
-    >
+    <SafeAreaViewContainer>
       <View className="flex-row justify-center items-center p-3">
         <Image
           source={{
@@ -239,7 +235,7 @@ export default () => {
         data={clubs}
         renderItem={(data) => renderItem(data)}
         keyExtractor={keyExtractor}
-        initialNumToRender={15}
+        initialNumToRender={100}
         removeClippedSubviews={true}
         windowSize={5}
         getItemLayout={(_data, index) => ({
@@ -262,6 +258,6 @@ export default () => {
           subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
         />
       )}
-    </SafeAreaView>
+    </SafeAreaViewContainer>
   );
 };

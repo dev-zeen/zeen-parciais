@@ -36,6 +36,7 @@ export default () => {
         refreshControl={
           <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
         }
+        initialNumToRender={10}
         data={data?.partidas}
         keyExtractor={(item) => `${item.clube_casa_id}`}
         renderItem={renderItem}

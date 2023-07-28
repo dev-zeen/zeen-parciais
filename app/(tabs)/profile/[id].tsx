@@ -1,15 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import {
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  useColorScheme,
-} from "react-native";
+import { RefreshControl, ScrollView, useColorScheme } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
 import { useGetHistoricMyClub, useGetMyClub } from "@/queries/club";
@@ -73,7 +69,7 @@ export default () => {
   }
 
   return (
-    <SafeAreaView className="flex-1">
+    <SafeAreaViewContainer>
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -143,6 +139,6 @@ export default () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaViewContainer>
   );
 };

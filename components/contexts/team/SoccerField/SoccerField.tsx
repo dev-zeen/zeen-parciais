@@ -2,26 +2,27 @@ import { useCallback, useEffect, useState } from "react";
 import { ImageBackground, Modal } from "react-native";
 
 import footballField from "@/assets/images/field.png";
-import { PlayerFootballField } from "@/components/contexts/team/player-football-field";
 import { FormationPlayer, ISchema } from "@/models/Formations";
 
-import { AddPlayerButton } from "@/components/contexts/team/add-player-button";
+import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 
-// TODO import { Market } from '@app/(tabs)/team/market';
+import { Market } from "@/app/(tabs)/team/market";
 import { View } from "@/components/Themed";
+import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
+import { Market as MarketModal } from "@/models/Market";
 import { useGetMarket } from "@/queries/market";
 
-type FootballFieldProps = {
+type SoccerFieldProps = {
   schema: ISchema;
   capitain: number;
   handleChangeCapitain?: (id: number) => void;
 };
 
-export function FootballField({
+export function SoccerField({
   schema,
   capitain,
   handleChangeCapitain,
-}: FootballFieldProps) {
+}: SoccerFieldProps) {
   const { data: market } = useGetMarket();
   const [positionMarketSearch, setPositionMarketSearch] =
     useState<FormationPlayer | null>();
@@ -45,13 +46,14 @@ export function FootballField({
   }, [positionMarketSearch]);
 
   return (
-    <View className="flex-1 justify-center items-center rounded-lg">
-      <View className="flex-1">
+    <View className="flex-1 justify-center items-center rounded-lg pt-2">
+      <View className="flex-1 rounded-lg">
         <ImageBackground
           source={footballField}
+          className="flex-1 rounded-lg"
           style={{
-            height: 435,
-            width: 410,
+            height: 420,
+            width: 372,
           }}
           alt="Campo de futebol"
         />
@@ -63,12 +65,13 @@ export function FootballField({
             key={`${position.left} + ${position.position} + ${position.top}`}
             className="absolute"
             style={{
-              top: position.top,
-              left: position.left,
+              top: position.top as any,
+              left: position.left as any,
+              backgroundColor: "transparent",
             }}
           >
             {position.player ? (
-              <PlayerFootballField
+              <TeamPlayer
                 player={position.player}
                 hasCaptain={capitain === position.player?.atleta_id}
                 handleCapitain={handleChangeCapitain}
@@ -84,11 +87,11 @@ export function FootballField({
       })}
 
       <Modal animationType="slide" transparent visible={activeModalMarket}>
-        {/* <Market
-          market={market as MarketModel}
+        <Market
+          market={market as MarketModal}
           position={positionMarketSearch}
           handleCloseMarketModal={handleCloseMarketModal}
-        /> */}
+        />
       </Modal>
     </View>
   );

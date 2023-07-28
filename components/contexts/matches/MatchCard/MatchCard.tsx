@@ -65,13 +65,13 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
             alt={`Escudo do ${homeClub?.nome}`}
           />
 
-          <View className="flex-row border border-gray-100 px-2 py-1 justify-center items-center">
+          <View className="flex-row px-2 py-1 justify-center items-center">
             <Text className="font-semibold">
               {match.placar_oficial_mandante ?? ""}{" "}
             </Text>
 
             <View className="items-center justify-center w-5 pr-0.5">
-              <Text className="text-gray-500">X</Text>
+              <Text className="text-gray-400">X</Text>
             </View>
 
             <Text className="font-semibold">

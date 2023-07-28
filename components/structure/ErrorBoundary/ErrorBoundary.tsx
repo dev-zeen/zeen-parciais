@@ -2,8 +2,9 @@ import { Text, View } from "@/components/Themed";
 import React from "react";
 // import { Props } from 'react-native-error-boundary/lib/ErrorBoundary/FallbackComponent';
 
-// import errorImage from '@/assets/images/error-background.png';
-// import { Button } from '@components/structure/button/button';
+import errorImage from "@/assets/images/error-background.png";
+import { Button } from "@/components/structure/Button";
+import { Image } from "react-native";
 
 type CustomErrorBoundaryProps = {
   isError?: boolean;
@@ -20,11 +21,11 @@ export function CustomFallbackErrorBoundary({
         gap: 16,
       }}
     >
-      {/* <Image
+      <Image
         source={errorImage}
         className="w-48 h-48 rounded-full"
         alt={`Imagem de erro na aplicação`}
-      /> */}
+      />
       <View className="items-center justify-center">
         <Text className="text-gray-700 text-sm">
           {error?.response?.data?.mensagem
@@ -36,7 +37,7 @@ export function CustomFallbackErrorBoundary({
         </Text>
       </View>
 
-      {/* <Button onPress={resetError} title="Voltar" /> */}
+      <Button onPress={resetError} title="Voltar" />
     </View>
   );
 }

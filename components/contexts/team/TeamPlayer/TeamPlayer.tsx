@@ -9,22 +9,19 @@ import { FullPlayer } from "@/models/Stats";
 import { numberToString } from "@/utils/parseTo";
 
 import captainImage from "@/assets/images/letter-c.png";
-import { View } from "@/components/Themed";
+import { Text, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { useGetMarketStatus } from "@/queries/market";
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
-import { FontAwesome } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 
-type PlayerFootballFieldProps = {
+type TeamPlayerProps = {
   player?: PlayerFormation | FullPlayer;
   hasCaptain?: boolean;
   handleCapitain?: (id: number) => void;
 };
 
-export function PlayerFootballField({
-  player,
-  hasCaptain,
-}: PlayerFootballFieldProps) {
+export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
   const { data: marketStatus } = useGetMarketStatus();
 
   const marketIsClosed =
@@ -53,6 +50,7 @@ export function PlayerFootballField({
         gap: 2,
         maxWidth: 90,
         minWidth: 90,
+        backgroundColor: "transparent",
       }}
     >
       {marketIsClosed ? (
@@ -60,38 +58,23 @@ export function PlayerFootballField({
           {(player as PlayerFormation) ? (
             <Text
               numberOfLines={1}
-              className={`font-bold ${
+              className={`font-bold text-center text-xs ${
                 scoreWithMarketStatus > 0 && "text-blue-500"
               } ${scoreWithMarketStatus === 0 && "text-gray-400"} ${
                 scoreWithMarketStatus < 0 && "text-red-500"
-              }   text-center`}
-              style={{
-                fontSize: 11,
-              }}
+              }`}
             >
               {scoreFinal}
             </Text>
           ) : (
-            <Text
-              numberOfLines={1}
-              className="font-bold text-gray-400"
-              style={{
-                fontSize: 11,
-              }}
-            >
+            <Text numberOfLines={1} className="font-bold text-gray-400 text-xs">
               -
             </Text>
           )}
         </View>
       ) : (
         <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg w-14">
-          <Text
-            numberOfLines={1}
-            className="font-bold  text-gray-500"
-            style={{
-              fontSize: 11,
-            }}
-          >
+          <Text numberOfLines={1} className="font-bold text-xs text-gray-500">
             $ {playerPrice}
           </Text>
         </View>
@@ -118,46 +101,37 @@ export function PlayerFootballField({
         />
         {hasCaptain && (
           <View
+            className="relative w-0.5 h-0.5 justify-center items-center"
             style={{
-              position: "relative",
               bottom: "85%",
               right: "50%",
               backgroundColor:
                 OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
                   ?.background,
-              width: 2,
-              height: 2,
-              justifyContent: "center",
-              alignItems: "center",
             }}
           >
             <Image
               source={captainImage}
-              className="w-5 h-5 rounded-full bg-white overflow-hidden"
+              className="w-5 h-5 rounded-full overflow-hidden"
               alt={`Foto do ${player?.apelido}`}
             />
           </View>
         )}
         <View
+          className="absolute w-4 h-4 rounded-xl justify-center items-center"
           style={{
-            position: "absolute",
             bottom: -2,
             right: 0,
             backgroundColor:
               OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
                 ?.background,
-            width: 18,
-            height: 18,
-            borderRadius: 10,
-            justifyContent: "center",
-            alignItems: "center",
           }}
         >
-          <FontAwesome
-            // name={
-            //   OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.icon
-            // }
-            name="info"
+          <Feather
+            name={
+              OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
+                ?.icon as keyof typeof Feather.glyphMap
+            }
             color={
               OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.color
             }
@@ -165,19 +139,11 @@ export function PlayerFootballField({
           />
         </View>
       </TouchableOpacity>
-      <View
-        style={{
-          paddingHorizontal: 2,
-        }}
-        className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg"
-      >
+      <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-1">
         <Text
-          style={{
-            fontSize: 11,
-          }}
           numberOfLines={1}
           ellipsizeMode="tail"
-          className="font-semibold text-gray-500 text-center"
+          className="font-semibold text-gray-500 text-center text-xs"
         >
           {player?.apelido_abreviado}
         </Text>

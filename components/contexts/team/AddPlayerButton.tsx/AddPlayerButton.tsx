@@ -1,6 +1,6 @@
 import { Text, View } from "@/components/Themed";
 import { FormationPlayer } from "@/models/Formations";
-import { FontAwesome } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
 
 type AddPlayerButtonProps = {
@@ -16,10 +16,9 @@ export function AddPlayerButton({
 }: AddPlayerButtonProps) {
   return (
     <View
-      className="items-center justify-center"
+      className="items-center justify-center mt-4 bg-transparent"
       style={{
         gap: 2,
-        marginTop: 16,
         maxWidth: 90,
         minWidth: 90,
       }}
@@ -31,22 +30,14 @@ export function AddPlayerButton({
         }
         className="justify-center items-center border-2 w-12 h-12 rounded-full border-neutral-200 bg-white"
       >
-        <FontAwesome name="plus" size={16} />
+        <Feather name="plus" size={20} />
       </TouchableOpacity>
 
-      <View
-        style={{
-          paddingHorizontal: 10,
-        }}
-        className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg"
-      >
+      <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-2">
         <Text
-          style={{
-            fontSize: 11,
-          }}
           numberOfLines={1}
           ellipsizeMode="tail"
-          className="font-semibold text-gray-500 text-center uppercase"
+          className="font-semibold text-gray-500 text-center uppercase text-xs"
         >
           {positionSchema?.abbr}
         </Text>

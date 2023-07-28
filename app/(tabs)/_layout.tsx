@@ -46,6 +46,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="team"
+        options={{
+          tabBarLabel: "Time",
+          headerTitle: "Time",
+          headerShown: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name="shield" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="statistics"
         options={{
           tabBarLabel: "Estatísticas",
@@ -70,13 +79,6 @@ export default function TabLayout() {
           tabBarLabel: "Perfil",
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="two"
-        options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
     </Tabs>

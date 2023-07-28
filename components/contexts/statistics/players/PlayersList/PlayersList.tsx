@@ -157,6 +157,7 @@ export function PlayersList({
         data={filteredDataSource}
         keyExtractor={(item) => `${item.clube_id + item.apelido}`}
         renderItem={renderItem}
+        initialNumToRender={400}
       />
     </>
   );

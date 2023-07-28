@@ -1,12 +1,13 @@
 import { useContext } from "react";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { INJECT_AUTH_LOGOUT } from "@/constants/Generic";
 import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
 import { URL_AUTH, URL_HOME } from "@/constants/Urls";
 import { AuthContext } from "@/contexts/Auth.context";
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import { Modal, SafeAreaView } from "react-native";
+import { Modal } from "react-native";
 
 type ModalLogoutProps = {
   isVisible: boolean;
@@ -26,7 +27,7 @@ export function ModalLogout({
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaViewContainer>
       <Modal visible={isVisible}>
         <WebView
           incognito
@@ -45,6 +46,6 @@ export function ModalLogout({
           }}
         />
       </Modal>
-    </SafeAreaView>
+    </SafeAreaViewContainer>
   );
 }
