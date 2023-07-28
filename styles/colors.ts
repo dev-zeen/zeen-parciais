@@ -1,0 +1,7 @@
+export const SNOW = '#FFFBFE';
+export const FOLLY = '#FF4365';
+export const ULTRA_VIOLET = '#52489C';
+export const TRUE_BLUE = '#4062BB';
+export const PRIMARY_DODGER_BLUE = '#479AFF';
+export const GRAY_OPACITY = '#D6D6D6';
+export const LIGHT_GREEN = '#93FF96';
