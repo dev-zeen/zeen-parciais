@@ -19,6 +19,7 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
+import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
@@ -37,6 +38,7 @@ import {
   onCalculatePartialScore,
   onGetPlayersHaveAlreadyPlayed,
 } from "@/utils/partials";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 
 export default () => {
   const router = useRouter();
@@ -101,6 +103,20 @@ export default () => {
     onRefetchStats,
     onRefetchPositions,
   ]);
+
+  const { handleUnautenticated } = useContext(AuthContext);
+
+  const { removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
+
+  const handleLogout = async () => {
+    try {
+      await removeItem().then(async (_response) => {
+        handleUnautenticated();
+      });
+    } catch (exception) {
+      console.log("exception", exception);
+    }
+  };
 
   useEffect(() => {
     if (topPlayers && topPlayers?.length > 0) setHighlights(true);
@@ -194,7 +210,7 @@ export default () => {
           }}
         >
           <MarketStatusCard />
-          {isAutheticated && club ? (
+          {club ? (
             <>
               <TouchableOpacity
                 className="rounded-lg flex-1"
@@ -370,20 +386,20 @@ export default () => {
               <Tabs tabs={playersTabs} />
             </View>
           )}
-          <ModalAuth
-            isVisible={showModalAuth}
-            handleLoginSuccess={async () => {
-              setShowModalAuth(false);
-              handleSuccessAuth();
-            }}
-            handleCloseModal={() => setShowModalAuth(false)}
-          />
-          <ModalLogout
-            isVisible={showModalLogout}
-            handleLogoutSuccess={() => setShowModalLogout(false)}
-          />
         </View>
       </ScrollView>
+      <ModalAuth
+        isVisible={showModalAuth}
+        handleLoginSuccess={async () => {
+          setShowModalAuth(false);
+          handleSuccessAuth();
+        }}
+        handleCloseModal={() => setShowModalAuth(false)}
+      />
+      <ModalLogout
+        isVisible={showModalLogout}
+        handleLogoutSuccess={() => setShowModalLogout(false)}
+      />
     </SafeAreaViewContainer>
   );
 };

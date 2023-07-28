@@ -19,30 +19,28 @@ export function ModalLogout({
 }: ModalLogoutProps) {
   const { removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
 
-  const { handleUnautenticated } = useContext(AuthContext);
+  const { handleUnautenticated, isAutheticated } = useContext(AuthContext);
 
-  async function handleWebViewMessage(event: WebViewMessageEvent) {
+  async function handleWebViewMessage(event?: WebViewMessageEvent) {
     await removeItem();
   }
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-      }}
-    >
+    <SafeAreaView>
       <Modal visible={isVisible}>
         <WebView
+          incognito
           source={{
             uri: URL_HOME,
           }}
           className="rounded-lg"
           injectedJavaScript={INJECT_AUTH_LOGOUT}
-          onMessage={handleWebViewMessage}
+          onMessage={(event) => handleWebViewMessage(event)}
           onNavigationStateChange={(event) => {
             if (event.url.startsWith(URL_AUTH)) {
               handleUnautenticated();
               handleLogoutSuccess();
+              handleWebViewMessage();
             }
           }}
         />

@@ -57,6 +57,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="matches"
+        options={{
+          tabBarLabel: "Partidas",
+          headerShown: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name="tv" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile/[id]"
         options={{
           tabBarLabel: "Perfil",
