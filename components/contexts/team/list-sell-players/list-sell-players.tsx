@@ -1,5 +1,5 @@
 // import { PlayersToSell } from '@app/(tabs)/team/team.helpers'; // TODO
-import { Loading } from "@/components/structure/loading/loading";
+import { Loading } from "@/components/structure/Loading/loading";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { PlayerFormation } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";

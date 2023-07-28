@@ -7,7 +7,7 @@ import { ptBR } from "date-fns/locale";
 
 import { Text, View } from "@/components/Themed";
 
-export function CardMarketStatus() {
+export function MarketStatusCard() {
   const { data: marketStatus } = useGetMarketStatus();
 
   const [marketCloseDate, setMarketCloseDate] = useState<string>("");

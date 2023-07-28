@@ -7,8 +7,8 @@ import {
 } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { CardPlayerStats } from "@/components/contexts/stats/card-player-stats";
-import { Loading } from "@/components/structure/loading/loading";
+import { PlayerCard } from "@/components/contexts/stats/players/PlayerCard/PlayerCard";
+import { Loading } from "@/components/structure/Loading";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { IPlayersStats, Player, PlayersStats } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market";
@@ -18,17 +18,17 @@ import { QueryObserverResult } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-interface ListPlayersStatsProps {
+interface PlayersListProps {
   playersStats?: PlayersStats;
   isRefetchingStats: boolean;
   onRefetch: () => Promise<QueryObserverResult>;
 }
 
-export function ListPlayersStats({
+export function PlayersList({
   playersStats,
   onRefetch,
   isRefetchingStats,
-}: ListPlayersStatsProps) {
+}: PlayersListProps) {
   const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
     useGetMarketStatus();
 
@@ -103,7 +103,7 @@ export function ListPlayersStats({
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<Player>) => {
       return (
-        <CardPlayerStats
+        <PlayerCard
           player={player}
           club={playersStats?.clubes[String(player.clube_id)]}
           position={playersStats?.posicoes[player.posicao_id]}

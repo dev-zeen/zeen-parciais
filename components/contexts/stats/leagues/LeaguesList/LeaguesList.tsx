@@ -1,21 +1,21 @@
 import { RefreshControl, ScrollView, TouchableOpacity } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { CardLeagueStats } from "@/components/contexts/stats/card-league-stats";
+import { LeagueCard } from "@/components/contexts/stats/leagues/LeagueCard";
 import { LeagueUserDetails } from "@/models/Leagues";
 import { useMemo } from "react";
 
-interface ListLeaguesStatsProps {
+interface ListLeaguesProps {
   leagues: LeagueUserDetails[];
   onRefetch: () => void;
   isRefetching: boolean;
 }
 
-export function ListLeaguesStats({
+export function LeaguesList({
   leagues,
   onRefetch,
   isRefetching,
-}: ListLeaguesStatsProps) {
+}: ListLeaguesProps) {
   const privateLeagues = useMemo(
     () => leagues.filter((league) => league.time_dono_id !== null),
     [leagues]
@@ -43,7 +43,7 @@ export function ListLeaguesStats({
           </View>
 
           {privateLeagues.map((item) => {
-            return <CardLeagueStats key={item.liga_id} league={item} />;
+            return <LeagueCard key={item.liga_id} league={item} />;
           })}
         </View>
 
@@ -55,7 +55,7 @@ export function ListLeaguesStats({
           {publicLeagues.map((item) => {
             return (
               <TouchableOpacity activeOpacity={0.4} key={item.liga_id}>
-                <CardLeagueStats league={item} />
+                <LeagueCard league={item} />
               </TouchableOpacity>
             );
           })}

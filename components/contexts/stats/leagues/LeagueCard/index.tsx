@@ -1,0 +1,1 @@
+export { LeagueCard } from "./LeagueCard";

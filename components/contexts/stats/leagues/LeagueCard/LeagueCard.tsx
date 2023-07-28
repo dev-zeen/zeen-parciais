@@ -8,7 +8,7 @@ interface CardLeagueStatsProps {
   league: LeagueUserDetails;
 }
 
-export function CardLeagueStats({ league }: CardLeagueStatsProps) {
+export function LeagueCard({ league }: CardLeagueStatsProps) {
   const router = useRouter();
 
   const typeLeague = {

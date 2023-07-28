@@ -4,17 +4,13 @@ import { Text, View } from "@/components/Themed";
 import { Club } from "@/models/Club";
 import { Player, Position } from "@/models/Stats";
 
-interface CardPlayerStatsProps {
+interface PlayerCardProps {
   player: Player;
   club?: Club;
   position?: Position;
 }
 
-export function CardPlayerStats({
-  player,
-  club,
-  position,
-}: CardPlayerStatsProps) {
+export function PlayerCard({ player, club, position }: PlayerCardProps) {
   const scoutsColors: { [key: string]: string } = {
     GS: "negative",
     PP: "negative",

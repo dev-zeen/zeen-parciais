@@ -1,0 +1,1 @@
+export { ModalAuth } from "./AuthModal";

@@ -13,7 +13,7 @@ import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
 import { FontAwesome } from "@expo/vector-icons";
 
-interface CardClubProps {
+interface ClubCardProps {
   club: any; // TODO import { ClubByLeague } from '@app/(tabs)/stats/league/[id]';
   league: League;
   orderBy: string;
@@ -23,7 +23,7 @@ interface CardClubProps {
   marketIsClosed: boolean;
 }
 
-export const CardLeagueClub: React.FC<CardClubProps> = memo(
+export const ClubCard: React.FC<ClubCardProps> = memo(
   ({
     league,
     club,
@@ -139,46 +139,46 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: theme.SPACING.xxs,
-    borderRadius: theme.SPACING.sm,
-    padding: theme.SPACING.sm,
+    marginHorizontal: theme.Tokens.SPACING.xs,
+    borderRadius: theme.Tokens.SPACING.sm,
+    padding: theme.Tokens.SPACING.sm,
   },
   containerDefault: {
     borderBottomWidth: 1,
-    borderColor: theme.COLORS.GRAY_200,
+    borderColor: theme.Tokens.COLORS.GRAY_200,
   },
   containerMyClub: {
     borderWidth: 2,
-    borderColor: theme.COLORS.PRIMARY,
-    backgroundColor: theme.COLORS.BLUE_100,
+    borderColor: theme.Tokens.COLORS.PRIMARY,
+    backgroundColor: theme.Tokens.COLORS.BLUE_100,
   },
   clubWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    gap: theme.SPACING.sm,
+    gap: theme.Tokens.SPACING.sm,
   },
-  positionWrapper: { alignItems: "center", width: theme.SPACING.lg },
-  positionText: { fontSize: theme.TEXT.xs, fontWeight: "600" },
+  positionWrapper: { alignItems: "center", width: theme.Tokens.SPACING.lg },
+  positionText: { fontSize: theme.Tokens.TEXT.xs, fontWeight: "600" },
   iconVariantionWrapper: { flexDirection: "row", alignItems: "center" },
-  positionVariationText: { fontSize: theme.TEXT.xs },
-  clubImageStyle: { width: theme.SIZE.sm, height: theme.SIZE.sm },
+  positionVariationText: { fontSize: theme.Tokens.TEXT.xs },
+  clubImageStyle: { width: theme.Tokens.SIZE.sm, height: theme.Tokens.SIZE.sm },
 
   pointsContainer: {
-    gap: theme.SPACING.xxs,
+    gap: theme.Tokens.SPACING.xs,
   },
-  clubNameText: { fontSize: theme.TEXT.sm, fontWeight: "600" },
+  clubNameText: { fontSize: theme.Tokens.TEXT.sm, fontWeight: "600" },
   userNameWrapper: { flexDirection: "row", alignItems: "center", gap: 4 },
   userNameLText: {
-    fontSize: theme.TEXT.xs,
+    fontSize: theme.Tokens.TEXT.xs,
     fontWeight: "300",
     textTransform: "capitalize",
   },
-  patrimonyText: { fontSize: theme.TEXT.xs, fontWeight: "normal" },
+  patrimonyText: { fontSize: theme.Tokens.TEXT.xs, fontWeight: "normal" },
 
   scoreWrapper: { alignItems: "flex-end", gap: 2 },
-  scoreText: { fontSize: theme.TEXT.sm, fontWeight: "600" },
+  scoreText: { fontSize: theme.Tokens.TEXT.sm, fontWeight: "600" },
   subtitleScore: {
-    fontSize: theme.TEXT.xs,
+    fontSize: theme.Tokens.TEXT.xs,
     fontWeight: "300",
   },
 });

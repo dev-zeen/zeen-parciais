@@ -7,16 +7,17 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import cartolaProImage from "@/assets/images/pro.png";
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { ModalAuth } from "@/components/contexts/auth/modal-auth";
-import { ModalLogout } from "@/components/contexts/auth/modal_logout";
-import { CardMarketStatus } from "@/components/contexts/market/card-market-status/card-market-status";
-import { TopPlayerCard } from "@/components/contexts/top-players/card-top-player";
-import { Loading } from "@/components/structure/loading/loading";
-import { ITabs, Tabs } from "@/components/structure/tabs";
+import { TopPlayerCard } from "@/components/contexts/TopPlayers/TopPlayerCard";
+import { ModalAuth } from "@/components/contexts/auth/AuthModal";
+import { ModalLogout } from "@/components/contexts/auth/LogoutModal";
+import { MarketStatusCard } from "@/components/contexts/market/MarketStatusCard";
+import { Loading } from "@/components/structure/Loading";
+import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
@@ -30,12 +31,12 @@ import {
   useGetTopPlayers,
 } from "@/queries/players";
 import { useGetScoredPlayers } from "@/queries/stats";
+import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
 import {
   onCalculatePartialScore,
   onGetPlayersHaveAlreadyPlayed,
 } from "@/utils/partials";
-import { Feather } from "@expo/vector-icons";
 
 export default () => {
   const router = useRouter();
@@ -174,63 +175,59 @@ export default () => {
   }
 
   return (
-    <SafeAreaView>
+    <SafeAreaView
+      className={`flex-1 rounded-lg ${
+        colorTheme === "dark" ? `bg-dark` : "bg-light"
+      }`}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
         }
-        className={`rounded-lg ${
-          colorTheme === "dark"
-            ? `bg-[${Colors.dark.backgroungFull}]`
-            : `bg-[${Colors.light.backgroungFull}]`
-        }`}
       >
         <View
           style={{
-            gap: 8,
+            gap: theme.Tokens.SPACING.xs,
+            marginHorizontal: theme.Tokens.SPACING.xs,
           }}
-          className={`rounded-lg mx-2 mt-2 ${
-            colorTheme === "dark"
-              ? `bg-[${Colors.dark.backgroungFull}]`
-              : `bg-[${Colors.light.backgroungFull}]`
+          className={`rounded-lg ${
+            colorTheme === "dark" ? `bg-dark` : "bg-light"
           }`}
         >
-          <CardMarketStatus />
+          <MarketStatusCard />
           {isAutheticated && club ? (
             <>
               <TouchableOpacity
                 className="rounded-lg"
-                activeOpacity={0.4}
+                activeOpacity={0.6}
                 onPress={() => router.push(`/profile/${club?.time.time_id}`)}
               >
-                <View className="flex-row justify-between items-center rounded-lg p-2">
-                  <View className="flex-row items-center gap-1">
-                    <Image
-                      source={{
-                        uri: club?.time.url_escudo_png,
-                      }}
-                      className="w-16 h-16"
-                      alt={`Escudo do ${club?.time.nome}`}
-                    />
-                    <View className="gap-1">
-                      {club?.time.assinante ? (
-                        <Image
-                          source={cartolaProImage}
-                          className="w-10 h-5"
-                          alt={`Selo PRO do cartola para quem é assinante`}
-                        />
-                      ) : (
-                        <View />
-                      )}
+                <View className="flex-row items-center rounded-md p-2">
+                  <Image
+                    source={{
+                      uri: club?.time.url_escudo_png,
+                    }}
+                    className="w-16 h-16"
+                    alt={`Escudo do ${club?.time.nome}`}
+                  />
+                  <View className="gap-1">
+                    {club?.time.assinante ? (
+                      <Image
+                        source={cartolaProImage}
+                        className="w-10 h-5"
+                        alt={`Selo PRO do cartola para quem é assinante`}
+                      />
+                    ) : (
+                      <View />
+                    )}
 
-                      <Text className="font-semibold text-sm">
-                        {club?.time.nome}
-                      </Text>
-                      <Text className="font-light text-xs capitalize">
-                        {club?.time.nome_cartola}
-                      </Text>
-                    </View>
+                    <Text className="font-semibold text-sm">
+                      {club?.time.nome}
+                    </Text>
+                    <Text className="font-light text-xs capitalize">
+                      {club?.time.nome_cartola}
+                    </Text>
                   </View>
                 </View>
               </TouchableOpacity>

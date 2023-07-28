@@ -1,0 +1,1 @@
+export { ModalLogout } from "./LogoutModal";

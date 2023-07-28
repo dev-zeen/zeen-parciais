@@ -8,7 +8,7 @@ import { Image, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/Themed";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-type CardMarketPlayer = {
+type MarketPlayerCardProps = {
   player: FullPlayer;
   onPress: (player: FullPlayer) => void;
 };
@@ -22,7 +22,7 @@ const renderVariationIcon = (variation: number): JSX.Element | null => {
   return null;
 };
 
-export function CardMarketPlayer({ player, onPress }: CardMarketPlayer) {
+export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
 
