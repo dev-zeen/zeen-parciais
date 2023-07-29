@@ -62,7 +62,7 @@ export default () => {
 
   return (
     <SafeAreaViewContainer>
-      <View className={`flex-1 rounded-lg`}>
+      <View className={`flex-1 rounded-lg px-4 pt-4`}>
         <Tabs tabs={statsTabs} />
       </View>
     </SafeAreaViewContainer>

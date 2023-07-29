@@ -75,7 +75,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       >
         <TouchableOpacity
           activeOpacity={0.4}
-          onPress={() => router.push(`/stats/league/club/${club.time_id}`)}
+          onPress={() => router.push(`/statistics/league/club/${club.time_id}`)}
         >
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center gap-x-1">
@@ -127,7 +127,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                       <Text className="text-xs font-light">
                         {marketIsClosed
                           ? `${club.playersHavePlayed}/12`
-                          : numberToString(diffScore)}
+                          : diffScore < 0 && numberToString(diffScore)}
                       </Text>
                     </View>
                   ) : (

@@ -228,7 +228,7 @@ export default () => {
         >
           <MarketStatusCard />
 
-          <View className="w-full flex-1 flex-row items-center rounded-md p-3 justify-between">
+          <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-between">
             <View className="justify-center items-center gap-1">
               <Text className="font-light text-xs">Patrim.</Text>
               <Text className="font-bold text-xs">

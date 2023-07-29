@@ -3,9 +3,8 @@ import {
   Image,
   RefreshControl,
   ScrollView,
-  Text,
   TouchableOpacity,
-  View,
+  useColorScheme,
 } from "react-native";
 
 import { Loading } from "@/components/structure/Loading";
@@ -15,6 +14,8 @@ import { useGetPositions } from "@/queries/players";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import cartolaProImage from "@/assets/images/pro.png";
+import { Text, View } from "@/components/Themed";
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { useGetMarket, useGetMarketStatus } from "@/queries/market";
 import { useGetScoredPlayers } from "@/queries/stats";
@@ -31,6 +32,7 @@ interface PlayerClub extends FullPlayer {
 }
 
 export default () => {
+  const colorTheme = useColorScheme();
   const { id } = useLocalSearchParams();
   const router = useRouter();
 
@@ -122,7 +124,8 @@ export default () => {
     (player: PlayerClub, isReserve?: boolean) => {
       return (
         <View
-          className={`bg-white rounded-md mx-2 p-2 
+          className={`rounded-lg mx-2 p-2 
+          border-b border-gray-200
           ${(player.isReplaced || isReserve) && "opacity-50"}
           ${player.isJoined && "opacity-100"}
           `}
@@ -199,143 +202,161 @@ export default () => {
   }
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          onRefresh={onRefetchStats}
-          refreshing={isRefetchingPlayersStats}
-        />
-      }
-    >
-      <View className="py-1 px-2 gap-y-1">
-        <View className="flex-row justify-between items-center w-full bg-white rounded-md p-3">
-          <View className="flex-row items-center gap-1">
-            <Image
-              source={{
-                uri: club?.time.url_escudo_png,
-              }}
-              className="w-14 h-14"
-              alt={`Escudo do ${club?.time.nome}`}
-            />
+    <SafeAreaViewContainer>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            onRefresh={onRefetchStats}
+            refreshing={isRefetchingPlayersStats}
+          />
+        }
+      >
+        <View
+          className={`p-2 rounded-lg ${
+            colorTheme === "dark" ? `bg-dark` : "bg-light"
+          }`}
+          style={{
+            gap: 8,
+          }}
+        >
+          <View className="flex-row justify-between items-center rounded-lg p-3">
+            <View className="flex-row items-center">
+              <Image
+                source={{
+                  uri: club?.time.url_escudo_png,
+                }}
+                className="w-14 h-14"
+                alt={`Escudo do ${club?.time.nome}`}
+              />
 
-            <View className="gap-1">
-              {club.time.assinante && (
-                <Image
-                  source={cartolaProImage}
-                  className="w-10 h-5"
-                  alt={`Selo PRO do cartola para quem é assinante`}
-                />
-              )}
-              <Text className="font-semibold text-sm">{club?.time.nome}</Text>
-              <Text className="font-light text-xs capitalize">
-                {club?.time.nome_cartola}
+              <View className="gap-1">
+                {club.time.assinante && (
+                  <Image
+                    source={cartolaProImage}
+                    className="w-10 h-5"
+                    alt={`Selo PRO do cartola para quem é assinante`}
+                  />
+                )}
+                <Text className="font-semibold text-sm">{club?.time.nome}</Text>
+                <Text className="font-light text-xs capitalize">
+                  {club?.time.nome_cartola}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View className="flex-row justify-between items-center rounded-lg p-3">
+            <View className="justify-center items-center gap-1">
+              <Text className="font-light text-xs">Patrim.</Text>
+              <Text className="font-semibold text-sm">
+                {numberToString(club.patrimonio)}
+              </Text>
+            </View>
+
+            <View className="justify-center items-center gap-1">
+              <Text className="font-light text-xs">Pontuação</Text>
+
+              <Text
+                className={`font-semibold text-sm ${
+                  currentRound === marketStatus?.rodada_atual &&
+                  "text-green-500"
+                }`}
+              >
+                {currentRound === marketStatus?.rodada_atual
+                  ? scoreCurrentRound
+                  : numberToString(club.pontos)}
+              </Text>
+            </View>
+
+            <View className="justify-center items-center gap-1">
+              <Text className="font-light text-xs">Total</Text>
+              <Text
+                className={`font-semibold text-sm ${
+                  currentRound === marketStatus?.rodada_atual &&
+                  "text-green-500"
+                }`}
+              >
+                {" "}
+                {currentRound === marketStatus?.rodada_atual
+                  ? onCalculatePartialScore(
+                      startingPlayers as FullPlayer[],
+                      club.capitao_id,
+                      playersStats
+                    )
+                    ? numberToString(
+                        (onCalculatePartialScore(
+                          startingPlayers as FullPlayer[],
+                          club.capitao_id,
+                          playersStats
+                        ) as number) + club.pontos_campeonato
+                      )
+                    : 0
+                  : numberToString(club.pontos_campeonato)}
               </Text>
             </View>
           </View>
-        </View>
 
-        <View className="w-full flex-row justify-between items-center bg-white rounded-md p-3">
-          <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Patrim.</Text>
-            <Text className="font-semibold text-sm">
-              {numberToString(club.patrimonio)}
-            </Text>
-          </View>
-
-          <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Pontuação</Text>
-
-            <Text
-              className={`font-semibold text-sm ${
-                currentRound === marketStatus?.rodada_atual && "text-green-500"
-              }`}
+          <View className="rounded-lg p-2 flex-row items-center justify-center">
+            <TouchableOpacity
+              disabled={currentRound === 1}
+              onPress={() => setCurrentRound((previous) => previous - 1)}
             >
-              {currentRound === marketStatus?.rodada_atual
-                ? scoreCurrentRound
-                : numberToString(club.pontos)}
-            </Text>
-          </View>
+              <Feather
+                name="chevron-left"
+                size={36}
+                color={currentRound === 1 ? "#d1d5db" : "#3b82f6"}
+              />
+            </TouchableOpacity>
 
-          <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Total</Text>
+            <Text className="font-semibold">Rodada {currentRound}</Text>
 
-            <Text
-              className={`font-semibold text-sm ${
-                currentRound === marketStatus?.rodada_atual && "text-green-500"
-              }`}
-            >
-              {" "}
-              {currentRound === marketStatus?.rodada_atual
-                ? onCalculatePartialScore(
-                    startingPlayers as FullPlayer[],
-                    club.capitao_id,
-                    playersStats
-                  )
-                  ? numberToString(
-                      (onCalculatePartialScore(
-                        startingPlayers as FullPlayer[],
-                        club.capitao_id,
-                        playersStats
-                      ) as number) + club.pontos_campeonato
-                    )
-                  : 0
-                : numberToString(club.pontos_campeonato)}
-            </Text>
-          </View>
-        </View>
-
-        <View className="bg-white rounded-md p-2 flex-row gap-x-2 items-center justify-center">
-          <TouchableOpacity
-            disabled={currentRound === 1}
-            onPress={() => setCurrentRound((previous) => previous - 1)}
-          >
-            <Feather
-              name="chevron-left"
-              size={36}
-              color={currentRound === 1 ? "#d1d5db" : "#3b82f6"}
-            />
-          </TouchableOpacity>
-
-          <Text className="font-semibold">Rodada {currentRound}</Text>
-
-          <TouchableOpacity
-            disabled={
-              marketIsClosed
-                ? currentRound === marketStatus?.rodada_atual
-                : currentRound === (marketStatus?.rodada_atual as number) - 1
-            }
-            onPress={() => setCurrentRound((previous) => previous + 1)}
-          >
-            <Feather
-              name="chevron-right"
-              size={36}
-              color={
+            <TouchableOpacity
+              disabled={
                 marketIsClosed
                   ? currentRound === marketStatus?.rodada_atual
+                  : currentRound === (marketStatus?.rodada_atual as number) - 1
+              }
+              onPress={() => setCurrentRound((previous) => previous + 1)}
+            >
+              <Feather
+                name="chevron-right"
+                size={36}
+                color={
+                  marketIsClosed
+                    ? currentRound === marketStatus?.rodada_atual
+                      ? "#d1d5db"
+                      : "#3b82f6"
+                    : currentRound ===
+                      (marketStatus?.rodada_atual as number) - 1
                     ? "#d1d5db"
                     : "#3b82f6"
-                  : currentRound === (marketStatus?.rodada_atual as number) - 1
-                  ? "#d1d5db"
-                  : "#3b82f6"
-              }
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View className="justify-center">
-        <View className="gap-y-1">
-          <Text className="font-semibold text-center text-lg">Titulares</Text>
-          {startingPlayers?.map((player) => renderItem(player))}
+                }
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View className="gap-y-1 mb-1">
-          <Text className="font-semibold text-center text-lg">Reservas</Text>
-          {reservePlayers?.map((player) => renderItem(player, true))}
+        <View
+          className={`justify-center rounded-lg mx-2 ${
+            colorTheme === "dark" ? `bg-dark` : "bg-light"
+          }`}
+          style={{
+            gap: 8,
+          }}
+        >
+          <View className="rounded-lg py-2">
+            <Text className="font-semibold text-center text-lg">Titulares</Text>
+            {startingPlayers?.map((player) => renderItem(player))}
+          </View>
+
+          <View className="rounded-lg py-2 mb-2">
+            <Text className="font-semibold text-center text-lg">Reservas</Text>
+            {reservePlayers?.map((player) => renderItem(player, true))}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaViewContainer>
   );
 };

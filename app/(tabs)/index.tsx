@@ -166,7 +166,6 @@ export default () => {
         );
       },
     },
-
     {
       id: 3,
       title: "Reservas",
