@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  Image,
   RefreshControl,
   ScrollView,
   TouchableOpacity,
@@ -10,9 +9,9 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 
-import cartolaProImage from "@/assets/images/pro.png";
 import { Text, View } from "@/components/Themed";
 import { ClubPlayerCard } from "@/components/contexts/leagues/club/ClubPlayerCard";
+import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
@@ -50,8 +49,8 @@ export default () => {
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const {
-    data: playersStats,
-    isRefetching: isRefetchingPlayersStats,
+    data: playerStats,
+    isRefetching: isRefetchingPlayerStats,
     refetch: onRefetchStats,
   } = useGetScoredPlayers();
 
@@ -65,13 +64,13 @@ export default () => {
   const scoreCurrentRound = onCalculatePartialScore(
     startingPlayers as FullPlayer[],
     club?.capitao_id as number,
-    playersStats
+    playerStats
   )
     ? numberToString(
         onCalculatePartialScore(
           startingPlayers as FullPlayer[],
           club?.capitao_id as number,
-          playersStats
+          playerStats
         )
       )
     : 0;
@@ -105,12 +104,12 @@ export default () => {
           player={player}
           currentRound={currentRound}
           marketStatus={marketStatus as MarketStatus}
-          playersStats={playersStats}
+          playerStats={playerStats}
           isReserve={isReserve}
         />
       );
     },
-    [currentRound, playersStats, marketStatus]
+    [currentRound, playerStats, marketStatus]
   );
 
   if (!club) {
@@ -125,7 +124,7 @@ export default () => {
         refreshControl={
           <RefreshControl
             onRefresh={onRefetchStats}
-            refreshing={isRefetchingPlayersStats}
+            refreshing={isRefetchingPlayerStats}
           />
         }
       >
@@ -138,29 +137,7 @@ export default () => {
           }}
         >
           <View className="flex-row justify-between items-center rounded-lg p-3">
-            <View className="flex-row items-center">
-              <Image
-                source={{
-                  uri: club?.time.url_escudo_png,
-                }}
-                className="w-14 h-14"
-                alt={`Escudo do ${club?.time.nome}`}
-              />
-
-              <View className="gap-1">
-                {club.time.assinante && (
-                  <Image
-                    source={cartolaProImage}
-                    className="w-10 h-5"
-                    alt={`Selo PRO do cartola para quem é assinante`}
-                  />
-                )}
-                <Text className="font-semibold text-sm">{club?.time.nome}</Text>
-                <Text className="font-light text-xs capitalize">
-                  {club?.time.nome_cartola}
-                </Text>
-              </View>
-            </View>
+            <TeamBanner team={club} />
           </View>
 
           <View className="flex-row justify-between items-center rounded-lg p-3">
@@ -199,13 +176,13 @@ export default () => {
                   ? onCalculatePartialScore(
                       startingPlayers as FullPlayer[],
                       club.capitao_id,
-                      playersStats
+                      playerStats
                     )
                     ? numberToString(
                         (onCalculatePartialScore(
                           startingPlayers as FullPlayer[],
                           club.capitao_id,
-                          playersStats
+                          playerStats
                         ) as number) + club.pontos_campeonato
                       )
                     : 0

@@ -21,7 +21,7 @@ export interface Player {
   entrou_em_campo: boolean;
 }
 
-export interface IPlayersStats {
+export interface IPlayerStats {
   [key: string]: Player;
 }
 
@@ -29,8 +29,8 @@ export interface IPositions {
   [key: string]: Position;
 }
 
-export interface PlayersStats {
-  atletas: IPlayersStats;
+export interface PlayerStats {
+  atletas: IPlayerStats;
   clubes: IClub;
   posicoes: IPositions;
   rodada: number;

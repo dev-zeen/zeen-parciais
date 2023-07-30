@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   FlatList,
   ListRenderItemInfo,
@@ -16,17 +16,18 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { Player, PlayersStats } from "@/models/Stats";
+import { Player, PlayerStats } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market";
 import { useGetAppreciations } from "@/queries/players";
 import { useGetScoredPlayers } from "@/queries/stats";
 import { GRAY_OPACITY } from "@/styles/colors";
+import { normalizeQuery } from "@/utils/format";
 
 export default () => {
   const colorTheme = useColorScheme();
 
   const {
-    data: playersStats,
+    data: playerStats,
     isRefetching: isRefetchingPlayersStats,
     refetch: onRefetchPlayersStats,
   } = useGetScoredPlayers();
@@ -34,58 +35,60 @@ export default () => {
   const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
     useGetMarketStatus();
 
-  const { data: appreciations, isLoading: isLoadingAppreciations } =
-    useGetAppreciations();
+  const {
+    data: appreciations,
+    isLoading: isLoadingAppreciations,
+    refetch: onRefetchAppreciations,
+    isRefetching: isRefetchAppreciations,
+  } = useGetAppreciations();
 
-  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState<
     Player[] | undefined
-  >();
+  >(onGetPlayersPlayedMatch(playerStats as PlayerStats));
 
   const onSearchFilter = useCallback(
-    (text: string) => {
+    async (text: string) => {
       if (text) {
         const newData = onGetPlayersPlayedMatch(
-          playersStats as PlayersStats
+          playerStats as PlayerStats
         )?.filter((item: Player) => {
-          const itemData = item.apelido
-            ? item.apelido.toUpperCase()
-            : "".toUpperCase();
-          const textData = text.toUpperCase();
+          const itemData = normalizeQuery(item.apelido);
+          const textData = normalizeQuery(text);
           return itemData.indexOf(textData) > -1;
         });
         setFilteredDataSource(newData);
-        setSearch(text);
+        setSearchQuery(text);
       } else {
         const playersPlayedMatch = onGetPlayersPlayedMatch(
-          playersStats as PlayersStats
+          playerStats as PlayerStats
         );
         setFilteredDataSource(playersPlayedMatch);
-        setSearch(text);
+        setSearchQuery(text);
       }
     },
-    [filteredDataSource, setFilteredDataSource, search, setSearch]
+    [playerStats]
   );
 
-  useEffect(() => {
-    if (playersStats) {
-      const playersPlayedMatch = onGetPlayersPlayedMatch(playersStats);
-      setFilteredDataSource(playersPlayedMatch);
-    }
-  }, [playersStats]);
+  const onRefetch = useCallback(async () => {
+    await onRefetchAppreciations();
+    await onRefetchPlayersStats();
+  }, [onRefetchAppreciations, onRefetchPlayersStats]);
+
+  const isRefetching = isRefetchingPlayersStats;
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<Player>) => {
       return (
         <PlayerCard
           player={player}
-          club={playersStats?.clubes[String(player.clube_id)]}
-          position={playersStats?.posicoes[player.posicao_id]}
+          club={playerStats?.clubes[String(player.clube_id)]}
+          position={playerStats?.posicoes[player.posicao_id]}
           appreciation={appreciations?.atletas?.[player.id].variacao_num}
         />
       );
     },
-    []
+    [appreciations]
   );
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO) {
@@ -107,8 +110,9 @@ export default () => {
   if (
     IsLoadingMarketStatus ||
     !marketStatus ||
-    !playersStats ||
-    isLoadingAppreciations
+    isLoadingAppreciations ||
+    !playerStats ||
+    !appreciations
   ) {
     return <Loading />;
   }
@@ -122,24 +126,23 @@ export default () => {
         }}
       >
         <TextInput
-          onChangeText={(text) => onSearchFilter(text)}
-          value={search}
+          onChangeText={onSearchFilter}
+          value={searchQuery}
           placeholder="Buscar Jogador"
           placeholderTextColor={GRAY_OPACITY}
-          className="rounded-lg p-3 mx-2 border-2 border-gray-400 bg-white"
+          className="rounded-lg p-3 mx-2 border-2 border-gray-200 bg-white"
+          autoCapitalize="none"
+          autoCorrect={false}
         />
 
         <FlatList
           refreshControl={
-            <RefreshControl
-              onRefresh={onRefetchPlayersStats}
-              refreshing={isRefetchingPlayersStats}
-            />
+            <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
           }
           data={filteredDataSource}
           keyExtractor={(item) => `${item.clube_id + item.apelido}`}
           renderItem={renderItem}
-          initialNumToRender={15}
+          initialNumToRender={20}
         />
       </View>
     </SafeAreaViewContainer>

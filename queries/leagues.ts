@@ -5,9 +5,11 @@ import {
   GET_CLUBS_BY_LEAGUE_ID,
   GET_LEAGUE_BY_SLUG,
 } from "@/constants/Endpoits";
+import { CLUBS_BY_LEAGUE_KEY_STORAGE } from "@/constants/Keys";
 import { League, LeagueUserDetails } from "@/models/Leagues";
 import { ClubsByLeagueUtils } from "@/utils/partials";
 import { useFetch } from "@/utils/reactQuery";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 
 export interface Filter {
   [key: string]: string;
@@ -33,19 +35,23 @@ export const useGetLeague = (
     }
   );
 
-export const useGetClubsByLeagueId = (id?: number) =>
-  useFetch<ClubsByLeagueUtils>(
+export const useGetClubsByLeagueId = (id?: number) => {
+  return useFetch<ClubsByLeagueUtils>(
     GET_CLUBS_BY_LEAGUE_ID.replace(":id", String(id)),
     undefined,
     {
       enabled: !!id,
+      select: (data) => {
+        const { setItem } = useAsyncStorage(
+          CLUBS_BY_LEAGUE_KEY_STORAGE(`${id}`)
+        );
+
+        if (data) {
+          setItem(JSON.stringify(data));
+        }
+
+        return data;
+      },
     }
   );
-
-// export const useDeleteLeague = (slug: string, config: UseMutationOptions) => {
-//   const url = QUIT_LEAGUE.replace(':slug', slug);
-//   return useMutation({
-//     mutationFn: async () => await axios.delete(url),
-//     ...config,
-//   });
-// };
+};

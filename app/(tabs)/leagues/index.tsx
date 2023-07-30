@@ -17,21 +17,25 @@ export default function () {
     isRefetching: isRefetching,
   } = useGetLeagues();
 
-  const { data } = useGetMarketStatus();
+  const { data: marketStatus } = useGetMarketStatus();
 
   const leagues = useMemo(() => {
-    if (data?.status_mercado === MARKET_STATUS_NAME.FECHADO) {
+    if (marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO) {
       const privateLeagues = dataLeagues?.ligas
         .filter((item) => item.time_dono_id)
         .sort((a, b) => b.time_dono_id - a.time_dono_id);
-
       return privateLeagues;
     }
 
     return dataLeagues?.ligas.sort((a, b) => b.time_dono_id - a.time_dono_id);
-  }, [dataLeagues]);
+  }, [dataLeagues, marketStatus]);
 
-  if (isLoadingLeagues && !dataLeagues && leagues?.length === 0) {
+  if (
+    !marketStatus &&
+    isLoadingLeagues &&
+    !dataLeagues &&
+    leagues?.length === 0
+  ) {
     <Loading />;
   }
 
@@ -48,7 +52,7 @@ export default function () {
         className="mx-2"
       >
         <View className="rounded-lg py-2">
-          <View className="border-b border-gray-400 items-center justify-center m-2 pb-4 pt-2">
+          <View className="border-b border-gray-200 items-center justify-center m-2 pb-4 pt-2">
             <Text className="text-base font-semibold"> Minhas Ligas </Text>
           </View>
           {leagues?.map((item) => (

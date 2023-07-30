@@ -133,7 +133,7 @@ export function ListPlayersSale({
                     .map(({ player }) => {
                       return (
                         <View
-                          className={`rounded-lg border-b border-gray-400 flex-row items-center justify-between p-2`}
+                          className={`rounded-lg border-b border-gray-200 flex-row items-center justify-between p-2`}
                           key={player?.atleta_id}
                         >
                           <View

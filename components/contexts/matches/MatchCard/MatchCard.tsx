@@ -27,7 +27,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
         className="justify-center items-center p-2 mx-2 rounded-lg"
       >
         <View className="flex-row gap-x-1 justify-center items-center mb-3">
-          <Text className=" font-medium text-xs ">
+          <Text className=" font-medium text-xs">
             {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
               locale: ptBR,
             })}
@@ -41,7 +41,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
             }}
             className={`w-1 h-1  rounded-full`}
           />
-          <Text className="font-medium text-xs ">{match.local}</Text>
+          <Text className="font-medium text-xs">{match.local}</Text>
         </View>
 
         <View
@@ -50,7 +50,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
           }`}
         >
           <View className="flex-row items-center justify-center">
-            <Text className="text-xs font-semibold">{`${match.clube_casa_posicao}º`}</Text>
+            <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
           </View>
 
           <View className="flex-row items-center justify-center">
@@ -92,7 +92,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
           </View>
 
           <View className="flex-row items-center justify-center">
-            <Text className="text-xs font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
+            <Text className="font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
           </View>
         </View>
 
@@ -102,7 +102,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
               <View
                 className={`justify-center items-center bg-folly p-2 m-1 rounded-lg`}
               >
-                <Text className="text-xs text-gray-50">Encerrado</Text>
+                <Text className="text-gray-50">Encerrado</Text>
               </View>
             )}
           </>

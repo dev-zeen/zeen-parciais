@@ -1,5 +1,5 @@
 import { FullClubInfo, Substitutions } from "@/models/Club";
-import { FullPlayer, Player, PlayersStats } from "@/models/Stats";
+import { FullPlayer, Player, PlayerStats } from "@/models/Stats";
 
 type ClubsWithRoundPartial = {
   club: string;
@@ -17,7 +17,7 @@ export type ClubsByLeagueUtils = Record<string, Club>;
 
 export function onGetClubsLeagueWithPartial(
   clubs: ClubsByLeagueUtils,
-  stats: PlayersStats
+  stats: PlayerStats
 ): ClubsWithRoundPartial[] {
   const result: ClubsWithRoundPartial[] = Object.entries(clubs).map(
     ([clubKey, item]) => {
@@ -43,7 +43,7 @@ export function onGetClubsLeagueWithPartial(
 export function onCalculatePartialScore(
   players: FullPlayer[],
   captainId: number,
-  playersPlayingNow?: PlayersStats
+  playersPlayingNow?: PlayerStats
 ): number {
   const clubAtletas = players || [];
   const playerStats = playersPlayingNow?.atletas || {};
@@ -67,7 +67,7 @@ export function onCalculatePartialScore(
 
 export function onGetPlayersHaveAlreadyPlayed(
   club: FullClubInfo,
-  stats: PlayersStats
+  stats: PlayerStats
 ) {
   const count = club.atletas.reduce((acc, current) => {
     if (stats.atletas[current.atleta_id]) {

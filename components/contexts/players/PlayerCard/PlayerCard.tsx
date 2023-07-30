@@ -1,11 +1,10 @@
-import { Image, TouchableOpacity } from "react-native";
-
-import { Feather } from "@expo/vector-icons";
+import { Image, TouchableOpacity, useColorScheme } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { Club } from "@/models/Club";
 import { Player, Position } from "@/models/Stats";
 import { numberToString } from "@/utils/parseTo";
+import { Feather } from "@expo/vector-icons";
 import { useMemo } from "react";
 
 interface PlayerCardProps {
@@ -21,6 +20,8 @@ export function PlayerCard({
   position,
   appreciation,
 }: PlayerCardProps) {
+  const colorTheme = useColorScheme();
+
   const scoutsColors: { [key: string]: string } = useMemo(() => {
     return {
       GS: "negative",
@@ -55,7 +56,9 @@ export function PlayerCard({
   return (
     <TouchableOpacity
       activeOpacity={0.6}
-      className="flex-row justify-between items-center rounded-lg p-3 border-b border-gray-400"
+      className={`flex-row justify-between items-center rounded-lg p-3 border-b ${
+        colorTheme === "dark" ? "border-gray-500" : "border-gray-200"
+      } `}
     >
       <View className="flex-row items-center gap-1">
         <Image
@@ -75,8 +78,11 @@ export function PlayerCard({
       </View>
       <View className="justify-center items-end">
         <View className="flex-row gap-2 items-center justify-center">
-          <Text className="font-semibold">{playerScore}</Text>
-          <View className="flex-row items-center justify-center">
+          <View className="w-10 justify-end items-end">
+            <Text className="font-semibold ">{playerScore}</Text>
+          </View>
+
+          <View className="flex-row items-center justify-end w-10">
             <Text
               className={`text-xs font-semibold ${
                 appreciation && appreciation < 0
@@ -97,7 +103,7 @@ export function PlayerCard({
 
         <View className="flex-row">
           {Object.entries(player?.scout as Object).map(([key, value]) => (
-            <View className="text-center" key={key}>
+            <View key={key}>
               <Text
                 className={`text-xs font-semibold text-center ${
                   scoutsColors[key] === "negative" && "text-folly"

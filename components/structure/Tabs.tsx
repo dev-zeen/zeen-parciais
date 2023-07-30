@@ -28,17 +28,17 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
 
   return (
     <>
-      <View className="flex-row">
+      <View className="flex-row items-center justify-center px-4">
         {tabs.map((tab, index) => (
           <TouchableOpacity
             activeOpacity={0.6}
             key={tab.id}
-            className={`flex-1 p-2 items-center justify-evenly rounded-lg border-2 border-gray-200 mb-2 mx-1 ${
+            className={`flex-1 p-2 items-center justify-evenly rounded-lg border-2 border-gray-200 mb-1 mx-0.5 ${
               activeTab === index && "border-2 border-blue-500 "
             }`}
             onPress={() => {
+              tab?.onPress && tab?.onPress();
               handlePress(index);
-              tab.onPress && tab.onPress();
             }}
           >
             <Text

@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { Image, TouchableOpacity } from "react-native";
+import { Image, TouchableOpacity, useColorScheme } from "react-native";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -33,6 +33,8 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     marketIsClosed,
   }) => {
     const router = useRouter();
+
+    const colorTheme = useColorScheme();
 
     const isOrderByPatrimonio = orderBy === "patrimonio";
     const patrimony = numberToString(club.patrimonio);
@@ -68,7 +70,11 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       <View
         key={club?.time_id}
         className={`rounded-lg p-2 justify-center mx-1 ${
-          myTeam ? "border-2 border-blue-400" : "border-b border-gray-400"
+          myTeam
+            ? "border-2 border-blue-400"
+            : colorTheme === "dark"
+            ? "border-b border-gray-500"
+            : "border-b border-gray-200"
         }`}
       >
         <TouchableOpacity
@@ -108,7 +114,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                   <Text className="text-xs font-light capitalize">
                     {club.nome_cartola}
                   </Text>
-                  <View className="rounded-full h-1 w-1 bg-gray-400"></View>
+                  <View className="rounded-full h-1 w-1 bg-gray-300"></View>
                   <Text className="text-xs font-light">C$ {patrimony}</Text>
                 </View>
               </View>
@@ -124,7 +130,8 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                     <View className="flex-row">
                       <Text className="text-xs font-light">
                         {marketIsClosed
-                          ? `${club.playersHavePlayed}/12`
+                          ? club.playersHavePlayed &&
+                            `${club.playersHavePlayed}/12`
                           : diffScore < 0 && numberToString(diffScore)}
                       </Text>
                     </View>

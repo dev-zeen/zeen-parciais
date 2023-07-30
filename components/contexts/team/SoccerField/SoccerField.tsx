@@ -9,6 +9,7 @@ import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
 import { FormationPlayer, ISchema } from "@/models/Formations";
 import { Market as MarketModal } from "@/models/Market";
 import { useGetMarket } from "@/queries/market";
+import { useGetScoredPlayers } from "@/queries/stats";
 
 type SoccerFieldProps = {
   schema: ISchema;
@@ -22,6 +23,7 @@ export function SoccerField({
   handleChangeCapitain,
 }: SoccerFieldProps) {
   const { data: market } = useGetMarket();
+  const { data: playerStats } = useGetScoredPlayers();
   const [positionMarketSearch, setPositionMarketSearch] =
     useState<FormationPlayer | null>();
 
@@ -73,6 +75,10 @@ export function SoccerField({
                 player={position.player}
                 hasCaptain={capitain === position.player?.atleta_id}
                 handleCapitain={handleChangeCapitain}
+                isPlayed={
+                  playerStats?.atletas?.[position.player.atleta_id]
+                    ?.entrou_em_campo
+                }
               />
             ) : (
               <AddPlayerButton

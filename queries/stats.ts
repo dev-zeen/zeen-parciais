@@ -1,9 +1,9 @@
 import { GET_SCORED_PLAYERS } from "@/constants/Endpoits";
-import { Player, PlayersStats } from "@/models/Stats";
+import { Player, PlayerStats } from "@/models/Stats";
 import { useFetch } from "@/utils/reactQuery";
 
 export const useGetScoredPlayers = () =>
-  useFetch<PlayersStats>(GET_SCORED_PLAYERS, undefined, {
+  useFetch<PlayerStats>(GET_SCORED_PLAYERS, undefined, {
     select: (data) => {
       if (data.atletas) {
         const playerFiltered: { [id: number]: Player } = {};
@@ -19,10 +19,12 @@ export const useGetScoredPlayers = () =>
           }
         });
 
-        return {
+        const filteredData = {
           ...data,
           atletas: playerFiltered,
         };
+
+        return filteredData;
       }
 
       return data;

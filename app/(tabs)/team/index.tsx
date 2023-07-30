@@ -21,7 +21,7 @@ import { SCHEMAS_LIST, SCHEMAS_OBJECT } from "@/constants/Formations";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { FullClubInfo } from "@/models/Club";
 import { FormationPlayer, ISchema } from "@/models/Formations";
-import { PlayersStats } from "@/models/Stats";
+import { PlayerStats } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club";
 import { useGetMarketStatus } from "@/queries/market";
 import { useGetScoredPlayers } from "@/queries/stats";
@@ -56,7 +56,7 @@ export default () => {
   const marketIsClosed =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
-  const { data: playersStats, refetch: onRefetchStats } = useGetScoredPlayers();
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
   const updateSchema = useTeamSchemaStore((state) => state.updateSchema);
   const schema = useTeamSchemaStore((state) => state.schema);
@@ -93,12 +93,12 @@ export default () => {
       const updatedFormation = fillFormationWithPlayers(
         club as FullClubInfo,
         newFormation,
-        playersStats as PlayersStats,
+        playerStats as PlayerStats,
         marketIsClosed
       );
       updateSchema(updatedFormation);
     },
-    [club, playersStats, marketIsClosed, schema]
+    [club, playerStats, marketIsClosed, schema]
   );
 
   const handleChangeFormation = useCallback(
@@ -144,7 +144,7 @@ export default () => {
       const defaultSchemaFilled = fillFormationWithPlayers(
         res.data as FullClubInfo,
         defaultFormation,
-        playersStats as PlayersStats,
+        playerStats as PlayerStats,
         marketIsClosed
       );
       updateSchema(defaultSchemaFilled);
@@ -176,7 +176,7 @@ export default () => {
       const defaultSchema = fillFormationWithPlayers(
         club,
         (SCHEMAS_OBJECT as any)[club?.time.esquema_id as number],
-        playersStats as PlayersStats,
+        playerStats as PlayerStats,
         marketIsClosed
       );
       updateSchema(defaultSchema);

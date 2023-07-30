@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Image } from "react-native";
+import { Image, useColorScheme } from "react-native";
 
 import { useRouter } from "expo-router";
 
@@ -7,7 +7,7 @@ import { PlayerClub } from "@/app/(tabs)/leagues/club/[id]";
 import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { MarketStatus } from "@/models/Market";
-import { FullPlayer, PlayersStats } from "@/models/Stats";
+import { FullPlayer, PlayerStats } from "@/models/Stats";
 import { useGetMarket } from "@/queries/market";
 import { useGetPositions } from "@/queries/players";
 import { numberToString } from "@/utils/parseTo";
@@ -16,18 +16,19 @@ type ClubPlayerCardProps = {
   player: PlayerClub;
   currentRound: number;
   marketStatus: MarketStatus;
-  playersStats?: PlayersStats;
+  playerStats?: PlayerStats;
   isReserve?: boolean;
 };
 
 export function ClubPlayerCard({
   player,
-  playersStats,
+  playerStats,
   currentRound,
   marketStatus,
   isReserve,
 }: ClubPlayerCardProps) {
   const router = useRouter();
+  const colorTheme = useColorScheme();
 
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
@@ -39,9 +40,9 @@ export function ClubPlayerCard({
     (player: FullPlayer) => {
       const scoreWithCurrentRound =
         currentRound === marketStatus?.rodada_atual &&
-        playersStats &&
-        playersStats?.atletas[player.atleta_id]
-          ? playersStats?.atletas[player.atleta_id]?.pontuacao
+        playerStats &&
+        playerStats?.atletas[player.atleta_id]
+          ? playerStats?.atletas[player.atleta_id]?.pontuacao
           : -1000;
 
       const scoreRound = player.pontos_num;
@@ -59,7 +60,9 @@ export function ClubPlayerCard({
   return (
     <View
       className={`rounded-lg mx-2 p-2 
-          border-b border-gray-400
+          border-b ${
+            colorTheme === "dark" ? "border-gray-400" : "border-gray-200"
+          }
           ${(player.isReplaced || isReserve) && "opacity-50"}
           ${player.isJoined && "opacity-100"}
           `}

@@ -20,9 +20,10 @@ type TeamPlayerProps = {
   player?: PlayerFormation | FullPlayer;
   hasCaptain?: boolean;
   handleCapitain?: (id: number) => void;
+  isPlayed?: boolean;
 };
 
-export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
+export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
   const { data: marketStatus } = useGetMarketStatus();
 
   const marketIsClosed =
@@ -40,9 +41,7 @@ export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
     ? (player as PlayerFormation)?.pontos_num * 1.5
     : (player as PlayerFormation)?.pontos_num;
 
-  const scoreFinal = scoreWithMarketStatus
-    ? numberToString(scoreWithMarketStatus)
-    : "--";
+  const scoreFinal = numberToString(scoreWithMarketStatus);
 
   const playerPrice = numberToString(player?.preco_num);
 
@@ -64,7 +63,7 @@ export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
             </Text>
           ) : (
             <Text numberOfLines={1} className="font-bold text-xs">
-              --
+              -
             </Text>
           )}
         </View>
@@ -92,7 +91,7 @@ export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
           source={{
             uri: player?.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-10 h-10 rounded-full bg-white overflow-hidden"
+          className="w-11 h-11 rounded-full bg-white overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
         {hasCaptain && (

@@ -14,7 +14,7 @@ export function TopPlayerCard({ player }: TopPlayerCardProps) {
     <TouchableOpacity
       activeOpacity={0.4}
       key={player.Atleta.atleta_id}
-      className="border-b border-gray-400 "
+      className="border-b border-gray-200 "
     >
       <View className="flex-row py-2 gap-x-2">
         <Image

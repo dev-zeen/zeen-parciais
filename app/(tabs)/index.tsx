@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   Image,
   RefreshControl,
@@ -24,7 +24,7 @@ import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
-import { FullPlayer, PlayersStats } from "@/models/Stats";
+import { FullPlayer, PlayerStats } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club";
 import { useGetMarketStatus } from "@/queries/market";
 import {
@@ -58,7 +58,7 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(isAutheticated);
 
-  const { data: playersStats, refetch: onRefetchStats } = useGetScoredPlayers();
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
   const {
     data: marketStatus,
@@ -79,7 +79,7 @@ export default () => {
   const myPartialPoints = onCalculatePartialScore(
     club?.atletas as FullPlayer[],
     club?.capitao_id as number,
-    playersStats
+    playerStats
   );
   const teamCapitain =
     club && club.atletas.find((item) => item.atleta_id === club.capitao_id);
@@ -121,65 +121,68 @@ export default () => {
   }, [topPlayers]);
 
   useEffect(() => {
-    if (club && playersStats) {
+    if (club && playerStats) {
       const countPlayersPlayed = onGetPlayersHaveAlreadyPlayed(
         club as FullClubInfo,
-        playersStats as PlayersStats
+        playerStats as PlayerStats
       );
       setPlayersHaveAlreadyPlayed(countPlayersPlayed);
     }
-  }, [club, playersStats]);
+  }, [club, playerStats]);
 
   const isLoading = IsLoadingMarketStatus;
 
-  const playersTabs: ITabs[] = [
-    {
-      id: 1,
-      title: "Titulares",
-      content: () => {
-        return (
-          <View className="mt-1">
-            {topPlayers?.map((item) => {
-              return (
-                <TopPlayerCard key={item.Atleta.atleta_id} player={item} />
-              );
-            })}
-          </View>
-        );
+  const playersTabs: ITabs[] = useMemo(
+    () => [
+      {
+        id: 1,
+        title: "Titulares",
+        content: () => {
+          return (
+            <View className="mt-1">
+              {topPlayers?.map((item) => {
+                return (
+                  <TopPlayerCard key={item.Atleta.atleta_id} player={item} />
+                );
+              })}
+            </View>
+          );
+        },
       },
-    },
 
-    {
-      id: 2,
-      title: "Capitão",
-      content: () => {
-        return (
-          <View className="mt-1">
-            {bestPlayers?.capitaes?.map((item) => {
-              return (
-                <TopPlayerCard key={item.Atleta.atleta_id} player={item} />
-              );
-            })}
-          </View>
-        );
+      {
+        id: 2,
+        title: "Capitão",
+        content: () => {
+          return (
+            <View className="mt-1">
+              {bestPlayers?.capitaes?.map((item) => {
+                return (
+                  <TopPlayerCard key={item.Atleta.atleta_id} player={item} />
+                );
+              })}
+            </View>
+          );
+        },
       },
-    },
-    {
-      id: 3,
-      title: "Reservas",
-      content: () => {
-        return (
-          <View className="mt-1">
-            {bestPlayers?.reservas?.map((item) => {
-              return (
-                <TopPlayerCard key={item.Atleta.atleta_id} player={item} />
-              );
-            })}
-          </View>
-        );
+      {
+        id: 3,
+        title: "Reservas",
+        content: () => {
+          return (
+            <View className="mt-1">
+              {bestPlayers?.reservas?.map((item) => {
+                return (
+                  <TopPlayerCard key={item.Atleta.atleta_id} player={item} />
+                );
+              })}
+            </View>
+          );
+        },
       },
-    },
-  ];
+    ],
+    [topPlayers, bestPlayers]
+  );
 
   if (isLoading || !positions) {
     return <Loading />;
@@ -287,10 +290,10 @@ export default () => {
                   <View className="justify-center items-center gap-1">
                     <Text className="font-light text-xs">Pontuados</Text>
 
-                    <Text className="font-bold text-sm ">
-                      <Text className="text-sm font-semibold">
-                        {playersHaveAlreadyPlayed}/12
-                      </Text>
+                    <Text className="text-sm font-semibold">
+                      {playersHaveAlreadyPlayed
+                        ? `${playersHaveAlreadyPlayed}/12`
+                        : ""}
                     </Text>
                   </View>
                 )}
@@ -324,13 +327,13 @@ export default () => {
 
                     {marketIsClosed &&
                     teamCapitain &&
-                    playersStats &&
-                    playersStats.atletas[teamCapitain?.atleta_id] ? (
+                    playerStats &&
+                    playerStats.atletas[teamCapitain?.atleta_id] ? (
                       <View className="items-center flex-row gap-x-2">
                         <View className="flex-row items-center">
                           <Text className="text-sm font-bold">
                             {numberToString(
-                              playersStats.atletas[teamCapitain?.atleta_id]
+                              playerStats.atletas[teamCapitain?.atleta_id]
                                 ?.pontuacao
                             )}
                           </Text>
@@ -339,7 +342,7 @@ export default () => {
 
                         <Text
                           className={`text-sm font-bold ${
-                            playersStats?.atletas[teamCapitain?.atleta_id]
+                            playerStats?.atletas[teamCapitain?.atleta_id]
                               ?.pontuacao *
                               1.5 >
                             0
@@ -348,7 +351,7 @@ export default () => {
                           }`}
                         >
                           {numberToString(
-                            playersStats?.atletas[teamCapitain?.atleta_id]
+                            playerStats?.atletas[teamCapitain?.atleta_id]
                               ?.pontuacao * 1.5
                           )}
                         </Text>

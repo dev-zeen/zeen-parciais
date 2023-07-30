@@ -1,6 +1,6 @@
 import { FullPlayer, Player } from "@/models/Stats";
 
-export interface PlayerFormation extends FullPlayer, Player {}
+export interface PlayerFormation extends Player, FullPlayer {}
 
 export type FormationPlayer = {
   top?: string;

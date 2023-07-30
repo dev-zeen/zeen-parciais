@@ -19,12 +19,15 @@ import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { League, TeamLeague } from "@/models/Leagues";
 import { MarketStatus } from "@/models/Market";
-import { PlayersStats } from "@/models/Stats";
+import { PlayerStats } from "@/models/Stats";
 import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues";
 import { useGetMarketStatus } from "@/queries/market";
 import { useGetScoredPlayers } from "@/queries/stats";
 import theme from "@/styles/theme";
 
+import { CLUBS_BY_LEAGUE_KEY_STORAGE } from "@/constants/Keys";
+import { ClubsByLeagueUtils } from "@/utils/partials";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import {
   mergeSort,
   onGetLeagueWithPartials,
@@ -45,7 +48,7 @@ export default () => {
   const marketIsClosed =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
-  const { data: playersStats, refetch: onRefetchStats } = useGetScoredPlayers();
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
   const [orderBy, setOrderBy] = useState(orderByOptions.RODADA);
@@ -65,11 +68,22 @@ export default () => {
 
   const isRefetching = isRefetchingLeague;
 
-  const { data: clubsByLeague } = useGetClubsByLeagueId(league?.liga.liga_id);
+  const { data, isLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
+    league?.liga.liga_id
+  );
+
+  const { getItem } = useAsyncStorage(
+    CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`)
+  );
 
   const handleConfirmDialog = () => {
     setShowModalPublicLeague(false);
   };
+
+  const onGetClubsByLeagueFromStorage = useCallback(async () => {
+    const data = await getItem();
+    return data;
+  }, [league]);
 
   const handleOrderByPatrimony = useCallback(() => {
     const newOrderBy =
@@ -82,17 +96,21 @@ export default () => {
   }, [league]);
 
   const handleSortClubs = useCallback(
-    (sortBy: string) => {
+    async (sortBy: string) => {
+      const clubsByLeague: ClubsByLeagueUtils | undefined =
+        await onGetClubsByLeagueFromStorage().then((data) =>
+          data ? JSON.parse(data) : ""
+        );
+
       const compareFn = (a: ClubByLeague, b: ClubByLeague) =>
         ((b.pontos as any)[sortBy] as number) -
         ((a.pontos as any)[sortBy] as number);
 
       if (marketIsClosed && clubsByLeague) {
-        // TODO preciso criar um clubs by league no frontend pq nem sempre vem do backend
         const leagueWithPartials = onGetLeagueWithPartials(
           league as League,
           clubsByLeague,
-          playersStats as PlayersStats
+          playerStats as PlayerStats
         );
         const sortedClubs = mergeSort(leagueWithPartials, compareFn);
         setClubs(sortedClubs);
@@ -101,11 +119,11 @@ export default () => {
         setClubs(clubByLeagues);
       }
     },
-    [league, clubsByLeague]
+    [league]
   );
 
   const handleOnPressOrderBy = useCallback(
-    (sortProp: string) => {
+    async (sortProp: string) => {
       if (sortProp === orderBy) return;
       setOrderBy(sortProp);
 
@@ -115,9 +133,9 @@ export default () => {
         return;
       }
 
-      handleSortClubs(sortProp);
+      await handleSortClubs(sortProp);
     },
-    [league, clubsByLeague, orderBy]
+    [league, orderBy]
   );
 
   useEffect(() => {
@@ -126,7 +144,7 @@ export default () => {
       return;
     }
     handleSortClubs(orderBy);
-  }, [league, clubsByLeague]);
+  }, [league]);
 
   useEffect(() => {
     if (league && !league?.liga.time_dono_id) {
@@ -200,7 +218,7 @@ export default () => {
 
   const keyExtractor = useCallback((item: TeamLeague) => `${item.time_id}`, []);
 
-  const isLoading = !clubs;
+  const isLoading = !clubs || isLoadingClubsByLeague;
 
   if (isLoading) {
     return <Loading />;

@@ -1,6 +1,6 @@
 import { ClubByLeague } from "@/app/(tabs)/leagues/[id]";
 import { League, TeamLeague } from "@/models/Leagues";
-import { PlayersStats } from "@/models/Stats";
+import { PlayerStats } from "@/models/Stats";
 import {
   ClubsByLeagueUtils,
   onGetClubsLeagueWithPartial,
@@ -93,14 +93,14 @@ export function mergeSort(
 export const onGetLeagueWithPartials = (
   league: League,
   clubsByLeague: ClubsByLeagueUtils,
-  playersStats: PlayersStats
+  playerStats: PlayerStats
 ): ClubByLeague[] => {
   const partialsByClub =
     clubsByLeague &&
-    playersStats &&
+    playerStats &&
     onGetClubsLeagueWithPartial(
       clubsByLeague as ClubsByLeagueUtils,
-      playersStats
+      playerStats
     );
 
   const clubMap = partialsByClub?.reduce((map, club) => {

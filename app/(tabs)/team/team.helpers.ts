@@ -1,12 +1,12 @@
 import { FORMATIONS, SCHEMAS_OBJECT } from "@/constants/Formations";
 import { FullClubInfo } from "@/models/Club";
 import { FormationPlayer, ISchema, PlayerFormation } from "@/models/Formations";
-import { FullPlayer, PlayersStats } from "@/models/Stats";
+import { FullPlayer, PlayerStats } from "@/models/Stats";
 
 type FillPlayersInSchema = {
   players: FullPlayer[];
   arrayFillTarget: FormationPlayer[];
-  playersStats: PlayersStats;
+  playerStats: PlayerStats;
   marketIsClosed: boolean;
 };
 
@@ -42,7 +42,7 @@ export function clearSchema(formation: FormationPlayer[]) {
 export function fillPlayersInSchema({
   players,
   arrayFillTarget,
-  playersStats,
+  playerStats,
   marketIsClosed,
 }: FillPlayersInSchema) {
   players?.forEach((item) => {
@@ -54,10 +54,10 @@ export function fillPlayersInSchema({
 
     if (emptyIndex !== -1) {
       const player =
-        marketIsClosed && playersStats
+        marketIsClosed && playerStats
           ? {
               ...item,
-              ...playersStats?.atletas[item.atleta_id],
+              ...playerStats?.atletas[item.atleta_id],
             }
           : item;
 
@@ -126,7 +126,7 @@ export function onClearSchema(formation: ISchema): ISchema {
 export function fillFormationWithPlayers(
   club: FullClubInfo,
   formation: string,
-  playersStats: PlayersStats,
+  playerStats: PlayerStats,
   marketIsClosed: boolean
 ): ISchema {
   const updatedFormation: ISchema = onClearSchema(FORMATIONS[formation]);
@@ -134,14 +134,14 @@ export function fillFormationWithPlayers(
   fillPlayersInSchema({
     players: club.atletas,
     arrayFillTarget: updatedFormation.players,
-    playersStats,
+    playerStats,
     marketIsClosed,
   });
 
   fillPlayersInSchema({
     players: club.reservas,
     arrayFillTarget: updatedFormation.reserves as FormationPlayer[],
-    playersStats,
+    playerStats,
     marketIsClosed,
   });
 
