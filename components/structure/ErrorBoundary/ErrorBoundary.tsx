@@ -1,8 +1,7 @@
-import { Text, View } from "@/components/Themed";
 import React from "react";
-// import { Props } from 'react-native-error-boundary/lib/ErrorBoundary/FallbackComponent';
 
 import errorImage from "@/assets/images/error-background.png";
+import { Text, View } from "@/components/Themed";
 import { Button } from "@/components/structure/Button";
 import { Image } from "react-native";
 

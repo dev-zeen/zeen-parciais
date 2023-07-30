@@ -1,8 +1,3 @@
-import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import { PlayerFormation } from "@/models/Formations";
-import { FullPlayer } from "@/models/Stats";
-import { useGetPositions } from "@/queries/players";
-import { numberToString } from "@/utils/parseTo";
 import { useCallback, useEffect, useState } from "react";
 import {
   Image,
@@ -11,12 +6,19 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
+
 import { PlayersToSell } from "@/app/(tabs)/team/team.helpers";
 import { Text, View } from "@/components/Themed";
 import { Loading } from "@/components/structure/Loading";
 import Colors from "@/constants/Colors";
+import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
+import { PlayerFormation } from "@/models/Formations";
+import { FullPlayer } from "@/models/Stats";
+import { useGetPositions } from "@/queries/players";
+import { numberToString } from "@/utils/parseTo";
+
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
-import { Feather } from "@expo/vector-icons";
 
 type ListPlayersSaleProps = {
   players: PlayersToSell[];
@@ -131,7 +133,7 @@ export function ListPlayersSale({
                     .map(({ player }) => {
                       return (
                         <View
-                          className={`rounded-lg border-b border-gray-200 flex-row items-center justify-between p-2`}
+                          className={`rounded-lg border-b border-gray-400 flex-row items-center justify-between p-2`}
                           key={player?.atleta_id}
                         >
                           <View

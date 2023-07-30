@@ -1,7 +1,9 @@
+import { TouchableOpacity } from "react-native";
+
+import { Feather } from "@expo/vector-icons";
+
 import { Text, View } from "@/components/Themed";
 import { FormationPlayer } from "@/models/Formations";
-import { Feather } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native";
 
 type AddPlayerButtonProps = {
   onPress?: () => void;

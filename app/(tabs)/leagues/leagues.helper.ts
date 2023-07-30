@@ -1,4 +1,4 @@
-import { ClubByLeague } from "@/app/(tabs)/statistics/league/[id]";
+import { ClubByLeague } from "@/app/(tabs)/leagues/[id]";
 import { League, TeamLeague } from "@/models/Leagues";
 import { PlayersStats } from "@/models/Stats";
 import {

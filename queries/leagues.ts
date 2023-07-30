@@ -1,3 +1,5 @@
+import { QueryObserverOptions } from "@tanstack/react-query";
+
 import {
   GET_ALL_LEAGUES,
   GET_CLUBS_BY_LEAGUE_ID,
@@ -6,7 +8,6 @@ import {
 import { League, LeagueUserDetails } from "@/models/Leagues";
 import { ClubsByLeagueUtils } from "@/utils/partials";
 import { useFetch } from "@/utils/reactQuery";
-import { QueryObserverOptions } from "@tanstack/react-query";
 
 export interface Filter {
   [key: string]: string;

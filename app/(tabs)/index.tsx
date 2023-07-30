@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
@@ -38,7 +39,6 @@ import {
   onCalculatePartialScore,
   onGetPlayersHaveAlreadyPlayed,
 } from "@/utils/partials";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 
 export default () => {
   const router = useRouter();
@@ -113,9 +113,7 @@ export default () => {
       await removeItem().then(async (_response) => {
         handleUnautenticated();
       });
-    } catch (exception) {
-      console.log("exception", exception);
-    }
+    } catch (exception) {}
   };
 
   useEffect(() => {
@@ -298,10 +296,9 @@ export default () => {
                 )}
               </View>
 
-              <View className="flex-1 p-3 rounded-lg">
-                <Text className="text-base font-semibold mb-1">
-                  {" "}
-                  Meu Capitão{" "}
+              <View className="flex-1 p-2 rounded-lg">
+                <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">
+                  Meu Capitão
                 </Text>
                 <View className="flex-row py-2 gap-x-1">
                   <Image
@@ -381,7 +378,9 @@ export default () => {
           )}
           {topPlayers && bestPlayers && (
             <View className="rounded-lg p-2">
-              <Text className="text-base font-semibold"> Mais Escalados </Text>
+              <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">
+                Mais Escalados
+              </Text>
               <Tabs tabs={playersTabs} />
             </View>
           )}
@@ -414,7 +413,6 @@ export default () => {
 //       handleUnautenticated();
 //     });
 //   } catch (exception) {
-//     console.log("exception", exception);
 //   }
 // };
 

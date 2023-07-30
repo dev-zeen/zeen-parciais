@@ -1,8 +1,8 @@
-import cartolaProImage from "@/assets/images/pro.png";
+import { Image } from "react-native";
 
+import cartolaProImage from "@/assets/images/pro.png";
 import { Text, View } from "@/components/Themed";
 import { FullClubInfo } from "@/models/Club";
-import { Image } from "react-native";
 
 type TeamBannerProps = {
   team: FullClubInfo;

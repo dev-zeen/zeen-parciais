@@ -1,19 +1,20 @@
 import { Image, TouchableOpacity } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
+
 import {
   ENUM_STATUS_MARKET_PLAYER,
   OBJECT_STATUS_MARKET_PLAYER,
 } from "@//constants/StatusPlayer";
-import { PlayerFormation } from "@/models/Formations";
-import { FullPlayer } from "@/models/Stats";
-import { numberToString } from "@/utils/parseTo";
-
 import captainImage from "@/assets/images/letter-c.png";
 import { Text, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { PlayerFormation } from "@/models/Formations";
+import { FullPlayer } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market";
+import { numberToString } from "@/utils/parseTo";
+
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
-import { Feather } from "@expo/vector-icons";
 
 type TeamPlayerProps = {
   player?: PlayerFormation | FullPlayer;
@@ -39,7 +40,9 @@ export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
     ? (player as PlayerFormation)?.pontos_num * 1.5
     : (player as PlayerFormation)?.pontos_num;
 
-  const scoreFinal = numberToString(scoreWithMarketStatus);
+  const scoreFinal = scoreWithMarketStatus
+    ? numberToString(scoreWithMarketStatus)
+    : "--";
 
   const playerPrice = numberToString(player?.preco_num);
 
@@ -54,26 +57,19 @@ export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
       }}
     >
       {marketIsClosed ? (
-        <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg w-14">
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14">
           {(player as PlayerFormation) ? (
-            <Text
-              numberOfLines={1}
-              className={`font-bold text-center text-xs ${
-                scoreWithMarketStatus > 0 && "text-blue-500"
-              } ${scoreWithMarketStatus === 0 && "text-gray-400"} ${
-                scoreWithMarketStatus < 0 && "text-red-500"
-              }`}
-            >
+            <Text numberOfLines={1} className={`font-bold text-center text-xs`}>
               {scoreFinal}
             </Text>
           ) : (
-            <Text numberOfLines={1} className="font-bold text-gray-400 text-xs">
-              -
+            <Text numberOfLines={1} className="font-bold text-xs">
+              --
             </Text>
           )}
         </View>
       ) : (
-        <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg w-14">
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14">
           <Text numberOfLines={1} className="font-bold text-xs text-gray-500">
             $ {playerPrice}
           </Text>
@@ -88,7 +84,7 @@ export function TeamPlayer({ player, hasCaptain }: TeamPlayerProps) {
         className={`justify-center items-center border-2 w-12 h-12 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
             ? "border-red-500 bg-red-500"
-            : "border-neutral-200 bg-neutral-50"
+            : "border-neutral-200"
         }`}
         key={player?.foto}
       >

@@ -25,7 +25,7 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
     <View className="rounded-lg mx-2 px-2">
       <TouchableOpacity
         activeOpacity={0.4}
-        onPress={() => router.push(`/statistics/league/${league.slug}`)}
+        onPress={() => router.push(`/leagues/${league.slug}`)}
       >
         <View className="flex-row py-2 gap-x-2">
           <Image

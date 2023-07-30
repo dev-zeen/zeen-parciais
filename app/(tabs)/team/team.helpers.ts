@@ -3,7 +3,7 @@ import { FullClubInfo } from "@/models/Club";
 import { FormationPlayer, ISchema, PlayerFormation } from "@/models/Formations";
 import { FullPlayer, PlayersStats } from "@/models/Stats";
 
-type FillPlayersWithArray = {
+type FillPlayersInSchema = {
   players: FullPlayer[];
   arrayFillTarget: FormationPlayer[];
   playersStats: PlayersStats;
@@ -30,12 +30,21 @@ export function isPlayerInClub(
   );
 }
 
-export function fillPlayersWithArray({
+export function clearSchema(formation: FormationPlayer[]) {
+  return formation.map((item) => {
+    return {
+      ...item,
+      player: undefined,
+    };
+  });
+}
+
+export function fillPlayersInSchema({
   players,
   arrayFillTarget,
   playersStats,
   marketIsClosed,
-}: FillPlayersWithArray) {
+}: FillPlayersInSchema) {
   players?.forEach((item) => {
     const { posicao_id } = item;
     const emptyIndex = arrayFillTarget?.findIndex(
@@ -122,14 +131,14 @@ export function fillFormationWithPlayers(
 ): ISchema {
   const updatedFormation: ISchema = onClearSchema(FORMATIONS[formation]);
 
-  fillPlayersWithArray({
+  fillPlayersInSchema({
     players: club.atletas,
     arrayFillTarget: updatedFormation.players,
     playersStats,
     marketIsClosed,
   });
 
-  fillPlayersWithArray({
+  fillPlayersInSchema({
     players: club.reservas,
     arrayFillTarget: updatedFormation.reserves as FormationPlayer[],
     playersStats,

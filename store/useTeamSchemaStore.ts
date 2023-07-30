@@ -1,7 +1,8 @@
+import { create } from "zustand";
+
 import { ISchema, PlayerFormation } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { removePlayerSchema } from "@/utils/team";
-import { create } from "zustand";
 
 type TeamSchemaStore = {
   updateSchema: (schema: ISchema) => void;

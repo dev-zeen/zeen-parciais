@@ -1,18 +1,16 @@
 import { memo, useCallback } from "react";
 import { Image, TouchableOpacity } from "react-native";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
+import { ClubByLeague } from "@/app/(tabs)/leagues/[id]";
+import { Text, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
-
 import { League } from "@/models/Leagues";
 import { MarketStatus } from "@/models/Market";
-
-import { ClubByLeague } from "@/app/(tabs)/statistics/league/[id]";
-import { Text, View } from "@/components/Themed";
 import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface ClubCardProps {
   club: ClubByLeague;
@@ -61,7 +59,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     }, []);
 
     const onPressHandler = useCallback(() => {
-      router.push(`/stats/league/club/${club.time_id}`);
+      router.push(`/leagues/club/${club.time_id}`);
     }, []);
 
     const myTeam = league?.time_usuario.time_id === club.time_id;
@@ -70,12 +68,12 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       <View
         key={club?.time_id}
         className={`rounded-lg p-2 justify-center mx-1 ${
-          myTeam && "border-2 border-blue-400"
+          myTeam ? "border-2 border-blue-400" : "border-b border-gray-400"
         }`}
       >
         <TouchableOpacity
           activeOpacity={0.4}
-          onPress={() => router.push(`/statistics/league/club/${club.time_id}`)}
+          onPress={() => router.push(`/leagues/club/${club.time_id}`)}
         >
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center gap-x-1">

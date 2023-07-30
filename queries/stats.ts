@@ -12,7 +12,10 @@ export const useGetScoredPlayers = () =>
           const playerId = parseInt(key, 10);
           const player = data.atletas[key];
           if (player.entrou_em_campo) {
-            playerFiltered[playerId] = player;
+            playerFiltered[playerId] = {
+              ...player,
+              id: key,
+            };
           }
         });
 

@@ -23,3 +23,12 @@ export interface TopPlayer {
   clube_id: number;
   escalacoes: number;
 }
+
+export type Appreciations = {
+  atletas: {
+    [key: string]: {
+      posicao_id: number;
+      variacao_num: number;
+    };
+  };
+};

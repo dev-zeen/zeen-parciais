@@ -6,11 +6,12 @@ import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
 import { useGetHistoricMyClub, useGetMyClub } from "@/queries/club";
 import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
+
+import { AuthContext } from "@/contexts/Auth.context";
 
 export default () => {
   const colorTheme = useColorScheme();

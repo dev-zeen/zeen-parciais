@@ -1,37 +1,39 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { RefreshControl, ScrollView, useColorScheme } from "react-native";
+import {
+  Modal,
+  RefreshControl,
+  ScrollView,
+  useColorScheme,
+} from "react-native";
 
+import { Feather } from "@expo/vector-icons";
 import SelectDropdown from "react-native-select-dropdown";
-
-import { ListReservePlayers } from "@/components/contexts/team/ListReservePlayers";
-import { Button } from "@/components/structure/Button";
-
-import { SCHEMAS_LIST, SCHEMAS_OBJECT } from "@/constants/Formations";
-
-import { FullClubInfo } from "@/models/Club";
-import { FormationPlayer, ISchema } from "@/models/Formations";
-import { PlayersStats } from "@/models/Stats";
-
-import { numberToString } from "@/utils/parseTo";
-
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { useGetMyClub } from "@/queries/club";
-import { useGetMarketStatus } from "@/queries/market";
-import { useGetScoredPlayers } from "@/queries/stats";
-import { onGetTeamPrice } from "@/utils/team";
-import { Modal } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { ListPlayersSale } from "@/components/contexts/team/ListPlayersSale/ListPlayersSale";
+import { ListReservePlayers } from "@/components/contexts/team/ListReservePlayers";
 import { SoccerField } from "@/components/contexts/team/SoccerField";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
+import { Button } from "@/components/structure/Button";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { AuthContext } from "@/contexts/Auth.context";
+import { SCHEMAS_LIST, SCHEMAS_OBJECT } from "@/constants/Formations";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { FullClubInfo } from "@/models/Club";
+import { FormationPlayer, ISchema } from "@/models/Formations";
+import { PlayersStats } from "@/models/Stats";
+import { useGetMyClub } from "@/queries/club";
+import { useGetMarketStatus } from "@/queries/market";
+import { useGetScoredPlayers } from "@/queries/stats";
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
-import { Feather } from "@expo/vector-icons";
+import { numberToString } from "@/utils/parseTo";
+import { onGetTeamPrice } from "@/utils/team";
+
+import { AuthContext } from "@/contexts/Auth.context";
+
 import {
   PlayersToSell,
+  clearSchema,
   fillFormationWithPlayers,
   onCheckSchemaIsCompleted,
   onGetDefaultFormation,
@@ -151,20 +153,11 @@ export default () => {
 
   const onRefetch = useCallback(async () => {
     await onRefetchStats();
-    handleResetClub();
+    await handleResetClub();
   }, [handleResetClub, onRefetchStats]);
 
   const handleSellAllPlayers = useCallback(
     (schema: ISchema) => {
-      const clearSchema = (formation: FormationPlayer[]) => {
-        return formation.map((item) => {
-          return {
-            ...item,
-            player: undefined,
-          };
-        });
-      };
-
       const clearPlayers = clearSchema(schema.players);
       const clearReserves = clearSchema(schema?.reserves as FormationPlayer[]);
 
@@ -177,13 +170,6 @@ export default () => {
     },
     [schema]
   );
-
-  useEffect(() => {
-    if (schema) {
-      const priceUpdated = onGetTeamPrice(schema?.players as FormationPlayer[]);
-      updatePrice(priceUpdated);
-    }
-  }, [schema]);
 
   useEffect(() => {
     if (club) {
@@ -205,6 +191,9 @@ export default () => {
         club as FullClubInfo,
         capitain
       );
+
+      const priceUpdated = onGetTeamPrice(schema?.players as FormationPlayer[]);
+      updatePrice(priceUpdated);
     }
   }, [schema]);
 
@@ -302,7 +291,7 @@ export default () => {
           </View>
 
           {/* <View
-          className="flex-row w-full justify-center items-center bg-white rounded-md p-3"
+          className="flex-row w-full justify-center items-center rounded-md p-3"
           style={{
             gap: 4,
           }}>

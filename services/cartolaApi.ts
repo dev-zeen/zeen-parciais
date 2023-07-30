@@ -1,5 +1,6 @@
-import { getTokenFromStorage } from "@/lib/core/auth";
 import axios, { InternalAxiosRequestConfig } from "axios";
+
+import { getTokenFromStorage } from "@/lib/core/auth";
 
 const cartolaApi = axios.create({
   baseURL: "https://api.cartola.globo.com",

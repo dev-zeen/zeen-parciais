@@ -7,36 +7,35 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
+
+import { onGetPlayersPlayedMatch } from "@/app/(tabs)/players/players.helper";
 import { Text, View } from "@/components/Themed";
-import { PlayerCard } from "@/components/contexts/statistics/players/PlayerCard/PlayerCard";
+import { PlayerCard } from "@/components/contexts/players/PlayerCard/PlayerCard";
 import { Loading } from "@/components/structure/Loading";
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { IPlayersStats, Player, PlayersStats } from "@/models/Stats";
+import { Player, PlayersStats } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market";
+import { useGetAppreciations } from "@/queries/players";
+import { useGetScoredPlayers } from "@/queries/stats";
 import { GRAY_OPACITY } from "@/styles/colors";
-import { Feather } from "@expo/vector-icons";
-import { QueryObserverResult } from "@tanstack/react-query";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
-interface PlayersListProps {
-  playersStats?: PlayersStats;
-  isRefetchingStats: boolean;
-  onRefetch: () => Promise<QueryObserverResult>;
-}
-
-export function PlayersList({
-  playersStats,
-  onRefetch,
-  isRefetchingStats,
-}: PlayersListProps) {
+export default () => {
   const colorTheme = useColorScheme();
+
+  const {
+    data: playersStats,
+    isRefetching: isRefetchingPlayersStats,
+    refetch: onRefetchPlayersStats,
+  } = useGetScoredPlayers();
 
   const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
     useGetMarketStatus();
 
-  const [marketCloseDate, setMarketCloseDate] = useState<string>("");
+  const { data: appreciations, isLoading: isLoadingAppreciations } =
+    useGetAppreciations();
 
   const [search, setSearch] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState<
@@ -68,41 +67,12 @@ export function PlayersList({
     [filteredDataSource, setFilteredDataSource, search, setSearch]
   );
 
-  const onGetPlayersPlayedMatch = (playersStats: PlayersStats): Player[] => {
-    const allPlayers =
-      playersStats &&
-      Object.keys(playersStats.atletas).map(
-        (item: string) => (playersStats.atletas as IPlayersStats)[item]
-      );
-
-    const playersPlayedMatch = allPlayers.sort((a: Player, b: Player) => {
-      if (a.pontuacao <= b.pontuacao) return 1;
-      return -1;
-    });
-
-    return playersPlayedMatch;
-  };
-
   useEffect(() => {
     if (playersStats) {
       const playersPlayedMatch = onGetPlayersPlayedMatch(playersStats);
       setFilteredDataSource(playersPlayedMatch);
     }
   }, [playersStats]);
-
-  useEffect(() => {
-    if (marketStatus) {
-      const { dia, mes, ano, hora, minuto } = marketStatus.fechamento;
-
-      const date = new Date(ano, mes - 1, dia, hora, minuto);
-
-      const closeMarket = format(date, "cccc 'ás' HH:mm", {
-        locale: ptBR,
-      });
-
-      setMarketCloseDate(closeMarket);
-    }
-  }, [marketStatus]);
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<Player>) => {
@@ -111,6 +81,7 @@ export function PlayersList({
           player={player}
           club={playersStats?.clubes[String(player.clube_id)]}
           position={playersStats?.posicoes[player.posicao_id]}
+          appreciation={appreciations?.atletas?.[player.id].variacao_num}
         />
       );
     },
@@ -133,32 +104,44 @@ export function PlayersList({
     );
   }
 
-  if (IsLoadingMarketStatus || !marketStatus || !playersStats) {
+  if (
+    IsLoadingMarketStatus ||
+    !marketStatus ||
+    !playersStats ||
+    isLoadingAppreciations
+  ) {
     return <Loading />;
   }
 
   return (
-    <>
-      <TextInput
-        onChangeText={(text) => onSearchFilter(text)}
-        value={search}
-        underlineColorAndroid="transparent"
-        placeholder="Buscar Jogador"
-        placeholderTextColor={GRAY_OPACITY}
-        className="flex-row justify-between items-center bg-white rounded-lg p-3 my-2 mx-2"
-      />
-      <FlatList
-        refreshControl={
-          <RefreshControl
-            onRefresh={onRefetch}
-            refreshing={isRefetchingStats}
-          />
-        }
-        data={filteredDataSource}
-        keyExtractor={(item) => `${item.clube_id + item.apelido}`}
-        renderItem={renderItem}
-        initialNumToRender={400}
-      />
-    </>
+    <SafeAreaViewContainer>
+      <View
+        className={`flex-1 justify-center rounded-lg p-2`}
+        style={{
+          gap: 8,
+        }}
+      >
+        <TextInput
+          onChangeText={(text) => onSearchFilter(text)}
+          value={search}
+          placeholder="Buscar Jogador"
+          placeholderTextColor={GRAY_OPACITY}
+          className="rounded-lg p-3 mx-2 border-2 border-gray-400 bg-white"
+        />
+
+        <FlatList
+          refreshControl={
+            <RefreshControl
+              onRefresh={onRefetchPlayersStats}
+              refreshing={isRefetchingPlayersStats}
+            />
+          }
+          data={filteredDataSource}
+          keyExtractor={(item) => `${item.clube_id + item.apelido}`}
+          renderItem={renderItem}
+          initialNumToRender={15}
+        />
+      </View>
+    </SafeAreaViewContainer>
   );
-}
+};

@@ -1,3 +1,8 @@
+import { useContext } from "react";
+import { Modal } from "react-native";
+
+import { Feather } from "@expo/vector-icons";
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 
 import { TouchableOpacity, View } from "@/components/Themed";
@@ -5,10 +10,6 @@ import { INJECT_AUTH_LOGIN } from "@/constants/Generic";
 import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
 import { URL_AUTH, URL_HOME } from "@/constants/Urls";
 import { AuthContext } from "@/contexts/Auth.context";
-import { Feather } from "@expo/vector-icons";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import { useContext } from "react";
-import { Modal } from "react-native";
 
 type ModalAuthProps = {
   isVisible: boolean;

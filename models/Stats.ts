@@ -11,6 +11,7 @@ export interface IScout {
 }
 
 export interface Player {
+  id: string;
   scout?: IScout;
   apelido: string;
   foto: string;

@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { ImageBackground, Modal } from "react-native";
 
-import footballField from "@/assets/images/field.png";
-import { FormationPlayer, ISchema } from "@/models/Formations";
-
-import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
-
 import { Market } from "@/app/(tabs)/team/market";
+import footballField from "@/assets/images/field.png";
 import { View } from "@/components/Themed";
+import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
+import { FormationPlayer, ISchema } from "@/models/Formations";
 import { Market as MarketModal } from "@/models/Market";
 import { useGetMarket } from "@/queries/market";
 

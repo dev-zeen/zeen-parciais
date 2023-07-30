@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, ListRenderItemInfo, TouchableOpacity } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
+
 import { Text, View } from "@/components/Themed";
 import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard";
 import { Loading } from "@/components/structure/Loading";
@@ -9,8 +11,8 @@ import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FormationPlayer, ISchema } from "@/models/Formations";
 import { Market as MarketModel } from "@/models/Market";
 import { FullPlayer } from "@/models/Stats";
+
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
-import { Feather } from "@expo/vector-icons";
 
 type MarketProps = {
   market: MarketModel;
@@ -112,7 +114,7 @@ export function Market({
         data={marketPlayers}
         renderItem={renderItem}
         keyExtractor={(item) => `${item.atleta_id}`}
-        initialNumToRender={100}
+        initialNumToRender={5}
         removeClippedSubviews={true}
         windowSize={5}
       />

@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 // import ErrorBoundary from 'react-native-error-boundary';
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 // import { CustomFallbackErrorBoundary } from '@components/structure/error-boundary/error-boundary';
 import { AuthContextProvider } from "@/contexts/Auth.context";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 type ProvidersProps = {
   children: ReactNode;

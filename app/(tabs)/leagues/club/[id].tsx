@@ -7,26 +7,27 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { Loading } from "@/components/structure/Loading";
-import { FullPlayer } from "@/models/Stats";
-import { useGetClub, useGetMatchSubstitutions } from "@/queries/club";
-import { useGetPositions } from "@/queries/players";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Feather } from "@expo/vector-icons";
+import { useLocalSearchParams } from "expo-router";
 
 import cartolaProImage from "@/assets/images/pro.png";
 import { Text, View } from "@/components/Themed";
+import { ClubPlayerCard } from "@/components/contexts/leagues/club/ClubPlayerCard";
+import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { useGetMarket, useGetMarketStatus } from "@/queries/market";
+import { MarketStatus } from "@/models/Market";
+import { FullPlayer } from "@/models/Stats";
+import { useGetClub, useGetMatchSubstitutions } from "@/queries/club";
+import { useGetMarketStatus } from "@/queries/market";
 import { useGetScoredPlayers } from "@/queries/stats";
 import { numberToString } from "@/utils/parseTo";
 import {
   onCalculatePartialScore,
   onUpdateTeamWithSubstitutedPlayers,
 } from "@/utils/partials";
-import { Feather } from "@expo/vector-icons";
 
-interface PlayerClub extends FullPlayer {
+export interface PlayerClub extends FullPlayer {
   isReplaced?: boolean;
   isJoined?: boolean;
 }
@@ -34,7 +35,6 @@ interface PlayerClub extends FullPlayer {
 export default () => {
   const colorTheme = useColorScheme();
   const { id } = useLocalSearchParams();
-  const router = useRouter();
 
   const [currentRound, setCurrentRound] = useState(0);
   const [reservePlayers, setReservePlayers] = useState<
@@ -44,7 +44,6 @@ export default () => {
     FullPlayer[] | PlayerClub[]
   >();
 
-  const { data: market } = useGetMarket();
   const { data: marketStatus } = useGetMarketStatus();
 
   const marketIsClosed =
@@ -57,7 +56,6 @@ export default () => {
   } = useGetScoredPlayers();
 
   const { data: club } = useGetClub(id as string, currentRound);
-  const { data: positions } = useGetPositions();
   const { data: substitutions } = useGetMatchSubstitutions({
     id: club?.time.time_id,
     round: currentRound,
@@ -99,102 +97,20 @@ export default () => {
       );
   }, [marketStatus]);
 
-  const scorePlayer = useCallback(
-    (player: FullPlayer) => {
-      const scoreWithCurrentRound =
-        currentRound === marketStatus?.rodada_atual &&
-        playersStats &&
-        playersStats?.atletas[player.atleta_id]
-          ? playersStats?.atletas[player.atleta_id]?.pontuacao
-          : -1000;
-
-      const scoreRound = player.pontos_num;
-
-      const score =
-        marketIsClosed && currentRound === marketStatus?.rodada_atual
-          ? scoreWithCurrentRound
-          : scoreRound;
-
-      return score;
-    },
-    [currentRound]
-  );
-
   const renderItem = useCallback(
     (player: PlayerClub, isReserve?: boolean) => {
       return (
-        <View
-          className={`rounded-lg mx-2 p-2 
-          border-b border-gray-200
-          ${(player.isReplaced || isReserve) && "opacity-50"}
-          ${player.isJoined && "opacity-100"}
-          `}
+        <ClubPlayerCard
           key={player.atleta_id}
-        >
-          <TouchableOpacity
-            className="justify-between flex-row"
-            activeOpacity={0.4}
-            onPress={() =>
-              router.push(`/statistics/player/${player.atleta_id}`)
-            }
-          >
-            <View className="flex-row gap-x-2 items-center">
-              <View className="justify-center items-center px-1 gap-y-1">
-                <Image
-                  source={{
-                    uri: market?.clubes[player.clube_id]?.escudos?.["45x45"],
-                  }}
-                  className="w-6 h-6"
-                  alt={`Imagem do time do escudo do ${
-                    market?.clubes[player.clube_id]?.nome
-                  }`}
-                />
-
-                <Text className="text-sm font-medium">
-                  {market?.clubes[player.clube_id]?.abreviacao}
-                </Text>
-              </View>
-
-              <View className="justify-center items-center">
-                <Image
-                  source={{
-                    uri: player.foto.replace("FORMATO", "220x220"),
-                  }}
-                  className="w-12 h-12"
-                  alt={`Imagem do ${player.nome}`}
-                />
-              </View>
-
-              <View>
-                <Text className="text-sm font-semibold">{player.apelido}</Text>
-                <View className="flex-row items-center gap-x-1">
-                  <Text className="text-xs font-light capitalize">
-                    {positions?.[player.posicao_id].nome}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View className="flex-row gap-x-2 items-center">
-              <Text
-                className={`font-semibold text-sm  ${
-                  scorePlayer(player) > 0
-                    ? "text-green-500"
-                    : scorePlayer(player) === -1000
-                    ? "text-gray-500"
-                    : "text-red-500"
-                }`}
-              >
-                {scorePlayer(player) === -1000
-                  ? "-"
-                  : numberToString(scorePlayer(player))}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        </View>
+          player={player}
+          currentRound={currentRound}
+          marketStatus={marketStatus as MarketStatus}
+          playersStats={playersStats}
+          isReserve={isReserve}
+        />
       );
     },
-    [positions, club, market, startingPlayers, reservePlayers]
+    [currentRound, playersStats, marketStatus]
   );
 
   if (!club) {

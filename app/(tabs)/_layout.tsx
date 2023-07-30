@@ -1,8 +1,9 @@
-import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
 
-import Colors from "@/constants/Colors";
 import { Feather } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+
+import Colors from "@/constants/Colors";
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -11,7 +12,7 @@ function TabBarIcon(props: {
   name: React.ComponentProps<typeof Feather>["name"];
   color: string;
 }) {
-  return <Feather size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <Feather size={20} style={{ marginBottom: -3 }} {...props} />;
 }
 
 export default function TabLayout() {
@@ -55,14 +56,23 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="statistics"
+        name="leagues"
         options={{
-          tabBarLabel: "Estatísticas",
-          headerTitle: "Estatísticas",
+          tabBarLabel: "Ligas",
+          headerTitle: "Ligas",
           headerShown: false,
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="bar-chart-2" color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="players"
+        options={{
+          tabBarLabel: "Jogadores",
+          headerTitle: "Jogadores",
+          headerShown: false,
+          tabBarIcon: ({ color }) => <TabBarIcon name="users" color={color} />,
         }}
       />
       <Tabs.Screen

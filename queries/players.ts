@@ -1,9 +1,10 @@
 import {
+  GET_APPRECIATIONS,
   GET_POSITIONS,
   GET_TOP_PLAYERS,
   GET_TOP_RANKED_PLAYERS,
 } from "@/constants/Endpoits";
-import { TopPlayer } from "@/models/Player";
+import { Appreciations, TopPlayer } from "@/models/Player";
 import { IPositions } from "@/models/Stats";
 import { useFetch } from "@/utils/reactQuery";
 
@@ -43,3 +44,6 @@ export const useGetBestCaptainPlayers = (
   );
 
 export const useGetPositions = () => useFetch<IPositions>(GET_POSITIONS);
+
+export const useGetAppreciations = () =>
+  useFetch<Appreciations>(GET_APPRECIATIONS);

@@ -9,22 +9,22 @@ import {
 
 import { useLocalSearchParams } from "expo-router";
 
-import { ClubCard } from "@/components/contexts/statistics/leagues/club/ClubCard";
-import { Loading } from "@/components/structure/Loading";
-import { ITabs, Tabs } from "@/components/structure/Tabs";
-import { League, TeamLeague } from "@/models/Leagues";
-import { PlayersStats } from "@/models/Stats";
-import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues";
-
 import { Text, View } from "@/components/Themed";
+import { ClubCard } from "@/components/contexts/leagues/club/ClubCard";
 import { DialogComponent } from "@/components/structure/Dialog";
+import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { League, TeamLeague } from "@/models/Leagues";
 import { MarketStatus } from "@/models/Market";
+import { PlayersStats } from "@/models/Stats";
+import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues";
 import { useGetMarketStatus } from "@/queries/market";
 import { useGetScoredPlayers } from "@/queries/stats";
 import theme from "@/styles/theme";
+
 import {
   mergeSort,
   onGetLeagueWithPartials,
@@ -88,6 +88,7 @@ export default () => {
         ((a.pontos as any)[sortBy] as number);
 
       if (marketIsClosed && clubsByLeague) {
+        // TODO preciso criar um clubs by league no frontend pq nem sempre vem do backend
         const leagueWithPartials = onGetLeagueWithPartials(
           league as League,
           clubsByLeague,
@@ -235,7 +236,7 @@ export default () => {
         data={clubs}
         renderItem={(data) => renderItem(data)}
         keyExtractor={keyExtractor}
-        initialNumToRender={100}
+        initialNumToRender={25}
         removeClippedSubviews={true}
         windowSize={5}
         getItemLayout={(_data, index) => ({

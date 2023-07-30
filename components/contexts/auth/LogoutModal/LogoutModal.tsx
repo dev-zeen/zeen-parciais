@@ -1,4 +1,7 @@
 import { useContext } from "react";
+import { Modal } from "react-native";
+
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
@@ -6,8 +9,6 @@ import { INJECT_AUTH_LOGOUT } from "@/constants/Generic";
 import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
 import { URL_AUTH, URL_HOME } from "@/constants/Urls";
 import { AuthContext } from "@/contexts/Auth.context";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import { Modal } from "react-native";
 
 type ModalLogoutProps = {
   isVisible: boolean;

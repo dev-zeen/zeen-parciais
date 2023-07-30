@@ -1,12 +1,13 @@
 import { Image, TouchableOpacity, useColorScheme } from "react-native";
 
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { useRouter } from "expo-router";
+
 import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Club } from "@/models/Club";
 import { Match } from "@/models/Matches";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useRouter } from "expo-router";
 
 interface MatchCardProps {
   match: Match;
@@ -16,7 +17,6 @@ interface MatchCardProps {
 
 export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
   const router = useRouter();
-
   const colorTheme = useColorScheme();
 
   return (
@@ -100,15 +100,15 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
           <>
             {match.status_transmissao_tr === "ENCERRADA" && (
               <View
-                className={`justify-center items-center bg-red-300 p-2 m-1 rounded-lg`}
+                className={`justify-center items-center bg-folly p-2 m-1 rounded-lg`}
               >
-                <Text className="text-xs">Encerrado</Text>
+                <Text className="text-xs text-gray-50">Encerrado</Text>
               </View>
             )}
           </>
         ) : (
           <View
-            className={`justify-center items-center bg-orange-300 p-2 m-1 rounded-lg`}
+            className={`justify-center items-center bg-blue-300 p-2 m-1 rounded-lg`}
           >
             <Text className="text-xs">
               Esta partida é inválida para a rodada

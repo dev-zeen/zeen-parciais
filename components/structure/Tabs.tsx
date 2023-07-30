@@ -23,17 +23,17 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
 
   const onRenderTabContent = (): ReactNode => {
     const tab = tabs[activeTab];
-    return <View>{tab.content && tab.content()}</View>;
+    return <View className="flex-1">{tab.content && tab.content()}</View>;
   };
 
   return (
     <>
-      <View className="flex-row justify-center">
+      <View className="flex-row">
         {tabs.map((tab, index) => (
           <TouchableOpacity
             activeOpacity={0.6}
             key={tab.id}
-            className={`flex-1 h-10 items-center justify-evenly rounded-lg border-2 border-gray-200 mb-2 mx-1 ${
+            className={`flex-1 p-2 items-center justify-evenly rounded-lg border-2 border-gray-200 mb-2 mx-1 ${
               activeTab === index && "border-2 border-blue-500 "
             }`}
             onPress={() => {

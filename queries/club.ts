@@ -1,3 +1,5 @@
+import { QueryObserverOptions } from "@tanstack/react-query";
+
 import {
   GET_CLUB_BY_ID,
   GET_CLUB_BY_ID_AND_ROUND,
@@ -8,7 +10,6 @@ import {
 } from "@/constants/Endpoits";
 import { FullClubInfo, Substitutions, TeamHistoryRound } from "@/models/Club";
 import { useFetch } from "@/utils/reactQuery";
-import { QueryObserverOptions } from "@tanstack/react-query";
 
 export const useGetMyClub = (isAutheticated: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { useGetMarketStatus } from "@/queries/market";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Text, View } from "@/components/Themed";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { useGetMarketStatus } from "@/queries/market";
 
 export function MarketStatusCard() {
   const { data: marketStatus } = useGetMarketStatus();

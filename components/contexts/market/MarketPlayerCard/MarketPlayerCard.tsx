@@ -1,3 +1,6 @@
+import { Feather } from "@expo/vector-icons";
+
+import { Text, View } from "@/components/Themed";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarket } from "@/queries/market";
@@ -5,21 +8,9 @@ import { useGetPositions } from "@/queries/players";
 import { numberToString } from "@/utils/parseTo";
 import { Image, TouchableOpacity } from "react-native";
 
-import { Text, View } from "@/components/Themed";
-import { Feather } from "@expo/vector-icons";
-
 type MarketPlayerCardProps = {
   player: FullPlayer;
   onPress: (player: FullPlayer) => void;
-};
-
-const renderVariationIcon = (variation: number): JSX.Element | null => {
-  if (variation !== 0) {
-    const iconName = variation > 0 ? "arrow-up" : "arrow-down";
-    const iconColor = variation > 0 ? "#4ade80" : "#f87171";
-    return <Feather name={iconName} color={iconColor} size={14} />;
-  }
-  return null;
 };
 
 export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
