@@ -6,6 +6,8 @@ import {
   TextInput,
 } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
+
 import { onGetPlayersPlayedMatch } from "@/app/(tabs)/players/players.helper";
 import { Text, View } from "@/components/Themed";
 import { PlayerCard } from "@/components/contexts/players/PlayerCard/PlayerCard";
@@ -22,7 +24,6 @@ import { useGetScoredPlayers } from "@/queries/stats.query";
 import { GRAY_OPACITY } from "@/styles/colors";
 import { onGetFromStorage } from "@/utils/asyncStorage";
 import { normalizeQuery } from "@/utils/format";
-import { Feather } from "@expo/vector-icons";
 
 export default () => {
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
@@ -72,13 +73,13 @@ export default () => {
 
   const onSearchFilter = useCallback(
     async (text: string) => {
-      if (text) {
+      if (text.length > 2) {
         const newData = onGetPlayersPlayedMatch(
           currentStats as PlayerStats
         )?.filter((item: Player) => {
           const itemData = normalizeQuery(item.apelido);
           const textData = normalizeQuery(text);
-          return itemData.indexOf(textData) > -1;
+          return itemData.includes(textData);
         });
         setFilteredDataSource(newData);
         setSearchQuery(text);
@@ -162,7 +163,7 @@ export default () => {
             gap: 4,
           }}
           initialNumToRender={20}
-          maxToRenderPerBatch={200}
+          maxToRenderPerBatch={20}
         />
       </View>
     </SafeAreaViewContainer>
