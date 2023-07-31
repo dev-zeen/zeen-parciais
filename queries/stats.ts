@@ -1,5 +1,7 @@
 import { GET_SCORED_PLAYERS } from "@/constants/Endpoits";
+import { CURRENT_STATS } from "@/constants/Keys";
 import { Player, PlayerStats } from "@/models/Stats";
+import { onSaveStorage } from "@/utils/asyncStorage";
 import { useFetch } from "@/utils/reactQuery";
 
 export const useGetScoredPlayers = () =>
@@ -23,6 +25,8 @@ export const useGetScoredPlayers = () =>
           ...data,
           atletas: playerFiltered,
         };
+
+        onSaveStorage(CURRENT_STATS, JSON.stringify(filteredData));
 
         return filteredData;
       }

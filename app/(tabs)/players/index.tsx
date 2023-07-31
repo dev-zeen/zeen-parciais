@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   ListRenderItemInfo,
@@ -15,19 +15,22 @@ import { PlayerCard } from "@/components/contexts/players/PlayerCard/PlayerCard"
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import Colors from "@/constants/Colors";
+import { CURRENT_STATS } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { Player, PlayerStats } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market";
 import { useGetAppreciations } from "@/queries/players";
 import { useGetScoredPlayers } from "@/queries/stats";
 import { GRAY_OPACITY } from "@/styles/colors";
+import { onGetFromStorage } from "@/utils/asyncStorage";
 import { normalizeQuery } from "@/utils/format";
 
 export default () => {
   const colorTheme = useColorScheme();
 
+  const [currentStats, setCurrentStats] = useState<PlayerStats>();
+
   const {
-    data: playerStats,
     isRefetching: isRefetchingPlayersStats,
     refetch: onRefetchPlayersStats,
   } = useGetScoredPlayers();
@@ -39,19 +42,28 @@ export default () => {
     data: appreciations,
     isLoading: isLoadingAppreciations,
     refetch: onRefetchAppreciations,
-    isRefetching: isRefetchAppreciations,
   } = useGetAppreciations();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState<
     Player[] | undefined
-  >(onGetPlayersPlayedMatch(playerStats as PlayerStats));
+  >();
+
+  useEffect(() => {
+    onGetFromStorage<PlayerStats>(CURRENT_STATS).then((res) => {
+      if (res) {
+        const data = onGetPlayersPlayedMatch(res as PlayerStats);
+        setFilteredDataSource(data);
+        setCurrentStats(res);
+      }
+    });
+  }, []);
 
   const onSearchFilter = useCallback(
     async (text: string) => {
       if (text) {
         const newData = onGetPlayersPlayedMatch(
-          playerStats as PlayerStats
+          currentStats as PlayerStats
         )?.filter((item: Player) => {
           const itemData = normalizeQuery(item.apelido);
           const textData = normalizeQuery(text);
@@ -61,13 +73,13 @@ export default () => {
         setSearchQuery(text);
       } else {
         const playersPlayedMatch = onGetPlayersPlayedMatch(
-          playerStats as PlayerStats
+          currentStats as PlayerStats
         );
         setFilteredDataSource(playersPlayedMatch);
         setSearchQuery(text);
       }
     },
-    [playerStats]
+    [currentStats]
   );
 
   const onRefetch = useCallback(async () => {
@@ -82,13 +94,13 @@ export default () => {
       return (
         <PlayerCard
           player={player}
-          club={playerStats?.clubes[String(player.clube_id)]}
-          position={playerStats?.posicoes[player.posicao_id]}
+          club={currentStats?.clubes[String(player.clube_id)]}
+          position={currentStats?.posicoes[player.posicao_id]}
           appreciation={appreciations?.atletas?.[player.id].variacao_num}
         />
       );
     },
-    [appreciations]
+    [appreciations, currentStats]
   );
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO) {
@@ -111,7 +123,6 @@ export default () => {
     IsLoadingMarketStatus ||
     !marketStatus ||
     isLoadingAppreciations ||
-    !playerStats ||
     !appreciations
   ) {
     return <Loading />;
@@ -143,6 +154,7 @@ export default () => {
           keyExtractor={(item) => `${item.clube_id + item.apelido}`}
           renderItem={renderItem}
           initialNumToRender={20}
+          maxToRenderPerBatch={200}
         />
       </View>
     </SafeAreaViewContainer>
