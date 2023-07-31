@@ -57,7 +57,7 @@ export function PlayerCard({
     <TouchableOpacity
       activeOpacity={0.6}
       className={`flex-row justify-between items-center rounded-lg p-3 border-b ${
-        colorTheme === "dark" ? "border-gray-500" : "border-gray-200"
+        colorTheme === "dark" ? "border-gray-200" : "border-gray-200"
       } `}
     >
       <View className="flex-row items-center gap-1">

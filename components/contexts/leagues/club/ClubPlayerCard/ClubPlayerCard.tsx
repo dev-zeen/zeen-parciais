@@ -61,7 +61,7 @@ export function ClubPlayerCard({
     <View
       className={`rounded-lg mx-2 p-2 
           border-b ${
-            colorTheme === "dark" ? "border-gray-400" : "border-gray-200"
+            colorTheme === "dark" ? "border-gray-200" : "border-gray-200"
           }
           ${(player.isReplaced || isReserve) && "opacity-50"}
           ${player.isJoined && "opacity-100"}
