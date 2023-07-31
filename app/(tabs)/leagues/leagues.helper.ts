@@ -6,14 +6,14 @@ import {
   onGetClubsLeagueWithPartial,
 } from "@/utils/partials";
 
-export const orderByOptions = {
-  CAMPEONATO: "campeonato",
-  TURNO: "turno",
-  MES: "mes",
-  RODADA: "rodada",
-  PATRIMONIO: "patrimonio",
-  CAPITAO: "capitao",
-};
+export const enum OrderByOptions {
+  CAMPEONATO = "campeonato",
+  TURNO = "turno",
+  MES = "mes",
+  RODADA = "rodada",
+  PATRIMONIO = "patrimonio",
+  CAPITAO = "capitao",
+}
 
 function merge(
   left: ClubByLeague[] | TeamLeague[],

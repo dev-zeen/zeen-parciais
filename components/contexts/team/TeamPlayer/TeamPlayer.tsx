@@ -55,7 +55,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
       }}
     >
       {marketIsClosed ? (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14">
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-white">
           {(player as PlayerFormation) ? (
             <Text numberOfLines={1} className={`font-bold text-center text-xs`}>
               {scoreFinal}
@@ -67,7 +67,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           )}
         </View>
       ) : (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14">
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-white">
           <Text numberOfLines={1} className="font-bold text-xs text-gray-500">
             $ {playerPrice}
           </Text>
@@ -133,7 +133,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           />
         </View>
       </TouchableOpacity>
-      <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-1">
+      <View className="border border-neutral-200 bg-white items-center justify-center rounded-lg px-1">
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"

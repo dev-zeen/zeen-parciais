@@ -57,6 +57,10 @@ export function ClubPlayerCard({
     [currentRound]
   );
 
+  const onPressHandler = useCallback(() => {
+    router.push(`/leagues/player/${player.atleta_id}`);
+  }, []);
+
   return (
     <View
       className={`rounded-lg mx-2 p-2 
@@ -70,7 +74,7 @@ export function ClubPlayerCard({
       <TouchableOpacity
         className="justify-between flex-row"
         activeOpacity={0.6}
-        onPress={() => router.push(`/leagues/player/${player.atleta_id}`)}
+        onPress={onPressHandler}
       >
         <View className="flex-row gap-x-2 items-center">
           <View className="justify-center items-center px-1 gap-y-1">

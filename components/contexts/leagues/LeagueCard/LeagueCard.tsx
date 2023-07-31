@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Image, TouchableOpacity } from "react-native";
 
 import { useRouter } from "expo-router";
@@ -22,12 +23,13 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
     league.total_times_liga
   );
 
+  const onPressHandler = useCallback(() => {
+    router.push(`/leagues/${league.slug}`);
+  }, []);
+
   return (
     <View className="rounded-lg mx-2 px-2">
-      <TouchableOpacity
-        activeOpacity={0.6}
-        onPress={() => router.push(`/leagues/${league.slug}`)}
-      >
+      <TouchableOpacity activeOpacity={0.6} onPress={onPressHandler}>
         <View className="flex-row py-2 gap-x-2">
           <Image
             source={{

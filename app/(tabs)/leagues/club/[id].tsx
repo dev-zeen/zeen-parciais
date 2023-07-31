@@ -136,9 +136,7 @@ export default () => {
             gap: 8,
           }}
         >
-          <View className="flex-row justify-between items-center rounded-lg p-3">
-            <TeamBanner team={club} />
-          </View>
+          <TeamBanner team={club} />
 
           <View className="flex-row justify-between items-center rounded-lg p-3">
             <View className="justify-center items-center gap-1">

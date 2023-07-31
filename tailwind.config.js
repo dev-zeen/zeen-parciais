@@ -19,11 +19,8 @@ module.exports = {
           DEFAULT: "#f5f5f5",
         },
         dark: {
-          DEFAULT: "#f5f5f5",
+          DEFAULT: "#12294D",
         },
-        // dark: {
-        //   DEFAULT: "#12294D",
-        // },
       },
     },
   },

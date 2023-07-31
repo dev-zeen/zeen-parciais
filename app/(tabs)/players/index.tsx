@@ -4,6 +4,7 @@ import {
   ListRenderItemInfo,
   RefreshControl,
   TextInput,
+  useColorScheme,
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
@@ -26,6 +27,8 @@ import { onGetFromStorage } from "@/utils/asyncStorage";
 import { normalizeQuery } from "@/utils/format";
 
 export default () => {
+  const colorTheme = useColorScheme();
+
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
   const [currentAppreciations, setCurrentAppreciations] =
     useState<Appreciations>();
@@ -137,9 +140,13 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className={`flex-1 justify-center rounded-lg p-2`}
+        className={`flex-1 justify-center rounded-lg mx-2`}
         style={{
           gap: 8,
+          backgroundColor:
+            colorTheme === "dark"
+              ? Colors.dark.backgroungFull
+              : Colors.light.background,
         }}
       >
         <TextInput
@@ -147,7 +154,7 @@ export default () => {
           value={searchQuery}
           placeholder="Buscar Jogador"
           placeholderTextColor={GRAY_OPACITY}
-          className="rounded-lg p-3 mx-2 border-2 border-gray-300 bg-white"
+          className="rounded-lg p-3 border-2 border-gray-300 bg-white"
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -159,11 +166,16 @@ export default () => {
           data={filteredDataSource}
           keyExtractor={(item) => `${item.clube_id + item.apelido}`}
           renderItem={renderItem}
+          initialNumToRender={12}
+          maxToRenderPerBatch={25}
           contentContainerStyle={{
+            marginTop: 4,
+            backgroundColor:
+              colorTheme === "dark"
+                ? Colors.dark.backgroungFull
+                : Colors.light.background,
             gap: 4,
           }}
-          initialNumToRender={20}
-          maxToRenderPerBatch={20}
         />
       </View>
     </SafeAreaViewContainer>

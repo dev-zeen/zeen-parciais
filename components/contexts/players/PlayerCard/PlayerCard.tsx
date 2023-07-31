@@ -1,10 +1,10 @@
-import { useMemo } from "react";
-import { Image, TouchableOpacity, useColorScheme } from "react-native";
+import { useCallback, useMemo } from "react";
+import { Image, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-import { Text, View } from "@/components/Themed";
+import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { Club } from "@/models/Club";
 import { Player, Position } from "@/models/Stats";
 import { numberToString } from "@/utils/parseTo";
@@ -56,13 +56,15 @@ export function PlayerCard({
     }).format(player.pontuacao);
   }, [player]);
 
+  const onPressHandler = useCallback(() => {
+    router.push(`/(tabs)/players/${player.id}`);
+  }, []);
+
   return (
     <TouchableOpacity
       activeOpacity={0.6}
-      onPress={() => router.push(`/(tabs)/players/${player.id}`)}
-      className={`flex-row justify-between items-center rounded-lg p-3 border ${
-        colorTheme === "dark" ? "border-gray-300" : "border-gray-300"
-      } `}
+      onPress={onPressHandler}
+      className={`flex-row justify-between items-center rounded-lg p-4`}
     >
       <View className="flex-row items-center gap-1">
         <Image

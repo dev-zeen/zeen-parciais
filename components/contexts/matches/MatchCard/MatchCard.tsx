@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Image, TouchableOpacity, useColorScheme } from "react-native";
 
 import { format } from "date-fns";
@@ -8,6 +9,7 @@ import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Club } from "@/models/Club";
 import { Match } from "@/models/Matches";
+import { Feather } from "@expo/vector-icons";
 
 interface MatchCardProps {
   match: Match;
@@ -19,11 +21,15 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
   const router = useRouter();
   const colorTheme = useColorScheme();
 
+  const onPressHandler = useCallback(() => {
+    router.push(`/matches/${match.partida_id}`);
+  }, []);
+
   return (
     <View className="mx-2 rounded-lg items-center justify-center">
       <TouchableOpacity
         activeOpacity={0.6}
-        onPress={() => router.push(`/matches/${match.partida_id}`)}
+        onPress={onPressHandler}
         className="justify-center items-center p-2 mx-2 rounded-lg"
       >
         <View className="flex-row gap-x-1 justify-center items-center mb-3 ">
@@ -75,9 +81,11 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
               {match.placar_oficial_mandante ?? ""}
             </Text>
 
-            <View className="items-center justify-center w-5 pr-0.5">
-              <Text className="text-gray-400">X</Text>
-            </View>
+            <Feather
+              name="x"
+              size={18}
+              color={colorTheme === "dark" ? "white" : Colors.light.text}
+            />
 
             <Text className="font-semibold">
               {match.placar_oficial_visitante ?? ""}

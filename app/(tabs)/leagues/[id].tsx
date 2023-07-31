@@ -29,9 +29,9 @@ import theme from "@/styles/theme";
 import { ClubsByLeagueUtils } from "@/utils/partials";
 
 import {
+  OrderByOptions,
   mergeSort,
   onGetLeagueWithPartials,
-  orderByOptions,
 } from "./leagues.helper";
 
 export interface ClubByLeague extends TeamLeague {
@@ -51,7 +51,7 @@ export default () => {
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
-  const [orderBy, setOrderBy] = useState(orderByOptions.RODADA);
+  const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
 
   const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
 
@@ -125,9 +125,9 @@ export default () => {
   const handleOnPressOrderBy = useCallback(
     async (sortProp: string) => {
       if (sortProp === orderBy) return;
-      setOrderBy(sortProp);
+      setOrderBy(sortProp as OrderByOptions);
 
-      if (sortProp === orderByOptions.PATRIMONIO) {
+      if (sortProp === OrderByOptions.PATRIMONIO) {
         const newOrderByPatrimony = handleOrderByPatrimony();
         setClubs(newOrderByPatrimony);
         return;
@@ -139,7 +139,7 @@ export default () => {
   );
 
   useEffect(() => {
-    if (league && orderBy === orderByOptions.PATRIMONIO) {
+    if (league && orderBy === OrderByOptions.PATRIMONIO) {
       handleOrderByPatrimony();
       return;
     }
@@ -158,7 +158,7 @@ export default () => {
         id: 1,
         title: "Rodada",
         onPress() {
-          const sortProp = orderByOptions.RODADA;
+          const sortProp = OrderByOptions.RODADA;
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -166,7 +166,7 @@ export default () => {
         id: 2,
         title: "Total",
         onPress() {
-          const sortProp = orderByOptions.CAMPEONATO;
+          const sortProp = OrderByOptions.CAMPEONATO;
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -174,7 +174,7 @@ export default () => {
         id: 3,
         title: "Turno",
         onPress() {
-          const sortProp = orderByOptions.TURNO;
+          const sortProp = OrderByOptions.TURNO;
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -182,7 +182,7 @@ export default () => {
         id: 4,
         title: "Mês",
         onPress() {
-          const sortProp = orderByOptions.MES;
+          const sortProp = OrderByOptions.MES;
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -191,7 +191,7 @@ export default () => {
         id: 5,
         title: "C$",
         onPress() {
-          const sortProp = orderByOptions.PATRIMONIO;
+          const sortProp = OrderByOptions.PATRIMONIO;
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -226,7 +226,7 @@ export default () => {
 
   return (
     <SafeAreaViewContainer>
-      <View className="flex-row justify-center items-center p-3">
+      <View className="flex-row justify-center items-center py-2 rounded-t-md mx-2">
         <Image
           source={{
             uri: league?.liga.url_flamula_png,
@@ -245,7 +245,9 @@ export default () => {
         </Text>
       </View>
 
-      <Tabs tabs={tabs} />
+      <View className="mx-2">
+        <Tabs tabs={tabs} />
+      </View>
 
       <FlatList
         refreshControl={
@@ -254,22 +256,22 @@ export default () => {
         data={clubs}
         renderItem={(data) => renderItem(data)}
         keyExtractor={keyExtractor}
-        initialNumToRender={25}
-        removeClippedSubviews={true}
-        windowSize={5}
-        getItemLayout={(_data, index) => ({
-          length: 40,
-          offset: 40 * index,
-          index,
-        })}
-        maxToRenderPerBatch={15}
+        initialNumToRender={10}
+        maxToRenderPerBatch={20}
         contentContainerStyle={{
+          paddingTop: 4,
+          marginHorizontal: 8,
           backgroundColor:
             colorTheme === "dark"
-              ? Colors.dark.background
+              ? Colors.dark.backgroungFull
               : Colors.light.background,
+          gap: 4,
+        }}
+        style={{
+          paddingBottom: 4,
         }}
       />
+
       {showModalPublicLeague && (
         <DialogComponent
           isVisible={showModalPublicLeague}

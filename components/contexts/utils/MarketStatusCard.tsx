@@ -19,10 +19,10 @@ export function MarketStatusCard() {
   };
 
   const MARKET_STATUS_NAMED = {
-    1: "ABERTO",
-    2: "FECHADO",
-    3: "EM ATUALIZAÇÃO",
-    4: "EM MANUTENÇÃO",
+    1: "Mercado Aberto",
+    2: "Mercado Fechado",
+    3: "Mercado em Atualização",
+    4: "Mercado em Manutenção",
   };
 
   const [marketCloseDate, setMarketCloseDate] = useState<string>("");

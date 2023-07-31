@@ -1,6 +1,6 @@
 import { FormationsDefault } from "@/models/Formations";
 
-export enum Positions {
+export const enum Positions {
   GOLEIRO = 1,
   LATERAL = 2,
   ZAGUEIRO = 3,

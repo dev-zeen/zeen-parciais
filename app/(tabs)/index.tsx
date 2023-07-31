@@ -107,6 +107,7 @@ export default () => {
     onRefetchBestPlayers,
     onRefetchStats,
     onRefetchPositions,
+    topPlayers,
   ]);
 
   useEffect(() => {
@@ -172,8 +173,12 @@ export default () => {
         },
       },
     ],
-    [topPlayers]
+    [topPlayers, bestPlayers]
   );
+
+  const onPressHandler = useCallback(() => {
+    router.push(`/profile/${club?.time.time_id}`);
+  }, []);
 
   const isLoading = isAutheticated
     ? IsLoadingMarketStatus || !positions || IsLoadingMarketStatus || !club
@@ -214,7 +219,7 @@ export default () => {
               <TouchableOpacity
                 className="flex-1 rounded-lg"
                 activeOpacity={0.6}
-                onPress={() => router.push(`/profile/${club?.time.time_id}`)}
+                onPress={onPressHandler}
               >
                 <TeamBanner team={club} />
               </TouchableOpacity>
@@ -269,7 +274,7 @@ export default () => {
 
                 <View className="justify-center items-center gap-1">
                   <Text className="font-light text-xs">
-                    {marketIsClosed ? "Total Parcial" : "Pontuação Total"}
+                    {marketIsClosed ? "Total Parcial" : "Total"}
                   </Text>
                   {marketIsClosed && myPartialPoints ? (
                     <Text className="font-bold text-sm text-green-500">
