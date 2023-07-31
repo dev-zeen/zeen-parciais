@@ -4,7 +4,7 @@ import { FullPlayer, IPositions } from "@/models/Stats";
 
 export interface MarketStatus {
   rodada_atual: number;
-  status_mercado: 1 | 2;
+  status_mercado: 1 | 2 | 3 | 4;
   esquema_default_id: number;
   cartoleta_inicial: number;
   max_ligas_free: number;

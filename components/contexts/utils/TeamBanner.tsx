@@ -10,7 +10,7 @@ type TeamBannerProps = {
 
 export function TeamBanner({ team }: TeamBannerProps) {
   return (
-    <View className="flex-1 flex-row items-center rounded-lg p-2">
+    <View className="flex-row items-center rounded-lg p-4">
       <Image
         source={{
           uri: team.time.url_escudo_png,

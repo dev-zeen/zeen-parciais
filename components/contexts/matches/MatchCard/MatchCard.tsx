@@ -20,13 +20,13 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
   const colorTheme = useColorScheme();
 
   return (
-    <View className="mx-2 rounded-lg">
+    <View className="mx-2 rounded-lg items-center justify-center">
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={() => router.push(`/matches/${match.partida_id}`)}
         className="justify-center items-center p-2 mx-2 rounded-lg"
       >
-        <View className="flex-row gap-x-1 justify-center items-center mb-3">
+        <View className="flex-row gap-x-1 justify-center items-center mb-3 ">
           <Text className=" font-medium text-xs">
             {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
               locale: ptBR,
@@ -45,29 +45,34 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
         </View>
 
         <View
-          className={`flex-row gap-x-1 justify-center items-center py-1 ${
+          className={`flex-row justify-center items-center p-2 ${
             match.status_transmissao_tr === "CRIADA" && "mb-4"
           }`}
+          style={{
+            gap: 4,
+          }}
         >
-          <View className="flex-row items-center justify-center">
-            <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
+          <View className="flex-row" style={{ gap: 4 }}>
+            <View className="flex-row items-center justify-center">
+              <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
+            </View>
+
+            <View className="flex-row items-center justify-center">
+              <Text className="font-semibold">{homeClub?.abreviacao}</Text>
+            </View>
+
+            <Image
+              source={{
+                uri: homeClub?.escudos["60x60"],
+              }}
+              className="w-7 h-7"
+              alt={`Escudo do ${homeClub?.nome}`}
+            />
           </View>
 
-          <View className="flex-row items-center justify-center">
-            <Text className="font-semibold">{homeClub?.abreviacao}</Text>
-          </View>
-
-          <Image
-            source={{
-              uri: homeClub?.escudos["60x60"],
-            }}
-            className="w-7 h-7"
-            alt={`Escudo do ${homeClub?.nome}`}
-          />
-
-          <View className="flex-row px-2 py-1 justify-center items-center">
+          <View className="flex-row justify-center items-center">
             <Text className="font-semibold">
-              {match.placar_oficial_mandante ?? ""}{" "}
+              {match.placar_oficial_mandante ?? ""}
             </Text>
 
             <View className="items-center justify-center w-5 pr-0.5">
@@ -78,21 +83,22 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
               {match.placar_oficial_visitante ?? ""}
             </Text>
           </View>
+          <View className="flex-row" style={{ gap: 4 }}>
+            <Image
+              source={{
+                uri: awayClub?.escudos["60x60"],
+              }}
+              className="w-7 h-7"
+              alt={`Escudo do ${awayClub?.nome}`}
+            />
 
-          <Image
-            source={{
-              uri: awayClub?.escudos["60x60"],
-            }}
-            className="w-7 h-7"
-            alt={`Escudo do ${awayClub?.nome}`}
-          />
+            <View className="flex-row items-center justify-center">
+              <Text className="font-semibold">{awayClub?.abreviacao}</Text>
+            </View>
 
-          <View className="flex-row items-center justify-center">
-            <Text className="font-semibold">{awayClub?.abreviacao}</Text>
-          </View>
-
-          <View className="flex-row items-center justify-center">
-            <Text className="font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
+            <View className="flex-row items-center justify-center">
+              <Text className="font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
+            </View>
           </View>
         </View>
 

@@ -19,17 +19,16 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { SCHEMAS_LIST, SCHEMAS_OBJECT } from "@/constants/Formations";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
 import { FormationPlayer, ISchema } from "@/models/Formations";
 import { PlayerStats } from "@/models/Stats";
-import { useGetMyClub } from "@/queries/club";
-import { useGetMarketStatus } from "@/queries/market";
-import { useGetScoredPlayers } from "@/queries/stats";
+import { useGetMyClub } from "@/queries/club.query";
+import { useGetMarketStatus } from "@/queries/market.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
 import { numberToString } from "@/utils/parseTo";
 import { onGetTeamPrice } from "@/utils/team";
-
-import { AuthContext } from "@/contexts/Auth.context";
 
 import {
   PlayersToSell,
@@ -44,14 +43,19 @@ export default () => {
   const colorTheme = useColorScheme();
   const { isAutheticated } = useContext(AuthContext);
 
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const allowRequests =
+    isAutheticated &&
+    marketStatus &&
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+
   const {
     data: club,
     isLoading: isLoadingClub,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(isAutheticated);
-
-  const { data: marketStatus } = useGetMarketStatus();
+  } = useGetMyClub(allowRequests);
 
   const marketIsClosed =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
@@ -296,7 +300,7 @@ export default () => {
             gap: 4,
           }}>
           <Icon name="info" size={14} />
-          <Text className="text-gray-600 text-xs">
+          <Text className="text-gray-200 text-xs">
             Para selecionar o capitão, mantenha pressionado no jogador
           </Text>
         </View> */}

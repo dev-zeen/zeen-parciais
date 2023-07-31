@@ -8,8 +8,8 @@ import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { MarketStatus } from "@/models/Market";
 import { FullPlayer, PlayerStats } from "@/models/Stats";
-import { useGetMarket } from "@/queries/market";
-import { useGetPositions } from "@/queries/players";
+import { useGetMarket } from "@/queries/market.query";
+import { useGetPositions } from "@/queries/players.query";
 import { numberToString } from "@/utils/parseTo";
 
 type ClubPlayerCardProps = {
@@ -69,7 +69,7 @@ export function ClubPlayerCard({
     >
       <TouchableOpacity
         className="justify-between flex-row"
-        activeOpacity={0.4}
+        activeOpacity={0.6}
         onPress={() => router.push(`/leagues/player/${player.atleta_id}`)}
       >
         <View className="flex-row gap-x-2 items-center">

@@ -1,15 +1,13 @@
-import { View } from "@/components/Themed";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ActivityIndicator } from "react-native";
+
+import { View } from "@/components/Themed";
 
 type LoadingProps = {};
 
 export function Loading({}: LoadingProps) {
   return (
-    <SafeAreaViewContainer>
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator />
-      </View>
-    </SafeAreaViewContainer>
+    <View className="flex-1 items-center justify-center">
+      <ActivityIndicator />
+    </View>
   );
 }

@@ -12,20 +12,20 @@ export function TopPlayerCard({ player }: TopPlayerCardProps) {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.4}
+      activeOpacity={0.6}
       key={player.Atleta.atleta_id}
-      className="border-b border-gray-200 "
+      className="border-b border-gray-200"
     >
       <View className="flex-row py-2 gap-x-2">
         <Image
           source={{
             uri: player.Atleta.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-12 h-12 rounded-full"
+          className="w-14 h-14 rounded-full"
           alt={`Foto do ${player.Atleta.apelido}`}
         />
 
-        <View className=" flex-1 flex-row items-center justify-between">
+        <View className="flex-1 flex-row items-center justify-between">
           <View className="gap-y-1">
             <View>
               <Text className="text-sm font-medium">

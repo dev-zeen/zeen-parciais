@@ -1,4 +1,6 @@
 export const MARKET_STATUS_NAME = {
   ABERTO: 1,
   FECHADO: 2,
+  EM_ATUALIZACAO: 3,
+  EM_MANUTENCAO: 4,
 };

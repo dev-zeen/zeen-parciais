@@ -1,6 +1,8 @@
-import { Text } from "@/components/Themed";
-import { Feather } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
+
+import { Feather } from "@expo/vector-icons";
+
+import { Text } from "@/components/Themed";
 
 interface ButtonProps {
   onPress: () => void;

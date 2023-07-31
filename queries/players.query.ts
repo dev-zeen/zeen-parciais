@@ -4,8 +4,10 @@ import {
   GET_TOP_PLAYERS,
   GET_TOP_RANKED_PLAYERS,
 } from "@/constants/Endpoits";
+import { APPRECIATIONS } from "@/constants/Keys";
 import { Appreciations, TopPlayer } from "@/models/Player";
 import { IPositions } from "@/models/Stats";
+import { onSaveStorage } from "@/utils/asyncStorage";
 import { useFetch } from "@/utils/reactQuery";
 
 interface useGetTopPlayersProps {
@@ -39,11 +41,18 @@ export const useGetBestCaptainPlayers = (
       ...filters,
     },
     {
-      enabled: hasHighlights,
+      enabled: !!hasHighlights,
     }
   );
 
 export const useGetPositions = () => useFetch<IPositions>(GET_POSITIONS);
 
-export const useGetAppreciations = () =>
-  useFetch<Appreciations>(GET_APPRECIATIONS);
+export const useGetAppreciations = (allowRequest?: boolean) => {
+  return useFetch<Appreciations>(GET_APPRECIATIONS, undefined, {
+    enabled: !!allowRequest,
+    select: (data) => {
+      if (data) onSaveStorage(APPRECIATIONS, data);
+      return data;
+    },
+  });
+};

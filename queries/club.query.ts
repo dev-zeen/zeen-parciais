@@ -11,9 +11,9 @@ import {
 import { FullClubInfo, Substitutions, TeamHistoryRound } from "@/models/Club";
 import { useFetch } from "@/utils/reactQuery";
 
-export const useGetMyClub = (isAutheticated: boolean) =>
+export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
-    enabled: isAutheticated,
+    enabled: !!allowRequest,
   });
 
 export const useGetClub = (

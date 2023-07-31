@@ -6,23 +6,32 @@ import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
-import { useGetHistoricMyClub, useGetMyClub } from "@/queries/club";
+import { useGetHistoricMyClub, useGetMyClub } from "@/queries/club.query";
+import { useGetMarketStatus } from "@/queries/market.query";
 import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
-
-import { AuthContext } from "@/contexts/Auth.context";
 
 export default () => {
   const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
 
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const allowRequests =
+    isAutheticated &&
+    marketStatus &&
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+
   const {
     data: club,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(isAutheticated);
+  } = useGetMyClub(allowRequests);
+
   const { data: historyClub, isLoading: isLoadingHistory } =
     useGetHistoricMyClub();
 

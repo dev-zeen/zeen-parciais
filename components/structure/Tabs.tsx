@@ -1,5 +1,6 @@
-import { Text, TouchableOpacity, View } from "@/components/Themed";
 import React, { ReactNode, useState } from "react";
+
+import { Text, TouchableOpacity, View } from "@/components/Themed";
 
 export type ITabs = {
   id: number;

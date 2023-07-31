@@ -1,11 +1,13 @@
+import { useMemo } from "react";
 import { Image, TouchableOpacity, useColorScheme } from "react-native";
+
+import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 import { Text, View } from "@/components/Themed";
 import { Club } from "@/models/Club";
 import { Player, Position } from "@/models/Stats";
 import { numberToString } from "@/utils/parseTo";
-import { Feather } from "@expo/vector-icons";
-import { useMemo } from "react";
 
 interface PlayerCardProps {
   player: Player;
@@ -20,6 +22,7 @@ export function PlayerCard({
   position,
   appreciation,
 }: PlayerCardProps) {
+  const router = useRouter();
   const colorTheme = useColorScheme();
 
   const scoutsColors: { [key: string]: string } = useMemo(() => {
@@ -56,8 +59,9 @@ export function PlayerCard({
   return (
     <TouchableOpacity
       activeOpacity={0.6}
-      className={`flex-row justify-between items-center rounded-lg p-3 border-b ${
-        colorTheme === "dark" ? "border-gray-200" : "border-gray-200"
+      onPress={() => router.push(`/(tabs)/players/${player.id}`)}
+      className={`flex-row justify-between items-center rounded-lg p-3 border ${
+        colorTheme === "dark" ? "border-gray-300" : "border-gray-300"
       } `}
     >
       <View className="flex-row items-center gap-1">

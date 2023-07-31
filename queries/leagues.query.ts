@@ -1,5 +1,3 @@
-import { QueryObserverOptions } from "@tanstack/react-query";
-
 import {
   GET_ALL_LEAGUES,
   GET_CLUBS_BY_LEAGUE_ID,
@@ -20,11 +18,7 @@ export interface Config extends Filter {}
 export const useGetLeagues = () =>
   useFetch<{ ligas: LeagueUserDetails[] }>(GET_ALL_LEAGUES);
 
-export const useGetLeague = (
-  slug: string,
-  filters?: Filter,
-  config?: QueryObserverOptions
-) =>
+export const useGetLeague = (slug: string, filters?: Filter) =>
   useFetch<League>(
     GET_LEAGUE_BY_SLUG.replace(":slug", slug),
     {

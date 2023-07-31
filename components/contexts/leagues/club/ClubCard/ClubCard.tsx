@@ -73,12 +73,12 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
           myTeam
             ? "border-2 border-blue-400"
             : colorTheme === "dark"
-            ? "border-b border-gray-500"
+            ? "border-b border-gray-200"
             : "border-b border-gray-200"
         }`}
       >
         <TouchableOpacity
-          activeOpacity={0.4}
+          activeOpacity={0.6}
           onPress={() => router.push(`/leagues/club/${club.time_id}`)}
         >
           <View className="flex-row justify-between items-center">
@@ -114,7 +114,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                   <Text className="text-xs font-light capitalize">
                     {club.nome_cartola}
                   </Text>
-                  <View className="rounded-full h-1 w-1 bg-gray-300"></View>
+                  <View className="rounded-full h-1 w-1 bg-gray-300" />
                   <Text className="text-xs font-light">C$ {patrimony}</Text>
                 </View>
               </View>

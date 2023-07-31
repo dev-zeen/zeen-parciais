@@ -6,5 +6,5 @@ export const onSaveStorage = async <T>(key: string, data: T) => {
 
 export const onGetFromStorage = async <T>(key: string): Promise<T> => {
   const data = await AsyncStorage.getItem(key);
-  return JSON.parse(JSON.parse(data as string));
+  return JSON.parse(data as string);
 };

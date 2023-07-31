@@ -15,10 +15,9 @@ import Colors from "@/constants/Colors";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { PlayerFormation } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
-import { useGetPositions } from "@/queries/players";
-import { numberToString } from "@/utils/parseTo";
-
+import { useGetPositions } from "@/queries/players.query";
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
+import { numberToString } from "@/utils/parseTo";
 
 type ListPlayersSaleProps = {
   players: PlayersToSell[];

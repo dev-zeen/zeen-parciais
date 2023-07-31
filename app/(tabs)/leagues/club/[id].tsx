@@ -17,9 +17,9 @@ import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { MarketStatus } from "@/models/Market";
 import { FullPlayer } from "@/models/Stats";
-import { useGetClub, useGetMatchSubstitutions } from "@/queries/club";
-import { useGetMarketStatus } from "@/queries/market";
-import { useGetScoredPlayers } from "@/queries/stats";
+import { useGetClub, useGetMatchSubstitutions } from "@/queries/club.query";
+import { useGetMarketStatus } from "@/queries/market.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 import { numberToString } from "@/utils/parseTo";
 import {
   onCalculatePartialScore,

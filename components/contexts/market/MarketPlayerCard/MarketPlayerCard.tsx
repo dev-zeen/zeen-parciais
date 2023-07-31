@@ -1,12 +1,13 @@
+import { Image, TouchableOpacity } from "react-native";
+
 import { Feather } from "@expo/vector-icons";
 
 import { Text, View } from "@/components/Themed";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FullPlayer } from "@/models/Stats";
-import { useGetMarket } from "@/queries/market";
-import { useGetPositions } from "@/queries/players";
+import { useGetMarket } from "@/queries/market.query";
+import { useGetPositions } from "@/queries/players.query";
 import { numberToString } from "@/utils/parseTo";
-import { Image, TouchableOpacity } from "react-native";
 
 type MarketPlayerCardProps = {
   player: FullPlayer;

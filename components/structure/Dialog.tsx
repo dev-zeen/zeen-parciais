@@ -1,7 +1,9 @@
-import { View } from "@/components/Themed";
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
+
 import Dialog from "react-native-dialog";
+
+import { View } from "@/components/Themed";
 
 type DialogComponentProps = {
   title?: string;

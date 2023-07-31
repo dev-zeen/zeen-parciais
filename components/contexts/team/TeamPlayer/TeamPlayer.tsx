@@ -11,10 +11,9 @@ import { Text, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { PlayerFormation } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
-import { useGetMarketStatus } from "@/queries/market";
-import { numberToString } from "@/utils/parseTo";
-
+import { useGetMarketStatus } from "@/queries/market.query";
 import useTeamSchemaStore from "@/store/useTeamSchemaStore";
+import { numberToString } from "@/utils/parseTo";
 
 type TeamPlayerProps = {
   player?: PlayerFormation | FullPlayer;

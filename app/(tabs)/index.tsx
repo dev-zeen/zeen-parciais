@@ -7,12 +7,12 @@ import {
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { ModalAuth } from "@/components/contexts/auth/AuthModal";
 import { ModalLogout } from "@/components/contexts/auth/LogoutModal";
+import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { TopPlayerCard } from "@/components/contexts/utils/TopPlayerCard";
@@ -20,19 +20,18 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
-import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
-import { FullPlayer, PlayerStats } from "@/models/Stats";
-import { useGetMyClub } from "@/queries/club";
-import { useGetMarketStatus } from "@/queries/market";
+import { FullPlayer, IPositions, PlayerStats } from "@/models/Stats";
+import { useGetMyClub } from "@/queries/club.query";
+import { useGetMarketStatus } from "@/queries/market.query";
 import {
   useGetBestCaptainPlayers,
   useGetPositions,
   useGetTopPlayers,
-} from "@/queries/players";
-import { useGetScoredPlayers } from "@/queries/stats";
+} from "@/queries/players.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
 import {
@@ -53,18 +52,23 @@ export default () => {
   const [playersHaveAlreadyPlayed, setPlayersHaveAlreadyPlayed] = useState(0);
 
   const {
-    data: club,
-    refetch: onRefetchClub,
-    isRefetching: isRefetchingClub,
-  } = useGetMyClub(isAutheticated);
-
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
-
-  const {
     data: marketStatus,
     isLoading: IsLoadingMarketStatus,
     refetch: onRefetchMarketStatus,
   } = useGetMarketStatus();
+
+  const allowRequests =
+    isAutheticated &&
+    marketStatus &&
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+
+  const {
+    data: club,
+    refetch: onRefetchClub,
+    isRefetching: isRefetchingClub,
+  } = useGetMyClub(allowRequests);
+
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
   const { data: topPlayers, refetch: onRefetchTopPlayers } = useGetTopPlayers();
 
@@ -81,6 +85,7 @@ export default () => {
     club?.capitao_id as number,
     playerStats
   );
+
   const teamCapitain =
     club && club.atletas.find((item) => item.atleta_id === club.capitao_id);
 
@@ -90,9 +95,9 @@ export default () => {
 
   const onRefetch = useCallback(async () => {
     club && (await onRefetchClub());
+    topPlayers && topPlayers?.length > 0 && (await onRefetchBestPlayers());
     await onRefetchMarketStatus();
     await onRefetchTopPlayers();
-    await onRefetchBestPlayers();
     await onRefetchPositions();
     await onRefetchStats();
   }, [
@@ -103,18 +108,6 @@ export default () => {
     onRefetchStats,
     onRefetchPositions,
   ]);
-
-  const { handleUnautenticated } = useContext(AuthContext);
-
-  const { removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
-
-  const handleLogout = async () => {
-    try {
-      await removeItem().then(async (_response) => {
-        handleUnautenticated();
-      });
-    } catch (exception) {}
-  };
 
   useEffect(() => {
     if (topPlayers && topPlayers?.length > 0) setHighlights(true);
@@ -129,8 +122,6 @@ export default () => {
       setPlayersHaveAlreadyPlayed(countPlayersPlayed);
     }
   }, [club, playerStats]);
-
-  const isLoading = IsLoadingMarketStatus;
 
   const playersTabs: ITabs[] = useMemo(
     () => [
@@ -181,10 +172,18 @@ export default () => {
         },
       },
     ],
-    [topPlayers, bestPlayers]
+    [topPlayers]
   );
 
-  if (isLoading || !positions) {
+  const isLoading = isAutheticated
+    ? IsLoadingMarketStatus || !positions || IsLoadingMarketStatus || !club
+    : IsLoadingMarketStatus;
+
+  if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
+    return <MaintenanceMarket />;
+  }
+
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -213,7 +212,7 @@ export default () => {
           {club ? (
             <>
               <TouchableOpacity
-                className="rounded-lg flex-1"
+                className="flex-1 rounded-lg"
                 activeOpacity={0.6}
                 onPress={() => router.push(`/profile/${club?.time.time_id}`)}
               >
@@ -229,7 +228,7 @@ export default () => {
                     MARKET_STATUS_NAME.ABERTO && (
                     <Text
                       className={`text-sm font-semibold ${
-                        club?.variacao_patrimonio || 0 > 0
+                        club?.variacao_patrimonio > 0
                           ? "text-green-500"
                           : "text-folly"
                       } `}
@@ -299,7 +298,7 @@ export default () => {
                 )}
               </View>
 
-              <View className="flex-1 p-2 rounded-lg">
+              <View className="p-2 rounded-lg">
                 <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">
                   Meu Capitão
                 </Text>
@@ -320,7 +319,11 @@ export default () => {
 
                       <View className="flex-row items-center">
                         <Text className="text-xs font-light uppercase">
-                          {positions[teamCapitain?.posicao_id as number].nome}
+                          {
+                            (positions as IPositions)[
+                              teamCapitain?.posicao_id as number
+                            ].nome
+                          }
                         </Text>
                       </View>
                     </View>
@@ -380,7 +383,7 @@ export default () => {
             </TouchableOpacity>
           )}
           {topPlayers && bestPlayers && (
-            <View className="rounded-lg p-2">
+            <View className="rounded-lg p-2 flex-1">
               <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">
                 Mais Escalados
               </Text>

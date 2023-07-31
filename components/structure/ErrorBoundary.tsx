@@ -1,9 +1,9 @@
 import React from "react";
+import { Image } from "react-native";
 
 import errorImage from "@/assets/images/error-background.png";
 import { Text, View } from "@/components/Themed";
 import { Button } from "@/components/structure/Button";
-import { Image } from "react-native";
 
 type CustomErrorBoundaryProps = {
   isError?: boolean;

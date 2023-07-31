@@ -2,7 +2,7 @@ import { Text, View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
 import { ISchema } from "@/models/Formations";
-import { useGetScoredPlayers } from "@/queries/stats";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 
 type ListReservePlayersProps = {
   schema: ISchema;

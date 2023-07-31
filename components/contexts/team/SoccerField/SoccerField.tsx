@@ -8,8 +8,8 @@ import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx"
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
 import { FormationPlayer, ISchema } from "@/models/Formations";
 import { Market as MarketModal } from "@/models/Market";
-import { useGetMarket } from "@/queries/market";
-import { useGetScoredPlayers } from "@/queries/stats";
+import { useGetMarket } from "@/queries/market.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 
 type SoccerFieldProps = {
   schema: ISchema;

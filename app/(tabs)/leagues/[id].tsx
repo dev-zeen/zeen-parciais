@@ -7,6 +7,7 @@ import {
   useColorScheme,
 } from "react-native";
 
+import { useAsyncStorage } from "@react-native-async-storage/async-storage";
 import { useLocalSearchParams } from "expo-router";
 
 import { Text, View } from "@/components/Themed";
@@ -16,18 +17,17 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
+import { CLUBS_BY_LEAGUE_KEY_STORAGE } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { League, TeamLeague } from "@/models/Leagues";
 import { MarketStatus } from "@/models/Market";
 import { PlayerStats } from "@/models/Stats";
-import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues";
-import { useGetMarketStatus } from "@/queries/market";
-import { useGetScoredPlayers } from "@/queries/stats";
+import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues.query";
+import { useGetMarketStatus } from "@/queries/market.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 import theme from "@/styles/theme";
-
-import { CLUBS_BY_LEAGUE_KEY_STORAGE } from "@/constants/Keys";
 import { ClubsByLeagueUtils } from "@/utils/partials";
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
+
 import {
   mergeSort,
   onGetLeagueWithPartials,
@@ -68,7 +68,7 @@ export default () => {
 
   const isRefetching = isRefetchingLeague;
 
-  const { data, isLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
+  const { isLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
     league?.liga.liga_id
   );
 

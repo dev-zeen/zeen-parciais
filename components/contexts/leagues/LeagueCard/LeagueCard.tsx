@@ -1,8 +1,9 @@
 import { Image, TouchableOpacity } from "react-native";
 
+import { useRouter } from "expo-router";
+
 import { Text, View } from "@/components/Themed";
 import { LeagueUserDetails } from "@/models/Leagues";
-import { useRouter } from "expo-router";
 
 interface CardLeagueStatsProps {
   league: LeagueUserDetails;
@@ -24,7 +25,7 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
   return (
     <View className="rounded-lg mx-2 px-2">
       <TouchableOpacity
-        activeOpacity={0.4}
+        activeOpacity={0.6}
         onPress={() => router.push(`/leagues/${league.slug}`)}
       >
         <View className="flex-row py-2 gap-x-2">

@@ -1,9 +1,16 @@
-import { Text, View } from 'react-native';
+import { Text, View } from "react-native";
+
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { useLocalSearchParams } from "expo-router";
 
 export default () => {
+  const { id } = useLocalSearchParams();
+
   return (
-    <View>
-      <Text>Página da partida</Text>
-    </View>
+    <SafeAreaViewContainer>
+      <View className="items-center justify-center flex-1">
+        <Text> Página do jogador </Text>
+      </View>
+    </SafeAreaViewContainer>
   );
 };

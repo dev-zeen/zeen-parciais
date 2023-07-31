@@ -5,7 +5,7 @@ import { MatchCard } from "@/components/contexts/matches/MatchCard";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { Match } from "@/models/Matches";
-import { useGetMatchs } from "@/queries/matches";
+import { useGetMatchs } from "@/queries/matches.query";
 
 export default () => {
   const { data, isLoading, refetch: onRefetch, isRefetching } = useGetMatchs();
