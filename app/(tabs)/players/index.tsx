@@ -144,9 +144,7 @@ export default () => {
         style={{
           gap: 8,
           backgroundColor:
-            colorTheme === "dark"
-              ? Colors.dark.backgroungFull
-              : Colors.light.background,
+            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
         }}
       >
         <TextInput
@@ -154,7 +152,7 @@ export default () => {
           value={searchQuery}
           placeholder="Buscar Jogador"
           placeholderTextColor={GRAY_OPACITY}
-          className="rounded-lg p-3 border-2 border-gray-300 bg-white"
+          className="rounded-lg p-3 border-2 border-gray-300 bg-white mx-4"
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -169,12 +167,15 @@ export default () => {
           initialNumToRender={12}
           maxToRenderPerBatch={25}
           contentContainerStyle={{
-            marginTop: 4,
+            paddingTop: 4,
             backgroundColor:
-              colorTheme === "dark"
-                ? Colors.dark.backgroungFull
-                : Colors.light.background,
+              colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
             gap: 4,
+          }}
+          style={{
+            paddingBottom: 4,
+            backgroundColor:
+              colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
           }}
         />
       </View>

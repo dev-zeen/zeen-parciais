@@ -79,7 +79,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
         onLongPress={() =>
           removePlayerSchema(player as PlayerFormation | FullPlayer)
         }
-        className={`justify-center items-center border-2 w-12 h-12 rounded-full ${
+        className={`justify-center items-center border-2 w-11 h-11 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
             ? "border-red-500 bg-red-500"
             : "border-neutral-200"
@@ -90,7 +90,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           source={{
             uri: player?.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-11 h-11 rounded-full bg-white overflow-hidden"
+          className="w-10 h-10 rounded-full bg-white overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
         {hasCaptain && (

@@ -226,27 +226,32 @@ export default () => {
 
   return (
     <SafeAreaViewContainer>
-      <View className="flex-row justify-center items-center py-2 rounded-t-md mx-2">
-        <Image
-          source={{
-            uri: league?.liga.url_flamula_png,
-          }}
-          style={{ width: theme.Tokens.SIZE.sm, height: theme.Tokens.SIZE.sm }}
-          alt={`Imagem da liga ${league?.liga.nome}`}
-        />
-        <Text
-          style={{
-            fontWeight: "700",
-            fontSize: theme.Tokens.TEXT.md,
-            textTransform: "uppercase",
-          }}
-        >
-          {league?.liga.nome}
-        </Text>
-      </View>
+      <View className={`${colorTheme === "dark" ? "bg-dark" : "bg-light"}`}>
+        <View className="flex-row justify-center items-center py-2 rounded-t-lg mx-2 mt-2">
+          <Image
+            source={{
+              uri: league?.liga.url_flamula_png,
+            }}
+            style={{
+              width: theme.Tokens.SIZE.sm,
+              height: theme.Tokens.SIZE.sm,
+            }}
+            alt={`Imagem da liga ${league?.liga.nome}`}
+          />
+          <Text
+            style={{
+              fontWeight: "700",
+              fontSize: theme.Tokens.TEXT.md,
+              textTransform: "uppercase",
+            }}
+          >
+            {league?.liga.nome}
+          </Text>
+        </View>
 
-      <View className="mx-2">
-        <Tabs tabs={tabs} />
+        <View className="mx-2 rounded-lg">
+          <Tabs tabs={tabs} />
+        </View>
       </View>
 
       <FlatList
@@ -262,13 +267,13 @@ export default () => {
           paddingTop: 4,
           marginHorizontal: 8,
           backgroundColor:
-            colorTheme === "dark"
-              ? Colors.dark.backgroungFull
-              : Colors.light.background,
+            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
           gap: 4,
         }}
         style={{
           paddingBottom: 4,
+          backgroundColor:
+            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
         }}
       />
 

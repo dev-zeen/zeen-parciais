@@ -18,7 +18,7 @@ export function AddPlayerButton({
 }: AddPlayerButtonProps) {
   return (
     <View
-      className="items-center justify-center mt-4 bg-transparent"
+      className="items-center justify-center mt-5 bg-transparent"
       style={{
         gap: 2,
         maxWidth: 90,
@@ -30,9 +30,9 @@ export function AddPlayerButton({
         onPress={() =>
           handleBuyPlayerOnMarket && handleBuyPlayerOnMarket(positionSchema)
         }
-        className="justify-center items-center border-2 w-12 h-12 rounded-full border-neutral-200 bg-white"
+        className="justify-center items-center border-2 w-11 h-11 rounded-full border-neutral-200 bg-white"
       >
-        <Feather name="plus" size={20} />
+        <Feather name="plus" size={18} />
       </TouchableOpacity>
 
       <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-2">

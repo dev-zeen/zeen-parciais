@@ -1,5 +1,5 @@
 import { memo, useCallback } from "react";
-import { Image, TouchableOpacity } from "react-native";
+import { Image, TouchableOpacity, useColorScheme } from "react-native";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -33,6 +33,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     marketIsClosed,
   }) => {
     const router = useRouter();
+    const colorTheme = useColorScheme();
 
     const isOrderByPatrimonio = orderBy === "patrimonio";
     const patrimony = numberToString(club.patrimonio);
@@ -87,7 +88,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               }`}
             >
               <View
-                className={`items-center justify-center gap-x-0.5 w-8 ${
+                className={`items-center justify-center gap-x-0.5 w-7 ${
                   myTeam && "bg-blue-400"
                 }`}
               >
