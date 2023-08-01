@@ -1,9 +1,11 @@
 import { useCallback } from "react";
 import { Image, useColorScheme } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { PlayerClub } from "@/app/(tabs)/leagues/club/[id]";
+import captainImage from "@/assets/images/letter-c.png";
 import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { MarketStatus } from "@/models/Market";
@@ -16,6 +18,8 @@ type ClubPlayerCardProps = {
   player: PlayerClub;
   currentRound: number;
   marketStatus: MarketStatus;
+  isCapitain: boolean;
+  appreciation?: number;
   playerStats?: PlayerStats;
   isReserve?: boolean;
 };
@@ -25,7 +29,9 @@ export function ClubPlayerCard({
   playerStats,
   currentRound,
   marketStatus,
+  appreciation,
   isReserve,
+  isCapitain,
 }: ClubPlayerCardProps) {
   const router = useRouter();
   const colorTheme = useColorScheme();
@@ -104,7 +110,17 @@ export function ClubPlayerCard({
           </View>
 
           <View>
-            <Text className="text-sm font-semibold">{player.apelido}</Text>
+            <View className="flex-row items-center justify-center gap-x-1">
+              <Text className="text-sm font-semibold">{player.apelido}</Text>
+              {isCapitain && (
+                <Image
+                  source={captainImage}
+                  className="w-5 h-5 rounded-full overflow-hidden"
+                  alt={`Capitão do time`}
+                />
+              )}
+            </View>
+
             <View className="flex-row items-center gap-x-1">
               <Text className="text-xs font-light capitalize">
                 {positions?.[player.posicao_id].nome}
@@ -113,9 +129,9 @@ export function ClubPlayerCard({
           </View>
         </View>
 
-        <View className="flex-row gap-x-2 items-center">
+        <View className="flex-row justify-between items-center w-20">
           <Text
-            className={`font-semibold text-sm  ${
+            className={`font-semibold text-sm ${
               scorePlayer(player) > 0
                 ? "text-green-500"
                 : scorePlayer(player) === -1000
@@ -127,6 +143,25 @@ export function ClubPlayerCard({
               ? "-"
               : numberToString(scorePlayer(player))}
           </Text>
+          {appreciation && (
+            <View className="flex-row items-center justify-end w-10">
+              <Text
+                className={`text-xs font-semibold ${
+                  appreciation && appreciation < 0
+                    ? "text-folly"
+                    : "text-green-400"
+                }`}
+              >
+                {appreciation ? numberToString(appreciation) : null}
+              </Text>
+              <Feather
+                name={
+                  appreciation && appreciation < 0 ? "arrow-down" : "arrow-up"
+                }
+                color={appreciation && appreciation < 0 ? "#ef4444" : "#4ade80"}
+              />
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     </View>

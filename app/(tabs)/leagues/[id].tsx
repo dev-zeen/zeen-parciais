@@ -209,7 +209,6 @@ export default () => {
           orderBy={orderBy}
           firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
           marketStatus={marketStatus as MarketStatus}
-          marketIsClosed={marketIsClosed}
         />
       );
     },

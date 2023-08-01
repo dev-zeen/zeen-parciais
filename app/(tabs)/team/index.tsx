@@ -41,6 +41,7 @@ import {
 
 export default () => {
   const colorTheme = useColorScheme();
+
   const { isAutheticated } = useContext(AuthContext);
 
   const { data: marketStatus } = useGetMarketStatus();
@@ -50,6 +51,9 @@ export default () => {
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
+  const marketIsClosed =
+    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+
   const {
     data: club,
     isLoading: isLoadingClub,
@@ -57,28 +61,22 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(allowRequests);
 
-  const marketIsClosed =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
-
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
   const updateSchema = useTeamSchemaStore((state) => state.updateSchema);
   const schema = useTeamSchemaStore((state) => state.schema);
   const price = useTeamSchemaStore((state) => state.price);
   const updatePrice = useTeamSchemaStore((state) => state.updatePrice);
-
   const capitain = useTeamSchemaStore((state) => state.capitain);
   const updateCapitain = useTeamSchemaStore((state) => state.updateCapitain);
 
   const teamFormationDefault = onGetDefaultFormation(
     club?.time.esquema_id as number
   );
-  const isRefetching = isRefetchingClub;
 
   const [formation, setFormation] = useState(teamFormationDefault);
   const [showTeamRegistrationButton, setShowTeamRegistrationButton] =
     useState(false);
-
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
 
@@ -200,6 +198,8 @@ export default () => {
       updatePrice(priceUpdated);
     }
   }, [schema]);
+
+  const isRefetching = isRefetchingClub;
 
   if (!club || isLoadingClub || !schema) {
     return <Loading />;

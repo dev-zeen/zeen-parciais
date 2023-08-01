@@ -14,12 +14,15 @@ import { ClubPlayerCard } from "@/components/contexts/leagues/club/ClubPlayerCar
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { APPRECIATIONS } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { MarketStatus } from "@/models/Market";
+import { Appreciations } from "@/models/Player";
 import { FullPlayer } from "@/models/Stats";
 import { useGetClub, useGetMatchSubstitutions } from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
+import { onGetFromStorage } from "@/utils/asyncStorage";
 import { numberToString } from "@/utils/parseTo";
 import {
   onCalculatePartialScore,
@@ -35,6 +38,8 @@ export default () => {
   const colorTheme = useColorScheme();
   const { id } = useLocalSearchParams();
 
+  const [currentAppreciations, setCurrentAppreciations] =
+    useState<Appreciations>();
   const [currentRound, setCurrentRound] = useState(0);
   const [reservePlayers, setReservePlayers] = useState<
     FullPlayer[] | PlayerClub[]
@@ -54,7 +59,20 @@ export default () => {
     refetch: onRefetchStats,
   } = useGetScoredPlayers();
 
+  useEffect(() => {
+    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
+      if (res) {
+        setCurrentAppreciations(res);
+      }
+    });
+
+    return () => {
+      setCurrentAppreciations(undefined);
+    };
+  }, []);
+
   const { data: club } = useGetClub(id as string, currentRound);
+
   const { data: substitutions } = useGetMatchSubstitutions({
     id: club?.time.time_id,
     round: currentRound,
@@ -102,14 +120,18 @@ export default () => {
         <ClubPlayerCard
           key={player.atleta_id}
           player={player}
+          isCapitain={club?.capitao_id === player.atleta_id}
           currentRound={currentRound}
           marketStatus={marketStatus as MarketStatus}
           playerStats={playerStats}
           isReserve={isReserve}
+          appreciation={
+            currentAppreciations?.atletas[player.atleta_id]?.variacao_num
+          }
         />
       );
     },
-    [currentRound, playerStats, marketStatus]
+    [currentRound, playerStats, marketStatus, club, currentAppreciations]
   );
 
   if (!club) {
