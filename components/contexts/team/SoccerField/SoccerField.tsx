@@ -6,31 +6,31 @@ import footballField from "@/assets/images/field.png";
 import { View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import { FormationPlayer, ISchema } from "@/models/Formations";
+import { LineupPlayers, LineupPosition } from "@/models/Formations";
 import { Market as MarketModal } from "@/models/Market";
 import { useGetMarket } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 
 type SoccerFieldProps = {
-  schema: ISchema;
+  lineup: LineupPlayers;
   capitain: number;
   handleChangeCapitain?: (id: number) => void;
 };
 
 export function SoccerField({
-  schema,
+  lineup,
   capitain,
   handleChangeCapitain,
 }: SoccerFieldProps) {
   const { data: market } = useGetMarket();
   const { data: playerStats } = useGetScoredPlayers();
   const [positionMarketSearch, setPositionMarketSearch] =
-    useState<FormationPlayer | null>();
+    useState<LineupPosition | null>();
 
   const [activeModalMarket, setActiveModalMarket] = useState(false);
 
   const handleBuyPlayerOnMarket = useCallback(
-    (player: FormationPlayer) => {
+    (player: LineupPosition) => {
       setPositionMarketSearch(player);
     },
     [positionMarketSearch]
@@ -59,7 +59,7 @@ export function SoccerField({
         />
       </View>
 
-      {schema.players.map((position) => {
+      {lineup.players.map((position) => {
         return (
           <View
             key={`${position.left} + ${position.position} + ${position.top}`}
@@ -83,7 +83,7 @@ export function SoccerField({
             ) : (
               <AddPlayerButton
                 handleBuyPlayerOnMarket={handleBuyPlayerOnMarket}
-                positionSchema={position}
+                positionLineup={position}
               />
             )}
           </View>

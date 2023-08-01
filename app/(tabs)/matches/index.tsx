@@ -10,6 +10,11 @@ import { useGetMatchs } from "@/queries/matches.query";
 export default () => {
   const { data, isLoading, refetch: onRefetch, isRefetching } = useGetMatchs();
 
+  const keyExtractor = useCallback(
+    (item: Match) => `${item.clube_casa_id}`,
+    [data]
+  );
+
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<Match>) => {
       return (
@@ -38,7 +43,7 @@ export default () => {
         }
         initialNumToRender={10}
         data={data?.partidas}
-        keyExtractor={(item) => `${item.clube_casa_id}`}
+        keyExtractor={keyExtractor}
         renderItem={renderItem}
       />
     </SafeAreaViewContainer>

@@ -9,14 +9,14 @@ import {
 import captainImage from "@/assets/images/letter-c.png";
 import { Text, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { PlayerFormation } from "@/models/Formations";
+import { LineupPlayer } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market.query";
-import useTeamSchemaStore from "@/store/useTeamSchemaStore";
+import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 
 type TeamPlayerProps = {
-  player?: PlayerFormation | FullPlayer;
+  player?: LineupPlayer | FullPlayer;
   hasCaptain?: boolean;
   handleCapitain?: (id: number) => void;
   isPlayed?: boolean;
@@ -28,17 +28,17 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
   const marketIsClosed =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
-  const removePlayerSchema = useTeamSchemaStore(
-    (state) => state.removePlayerSchema
+  const removePlayerFromLineup = useTeamLineupStore(
+    (state) => state.removePlayerFromLineup
   );
 
   const scoreWithMarketStatus = marketIsClosed
     ? hasCaptain
-      ? (player as PlayerFormation)?.pontuacao * 1.5
-      : (player as PlayerFormation)?.pontuacao
+      ? (player as LineupPlayer)?.pontuacao * 1.5
+      : (player as LineupPlayer)?.pontuacao
     : hasCaptain
-    ? (player as PlayerFormation)?.pontos_num * 1.5
-    : (player as PlayerFormation)?.pontos_num;
+    ? (player as LineupPlayer)?.pontos_num * 1.5
+    : (player as LineupPlayer)?.pontos_num;
 
   const scoreFinal = numberToString(scoreWithMarketStatus);
 
@@ -56,7 +56,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
     >
       {marketIsClosed ? (
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-white">
-          {(player as PlayerFormation) ? (
+          {(player as LineupPlayer) ? (
             <Text numberOfLines={1} className={`font-bold text-center text-xs`}>
               {scoreFinal}
             </Text>
@@ -77,7 +77,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         onLongPress={() =>
-          removePlayerSchema(player as PlayerFormation | FullPlayer)
+          removePlayerFromLineup(player as LineupPlayer | FullPlayer)
         }
         className={`justify-center items-center border-2 w-11 h-11 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL

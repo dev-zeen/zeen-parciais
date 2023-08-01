@@ -1,4 +1,4 @@
-import { FormationsDefault } from "@/models/Formations";
+import { TacticalFormations } from "@/models/Formations";
 
 export const enum Positions {
   GOLEIRO = 1,
@@ -9,7 +9,7 @@ export const enum Positions {
   TECNICO = 6,
 }
 
-export const FORMATIONS: FormationsDefault = {
+export const FORMATIONS: TacticalFormations = {
   "3-4-3": {
     players: [
       {
@@ -704,7 +704,7 @@ export const FORMATIONS: FormationsDefault = {
   },
 };
 
-export const SCHEMAS_OBJECT = {
+export const LINEUPS_DEFAULT_OBJECT = {
   1: "3-4-3",
   2: "3-5-2",
   3: "4-3-3",
@@ -713,13 +713,3 @@ export const SCHEMAS_OBJECT = {
   6: "5-3-2",
   7: "5-4-1",
 };
-
-export const SCHEMAS_LIST = [
-  "3-4-3",
-  "3-5-2",
-  "4-3-3",
-  "4-4-2",
-  "4-5-1",
-  "5-3-2",
-  "5-4-1",
-];

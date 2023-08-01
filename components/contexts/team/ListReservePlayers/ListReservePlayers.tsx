@@ -1,14 +1,14 @@
 import { Text, View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import { ISchema } from "@/models/Formations";
+import { LineupPlayers } from "@/models/Formations";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 
 type ListReservePlayersProps = {
-  schema: ISchema;
+  lineup: LineupPlayers;
 };
 
-export function ListReservePlayers({ schema }: ListReservePlayersProps) {
+export function ListReservePlayers({ lineup }: ListReservePlayersProps) {
   const { data: playerStats } = useGetScoredPlayers();
 
   return (
@@ -17,7 +17,7 @@ export function ListReservePlayers({ schema }: ListReservePlayersProps) {
         Banco de Reservas
       </Text>
       <View className="flex-row rounded-lg py-2 mb-1 items-center justify-center">
-        {schema.reserves?.map((item) => {
+        {lineup.reserves?.map((item) => {
           return (
             <View
               key={item.position}
@@ -35,7 +35,7 @@ export function ListReservePlayers({ schema }: ListReservePlayersProps) {
                 <AddPlayerButton
                   key={item.left}
                   onPress={() => console.log("Comprar reserva")}
-                  positionSchema={item}
+                  positionLineup={item}
                 />
               )}
             </View>

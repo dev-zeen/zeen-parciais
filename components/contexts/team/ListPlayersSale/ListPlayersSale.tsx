@@ -13,10 +13,10 @@ import { Text, View } from "@/components/Themed";
 import { Loading } from "@/components/structure/Loading";
 import Colors from "@/constants/Colors";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import { PlayerFormation } from "@/models/Formations";
+import { LineupPlayer } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { useGetPositions } from "@/queries/players.query";
-import useTeamSchemaStore from "@/store/useTeamSchemaStore";
+import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 
 type ListPlayersSaleProps = {
@@ -34,8 +34,8 @@ export function ListPlayersSale({
 
   const { data: positions } = useGetPositions();
 
-  const removePlayerSchema = useTeamSchemaStore(
-    (state) => state.removePlayerSchema
+  const removePlayerFromLineup = useTeamLineupStore(
+    (state) => state.removePlayerFromLineup
   );
 
   const [playersSell, setPlayersSell] = useState<PlayersToSell[]>();
@@ -46,7 +46,7 @@ export function ListPlayersSale({
     }
   }, []);
 
-  const onRemovePlayerSchema = useCallback(
+  const onremovePlayerFromLineup = useCallback(
     (id: number) => {
       const playerSellUpdated = playersSell?.map((position) => {
         const positionUpdated = position.players.filter(
@@ -65,10 +65,10 @@ export function ListPlayersSale({
   );
 
   const handleSellPlayer = useCallback(
-    (player: FullPlayer | PlayerFormation) => {
-      const playersUpdated = onRemovePlayerSchema(player?.atleta_id);
+    (player: FullPlayer | LineupPlayer) => {
+      const playersUpdated = onremovePlayerFromLineup(player?.atleta_id);
       setPlayersSell(playersUpdated);
-      removePlayerSchema(player);
+      removePlayerFromLineup(player);
 
       if (playersUpdated?.length === 0) return handleCloseSuccessSellPlayers();
     },
@@ -259,7 +259,7 @@ export function ListPlayersSale({
                                   <TouchableOpacity
                                     onPress={() =>
                                       handleSellPlayer(
-                                        player as FullPlayer | PlayerFormation
+                                        player as FullPlayer | LineupPlayer
                                       )
                                     }
                                     className="bg-red-500 rounded-lg py-2 px-4 disabled:bg-gray-300"

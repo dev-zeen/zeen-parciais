@@ -3,17 +3,17 @@ import { TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { Text, View } from "@/components/Themed";
-import { FormationPlayer } from "@/models/Formations";
+import { LineupPosition } from "@/models/Formations";
 
 type AddPlayerButtonProps = {
   onPress?: () => void;
-  positionSchema: FormationPlayer;
-  handleBuyPlayerOnMarket?: (player: FormationPlayer) => void;
+  positionLineup: LineupPosition;
+  handleBuyPlayerOnMarket?: (player: LineupPosition) => void;
 };
 
 export function AddPlayerButton({
   onPress,
-  positionSchema,
+  positionLineup,
   handleBuyPlayerOnMarket,
 }: AddPlayerButtonProps) {
   return (
@@ -28,7 +28,7 @@ export function AddPlayerButton({
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={() =>
-          handleBuyPlayerOnMarket && handleBuyPlayerOnMarket(positionSchema)
+          handleBuyPlayerOnMarket && handleBuyPlayerOnMarket(positionLineup)
         }
         className="justify-center items-center border-2 w-11 h-11 rounded-full border-neutral-200 bg-white"
       >
@@ -41,7 +41,7 @@ export function AddPlayerButton({
           ellipsizeMode="tail"
           className="font-semibold text-gray-500 text-center uppercase text-xs"
         >
-          {positionSchema?.abbr}
+          {positionLineup?.abbr}
         </Text>
       </View>
     </View>

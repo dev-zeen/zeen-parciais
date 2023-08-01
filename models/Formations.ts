@@ -1,26 +1,26 @@
 import { FullPlayer, Player } from "@/models/Stats";
 
-export interface PlayerFormation extends Player, FullPlayer {}
+export interface LineupPlayer extends Player, FullPlayer {}
 
-export type FormationPlayer = {
+export type LineupPosition = {
   top?: string;
   left?: string;
   position: number;
-  player?: PlayerFormation | FullPlayer | undefined;
+  player?: LineupPlayer | FullPlayer | undefined;
   abbr?: string;
   zone?: number;
 };
 
-export interface ISchema {
-  players: FormationPlayer[];
-  reserves: FormationPlayer[];
+export interface LineupPlayers {
+  players: LineupPosition[];
+  reserves: LineupPosition[];
 }
 
-export interface FormationsDefault {
-  [key: string]: ISchema;
+export interface TacticalFormations {
+  [key: string]: LineupPlayers;
 }
 
-export interface Schema {
+export interface Lineup {
   atletas: number[];
   reservas: {
     1: number;

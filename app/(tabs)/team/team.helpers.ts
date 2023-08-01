@@ -1,37 +1,41 @@
-import { FORMATIONS, SCHEMAS_OBJECT } from "@/constants/Formations";
+import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
 import { FullClubInfo } from "@/models/Club";
-import { FormationPlayer, ISchema, PlayerFormation } from "@/models/Formations";
+import {
+  LineupPlayer,
+  LineupPlayers,
+  LineupPosition,
+} from "@/models/Formations";
 import { FullPlayer, PlayerStats } from "@/models/Stats";
 
-type FillPlayersInSchema = {
+type FillPlayersInLineup = {
   players: FullPlayer[];
-  arrayFillTarget: FormationPlayer[];
+  arrayFillTarget: LineupPosition[];
   playerStats: PlayerStats;
   marketIsClosed: boolean;
 };
 
 export type PlayersToSell = {
   position: string;
-  players: FormationPlayer[];
+  players: LineupPosition[];
   quantityToSell: number;
   quantityToNewFormation: number;
 };
 
-export function onGetDefaultFormation(id: number): string {
-  return (SCHEMAS_OBJECT as any)[id];
+export function onGetDefaultLineupTeam(id: number): string {
+  return (LINEUPS_DEFAULT_OBJECT as any)[id];
 }
 
 export function isPlayerInClub(
-  player: FullPlayer | PlayerFormation,
-  playersSchema: FormationPlayer[]
+  player: FullPlayer | LineupPlayer,
+  playersLineup: LineupPosition[]
 ) {
-  return playersSchema.some(
+  return playersLineup.some(
     (item) => item.player?.atleta_id === player.atleta_id
   );
 }
 
-export function clearSchema(formation: FormationPlayer[]) {
-  return formation.map((item) => {
+export function clearLineup(lineupPlayers: LineupPosition[]) {
+  return lineupPlayers.map((item) => {
     return {
       ...item,
       player: undefined,
@@ -39,12 +43,12 @@ export function clearSchema(formation: FormationPlayer[]) {
   });
 }
 
-export function fillPlayersInSchema({
+export function fillPlayersInLineup({
   players,
   arrayFillTarget,
   playerStats,
   marketIsClosed,
-}: FillPlayersInSchema) {
+}: FillPlayersInLineup) {
   players?.forEach((item) => {
     const { posicao_id } = item;
     const emptyIndex = arrayFillTarget?.findIndex(
@@ -66,18 +70,18 @@ export function fillPlayersInSchema({
   });
 }
 
-function onGetPlayerPositions(players: FormationPlayer[]): Array<number> {
+function onGetPlayerPositions(players: LineupPosition[]): Array<number> {
   const positions = new Set<number>();
   players?.forEach((player) => positions?.add(player.position));
   return Array.from(positions);
 }
 
 export function onGetPlayersOnChangePositionSell(
-  currentFormationWithPlayers: ISchema,
+  currentFormationWithPlayers: LineupPlayers,
   newFormation: string
 ): PlayersToSell[] {
   const currentPlayers =
-    currentFormationWithPlayers.players as FormationPlayer[];
+    currentFormationWithPlayers.players as LineupPosition[];
   const newPlayers = FORMATIONS[newFormation].players;
 
   const currentPlayerPositions = onGetPlayerPositions(currentPlayers);
@@ -107,45 +111,45 @@ export function onGetPlayersOnChangePositionSell(
   return playersToSell;
 }
 
-export function onClearSchema(formation: ISchema): ISchema {
-  const clearPlayers = (item: FormationPlayer) => ({
+export function onClearLineup(lineupPlayers: LineupPlayers): LineupPlayers {
+  const clearPlayers = (item: LineupPosition) => ({
     ...item,
     player: undefined,
   });
 
-  const clearFormationPlayers = formation?.players?.map(clearPlayers);
-  const clearFormationReserves = formation?.reserves?.map(clearPlayers);
+  const clearLineupPositions = lineupPlayers?.players?.map(clearPlayers);
+  const clearFormationReserves = lineupPlayers?.reserves?.map(clearPlayers);
 
   return {
-    ...formation,
-    players: clearFormationPlayers,
+    ...lineupPlayers,
+    players: clearLineupPositions,
     reserves: clearFormationReserves,
   };
 }
 
-export function fillFormationWithPlayers(
+export function fillLineupWithPlayers(
   club: FullClubInfo,
-  formation: string,
+  lineup: string,
   playerStats: PlayerStats,
   marketIsClosed: boolean
-): ISchema {
-  const updatedFormation: ISchema = onClearSchema(FORMATIONS[formation]);
+): LineupPlayers {
+  const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[lineup]);
 
-  fillPlayersInSchema({
+  fillPlayersInLineup({
     players: club.atletas,
-    arrayFillTarget: updatedFormation.players,
+    arrayFillTarget: lineupUpdated.players,
     playerStats,
     marketIsClosed,
   });
 
-  fillPlayersInSchema({
+  fillPlayersInLineup({
     players: club.reservas,
-    arrayFillTarget: updatedFormation.reserves as FormationPlayer[],
+    arrayFillTarget: lineupUpdated.reserves as LineupPosition[],
     playerStats,
     marketIsClosed,
   });
 
-  return updatedFormation;
+  return lineupUpdated;
 }
 
 export function onHasPlayersEqual(
@@ -170,12 +174,12 @@ export function onAreEqualCapitain(
   return currentCapitain === defaultCapitain;
 }
 
-export function onCheckSchemaIsCompleted(
-  schema: ISchema,
+export function onCheckLineupIsCompleted(
+  lineup: LineupPlayers,
   club: FullClubInfo,
   capitain: number
 ) {
-  const currentPlayersId = schema?.players
+  const currentPlayersId = lineup?.players
     .map(({ player }) => player?.atleta_id)
     .filter((item) => item);
 
@@ -184,12 +188,12 @@ export function onCheckSchemaIsCompleted(
   const hasTotalCurrentPlayers = currentPlayersId.length === 12;
   const hasCapitain = !!capitain;
 
-  const isEqualCurrentAndDefaultSchemas = onHasPlayersEqual(
+  const isEqualCurrentAndDefaultLineups = onHasPlayersEqual(
     currentPlayersId as Array<number>,
     defaultPlayersId as Array<number>
   );
 
   return (
-    hasTotalCurrentPlayers && hasCapitain && !isEqualCurrentAndDefaultSchemas
+    hasTotalCurrentPlayers && hasCapitain && !isEqualCurrentAndDefaultLineups
   );
 }

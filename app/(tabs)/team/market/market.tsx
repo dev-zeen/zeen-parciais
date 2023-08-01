@@ -8,15 +8,15 @@ import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard"
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import { FormationPlayer, ISchema } from "@/models/Formations";
+import { LineupPlayers, LineupPosition } from "@/models/Formations";
 import { Market as MarketModel } from "@/models/Market";
 import { FullPlayer } from "@/models/Stats";
 
-import useTeamSchemaStore from "@/store/useTeamSchemaStore";
+import useTeamLineupStore from "@/store/useTeamLineupStore";
 
 type MarketProps = {
   market: MarketModel;
-  position?: FormationPlayer | null;
+  position?: LineupPosition | null;
   handleCloseMarketModal: () => void;
 };
 
@@ -25,16 +25,16 @@ export function Market({
   handleCloseMarketModal,
   market,
 }: MarketProps) {
-  const upateSchema = useTeamSchemaStore((state) => state.updateSchema);
-  const schema = useTeamSchemaStore((state) => state.schema);
+  const upateLineup = useTeamLineupStore((state) => state.updateLineup);
+  const lineup = useTeamLineupStore((state) => state.lineup);
 
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
   const [searchPlayerParam, setSearchPlayerParam] =
-    useState<FormationPlayer | null>();
+    useState<LineupPosition | null>();
 
-  const handleBuyPlayer = (schema: ISchema, player: FullPlayer) => {
+  const handleBuyPlayer = (lineup: LineupPlayers, player: FullPlayer) => {
     handleCloseMarketModal();
-    const playersUpdated = schema?.players.map((item) => {
+    const playersUpdated = lineup?.players.map((item) => {
       if (player.posicao_id === item.position && !item.player) {
         return {
           ...item,
@@ -44,12 +44,12 @@ export function Market({
       return item;
     });
 
-    const schemaUpdated: ISchema = {
-      ...schema,
+    const lineupUpdated: LineupPlayers = {
+      ...lineup,
       players: playersUpdated,
     };
 
-    upateSchema(schemaUpdated);
+    upateLineup(lineupUpdated);
   };
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function Market({
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
         <MarketPlayerCard
-          onPress={() => handleBuyPlayer(schema as ISchema, player)}
+          onPress={() => handleBuyPlayer(lineup as LineupPlayers, player)}
           player={player}
         />
       );

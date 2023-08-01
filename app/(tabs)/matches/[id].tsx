@@ -9,7 +9,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View className="items-center justify-center flex-1">
-        <Text> Página do jogador </Text>
+        <Text> Página da partida </Text>
       </View>
     </SafeAreaViewContainer>
   );

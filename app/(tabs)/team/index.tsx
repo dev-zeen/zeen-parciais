@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Modal,
   RefreshControl,
@@ -17,25 +23,25 @@ import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { Button } from "@/components/structure/Button";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { SCHEMAS_LIST, SCHEMAS_OBJECT } from "@/constants/Formations";
+import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
-import { FormationPlayer, ISchema } from "@/models/Formations";
+import { LineupPlayers, LineupPosition } from "@/models/Formations";
 import { PlayerStats } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
-import useTeamSchemaStore from "@/store/useTeamSchemaStore";
+import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 import { onGetTeamPrice } from "@/utils/team";
 
 import {
   PlayersToSell,
-  clearSchema,
-  fillFormationWithPlayers,
-  onCheckSchemaIsCompleted,
-  onGetDefaultFormation,
+  clearLineup,
+  fillLineupWithPlayers,
+  onCheckLineupIsCompleted,
+  onGetDefaultLineupTeam,
   onGetPlayersOnChangePositionSell,
 } from "./team.helpers";
 
@@ -63,54 +69,53 @@ export default () => {
 
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
 
-  const updateSchema = useTeamSchemaStore((state) => state.updateSchema);
-  const schema = useTeamSchemaStore((state) => state.schema);
-  const price = useTeamSchemaStore((state) => state.price);
-  const updatePrice = useTeamSchemaStore((state) => state.updatePrice);
-  const capitain = useTeamSchemaStore((state) => state.capitain);
-  const updateCapitain = useTeamSchemaStore((state) => state.updateCapitain);
+  const updateLineup = useTeamLineupStore((state) => state.updateLineup);
+  const lineup = useTeamLineupStore((state) => state.lineup);
+  const price = useTeamLineupStore((state) => state.price);
+  const updatePrice = useTeamLineupStore((state) => state.updatePrice);
+  const capitain = useTeamLineupStore((state) => state.capitain);
+  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
-  const teamFormationDefault = onGetDefaultFormation(
+  const defaultLineupTeam = onGetDefaultLineupTeam(
     club?.time.esquema_id as number
   );
 
-  const [formation, setFormation] = useState(teamFormationDefault);
-  const [showTeamRegistrationButton, setShowTeamRegistrationButton] =
-    useState(false);
+  const [lineupState, setLineupState] = useState(defaultLineupTeam);
+  const [showSaveLineupButton, setShowSaveLineupButton] = useState(false);
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
 
   const onCloseModalSell = useCallback(() => {
     setShowModalPlayersToSell(false);
-    setFormation(teamFormationDefault);
+    setLineupState(defaultLineupTeam);
   }, []);
 
   const handleCloseSuccessSellPlayers = useCallback(() => {
     setShowModalPlayersToSell(false);
-    onFillNewFormation(formation);
-  }, [schema, formation]);
+    onFillNewFormation(lineupState);
+  }, [lineup, lineupState]);
 
   const onFillNewFormation = useCallback(
     (newFormation: string) => {
-      const updatedFormation = fillFormationWithPlayers(
+      const updatedFormation = fillLineupWithPlayers(
         club as FullClubInfo,
         newFormation,
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateSchema(updatedFormation);
+      updateLineup(updatedFormation);
     },
-    [club, playerStats, marketIsClosed, schema]
+    [club, playerStats, marketIsClosed, lineup]
   );
 
   const handleChangeFormation = useCallback(
     (value: number) => {
-      const newFormation = (SCHEMAS_OBJECT as any)[value];
-      if ((SCHEMAS_OBJECT as any)[value] === formation) return;
+      const newFormation = (LINEUPS_DEFAULT_OBJECT as any)[value];
+      if ((LINEUPS_DEFAULT_OBJECT as any)[value] === lineupState) return;
 
-      setFormation(newFormation);
+      setLineupState(newFormation);
       const playersToSell = onGetPlayersOnChangePositionSell(
-        schema as ISchema,
+        lineup as LineupPlayers,
         newFormation
       );
 
@@ -121,35 +126,35 @@ export default () => {
         setShowModalPlayersToSell(true);
       }
     },
-    [schema]
+    [lineup]
   );
 
-  const onUpdateShowTeamRegistrationButton = useCallback(
-    (schema: ISchema, club: FullClubInfo, capitain: number) => {
-      const schemaIsCompleted = onCheckSchemaIsCompleted(
-        schema,
+  const onUpdateShowSaveLineupButton = useCallback(
+    (lineup: LineupPlayers, club: FullClubInfo, capitain: number) => {
+      const lineupIsCompleted = onCheckLineupIsCompleted(
+        lineup,
         club,
         capitain
       );
-      setShowTeamRegistrationButton(schemaIsCompleted);
+      setShowSaveLineupButton(lineupIsCompleted);
     },
-    [schema]
+    [lineup]
   );
 
   const handleResetClub = useCallback(async () => {
     await onRefetchClub().then((res) => {
-      const defaultFormation = onGetDefaultFormation(
+      const defaultFormation = onGetDefaultLineupTeam(
         res.data?.time.esquema_id as number
       );
-      setFormation(defaultFormation);
+      setLineupState(defaultFormation);
 
-      const defaultSchemaFilled = fillFormationWithPlayers(
+      const defaultLineupFilled = fillLineupWithPlayers(
         res.data as FullClubInfo,
         defaultFormation,
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateSchema(defaultSchemaFilled);
+      updateLineup(defaultLineupFilled);
     });
   }, [club]);
 
@@ -158,50 +163,55 @@ export default () => {
     await handleResetClub();
   }, [handleResetClub, onRefetchStats]);
 
-  const handleSellAllPlayers = useCallback(
-    (schema: ISchema) => {
-      const clearPlayers = clearSchema(schema.players);
-      const clearReserves = clearSchema(schema?.reserves as FormationPlayer[]);
+  const listDefaultLineups = useMemo(
+    () => Object.entries(LINEUPS_DEFAULT_OBJECT).map(([_key, value]) => value),
+    []
+  );
 
-      const schemaWithoutPlayers: ISchema = {
-        players: [...(clearPlayers as FormationPlayer[])],
-        reserves: [...(clearReserves as FormationPlayer[])],
+  const handleSellAllPlayers = useCallback(
+    (lineup: LineupPlayers) => {
+      const clearPlayers = clearLineup(lineup.players);
+      const clearReserves = clearLineup(lineup?.reserves as LineupPosition[]);
+
+      const lineupWithoutPlayers: LineupPlayers = {
+        players: [...(clearPlayers as LineupPosition[])],
+        reserves: [...(clearReserves as LineupPosition[])],
       };
 
-      updateSchema(schemaWithoutPlayers);
+      updateLineup(lineupWithoutPlayers);
     },
-    [schema]
+    [lineup]
   );
 
   useEffect(() => {
     if (club) {
-      const defaultSchema = fillFormationWithPlayers(
+      const defaultLineup = fillLineupWithPlayers(
         club,
-        (SCHEMAS_OBJECT as any)[club?.time.esquema_id as number],
+        (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number],
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateSchema(defaultSchema);
+      updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
   }, [club]);
 
   useEffect(() => {
-    if (schema) {
-      onUpdateShowTeamRegistrationButton(
-        schema as ISchema,
+    if (lineup) {
+      onUpdateShowSaveLineupButton(
+        lineup as LineupPlayers,
         club as FullClubInfo,
         capitain
       );
 
-      const priceUpdated = onGetTeamPrice(schema?.players as FormationPlayer[]);
+      const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
       updatePrice(priceUpdated);
     }
-  }, [schema]);
+  }, [lineup]);
 
   const isRefetching = isRefetchingClub;
 
-  if (!club || isLoadingClub || !schema) {
+  if (!club || isLoadingClub || !lineup) {
     return <Loading />;
   }
 
@@ -244,13 +254,13 @@ export default () => {
                   <Feather name="chevron-down" size={18} color={"#374151"} />
                 );
               }}
-              defaultValue={formation}
-              data={SCHEMAS_LIST}
+              defaultValue={lineupState}
+              data={listDefaultLineups}
               onSelect={(_selectedItem, index) => {
                 handleChangeFormation(index + 1);
               }}
               buttonTextAfterSelection={(_selectedItem, _index) => {
-                return formation;
+                return lineupState;
               }}
               rowTextForSelection={(item, _index) => {
                 return item;
@@ -281,7 +291,7 @@ export default () => {
 
             <Button
               variant="warning"
-              onPress={() => handleSellAllPlayers(schema)}
+              onPress={() => handleSellAllPlayers(lineup)}
               onlyIcon
               hasIcon
               iconName="trash"
@@ -305,7 +315,7 @@ export default () => {
           </Text>
         </View> */}
 
-          {showTeamRegistrationButton && (
+          {showSaveLineupButton && (
             <Button
               title="Confirmar Escalação"
               onPress={() => console.log("Confirmar Escalação")}
@@ -313,12 +323,12 @@ export default () => {
           )}
 
           <SoccerField
-            schema={schema}
+            lineup={lineup}
             capitain={capitain}
             handleChangeCapitain={updateCapitain}
           />
 
-          <ListReservePlayers schema={schema} />
+          <ListReservePlayers lineup={lineup} />
 
           <Modal
             animationType="slide"
