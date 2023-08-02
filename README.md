@@ -1,10 +1,6 @@
 # Projeto para uso da api do cartola
 
-<!-- ![Logo](assets/images/splash.png) -->
-
-<div>
-  <img src="assets/images/splash.png" alt="Exemplo de imagem" width="300">
-</div>
+![Logo](assets/images/meu-cartola-low-background.png)
 
 ## 🚀 Funcionalidades
 

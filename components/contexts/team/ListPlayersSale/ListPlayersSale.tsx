@@ -46,7 +46,7 @@ export function ListPlayersSale({
     }
   }, []);
 
-  const onremovePlayerFromLineup = useCallback(
+  const onRemovePlayer = useCallback(
     (id: number) => {
       const playerSellUpdated = playersSell?.map((position) => {
         const positionUpdated = position.players.filter(
@@ -66,7 +66,7 @@ export function ListPlayersSale({
 
   const handleSellPlayer = useCallback(
     (player: FullPlayer | LineupPlayer) => {
-      const playersUpdated = onremovePlayerFromLineup(player?.atleta_id);
+      const playersUpdated = onRemovePlayer(player?.atleta_id);
       setPlayersSell(playersUpdated);
       removePlayerFromLineup(player);
 

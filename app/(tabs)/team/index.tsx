@@ -80,20 +80,20 @@ export default () => {
     club?.time.esquema_id as number
   );
 
-  const [lineupState, setLineupState] = useState(defaultLineupTeam);
+  const [tacticalFormation, setTacticalFormation] = useState(defaultLineupTeam);
   const [showSaveLineupButton, setShowSaveLineupButton] = useState(false);
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
 
   const onCloseModalSell = useCallback(() => {
     setShowModalPlayersToSell(false);
-    setLineupState(defaultLineupTeam);
+    setTacticalFormation(defaultLineupTeam);
   }, []);
 
   const handleCloseSuccessSellPlayers = useCallback(() => {
     setShowModalPlayersToSell(false);
-    onFillNewFormation(lineupState);
-  }, [lineup, lineupState]);
+    onFillNewFormation(tacticalFormation);
+  }, [lineup, tacticalFormation]);
 
   const onFillNewFormation = useCallback(
     (newFormation: string) => {
@@ -111,9 +111,9 @@ export default () => {
   const handleChangeFormation = useCallback(
     (value: number) => {
       const newFormation = (LINEUPS_DEFAULT_OBJECT as any)[value];
-      if ((LINEUPS_DEFAULT_OBJECT as any)[value] === lineupState) return;
+      if ((LINEUPS_DEFAULT_OBJECT as any)[value] === tacticalFormation) return;
 
-      setLineupState(newFormation);
+      setTacticalFormation(newFormation);
       const playersToSell = onGetPlayersOnChangePositionSell(
         lineup as LineupPlayers,
         newFormation
@@ -146,7 +146,7 @@ export default () => {
       const defaultFormation = onGetDefaultLineupTeam(
         res.data?.time.esquema_id as number
       );
-      setLineupState(defaultFormation);
+      setTacticalFormation(defaultFormation);
 
       const defaultLineupFilled = fillLineupWithPlayers(
         res.data as FullClubInfo,
@@ -155,6 +155,7 @@ export default () => {
         marketIsClosed
       );
       updateLineup(defaultLineupFilled);
+      updateCapitain(res.data?.capitao_id as number);
     });
   }, [club]);
 
@@ -194,7 +195,7 @@ export default () => {
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
-  }, [club]);
+  }, []);
 
   useEffect(() => {
     if (lineup) {
@@ -209,7 +210,7 @@ export default () => {
     }
   }, [lineup]);
 
-  const isRefetching = isRefetchingClub;
+  const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
 
   if (!club || isLoadingClub || !lineup) {
     return <Loading />;
@@ -254,13 +255,13 @@ export default () => {
                   <Feather name="chevron-down" size={18} color={"#374151"} />
                 );
               }}
-              defaultValue={lineupState}
+              defaultValue={tacticalFormation}
               data={listDefaultLineups}
               onSelect={(_selectedItem, index) => {
                 handleChangeFormation(index + 1);
               }}
               buttonTextAfterSelection={(_selectedItem, _index) => {
-                return lineupState;
+                return tacticalFormation;
               }}
               rowTextForSelection={(item, _index) => {
                 return item;

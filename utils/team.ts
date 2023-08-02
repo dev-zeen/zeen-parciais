@@ -22,7 +22,7 @@ export function removePlayerFromLineup(
 ) {
   const { atleta_id: playerId } = player;
 
-  const isTeamPlayer = lineup?.players.find(
+  const isTeamPlayer = lineup?.players.some(
     (item) => item.player?.atleta_id === playerId
   );
 

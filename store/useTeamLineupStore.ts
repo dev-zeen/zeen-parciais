@@ -9,7 +9,7 @@ type TeamLineupStore = {
   updateCapitain: (value: number) => void;
   updatePrice: (value: number) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
-  price: number;
+  price: number | undefined;
   lineup: LineupPlayers | undefined;
   capitain: number;
 };
@@ -40,6 +40,7 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
         state.lineup as LineupPlayers,
         player
       );
+
       return {
         lineup: lineupUpdated,
       };
