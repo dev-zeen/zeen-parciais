@@ -13,20 +13,26 @@ import { Text, View } from "@/components/Themed";
 import { Loading } from "@/components/structure/Loading";
 import Colors from "@/constants/Colors";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import { LineupPlayer } from "@/models/Formations";
+import { LineupPlayer, LineupPlayers } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { useGetPositions } from "@/queries/players.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
+import { removePlayerFromLineup } from "@/utils/team";
 
 type ListPlayersSaleProps = {
   players: PlayersToSell[];
+  tacticalFormation: string;
   handleClose: () => void;
-  handleCloseSuccessSellPlayers: () => void;
+  handleCloseSuccessSellPlayers: (
+    lineup: LineupPlayers,
+    tacticalFormation: string
+  ) => void;
 };
 
 export function ListPlayersSale({
   players,
+  tacticalFormation,
   handleClose,
   handleCloseSuccessSellPlayers,
 }: ListPlayersSaleProps) {
@@ -34,8 +40,10 @@ export function ListPlayersSale({
 
   const { data: positions } = useGetPositions();
 
-  const removePlayerFromLineup = useTeamLineupStore(
-    (state) => state.removePlayerFromLineup
+  const lineup = useTeamLineupStore((state) => state.lineup);
+
+  const [lineupState, setLineupState] = useState<LineupPlayers | undefined>(
+    lineup
   );
 
   const [playersSell, setPlayersSell] = useState<PlayersToSell[]>();
@@ -46,7 +54,7 @@ export function ListPlayersSale({
     }
   }, []);
 
-  const onRemovePlayer = useCallback(
+  const onRemovePlayerFromSellPlayers = useCallback(
     (id: number) => {
       const playerSellUpdated = playersSell?.map((position) => {
         const positionUpdated = position.players.filter(
@@ -66,11 +74,20 @@ export function ListPlayersSale({
 
   const handleSellPlayer = useCallback(
     (player: FullPlayer | LineupPlayer) => {
-      const playersUpdated = onRemovePlayer(player?.atleta_id);
-      setPlayersSell(playersUpdated);
-      removePlayerFromLineup(player);
+      const positionSellUpdated = onRemovePlayerFromSellPlayers(
+        player?.atleta_id
+      );
+      setPlayersSell(positionSellUpdated);
 
-      if (playersUpdated?.length === 0) return handleCloseSuccessSellPlayers();
+      const lineUpdated = removePlayerFromLineup(
+        lineupState as LineupPlayers,
+        player
+      );
+      setLineupState(lineUpdated);
+
+      if (positionSellUpdated?.length === 0) {
+        return handleCloseSuccessSellPlayers(lineUpdated, tacticalFormation);
+      }
     },
     [playersSell]
   );
@@ -257,11 +274,11 @@ export function ListPlayersSale({
                                   }}
                                 >
                                   <TouchableOpacity
-                                    onPress={() =>
+                                    onPress={() => {
                                       handleSellPlayer(
                                         player as FullPlayer | LineupPlayer
-                                      )
-                                    }
+                                      );
+                                    }}
                                     className="bg-red-500 rounded-lg py-2 px-4 disabled:bg-gray-300"
                                     activeOpacity={0.6}
                                   >

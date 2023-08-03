@@ -40,6 +40,7 @@ import {
   PlayersToSell,
   clearLineup,
   fillLineupWithPlayers,
+  fillLineupWithPlayersV2,
   onCheckLineupIsCompleted,
   onGetDefaultLineupTeam,
   onGetPlayersOnChangePositionSell,
@@ -88,40 +89,38 @@ export default () => {
   const onCloseModalSell = useCallback(() => {
     setShowModalPlayersToSell(false);
     setTacticalFormation(defaultLineupTeam);
+    handleResetClub();
   }, []);
 
-  const handleCloseSuccessSellPlayers = useCallback(() => {
-    setShowModalPlayersToSell(false);
-    onFillNewFormation(tacticalFormation);
-  }, [lineup, tacticalFormation]);
-
-  const onFillNewFormation = useCallback(
-    (newFormation: string) => {
-      const updatedFormation = fillLineupWithPlayers(
-        club as FullClubInfo,
-        newFormation,
-        playerStats as PlayerStats,
+  const handleCloseSuccessSellPlayers = useCallback(
+    (lineup: LineupPlayers, tacticalFormation: string) => {
+      setShowModalPlayersToSell(false);
+      const lineupUpdated = fillLineupWithPlayersV2(
+        lineup,
+        tacticalFormation,
+        playerStats,
         marketIsClosed
       );
-      updateLineup(updatedFormation);
+
+      updateLineup(lineupUpdated);
     },
-    [club, playerStats, marketIsClosed, lineup]
+    [lineup]
   );
 
   const handleChangeFormation = useCallback(
     (value: number) => {
-      const newFormation = (LINEUPS_DEFAULT_OBJECT as any)[value];
-      if ((LINEUPS_DEFAULT_OBJECT as any)[value] === tacticalFormation) return;
+      const newFormation = onGetDefaultLineupTeam(value);
 
       setTacticalFormation(newFormation);
+
+      if ((LINEUPS_DEFAULT_OBJECT as any)[value] === tacticalFormation) return;
+
       const playersToSell = onGetPlayersOnChangePositionSell(
         lineup as LineupPlayers,
         newFormation
       );
 
-      if (!Object.keys(playersToSell).length) {
-        onFillNewFormation(newFormation);
-      } else {
+      if (Object.keys(playersToSell).length) {
         setPlayersToSell(playersToSell);
         setShowModalPlayersToSell(true);
       }
@@ -154,7 +153,7 @@ export default () => {
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateLineup(defaultLineupFilled);
+      updateLineup(defaultLineupFilled, "handleResetClub");
       updateCapitain(res.data?.capitao_id as number);
     });
   }, [club]);
@@ -179,7 +178,7 @@ export default () => {
         reserves: [...(clearReserves as LineupPosition[])],
       };
 
-      updateLineup(lineupWithoutPlayers);
+      updateLineup(lineupWithoutPlayers, "handleSellAllPlayers");
     },
     [lineup]
   );
@@ -192,7 +191,7 @@ export default () => {
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateLineup(defaultLineup);
+      updateLineup(defaultLineup, "useEffect 1");
       updateCapitain(club.capitao_id);
     }
   }, []);
@@ -331,17 +330,20 @@ export default () => {
 
           <ListReservePlayers lineup={lineup} />
 
-          <Modal
-            animationType="slide"
-            transparent
-            visible={showModalPlayersToSell}
-          >
-            <ListPlayersSale
-              players={playersToSell as PlayersToSell[]}
-              handleCloseSuccessSellPlayers={handleCloseSuccessSellPlayers}
-              handleClose={onCloseModalSell}
-            />
-          </Modal>
+          {showModalPlayersToSell && (
+            <Modal
+              animationType="slide"
+              transparent
+              visible={showModalPlayersToSell}
+            >
+              <ListPlayersSale
+                players={playersToSell as PlayersToSell[]}
+                handleCloseSuccessSellPlayers={handleCloseSuccessSellPlayers}
+                handleClose={onCloseModalSell}
+                tacticalFormation={tacticalFormation}
+              />
+            </Modal>
+          )}
         </View>
       </ScrollView>
     </SafeAreaViewContainer>

@@ -5,7 +5,7 @@ import { FullPlayer } from "@/models/Stats";
 import { removePlayerFromLineup } from "@/utils/team";
 
 type TeamLineupStore = {
-  updateLineup: (lineup: LineupPlayers) => void;
+  updateLineup: (lineup: LineupPlayers, title?: string) => void;
   updateCapitain: (value: number) => void;
   updatePrice: (value: number) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
@@ -19,7 +19,7 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
   capitain: 0,
   price: 0,
 
-  updateLineup: (lineupUpdated: LineupPlayers) => {
+  updateLineup: (lineupUpdated: LineupPlayers, title?: string) => {
     set((_state) => ({
       lineup: lineupUpdated,
     }));

@@ -10,8 +10,8 @@ import { FullPlayer, PlayerStats } from "@/models/Stats";
 type FillPlayersInLineup = {
   players: FullPlayer[];
   arrayFillTarget: LineupPosition[];
-  playerStats: PlayerStats;
-  marketIsClosed: boolean;
+  playerStats?: PlayerStats;
+  marketIsClosed?: boolean;
 };
 
 export type PlayersToSell = {
@@ -125,6 +125,43 @@ export function onClearLineup(lineupPlayers: LineupPlayers): LineupPlayers {
     players: clearLineupPositions,
     reserves: clearFormationReserves,
   };
+}
+
+export function fillLineupWithPlayersV2(
+  lineupPlayers: LineupPlayers,
+  tacticalFormation?: string,
+  playerStats?: PlayerStats,
+  marketIsClosed?: boolean
+): LineupPlayers {
+  const lineupUpdated: LineupPlayers = onClearLineup(
+    FORMATIONS[tacticalFormation as string]
+  );
+
+  lineupPlayers.players?.forEach((item) => {
+    if (item.player) {
+      const emptyIndex = lineupUpdated.players?.findIndex(
+        (itemFormation) =>
+          itemFormation.position === item?.player?.posicao_id &&
+          !itemFormation.player
+      );
+
+      if (emptyIndex !== -1) {
+        const player =
+          marketIsClosed && playerStats
+            ? {
+                ...item.player,
+                ...playerStats?.atletas[item.player?.atleta_id],
+              }
+            : item.player;
+
+        lineupUpdated.players[emptyIndex].player = player;
+      }
+    }
+
+    return item;
+  });
+
+  return lineupUpdated;
 }
 
 export function fillLineupWithPlayers(

@@ -49,7 +49,7 @@ export function Market({
       players: playersUpdated,
     };
 
-    upateLineup(lineupUpdated);
+    upateLineup(lineupUpdated, "handleBuyPlayer");
   };
 
   useEffect(() => {

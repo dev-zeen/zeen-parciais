@@ -4,10 +4,10 @@ import {
   useQuery,
   useQueryClient,
   UseQueryOptions,
-} from '@tanstack/react-query';
-import { AxiosError, AxiosResponse } from 'axios';
+} from "@tanstack/react-query";
+import { AxiosError, AxiosResponse } from "axios";
 
-import { api } from './api';
+import { api } from "./api";
 
 export interface GetInfinitePagesInterface<T> {
   nextId?: number;
@@ -36,17 +36,25 @@ export const useLoadMore = <T>(url: string | null, params?: object) => {
     Error,
     GetInfinitePagesInterface<T>,
     QueryKeyT
-  >([url!, params], ({ queryKey, pageParam = 1 }) => fetcher({ queryKey, pageParam }), {
-    getPreviousPageParam: (firstPage) => firstPage.previousId ?? false,
-    getNextPageParam: (lastPage) => {
-      return lastPage.nextId ?? false;
-    },
-  });
+  >(
+    [url!, params],
+    ({ queryKey, pageParam = 1 }) => fetcher({ queryKey, pageParam }),
+    {
+      getPreviousPageParam: (firstPage) => firstPage.previousId ?? false,
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextId ?? false;
+      },
+    }
+  );
 
   return context;
 };
 
-export const usePrefetch = <T>(url: string | null, params?: object) => {
+export const usePrefetch = <T>(
+  url: string | null,
+  params?: object,
+  config?: UseQueryOptions<T, Error, T, QueryKeyT>
+) => {
   const queryClient = useQueryClient();
 
   return () => {
@@ -54,8 +62,12 @@ export const usePrefetch = <T>(url: string | null, params?: object) => {
       return;
     }
 
-    queryClient.prefetchQuery<T, Error, T, QueryKeyT>([url!, params], ({ queryKey }) =>
-      fetcher({ queryKey })
+    queryClient.prefetchQuery<T, Error, T, QueryKeyT>(
+      [url!, params],
+      ({ queryKey }) => fetcher({ queryKey }),
+      {
+        ...config,
+      }
     );
   };
 };
@@ -123,7 +135,12 @@ export const usePost = <T, S>(
   params?: object,
   updater?: (oldData: T, newData: S) => T
 ) => {
-  return useGenericMutation<T, S>((data) => api.post<S>(url, data), url, params, updater);
+  return useGenericMutation<T, S>(
+    (data) => api.post<S>(url, data),
+    url,
+    params,
+    updater
+  );
 };
 
 export const useUpdate = <T, S>(
@@ -131,5 +148,10 @@ export const useUpdate = <T, S>(
   params?: object,
   updater?: (oldData: T, newData: S) => T
 ) => {
-  return useGenericMutation<T, S>((data) => api.patch<S>(url, data), url, params, updater);
+  return useGenericMutation<T, S>(
+    (data) => api.patch<S>(url, data),
+    url,
+    params,
+    updater
+  );
 };

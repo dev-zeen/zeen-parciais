@@ -9,10 +9,15 @@ import {
   GET_MY_CLUB,
 } from "@/constants/Endpoits";
 import { FullClubInfo, Substitutions, TeamHistoryRound } from "@/models/Club";
-import { useFetch } from "@/utils/reactQuery";
+import { useFetch, usePrefetch } from "@/utils/reactQuery";
 
 export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
+    enabled: !!allowRequest,
+  });
+
+export const usePrefetchMyClub = (allowRequest?: boolean) =>
+  usePrefetch<FullClubInfo>(GET_MY_CLUB, undefined, {
     enabled: !!allowRequest,
   });
 
