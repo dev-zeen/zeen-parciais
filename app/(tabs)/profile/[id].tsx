@@ -41,8 +41,6 @@ export default () => {
   const totalScore = club && numberToString(club?.pontos_campeonato);
   const totalPatrimony = club && numberToString(club?.patrimonio);
 
-  console.log("isLoadingHistory", isLoadingHistory, !club);
-
   const isLoading = isLoadingHistory || !club;
 
   useEffect(() => {

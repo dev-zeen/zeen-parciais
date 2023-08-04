@@ -17,6 +17,7 @@ import useTeamLineupStore from "@/store/useTeamLineupStore";
 type MarketProps = {
   market: MarketModel;
   position?: LineupPosition | null;
+  index?: number;
   handleCloseMarketModal: () => void;
 };
 
@@ -24,6 +25,7 @@ export function Market({
   position,
   handleCloseMarketModal,
   market,
+  index,
 }: MarketProps) {
   const upateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -32,24 +34,41 @@ export function Market({
   const [searchPlayerParam, setSearchPlayerParam] =
     useState<LineupPosition | null>();
 
-  const handleBuyPlayer = (lineup: LineupPlayers, player: FullPlayer) => {
-    handleCloseMarketModal();
-    const playersUpdated = lineup?.players.map((item) => {
-      if (player.posicao_id === item.position && !item.player) {
-        return {
-          ...item,
+  const handleBuyPlayer = (player: FullPlayer, targetIndex?: number) => {
+    const playersUpdated = [...(lineup?.players || [])];
+
+    const addPlayerToIndex = (index: number) => {
+      if (!playersUpdated[index].player) {
+        playersUpdated[index] = {
+          ...playersUpdated[index],
           player,
         };
       }
-      return item;
-    });
-
-    const lineupUpdated: LineupPlayers = {
-      ...lineup,
-      players: playersUpdated,
     };
 
-    upateLineup(lineupUpdated, "handleBuyPlayer");
+    if (
+      typeof targetIndex !== "undefined" &&
+      targetIndex >= 0 &&
+      targetIndex < playersUpdated.length
+    ) {
+      addPlayerToIndex(targetIndex);
+    } else {
+      const emptyIndex = playersUpdated.findIndex(
+        (item) => item.position === player.posicao_id && !item.player
+      );
+      if (emptyIndex !== -1) {
+        addPlayerToIndex(emptyIndex);
+      }
+    }
+
+    const lineupUpdated = {
+      ...lineup,
+      players: playersUpdated as LineupPosition[],
+    } as LineupPlayers;
+
+    upateLineup(lineupUpdated);
+
+    handleCloseMarketModal();
   };
 
   useEffect(() => {
@@ -75,12 +94,12 @@ export function Market({
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
         <MarketPlayerCard
-          onPress={() => handleBuyPlayer(lineup as LineupPlayers, player)}
+          onPress={() => handleBuyPlayer(player, index)}
           player={player}
         />
       );
     },
-    []
+    [lineup]
   );
 
   if (!marketPlayers) return <Loading />;

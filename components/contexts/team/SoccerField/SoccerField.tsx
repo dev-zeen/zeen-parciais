@@ -27,11 +27,14 @@ export function SoccerField({
   const [positionMarketSearch, setPositionMarketSearch] =
     useState<LineupPosition | null>();
 
+  const [playerIndex, setPlayerIndex] = useState(0);
+
   const [activeModalMarket, setActiveModalMarket] = useState(false);
 
   const handleBuyPlayerOnMarket = useCallback(
-    (player: LineupPosition) => {
+    (player: LineupPosition, playerIndex: number) => {
       setPositionMarketSearch(player);
+      setPlayerIndex(playerIndex);
     },
     [positionMarketSearch]
   );
@@ -39,6 +42,7 @@ export function SoccerField({
   const handleCloseMarketModal = useCallback(() => {
     setActiveModalMarket(false);
     setPositionMarketSearch(null);
+    setPlayerIndex(0);
   }, []);
 
   useEffect(() => {
@@ -59,7 +63,7 @@ export function SoccerField({
         />
       </View>
 
-      {lineup.players.map((position) => {
+      {lineup.players.map((position, index) => {
         return (
           <View
             key={`${position.left} + ${position.position} + ${position.top}`}
@@ -82,7 +86,9 @@ export function SoccerField({
               />
             ) : (
               <AddPlayerButton
-                handleBuyPlayerOnMarket={handleBuyPlayerOnMarket}
+                handleBuyPlayerOnMarket={(e) =>
+                  handleBuyPlayerOnMarket(e, index)
+                }
                 positionLineup={position}
               />
             )}
@@ -95,6 +101,7 @@ export function SoccerField({
           market={market as MarketModal}
           position={positionMarketSearch}
           handleCloseMarketModal={handleCloseMarketModal}
+          index={playerIndex}
         />
       </Modal>
     </View>

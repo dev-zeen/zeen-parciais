@@ -39,8 +39,8 @@ import { onGetTeamPrice } from "@/utils/team";
 import {
   PlayersToSell,
   clearLineup,
+  fillLineupOnChangeTacticalFormation,
   fillLineupWithPlayers,
-  fillLineupWithPlayersV2,
   onCheckLineupIsCompleted,
   onGetDefaultLineupTeam,
   onGetPlayersOnChangePositionSell,
@@ -95,7 +95,7 @@ export default () => {
   const handleCloseSuccessSellPlayers = useCallback(
     (lineup: LineupPlayers, tacticalFormation: string) => {
       setShowModalPlayersToSell(false);
-      const lineupUpdated = fillLineupWithPlayersV2(
+      const lineupUpdated = fillLineupOnChangeTacticalFormation(
         lineup,
         tacticalFormation,
         playerStats,
@@ -153,7 +153,7 @@ export default () => {
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateLineup(defaultLineupFilled, "handleResetClub");
+      updateLineup(defaultLineupFilled);
       updateCapitain(res.data?.capitao_id as number);
     });
   }, [club]);
@@ -168,20 +168,17 @@ export default () => {
     []
   );
 
-  const handleSellAllPlayers = useCallback(
-    (lineup: LineupPlayers) => {
-      const clearPlayers = clearLineup(lineup.players);
-      const clearReserves = clearLineup(lineup?.reserves as LineupPosition[]);
+  const handleSellAllPlayers = useCallback(() => {
+    const emptyLineup = clearLineup(lineup?.players as LineupPosition[]);
+    const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
 
-      const lineupWithoutPlayers: LineupPlayers = {
-        players: [...(clearPlayers as LineupPosition[])],
-        reserves: [...(clearReserves as LineupPosition[])],
-      };
+    const lineupWithoutPlayers: LineupPlayers = {
+      players: [...(emptyLineup as LineupPosition[])],
+      reserves: [...(emptyReserves as LineupPosition[])],
+    };
 
-      updateLineup(lineupWithoutPlayers, "handleSellAllPlayers");
-    },
-    [lineup]
-  );
+    updateLineup(lineupWithoutPlayers);
+  }, [lineup, updateLineup]);
 
   useEffect(() => {
     if (club) {
@@ -191,7 +188,7 @@ export default () => {
         playerStats as PlayerStats,
         marketIsClosed
       );
-      updateLineup(defaultLineup, "useEffect 1");
+      updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
   }, []);
@@ -291,13 +288,13 @@ export default () => {
 
             <Button
               variant="warning"
-              onPress={() => handleSellAllPlayers(lineup)}
+              onPress={handleSellAllPlayers}
               onlyIcon
               hasIcon
               iconName="trash"
             />
             <Button
-              onPress={() => handleResetClub()}
+              onPress={handleResetClub}
               onlyIcon
               hasIcon
               iconName="refresh-cw"

@@ -56,18 +56,20 @@ export function ListPlayersSale({
 
   const onRemovePlayerFromSellPlayers = useCallback(
     (id: number) => {
-      const playerSellUpdated = playersSell?.map((position) => {
-        const positionUpdated = position.players.filter(
-          (player) => player.player?.atleta_id !== id
+      const updatedPlayerSell = playersSell
+        ?.map((position) => {
+          const updatedPlayers = position.players.filter(
+            (player) => player.player?.atleta_id !== id
+          );
+
+          return { ...position, players: updatedPlayers };
+        })
+        .filter(
+          (position) =>
+            position.players.length > position.quantityToNewFormation
         );
-        return { ...position, players: positionUpdated };
-      });
 
-      const updatedPlayerSellWithoutEmptyPositions = playerSellUpdated?.filter(
-        (position) => position.players.length > position.quantityToNewFormation
-      );
-
-      return updatedPlayerSellWithoutEmptyPositions;
+      return updatedPlayerSell;
     },
     [playersSell]
   );

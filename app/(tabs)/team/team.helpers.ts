@@ -49,23 +49,30 @@ export function fillPlayersInLineup({
   playerStats,
   marketIsClosed,
 }: FillPlayersInLineup) {
-  players?.forEach((item) => {
-    const { posicao_id } = item;
-    const emptyIndex = arrayFillTarget?.findIndex(
-      (itemFormation) =>
-        itemFormation.position === posicao_id && !itemFormation.player
-    );
+  if (!players || !arrayFillTarget) return;
 
-    if (emptyIndex !== -1) {
-      const player =
-        marketIsClosed && playerStats
-          ? {
-              ...item,
-              ...playerStats?.atletas[item.atleta_id],
-            }
-          : item;
+  const usedPlayers: { [key: number]: boolean } = {};
 
-      arrayFillTarget[emptyIndex].player = player;
+  arrayFillTarget.forEach((itemFormation) => {
+    if (!itemFormation.player) {
+      const posicao_id = itemFormation.position;
+      const player = players.find(
+        (item) => item.posicao_id === posicao_id && !usedPlayers[item.atleta_id]
+      );
+
+      if (player) {
+        usedPlayers[player.atleta_id] = true;
+
+        const playerData =
+          marketIsClosed && playerStats
+            ? {
+                ...player,
+                ...playerStats.atletas[player.atleta_id],
+              }
+            : player;
+
+        itemFormation.player = playerData;
+      }
     }
   });
 }
@@ -85,12 +92,18 @@ export function onGetPlayersOnChangePositionSell(
   const newPlayers = FORMATIONS[newFormation].players;
 
   const currentPlayerPositions = onGetPlayerPositions(currentPlayers);
-  const playersToSell = [] as PlayersToSell[];
+  const playersToSell: PlayersToSell[] = [];
+
+  const currentPlayerMap: Record<string, LineupPosition[]> =
+    currentPlayerPositions.reduce((map, position) => {
+      (map as any)[position] = currentPlayers.filter(
+        (player) => player.position === position
+      );
+      return map;
+    }, {});
 
   currentPlayerPositions.forEach((position) => {
-    const currentPlayersInPosition = currentPlayers.filter(
-      (player) => player.position === position
-    );
+    const currentPlayersInPosition = currentPlayerMap[position];
     const newPlayersInPosition = newPlayers.filter(
       (player) => player.position === position
     );
@@ -127,22 +140,26 @@ export function onClearLineup(lineupPlayers: LineupPlayers): LineupPlayers {
   };
 }
 
-export function fillLineupWithPlayersV2(
+export function fillLineupOnChangeTacticalFormation(
   lineupPlayers: LineupPlayers,
   tacticalFormation?: string,
   playerStats?: PlayerStats,
   marketIsClosed?: boolean
 ): LineupPlayers {
-  const lineupUpdated: LineupPlayers = onClearLineup(
+  const newLineup: LineupPlayers = onClearLineup(
     FORMATIONS[tacticalFormation as string]
   );
 
-  lineupPlayers.players?.forEach((item) => {
+  if (!lineupPlayers.players || !newLineup.players) {
+    return newLineup;
+  }
+
+  lineupPlayers.players.forEach((item) => {
     if (item.player) {
-      const emptyIndex = lineupUpdated.players?.findIndex(
+      const { posicao_id, atleta_id } = item.player;
+      const emptyIndex = newLineup.players.findIndex(
         (itemFormation) =>
-          itemFormation.position === item?.player?.posicao_id &&
-          !itemFormation.player
+          itemFormation.position === posicao_id && !itemFormation.player
       );
 
       if (emptyIndex !== -1) {
@@ -150,18 +167,21 @@ export function fillLineupWithPlayersV2(
           marketIsClosed && playerStats
             ? {
                 ...item.player,
-                ...playerStats?.atletas[item.player?.atleta_id],
+                ...playerStats?.atletas[atleta_id],
               }
             : item.player;
 
-        lineupUpdated.players[emptyIndex].player = player;
+        newLineup.players[emptyIndex].player = player;
+      } else {
+        // If the player's position doesn't have a slot in the new formation,
+        // you might want to handle this case or log a message.
+        // For now, I'll assume you want to keep the player in their original position.
+        newLineup.players.push(item);
       }
     }
-
-    return item;
   });
 
-  return lineupUpdated;
+  return newLineup;
 }
 
 export function fillLineupWithPlayers(
@@ -192,16 +212,18 @@ export function fillLineupWithPlayers(
 export function onHasPlayersEqual(
   currentPlayers: number[],
   defaultPlayers: number[]
-) {
-  const areEqual =
-    currentPlayers?.every((currentPlayerId) =>
-      defaultPlayers?.includes(currentPlayerId)
-    ) &&
-    defaultPlayers?.every((defaultPlayerId) =>
-      currentPlayers?.includes(defaultPlayerId)
-    );
+): boolean {
+  if (!currentPlayers || !defaultPlayers) {
+    return false;
+  }
 
-  return areEqual;
+  const sortedCurrentPlayers = currentPlayers.slice().sort();
+  const sortedDefaultPlayers = defaultPlayers.slice().sort();
+
+  return (
+    JSON.stringify(sortedCurrentPlayers) ===
+    JSON.stringify(sortedDefaultPlayers)
+  );
 }
 
 export function onAreEqualCapitain(
@@ -210,15 +232,14 @@ export function onAreEqualCapitain(
 ) {
   return currentCapitain === defaultCapitain;
 }
-
 export function onCheckLineupIsCompleted(
   lineup: LineupPlayers,
   club: FullClubInfo,
   capitain: number
-) {
+): boolean {
   const currentPlayersId = lineup?.players
     .map(({ player }) => player?.atleta_id)
-    .filter((item) => item);
+    .filter(Boolean);
 
   const defaultPlayersId = club?.atletas.map(({ atleta_id }) => atleta_id);
 
@@ -226,8 +247,8 @@ export function onCheckLineupIsCompleted(
   const hasCapitain = !!capitain;
 
   const isEqualCurrentAndDefaultLineups = onHasPlayersEqual(
-    currentPlayersId as Array<number>,
-    defaultPlayersId as Array<number>
+    currentPlayersId as number[],
+    defaultPlayersId
   );
 
   return (
