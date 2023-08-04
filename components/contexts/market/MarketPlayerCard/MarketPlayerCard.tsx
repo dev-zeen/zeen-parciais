@@ -1,13 +1,12 @@
 import { Image, TouchableOpacity } from "react-native";
 
-import { Feather } from "@expo/vector-icons";
-
 import { Text, View } from "@/components/Themed";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarket } from "@/queries/market.query";
 import { useGetPositions } from "@/queries/players.query";
 import { numberToString } from "@/utils/parseTo";
+import { Feather } from "@expo/vector-icons";
 
 type MarketPlayerCardProps = {
   player: FullPlayer;
@@ -23,20 +22,72 @@ export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
       className={`rounded-lg flex-row items-center justify-between p-2 mx-2`}
       key={player.atleta_id}
     >
-      <Image
-        source={{
-          uri: player.foto.replace("FORMATO", "220x220"),
-        }}
-        className="w-20 h-20 rounded-3xl mr-2"
-        alt={`Imagem do ${player.nome}`}
-      />
+      <View>
+        <Image
+          source={{
+            uri: player.foto.replace("FORMATO", "220x220"),
+          }}
+          className="w-20 h-20 rounded-3xl mr-2"
+          alt={`Imagem do ${player.nome}`}
+        />
+        <View
+          className="flex-row absolute"
+          style={{
+            top: "70%",
+            left: "70%",
+            width: 22,
+            height: 22,
+            borderRadius: 10,
+            backgroundColor:
+              OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.background,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Feather
+            name={
+              OBJECT_STATUS_MARKET_PLAYER[player?.status_id]
+                ?.icon as keyof typeof Feather.glyphMap
+            }
+            color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.color}
+            size={14}
+          />
+        </View>
+      </View>
 
       <View className="flex-1 justify-between">
         <View className="flex-row justify-between items-center flex-1">
           <View className="items-start justify-center">
-            <Text className="flex-row text-sm font-semibold">
-              {player.apelido}
-            </Text>
+            <View className="flex-row items-center gap-0.5">
+              <Text className="flex-row text-sm font-bold">
+                {player.apelido_abreviado}
+              </Text>
+              <View className="rounded-full bg-gray-300 h-1 w-1" />
+              <Text className="font-medium text-xs">
+                {OBJECT_STATUS_MARKET_PLAYER[player.status_id].name}
+              </Text>
+              <View
+                className="flex-row"
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: 10,
+                  backgroundColor:
+                    OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.background,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Feather
+                  name={
+                    OBJECT_STATUS_MARKET_PLAYER[player?.status_id]
+                      ?.icon as keyof typeof Feather.glyphMap
+                  }
+                  color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.color}
+                  size={14}
+                />
+              </View>
+            </View>
 
             <View
               className="flex-row items-center justify-start"
@@ -63,30 +114,9 @@ export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
           </View>
 
           <View className="flex-row" style={{ gap: 4 }}>
-            <Text className="font-medium text-xs">
-              {OBJECT_STATUS_MARKET_PLAYER[player.status_id].name}
+            <Text className="flex-row text-sm font-semibold">
+              C$ {player.preco_num}
             </Text>
-            <View
-              className="flex-row"
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: 10,
-                backgroundColor:
-                  OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.background,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Feather
-                name={
-                  OBJECT_STATUS_MARKET_PLAYER[player?.status_id]
-                    ?.icon as keyof typeof Feather.glyphMap
-                }
-                color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.color}
-                size={14}
-              />
-            </View>
           </View>
         </View>
 
@@ -99,22 +129,22 @@ export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
               }}
             >
               <View className="items-center justify-center">
-                <Text className="font-light uppercase text-xs">Média</Text>
-                <Text className="font-semibold text-xs">
+                <Text className="uppercase text-xs">Média</Text>
+                <Text className="font-bold text-xs">
                   {numberToString(player.media_num)}
                 </Text>
               </View>
 
               <View className="items-center justify-center">
-                <Text className="font-light uppercase text-xs">Última</Text>
-                <Text className="font-semibold text-xs">
+                <Text className="uppercase text-xs">Última</Text>
+                <Text className="font-bold text-xs">
                   {numberToString(player.pontos_num)}
                 </Text>
               </View>
 
               <View className="items-center justify-center">
-                <Text className="font-light uppercase text-xs">Min P/ Val</Text>
-                <Text className="font-semibold text-xs">
+                <Text className="uppercase text-xs">Min P/ Val</Text>
+                <Text className="font-bold text-xs">
                   {numberToString(player.minimo_para_valorizar)}
                 </Text>
               </View>
