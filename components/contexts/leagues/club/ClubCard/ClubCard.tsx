@@ -19,7 +19,7 @@ interface ClubCardProps {
   position: number;
   firstPlaceScore: number;
   marketStatus: MarketStatus;
-  marketIsClosed: boolean;
+  isMarketClose: boolean;
 }
 
 export const ClubCard: React.FC<ClubCardProps> = memo(
@@ -30,7 +30,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     position,
     firstPlaceScore,
     marketStatus,
-    marketIsClosed,
+    isMarketClose,
   }) => {
     const router = useRouter();
     const colorTheme = useColorScheme();
@@ -147,7 +147,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               {!isOrderByPatrimonio && (
                 <View className={`flex-row ${myTeam && "bg-blue-400"}`}>
                   <Text className="text-xs">
-                    {marketIsClosed
+                    {isMarketClose
                       ? club.playersHavePlayed && `${club.playersHavePlayed}/12`
                       : diffScore < 0 && numberToString(diffScore)}
                   </Text>

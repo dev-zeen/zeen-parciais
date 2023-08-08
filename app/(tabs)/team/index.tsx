@@ -58,7 +58,7 @@ export default () => {
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
-  const marketIsClosed =
+  const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const {
@@ -68,7 +68,8 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(allowRequests);
 
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
+  const { data: playerStats, refetch: onRefetchStats } =
+    useGetScoredPlayers(isMarketClose);
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -99,7 +100,7 @@ export default () => {
         lineup,
         tacticalFormation,
         playerStats,
-        marketIsClosed
+        isMarketClose
       );
 
       updateLineup(lineupUpdated);
@@ -151,7 +152,7 @@ export default () => {
         res.data as FullClubInfo,
         defaultFormation,
         playerStats as PlayerStats,
-        marketIsClosed
+        isMarketClose
       );
       updateLineup(defaultLineupFilled);
       updateCapitain(res.data?.capitao_id as number);
@@ -186,7 +187,7 @@ export default () => {
         club,
         (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number],
         playerStats as PlayerStats,
-        marketIsClosed
+        isMarketClose
       );
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
@@ -244,7 +245,7 @@ export default () => {
             </View>
 
             <SelectDropdown
-              disabled={marketIsClosed}
+              disabled={isMarketClose}
               dropdownIconPosition="right"
               renderDropdownIcon={() => {
                 return (
@@ -322,10 +323,11 @@ export default () => {
           <SoccerField
             lineup={lineup}
             capitain={capitain}
+            isMarketClose={isMarketClose}
             handleChangeCapitain={updateCapitain}
           />
 
-          <ListReservePlayers lineup={lineup} />
+          <ListReservePlayers lineup={lineup} isMarketClose={isMarketClose} />
 
           {showModalPlayersToSell && (
             <Modal

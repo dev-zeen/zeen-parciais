@@ -25,7 +25,7 @@ export function MarketStatusCard() {
     4: "Mercado em Manutenção",
   };
 
-  const [marketCloseDate, setMarketCloseDate] = useState<string>("");
+  const [marketClosingDate, setMarketClosingDate] = useState<string>("");
 
   useEffect(() => {
     if (marketStatus) {
@@ -34,7 +34,7 @@ export function MarketStatusCard() {
       const closeMarket = format(date, "EEEE 'ás' HH:mm", {
         locale: ptBR,
       });
-      setMarketCloseDate(closeMarket);
+      setMarketClosingDate(closeMarket);
     }
   }, [marketStatus]);
 
@@ -59,7 +59,7 @@ export function MarketStatusCard() {
       <View>
         <Text className="italic text-sm font-medium">{`${
           marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO
-            ? `até ${marketCloseDate}`
+            ? `até ${marketClosingDate}`
             : `Rodada ${marketStatus?.rodada_atual}`
         } `}</Text>
       </View>

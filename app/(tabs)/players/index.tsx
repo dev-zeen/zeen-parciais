@@ -36,6 +36,9 @@ export default () => {
   const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
     useGetMarketStatus();
 
+  const isMarketClose =
+    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+
   const allowRequest =
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
@@ -43,7 +46,7 @@ export default () => {
   const {
     isRefetching: isRefetchingPlayersStats,
     refetch: onRefetchPlayersStats,
-  } = useGetScoredPlayers();
+  } = useGetScoredPlayers(isMarketClose);
 
   const { refetch: onRefetchAppreciations } = useGetAppreciations(allowRequest);
 
@@ -113,7 +116,7 @@ export default () => {
           position={(currentStats as PlayerStats)?.posicoes[player.posicao_id]}
           appreciation={
             (currentAppreciations as Appreciations).atletas?.[player.id]
-              .variacao_num
+              ?.variacao_num
           }
         />
       );
@@ -133,7 +136,12 @@ export default () => {
     );
   }
 
-  if (IsLoadingMarketStatus || !marketStatus || !currentAppreciations) {
+  if (
+    IsLoadingMarketStatus ||
+    !marketStatus ||
+    !currentAppreciations ||
+    !currentAppreciations.atletas
+  ) {
     return <Loading />;
   }
 

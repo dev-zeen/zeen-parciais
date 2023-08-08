@@ -6,10 +6,14 @@ import { useGetScoredPlayers } from "@/queries/stats.query";
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
+  isMarketClose: boolean;
 };
 
-export function ListReservePlayers({ lineup }: ListReservePlayersProps) {
-  const { data: playerStats } = useGetScoredPlayers();
+export function ListReservePlayers({
+  lineup,
+  isMarketClose,
+}: ListReservePlayersProps) {
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   return (
     <View className="rounded-lg items-center justify-center">

@@ -50,14 +50,14 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const marketIsClosed =
+  const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const {
     data: playerStats,
     isRefetching: isRefetchingPlayerStats,
     refetch: onRefetchStats,
-  } = useGetScoredPlayers();
+  } = useGetScoredPlayers(isMarketClose);
 
   useEffect(() => {
     onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
@@ -108,7 +108,7 @@ export default () => {
   useEffect(() => {
     if (marketStatus)
       setCurrentRound(
-        marketIsClosed
+        isMarketClose
           ? marketStatus.rodada_atual
           : marketStatus.rodada_atual - 1
       );
@@ -227,7 +227,7 @@ export default () => {
 
             <TouchableOpacity
               disabled={
-                marketIsClosed
+                isMarketClose
                   ? currentRound === marketStatus?.rodada_atual
                   : currentRound === (marketStatus?.rodada_atual as number) - 1
               }
@@ -237,7 +237,7 @@ export default () => {
                 name="chevron-right"
                 size={36}
                 color={
-                  marketIsClosed
+                  isMarketClose
                     ? currentRound === marketStatus?.rodada_atual
                       ? "#d1d5db"
                       : "#3b82f6"

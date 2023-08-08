@@ -11,7 +11,7 @@ type FillPlayersInLineup = {
   players: FullPlayer[];
   arrayFillTarget: LineupPosition[];
   playerStats?: PlayerStats;
-  marketIsClosed?: boolean;
+  isMarketClose?: boolean;
 };
 
 export type PlayersToSell = {
@@ -47,7 +47,7 @@ export function fillPlayersInLineup({
   players,
   arrayFillTarget,
   playerStats,
-  marketIsClosed,
+  isMarketClose,
 }: FillPlayersInLineup) {
   if (!players || !arrayFillTarget) return;
 
@@ -64,7 +64,7 @@ export function fillPlayersInLineup({
         usedPlayers[player.atleta_id] = true;
 
         const playerData =
-          marketIsClosed && playerStats
+          isMarketClose && playerStats
             ? {
                 ...player,
                 ...playerStats.atletas[player.atleta_id],
@@ -144,7 +144,7 @@ export function fillLineupOnChangeTacticalFormation(
   lineupPlayers: LineupPlayers,
   tacticalFormation?: string,
   playerStats?: PlayerStats,
-  marketIsClosed?: boolean
+  isMarketClose?: boolean
 ): LineupPlayers {
   const newLineup: LineupPlayers = onClearLineup(
     FORMATIONS[tacticalFormation as string]
@@ -164,7 +164,7 @@ export function fillLineupOnChangeTacticalFormation(
 
       if (emptyIndex !== -1) {
         const player =
-          marketIsClosed && playerStats
+          isMarketClose && playerStats
             ? {
                 ...item.player,
                 ...playerStats?.atletas[atleta_id],
@@ -188,7 +188,7 @@ export function fillLineupWithPlayers(
   club: FullClubInfo,
   lineup: string,
   playerStats: PlayerStats,
-  marketIsClosed: boolean
+  isMarketClose: boolean
 ): LineupPlayers {
   const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[lineup]);
 
@@ -196,14 +196,14 @@ export function fillLineupWithPlayers(
     players: club.atletas,
     arrayFillTarget: lineupUpdated.players,
     playerStats,
-    marketIsClosed,
+    isMarketClose,
   });
 
   fillPlayersInLineup({
     players: club.reservas,
     arrayFillTarget: lineupUpdated.reserves as LineupPosition[],
     playerStats,
-    marketIsClosed,
+    isMarketClose,
   });
 
   return lineupUpdated;

@@ -39,7 +39,7 @@ export function ClubPlayerCard({
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
 
-  const marketIsClosed =
+  const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const scorePlayer = useCallback(
@@ -54,7 +54,7 @@ export function ClubPlayerCard({
       const scoreRound = player.pontos_num;
 
       const score =
-        marketIsClosed && currentRound === marketStatus?.rodada_atual
+        isMarketClose && currentRound === marketStatus?.rodada_atual
           ? scoreWithCurrentRound
           : scoreRound;
 

@@ -25,22 +25,22 @@ type TeamPlayerProps = {
 export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
   const { data: marketStatus } = useGetMarketStatus();
 
-  const marketIsClosed =
+  const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const removePlayerFromLineup = useTeamLineupStore(
     (state) => state.removePlayerFromLineup
   );
 
-  const scoreWithMarketStatus = marketIsClosed
+  const scoreWithMarketStatus = isMarketClose
     ? hasCaptain
-      ? (player as LineupPlayer)?.pontuacao * 1.5
+      ? (player as LineupPlayer)?.pontuacao * 1.5 || 0
       : (player as LineupPlayer)?.pontuacao
     : hasCaptain
-    ? (player as LineupPlayer)?.pontos_num * 1.5
+    ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
     : (player as LineupPlayer)?.pontos_num;
 
-  const scoreFinal = numberToString(scoreWithMarketStatus);
+  const scoreFinal = isPlayed ? numberToString(scoreWithMarketStatus) : "---";
 
   const playerPrice = numberToString(player?.preco_num);
 
@@ -54,10 +54,13 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
         backgroundColor: "transparent",
       }}
     >
-      {marketIsClosed ? (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-white">
+      {isMarketClose ? (
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-100">
           {(player as LineupPlayer) ? (
-            <Text numberOfLines={1} className={`font-bold text-center text-xs`}>
+            <Text
+              numberOfLines={1}
+              className={`text-gray-400 font-bold text-center text-xs`}
+            >
               {scoreFinal}
             </Text>
           ) : (
@@ -67,7 +70,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           )}
         </View>
       ) : (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-white">
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-100">
           <Text numberOfLines={1} className="font-bold text-xs text-gray-500">
             $ {playerPrice}
           </Text>
@@ -90,7 +93,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           source={{
             uri: player?.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-10 h-10 rounded-full bg-white overflow-hidden"
+          className="w-10 h-10 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
         {hasCaptain && (

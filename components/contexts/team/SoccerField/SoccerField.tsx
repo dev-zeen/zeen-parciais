@@ -14,16 +14,18 @@ import { useGetScoredPlayers } from "@/queries/stats.query";
 type SoccerFieldProps = {
   lineup: LineupPlayers;
   capitain: number;
+  isMarketClose: boolean;
   handleChangeCapitain?: (id: number) => void;
 };
 
 export function SoccerField({
   lineup,
   capitain,
+  isMarketClose,
   handleChangeCapitain,
 }: SoccerFieldProps) {
   const { data: market } = useGetMarket();
-  const { data: playerStats } = useGetScoredPlayers();
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
   const [positionMarketSearch, setPositionMarketSearch] =
     useState<LineupPosition | null>();
 

@@ -45,10 +45,11 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const marketIsClosed =
+  const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
+  const { data: playerStats, refetch: onRefetchStats } =
+    useGetScoredPlayers(isMarketClose);
 
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
@@ -106,7 +107,7 @@ export default () => {
         ((b.pontos as any)[sortBy] as number) -
         ((a.pontos as any)[sortBy] as number);
 
-      if (marketIsClosed && clubsByLeague) {
+      if (isMarketClose && clubsByLeague) {
         const leagueWithPartials = onGetLeagueWithPartials(
           league as League,
           clubsByLeague,
@@ -209,6 +210,7 @@ export default () => {
           orderBy={orderBy}
           firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
           marketStatus={marketStatus as MarketStatus}
+          isMarketClose={isMarketClose}
         />
       );
     },

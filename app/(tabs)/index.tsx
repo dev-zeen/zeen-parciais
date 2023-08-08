@@ -57,6 +57,9 @@ export default () => {
     refetch: onRefetchMarketStatus,
   } = useGetMarketStatus();
 
+  const isMarketClose =
+    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+
   const allowRequests =
     isAutheticated &&
     marketStatus &&
@@ -68,7 +71,8 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(allowRequests);
 
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers();
+  const { data: playerStats, refetch: onRefetchStats } =
+    useGetScoredPlayers(isMarketClose);
 
   const { data: topPlayers, refetch: onRefetchTopPlayers } = useGetTopPlayers();
 
@@ -76,9 +80,6 @@ export default () => {
     useGetBestCaptainPlayers(hasHighlights);
 
   const { data: positions, refetch: onRefetchPositions } = useGetPositions();
-
-  const marketIsClosed =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const myPartialPoints = onCalculatePartialScore(
     club?.atletas as FullPlayer[],
@@ -245,10 +246,10 @@ export default () => {
 
                 <View className="justify-center items-center gap-1">
                   <Text className="font-light text-xs">
-                    {marketIsClosed ? "Parcial" : "Ult. Rodada"}
+                    {isMarketClose ? "Parcial" : "Ult. Rodada"}
                   </Text>
 
-                  {marketIsClosed ? (
+                  {isMarketClose ? (
                     <Text className="font-bold text-sm text-green-500">
                       {numberToString(myPartialPoints)}
                     </Text>
@@ -274,9 +275,9 @@ export default () => {
 
                 <View className="justify-center items-center gap-1">
                   <Text className="font-light text-xs">
-                    {marketIsClosed ? "Total Parcial" : "Total"}
+                    {isMarketClose ? "Total Parcial" : "Total"}
                   </Text>
-                  {marketIsClosed && myPartialPoints ? (
+                  {isMarketClose && myPartialPoints ? (
                     <Text className="font-bold text-sm text-green-500">
                       {numberToString(
                         club?.pontos_campeonato + myPartialPoints
@@ -295,9 +296,7 @@ export default () => {
                     <Text className="font-light text-xs">Pontuados</Text>
 
                     <Text className="text-sm font-semibold">
-                      {playersHaveAlreadyPlayed
-                        ? `${playersHaveAlreadyPlayed}/12`
-                        : ""}
+                      {`${playersHaveAlreadyPlayed || "0"}/12`}
                     </Text>
                   </View>
                 )}
@@ -333,7 +332,7 @@ export default () => {
                       </View>
                     </View>
 
-                    {marketIsClosed &&
+                    {isMarketClose &&
                     teamCapitain &&
                     playerStats &&
                     playerStats.atletas[teamCapitain?.atleta_id] ? (

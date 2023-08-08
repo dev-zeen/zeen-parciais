@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { Club } from "@/models/Club";
 import { Player, Position } from "@/models/Stats";
+import { GRAY_OPACITY } from "@/styles/colors";
 import { numberToString } from "@/utils/parseTo";
 
 interface PlayerCardProps {
@@ -96,13 +97,23 @@ export function PlayerCard({
                   : "text-green-400"
               }`}
             >
-              {appreciation ? numberToString(appreciation) : null}
+              {appreciation ? numberToString(appreciation) : "0,00"}
             </Text>
             <Feather
               name={
-                appreciation && appreciation < 0 ? "arrow-down" : "arrow-up"
+                !appreciation
+                  ? "arrow-left"
+                  : appreciation && appreciation < 0
+                  ? "arrow-down"
+                  : "arrow-up"
               }
-              color={appreciation && appreciation < 0 ? "#ef4444" : "#4ade80"}
+              color={
+                !appreciation
+                  ? GRAY_OPACITY
+                  : appreciation && appreciation < 0
+                  ? "#ef4444"
+                  : "#4ade80"
+              }
             />
           </View>
         </View>
