@@ -1,21 +1,26 @@
-import React from "react";
-import { Image } from "react-native";
+import { GestureResponderEvent, Image } from "react-native";
 
 import errorImage from "@/assets/images/error-background.png";
-import { Text, View } from "@/components/Themed";
-import { Button } from "@/components/structure/Button";
+import { Text, TouchableOpacity, View } from "@/components/Themed";
+import { StatusErrorMessages } from "@/constants/Errors";
+import { AxiosError } from "axios";
 
 type CustomErrorBoundaryProps = {
-  isError?: boolean;
-  error?: Response | Error | null;
+  error: AxiosError<Error>;
+  resetError: ((event: GestureResponderEvent) => void) | undefined;
 };
 
-export function CustomFallbackErrorBoundary({
+export function ErrorBoundaryComponent({
   error,
+  resetError,
 }: CustomErrorBoundaryProps) {
+  const errorData = error.response
+    ? StatusErrorMessages[error.response.status as number]
+    : StatusErrorMessages[1];
+
   return (
     <View
-      className="bg-white flex-1 justify-center items-center"
+      className="bg-neutral-100 flex-1 justify-center items-center px-4"
       style={{
         gap: 16,
       }}
@@ -25,18 +30,16 @@ export function CustomFallbackErrorBoundary({
         className="w-48 h-48 rounded-full"
         alt={`Imagem de erro na aplicação`}
       />
-      <View className="items-center justify-center">
-        <Text className="text-gray-700 text-sm">
-          {error?.response?.data?.mensagem
-            ? error.response.data.mensagem
-            : error.message}
-        </Text>
-        <Text className="text-gray-500 text-sm font-light">
-          Tente novamente em alguns instantes
-        </Text>
-      </View>
+      <Text className="font-semibold text-base text-center">
+        {errorData.message}
+      </Text>
 
-      <Button onPress={resetError} title="Voltar" />
+      <TouchableOpacity
+        onPress={resetError}
+        className="px-4 py-3 rounded bg-red-200 border-red-500 border"
+      >
+        <Text className="font-semibold">{errorData.buttonText}</Text>
+      </TouchableOpacity>
     </View>
   );
 }
