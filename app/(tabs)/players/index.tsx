@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   FlatList,
   ListRenderItemInfo,
@@ -12,11 +12,13 @@ import { Feather } from "@expo/vector-icons";
 import { onGetPlayersPlayedMatch } from "@/app/(tabs)/players/players.helper";
 import { Text, View } from "@/components/Themed";
 import { PlayerCard } from "@/components/contexts/players/PlayerCard/PlayerCard";
+import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import Colors from "@/constants/Colors";
 import { APPRECIATIONS, CURRENT_STATS } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { AuthContext } from "@/contexts/Auth.context";
 import { Appreciations } from "@/models/Player";
 import { Player, PlayerStats } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market.query";
@@ -36,10 +38,13 @@ export default () => {
   const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
     useGetMarketStatus();
 
+  const { isAutheticated } = useContext(AuthContext);
+
   const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const allowRequest =
+    isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
@@ -126,13 +131,23 @@ export default () => {
 
   if (!currentStats) {
     return (
-      <View className="flex-row p-4 items-center rounded-lg justify-center mt-4">
-        <Feather name="info" size={20} color={Colors.light.tint} />
-        <Text className="text-sm ml-2">
-          Os jogadores serão exibidos assim que obtiverem pontuação durante os
-          jogos.
-        </Text>
-      </View>
+      <SafeAreaViewContainer>
+        <View className="mx-2 rounded-lg">
+          <MarketStatusCard />
+        </View>
+        <View
+          className="flex-row py-4 px-8 rounded-lg items-center justify-center m-2"
+          style={{
+            gap: 8,
+          }}
+        >
+          <Feather name="info" size={24} color={Colors.light.tint} />
+          <Text className="text-sm font-semibold text-center">
+            Os jogadores serão exibidos assim que obtiverem suas pontuações
+            durante os jogos.
+          </Text>
+        </View>
+      </SafeAreaViewContainer>
     );
   }
 

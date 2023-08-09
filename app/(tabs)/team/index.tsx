@@ -22,6 +22,7 @@ import { SoccerField } from "@/components/contexts/team/SoccerField";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { Button } from "@/components/structure/Button";
 import { Loading } from "@/components/structure/Loading";
+import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
@@ -208,6 +209,12 @@ export default () => {
   }, [lineup]);
 
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
+
+  if (!isAutheticated) {
+    return (
+      <Login title="Para acessar o seu time, é necessário efetuar o login no Cartola FC." />
+    );
+  }
 
   if (!club || isLoadingClub || !lineup) {
     return <Loading />;

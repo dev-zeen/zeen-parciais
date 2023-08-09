@@ -14,7 +14,6 @@ import { AuthContext } from "@/contexts/Auth.context";
 type ModalAuthProps = {
   isVisible: boolean;
   handleLoginSuccess: () => void;
-
   handleCloseModal: () => void;
 };
 

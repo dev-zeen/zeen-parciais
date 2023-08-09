@@ -5,6 +5,7 @@ import { Text, View } from "@/components/Themed";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
+import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
@@ -21,10 +22,10 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const allowRequests =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+  const allowRequests = marketStatus
+    ? isAutheticated &&
+      marketStatus.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
+    : false;
 
   const {
     data: club,
@@ -33,7 +34,7 @@ export default () => {
   } = useGetMyClub(allowRequests);
 
   const { data: historyClub, isLoading: isLoadingHistory } =
-    useGetHistoricMyClub();
+    useGetHistoricMyClub(allowRequests);
 
   const [highestScore, setHighestScore] = useState<TeamHistoryRound>();
   const [lowestScore, setLowestScore] = useState<TeamHistoryRound>();
@@ -73,6 +74,12 @@ export default () => {
       setLowestScore(lowestScore as TeamHistoryRound);
     }
   }, [historyClub]);
+
+  if (!isAutheticated) {
+    return (
+      <Login title="Para acessar as informações do seu perfil é necessário efetuar o login no Cartola FC." />
+    );
+  }
 
   if (isLoading) {
     return <Loading />;

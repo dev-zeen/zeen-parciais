@@ -1,22 +1,28 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { FlatList, ListRenderItemInfo, RefreshControl } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { LeagueCard } from "@/components/contexts/leagues/LeagueCard";
 import { Loading } from "@/components/structure/Loading";
+import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { AuthContext } from "@/contexts/Auth.context";
 import { LeagueUserDetails } from "@/models/Leagues";
 import { useGetLeagues } from "@/queries/leagues.query";
 import { useGetMarketStatus } from "@/queries/market.query";
 
 export default function () {
+  const { isAutheticated } = useContext(AuthContext);
+
+  const allowRequest = isAutheticated;
+
   const {
     data: dataLeagues,
     isLoading: isLoadingLeagues,
     refetch: onRefetchLeagues,
     isRefetching: isRefetching,
-  } = useGetLeagues();
+  } = useGetLeagues(allowRequest);
 
   const [leagues, setLeagues] = useState<LeagueUserDetails[]>();
 
@@ -48,6 +54,12 @@ export default function () {
     },
     [leagues]
   );
+
+  if (!isAutheticated) {
+    return (
+      <Login title="Para acessar suas ligas, é necessário efetuar o login no Cartola FC." />
+    );
+  }
 
   if (!dataLeagues || !leagues || isLoadingLeagues) {
     return <Loading />;

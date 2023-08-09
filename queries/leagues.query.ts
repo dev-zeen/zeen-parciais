@@ -15,8 +15,10 @@ export interface Filter {
 
 export interface Config extends Filter {}
 
-export const useGetLeagues = () =>
-  useFetch<{ ligas: LeagueUserDetails[] }>(GET_ALL_LEAGUES);
+export const useGetLeagues = (allowRequest: boolean) =>
+  useFetch<{ ligas: LeagueUserDetails[] }>(GET_ALL_LEAGUES, undefined, {
+    enabled: !!allowRequest,
+  });
 
 export const useGetLeague = (slug: string, filters?: Filter) =>
   useFetch<League>(

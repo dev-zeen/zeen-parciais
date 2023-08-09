@@ -44,7 +44,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "@types/": "react-native-async-storage/async-storage",
     "@types/axios": "^0.14.0",
     "@types/date-fns": "^2.6.0",
     "@types/js-cookie": "^3.0.3",

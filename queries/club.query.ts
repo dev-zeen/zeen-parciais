@@ -50,8 +50,10 @@ export const useGetClub = (
   });
 };
 
-export const useGetHistoricMyClub = () =>
-  useFetch<TeamHistoryRound[]>(GET_CLUB_HISTORY);
+export const useGetHistoricMyClub = (allowRequests: boolean) =>
+  useFetch<TeamHistoryRound[]>(GET_CLUB_HISTORY, undefined, {
+    enabled: !!allowRequests,
+  });
 
 interface SubstitutionsParams {
   id?: number | string;

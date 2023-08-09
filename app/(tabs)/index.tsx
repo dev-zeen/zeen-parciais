@@ -6,20 +6,17 @@ import {
   useColorScheme,
 } from "react-native";
 
-import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { ModalAuth } from "@/components/contexts/auth/AuthModal";
-import { ModalLogout } from "@/components/contexts/auth/LogoutModal";
 import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { TopPlayerCard } from "@/components/contexts/utils/TopPlayerCard";
 import { Loading } from "@/components/structure/Loading";
+import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ITabs, Tabs } from "@/components/structure/Tabs";
-import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
@@ -47,8 +44,7 @@ export default () => {
   const { isAutheticated, handleSuccessAuth } = useContext(AuthContext);
 
   const [hasHighlights, setHighlights] = useState(false);
-  const [showModalAuth, setShowModalAuth] = useState(false);
-  const [showModalLogout, setShowModalLogout] = useState(false);
+
   const [playersHaveAlreadyPlayed, setPlayersHaveAlreadyPlayed] = useState(0);
 
   const {
@@ -89,10 +85,6 @@ export default () => {
 
   const teamCapitain =
     club && club.atletas.find((item) => item.atleta_id === club.capitao_id);
-
-  const handleLogin = useCallback(() => {
-    setShowModalAuth(true);
-  }, []);
 
   const onRefetch = useCallback(async () => {
     club && (await onRefetchClub());
@@ -371,20 +363,7 @@ export default () => {
               </View>
             </>
           ) : (
-            <TouchableOpacity
-              activeOpacity={0.6}
-              className={`flex-1 flex-row items-center rounded-lg border-2 border-blue-500 px-4 py-2 gap-x-1`}
-              onPress={() => handleLogin()}
-            >
-              <Text className={`font-normal text-xs `}>Conectar time</Text>
-              <Feather
-                name="log-in"
-                size={24}
-                color={
-                  colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint
-                }
-              />
-            </TouchableOpacity>
+            <Login />
           )}
           {topPlayers && bestPlayers && (
             <View className="rounded-lg p-2 flex-1">
@@ -396,18 +375,6 @@ export default () => {
           )}
         </View>
       </ScrollView>
-      <ModalAuth
-        isVisible={showModalAuth}
-        handleLoginSuccess={async () => {
-          setShowModalAuth(false);
-          handleSuccessAuth();
-        }}
-        handleCloseModal={() => setShowModalAuth(false)}
-      />
-      <ModalLogout
-        isVisible={showModalLogout}
-        handleLogoutSuccess={() => setShowModalLogout(false)}
-      />
     </SafeAreaViewContainer>
   );
 };
