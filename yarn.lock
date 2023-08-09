@@ -2235,12 +2235,6 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
-"@types/@react-native-async-storage/async-storage":
-  version "1.19.1"
-  resolved "https://codeload.github.com/react-native-async-storage/async-storage/tar.gz/9170c40ed435c3a21665bde21f485c873ad34584"
-  dependencies:
-    merge-options "^3.0.4"
-
 "@types/axios@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@types/axios/-/axios-0.14.0.tgz#ec2300fbe7d7dddd7eb9d3abf87999964cafce46"
@@ -2352,13 +2346,6 @@
   version "6.9.7"
   resolved "https://registry.yarnpkg.com/@types/qs/-/qs-6.9.7.tgz#63bb7d067db107cc1e457c303bc25d511febf6cb"
   integrity sha512-FGa1F62FT09qcrueBA6qYTrJPVDzah9a+493+o2PCXsesWHIn27G98TsSMs3WPNbZIEj4+VJf6saSFpvD+3Zsw==
-
-"@types/react-native-dialog@^8.0.0":
-  version "8.0.0"
-  resolved "https://registry.yarnpkg.com/@types/react-native-dialog/-/react-native-dialog-8.0.0.tgz#2532a9b76787ddb4e63fbb02fd8daf42d601e0c8"
-  integrity sha512-SFqgfUm3agAs7bWH2Wk5uMy58aEwMRN4WBFT7xYnRlz32PpXqzgnxuMtqeUPuq416r5FybtxwbLgJtAtGfBesA==
-  dependencies:
-    react-native-dialog "*"
 
 "@types/react@~18.2.14":
   version "18.2.17"
@@ -6964,7 +6951,7 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
-react-native-dialog@*, react-native-dialog@^9.3.0:
+react-native-dialog@^9.3.0:
   version "9.3.0"
   resolved "https://registry.yarnpkg.com/react-native-dialog/-/react-native-dialog-9.3.0.tgz#9d745cc51653a1e2ae08076b46f11d99723c47f6"
   integrity sha512-JEOJY/0AzTM9grIl0BL8o/IJPIJru7k5MPj9POTE9RRezUEtgn0YSvCpTlBtG0obWgOdzg2otMz1OQvMXS0wMQ==
