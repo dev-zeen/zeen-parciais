@@ -112,6 +112,8 @@ export default () => {
 
   const isRefetching = isRefetchingPlayersStats;
 
+  const keyExtractor = useCallback((item: Player) => `${item.foto}`, []);
+
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<Player>) => {
       return (
@@ -185,7 +187,7 @@ export default () => {
             <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
           }
           data={filteredDataSource}
-          keyExtractor={(item) => `${item.clube_id + item.apelido}`}
+          keyExtractor={keyExtractor}
           renderItem={renderItem}
           initialNumToRender={12}
           maxToRenderPerBatch={25}

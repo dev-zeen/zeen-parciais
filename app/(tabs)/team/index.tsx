@@ -15,6 +15,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import SelectDropdown from "react-native-select-dropdown";
 
+import { Market } from "@/app/(tabs)/team/market";
 import { Text, View } from "@/components/Themed";
 import { ListPlayersSale } from "@/components/contexts/team/ListPlayersSale/ListPlayersSale";
 import { ListReservePlayers } from "@/components/contexts/team/ListReservePlayers";
@@ -87,12 +88,15 @@ export default () => {
   const [showSaveLineupButton, setShowSaveLineupButton] = useState(false);
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
+  const [showMarketModal, setShowMarketModal] = useState(false);
 
   const onCloseModalSell = useCallback(() => {
     setShowModalPlayersToSell(false);
     setTacticalFormation(defaultLineupTeam);
     handleResetClub();
   }, []);
+
+  console.log("render index team?");
 
   const handleCloseSuccessSellPlayers = useCallback(
     (lineup: LineupPlayers, tacticalFormation: string) => {
@@ -251,6 +255,29 @@ export default () => {
               </Text>
             </View>
 
+            <Button
+              variant="error"
+              onPress={handleSellAllPlayers}
+              onlyIcon
+              hasIcon
+              iconName="trash"
+            />
+            <Button
+              onPress={handleResetClub}
+              onlyIcon
+              hasIcon
+              iconName="refresh-cw"
+            />
+            <Button
+              variant="secondary"
+              onPress={() => setShowMarketModal(true)}
+              onlyIcon
+              hasIcon
+              iconName="briefcase"
+            />
+          </View>
+
+          <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-evenly">
             <SelectDropdown
               disabled={isMarketClose}
               dropdownIconPosition="right"
@@ -293,20 +320,6 @@ export default () => {
                 color: "#374151",
               }}
             />
-
-            <Button
-              variant="warning"
-              onPress={handleSellAllPlayers}
-              onlyIcon
-              hasIcon
-              iconName="trash"
-            />
-            <Button
-              onPress={handleResetClub}
-              onlyIcon
-              hasIcon
-              iconName="refresh-cw"
-            />
           </View>
 
           {/* <View
@@ -335,6 +348,14 @@ export default () => {
           />
 
           <ListReservePlayers lineup={lineup} isMarketClose={isMarketClose} />
+
+          {showMarketModal && (
+            <Modal animationType="slide" transparent visible={showMarketModal}>
+              <Market
+                handleCloseMarketModal={() => setShowMarketModal(false)}
+              />
+            </Modal>
+          )}
 
           {showModalPlayersToSell && (
             <Modal

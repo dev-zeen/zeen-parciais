@@ -1,4 +1,4 @@
-import { Image, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
@@ -10,10 +10,19 @@ import { Feather } from "@expo/vector-icons";
 
 type MarketPlayerCardProps = {
   player: FullPlayer;
-  onPress: (player: FullPlayer) => void;
+  onPressAddPlayerToLineup: (player: FullPlayer) => void;
+  onPressRemovePlayerFromLineup: (player: FullPlayer) => void;
+  isPurchaseDisabled: boolean;
+  isSellPlayer?: boolean;
 };
 
-export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
+export function MarketPlayerCard({
+  player,
+  onPressAddPlayerToLineup,
+  onPressRemovePlayerFromLineup,
+  isPurchaseDisabled,
+  isSellPlayer,
+}: MarketPlayerCardProps) {
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
 
@@ -115,7 +124,7 @@ export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
 
           <View className="flex-row" style={{ gap: 4 }}>
             <Text className="flex-row text-sm font-semibold">
-              C$ {player.preco_num}
+              C$ {numberToString(player.preco_num)}
             </Text>
           </View>
         </View>
@@ -157,16 +166,54 @@ export function MarketPlayerCard({ player, onPress }: MarketPlayerCardProps) {
               gap: 8,
             }}
           >
-            <TouchableOpacity
-              onPress={() => onPress(player)}
-              className="bg-blue-500 rounded-lg py-2 px-4"
-              activeOpacity={0.6}
-            >
-              <Text className="text-white text-xs font-semibold">Comprar</Text>
-            </TouchableOpacity>
+            {!isSellPlayer ? (
+              <TouchableOpacity
+                disabled={isPurchaseDisabled}
+                style={[
+                  styles.purchasePlayerButton,
+                  isPurchaseDisabled
+                    ? styles.purchasePlayerButtonDisabled
+                    : styles.purchasePlayerButtonActived,
+                ]}
+                onPress={() => onPressAddPlayerToLineup(player)}
+                activeOpacity={0.6}
+              >
+                <Text className="text-white text-xs font-semibold">
+                  {isPurchaseDisabled ? "Caro" : "Comprar"}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.purchasePlayerButton, styles.sellPlayerButton]}
+                onPress={() => onPressRemovePlayerFromLineup(player)}
+                activeOpacity={0.6}
+              >
+                <Text className="text-white text-xs font-semibold">Vender</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  purchasePlayerButton: {
+    width: 84,
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  purchasePlayerButtonDisabled: {
+    backgroundColor: "#9ca3af",
+  },
+  purchasePlayerButtonActived: {
+    backgroundColor: "#3b82f6",
+  },
+  sellPlayerButton: {
+    backgroundColor: "#ef4444",
+  },
+});

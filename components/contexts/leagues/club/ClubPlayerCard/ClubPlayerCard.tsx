@@ -58,7 +58,7 @@ export function ClubPlayerCard({
           ? scoreWithCurrentRound
           : scoreRound;
 
-      return score;
+      return isCapitain ? score * 1.5 : score;
     },
     [currentRound]
   );

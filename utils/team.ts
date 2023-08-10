@@ -29,6 +29,8 @@ export function removePlayerFromLineup(
   if (isTeamPlayer) {
     const playersUpdated = onRemovePlayer(lineup.players, playerId);
     const lineupUpdated = { ...lineup, players: playersUpdated };
+    console.log("executou");
+
     return lineupUpdated;
   }
   const reservePlayersUpdated = onRemovePlayer(lineup.reserves, playerId);

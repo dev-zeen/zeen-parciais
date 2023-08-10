@@ -7,8 +7,6 @@ import { View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
 import { LineupPlayers, LineupPosition } from "@/models/Formations";
-import { Market as MarketModal } from "@/models/Market";
-import { useGetMarket } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 
 type SoccerFieldProps = {
@@ -24,16 +22,15 @@ export function SoccerField({
   isMarketClose,
   handleChangeCapitain,
 }: SoccerFieldProps) {
-  const { data: market } = useGetMarket();
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
   const [positionMarketSearch, setPositionMarketSearch] =
     useState<LineupPosition | null>();
 
   const [playerIndex, setPlayerIndex] = useState(0);
 
-  const [activeModalMarket, setActiveModalMarket] = useState(false);
+  const [showMarketModal, setShowMarketModal] = useState(false);
 
-  const handleBuyPlayerOnMarket = useCallback(
+  const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
       setPositionMarketSearch(player);
       setPlayerIndex(playerIndex);
@@ -41,14 +38,16 @@ export function SoccerField({
     [positionMarketSearch]
   );
 
+  console.log("render soccer field?");
+
   const handleCloseMarketModal = useCallback(() => {
-    setActiveModalMarket(false);
+    setShowMarketModal(false);
     setPositionMarketSearch(null);
     setPlayerIndex(0);
   }, []);
 
   useEffect(() => {
-    if (positionMarketSearch) setActiveModalMarket(true);
+    if (positionMarketSearch) setShowMarketModal(true);
   }, [positionMarketSearch]);
 
   return (
@@ -88,8 +87,8 @@ export function SoccerField({
               />
             ) : (
               <AddPlayerButton
-                handleBuyPlayerOnMarket={(e) =>
-                  handleBuyPlayerOnMarket(e, index)
+                handlePurchasePlayerOnMarket={(e) =>
+                  handlePurchasePlayerOnMarket(e, index)
                 }
                 positionLineup={position}
               />
@@ -98,14 +97,15 @@ export function SoccerField({
         );
       })}
 
-      <Modal animationType="slide" transparent visible={activeModalMarket}>
-        <Market
-          market={market as MarketModal}
-          position={positionMarketSearch}
-          handleCloseMarketModal={handleCloseMarketModal}
-          index={playerIndex}
-        />
-      </Modal>
+      {showMarketModal && (
+        <Modal animationType="slide" transparent visible={showMarketModal}>
+          <Market
+            position={positionMarketSearch}
+            handleCloseMarketModal={handleCloseMarketModal}
+            index={playerIndex}
+          />
+        </Modal>
+      )}
     </View>
   );
 }

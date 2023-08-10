@@ -12,7 +12,7 @@ export default () => {
 
   const keyExtractor = useCallback(
     (item: Match) => `${item.clube_casa_id}`,
-    [data]
+    []
   );
 
   const renderItem = useCallback(
