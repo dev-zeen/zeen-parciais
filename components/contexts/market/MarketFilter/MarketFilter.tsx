@@ -1,7 +1,7 @@
-import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
 import { ScrollView } from "react-native-gesture-handler";
+
+import { Text, TouchableOpacity, View } from "@/components/Themed";
 
 type MarketFilterProps = {
   handleClose: () => void;

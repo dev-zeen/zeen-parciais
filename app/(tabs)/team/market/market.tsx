@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, ListRenderItemInfo, Modal } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
@@ -16,6 +16,7 @@ import { useGetMyClub } from "@/queries/club.query";
 import { useGetMarket } from "@/queries/market.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
+import { onGetTeamPrice, removePlayerFromLineup } from "@/utils/team";
 
 type MarketProps = {
   handleCloseMarketModal: () => void;
@@ -34,10 +35,8 @@ export function Market({
   const { data: marketData } = useGetMarket();
 
   const upateLineup = useTeamLineupStore((state) => state.updateLineup);
-  const removePlayerFromLineup = useTeamLineupStore(
-    (state) => state.removePlayerFromLineup
-  );
   const lineup = useTeamLineupStore((state) => state.lineup);
+  const updatePrice = useTeamLineupStore((state) => state.updatePrice);
   const price = useTeamLineupStore((state) => state.price);
 
   console.log("render market?");
@@ -85,6 +84,8 @@ export function Market({
         players: playersUpdated as LineupPosition[],
       } as LineupPlayers;
 
+      const newPrice = onGetTeamPrice(lineupUpdated.players);
+      updatePrice(newPrice);
       upateLineup(lineupUpdated);
 
       handleCloseMarketModal();
@@ -92,9 +93,20 @@ export function Market({
     []
   );
 
-  const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {
-    removePlayerFromLineup(player);
-  }, []);
+  const handleRemovePlayerFromLineup = useCallback(
+    (player: FullPlayer) => {
+      const lineupUpdated: LineupPlayers = removePlayerFromLineup(
+        lineup as LineupPlayers,
+        player
+      );
+
+      const newPrice = onGetTeamPrice(lineupUpdated.players);
+
+      updatePrice(newPrice);
+      upateLineup(lineupUpdated);
+    },
+    [lineup]
+  );
 
   useEffect(() => {
     const filterAndSortPlayers = (
@@ -121,6 +133,10 @@ export function Market({
       }
     }
   }, [marketData, searchPlayerParam, price]);
+
+  const handleShowMarketFilters = useCallback(() => {
+    setShowFilterMarketModal((previous) => !previous);
+  }, []);
 
   const keyExtractor = useCallback(
     (item: FullPlayer) => `${item.atleta_id}`,
@@ -193,9 +209,7 @@ export function Market({
         }}
       >
         <TouchableOpacity
-          onPress={() => {
-            setShowFilterMarketModal(true);
-          }}
+          onPress={handleShowMarketFilters}
           className="p-2 rounded-full flex-row items-center justify-center"
           style={{
             gap: 8,
@@ -210,9 +224,7 @@ export function Market({
           style={{
             gap: 8,
           }}
-          onPress={() => {
-            setShowFilterMarketModal(true);
-          }}
+          onPress={handleShowMarketFilters}
         >
           <Feather name="user-check" color="#9ca3af" size={18} />
           <Text className="text-sm font-semibold">Provavél</Text>
@@ -223,9 +235,7 @@ export function Market({
           style={{
             gap: 8,
           }}
-          onPress={() => {
-            setShowFilterMarketModal(true);
-          }}
+          onPress={handleShowMarketFilters}
         >
           <Feather name="filter" color="#9ca3af" size={18} />
           <Text className="text-sm font-semibold">Filtrar</Text>

@@ -1,8 +1,9 @@
-import React, {
+import {
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -37,18 +38,19 @@ import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 import { onGetTeamPrice } from "@/utils/team";
-
 import {
   PlayersToSell,
   clearLineup,
   fillLineupOnChangeTacticalFormation,
   fillLineupWithPlayers,
-  onCheckLineupIsCompleted,
+  isEqualLineups,
   onGetDefaultLineupTeam,
   onGetPlayersOnChangePositionSell,
 } from "./team.helpers";
 
 export default () => {
+  const firstRender = useRef(true);
+
   const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
@@ -100,6 +102,8 @@ export default () => {
 
   const handleCloseSuccessSellPlayers = useCallback(
     (lineup: LineupPlayers, tacticalFormation: string) => {
+      console.log("Inicio handleCloseSuccessSellPlayers");
+
       setShowModalPlayersToSell(false);
       const lineupUpdated = fillLineupOnChangeTacticalFormation(
         lineup,
@@ -109,12 +113,16 @@ export default () => {
       );
 
       updateLineup(lineupUpdated);
+
+      console.log("fim handleCloseSuccessSellPlayers");
     },
     [lineup]
   );
 
   const handleChangeFormation = useCallback(
     (value: number) => {
+      console.log("Inicio handleChangeFormation");
+
       const newFormation = onGetDefaultLineupTeam(value);
 
       setTacticalFormation(newFormation);
@@ -130,20 +138,23 @@ export default () => {
         setPlayersToSell(playersToSell);
         setShowModalPlayersToSell(true);
       }
+
+      console.log("fim handleChangeFormation");
     },
     [lineup]
   );
 
-  const onUpdateShowSaveLineupButton = useCallback(
-    (lineup: LineupPlayers, club: FullClubInfo, capitain: number) => {
-      const lineupIsCompleted = onCheckLineupIsCompleted(
-        lineup,
-        club,
-        capitain
-      );
-      setShowSaveLineupButton(lineupIsCompleted);
+  const onShowSaveLineupButton = useCallback(
+    (lineup: LineupPlayers, club: FullClubInfo) => {
+      console.log("Inicio onUpdateShowSaveLineupButton");
+
+      const lineupIsCompleted = isEqualLineups(lineup, club);
+
+      setShowSaveLineupButton(!lineupIsCompleted);
+
+      console.log("Fim onUpdateShowSaveLineupButton");
     },
-    [lineup]
+    []
   );
 
   const handleResetClub = useCallback(async () => {
@@ -175,6 +186,8 @@ export default () => {
   );
 
   const handleSellAllPlayers = useCallback(() => {
+    console.log("Inicio handleSellAllPlayers");
+
     const emptyLineup = clearLineup(lineup?.players as LineupPosition[]);
     const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
 
@@ -184,9 +197,12 @@ export default () => {
     };
 
     updateLineup(lineupWithoutPlayers);
+
+    console.log("Fim handleSellAllPlayers");
   }, [lineup, updateLineup]);
 
   useEffect(() => {
+    console.log("Inicio useEffect 1");
     if (club) {
       const defaultLineup = fillLineupWithPlayers(
         club,
@@ -194,23 +210,40 @@ export default () => {
         playerStats as PlayerStats,
         isMarketClose
       );
+
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
+    console.log("Fim useEffect 1");
   }, []);
 
   useEffect(() => {
-    if (lineup) {
-      onUpdateShowSaveLineupButton(
-        lineup as LineupPlayers,
-        club as FullClubInfo,
-        capitain
-      );
+    console.log("Inicio useEffect 2");
 
+    if (lineup) {
+      const isFilledLineup = lineup?.players.every((item) => item.player);
+      console.log("isFilledLineup", isFilledLineup);
+
+      if (isFilledLineup) {
+        onShowSaveLineupButton(lineup as LineupPlayers, club as FullClubInfo);
+      }
+    }
+
+    console.log("Fim useEffect 2");
+  }, [lineup]);
+
+  useEffect(() => {
+    if (firstRender.current && lineup) {
       const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
       updatePrice(priceUpdated);
+
+      firstRender.current = false;
     }
   }, [lineup]);
+
+  const handlePressShowMarketModal = useCallback(() => {
+    setShowMarketModal((previous) => !previous);
+  }, []);
 
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
 
@@ -270,7 +303,7 @@ export default () => {
             />
             <Button
               variant="secondary"
-              onPress={() => setShowMarketModal(true)}
+              onPress={handlePressShowMarketModal}
               onlyIcon
               hasIcon
               iconName="briefcase"
@@ -351,9 +384,7 @@ export default () => {
 
           {showMarketModal && (
             <Modal animationType="slide" transparent visible={showMarketModal}>
-              <Market
-                handleCloseMarketModal={() => setShowMarketModal(false)}
-              />
+              <Market handleCloseMarketModal={handlePressShowMarketModal} />
             </Modal>
           )}
 

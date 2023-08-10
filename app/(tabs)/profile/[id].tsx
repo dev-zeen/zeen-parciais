@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { RefreshControl, ScrollView, useColorScheme } from "react-native";
 
 import { Text, View } from "@/components/Themed";

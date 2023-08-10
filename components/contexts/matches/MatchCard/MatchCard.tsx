@@ -122,9 +122,9 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
           </>
         ) : (
           <View
-            className={`justify-center items-center bg-blue-300 p-2 m-1 rounded-lg`}
+            className={`justify-center items-center bg-red-500 p-2 m-1 rounded-lg`}
           >
-            <Text className="text-xs">
+            <Text className="text-xs text-white">
               Esta partida é inválida para a rodada
             </Text>
           </View>

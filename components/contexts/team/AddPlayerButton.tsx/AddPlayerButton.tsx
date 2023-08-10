@@ -8,13 +8,13 @@ import { LineupPosition } from "@/models/Formations";
 type AddPlayerButtonProps = {
   onPress?: () => void;
   positionLineup: LineupPosition;
-  handlePurchasePlayerOnMarket?: (player: LineupPosition) => void;
+  onPurchasePlayerOnMarket: (player: LineupPosition) => void;
 };
 
 export function AddPlayerButton({
   onPress,
   positionLineup,
-  handlePurchasePlayerOnMarket,
+  onPurchasePlayerOnMarket,
 }: AddPlayerButtonProps) {
   return (
     <View
@@ -27,10 +27,7 @@ export function AddPlayerButton({
     >
       <TouchableOpacity
         activeOpacity={0.6}
-        onPress={() =>
-          handlePurchasePlayerOnMarket &&
-          handlePurchasePlayerOnMarket(positionLineup)
-        }
+        onPress={() => onPurchasePlayerOnMarket(positionLineup)}
         className="justify-center items-center border-2 w-11 h-11 rounded-full border-neutral-200 bg-white"
       >
         <Feather name="plus" size={18} />

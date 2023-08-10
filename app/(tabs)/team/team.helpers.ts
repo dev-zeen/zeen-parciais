@@ -209,7 +209,7 @@ export function fillLineupWithPlayers(
   return lineupUpdated;
 }
 
-export function onHasPlayersEqual(
+export function isPlayersEqual(
   currentPlayers: number[],
   defaultPlayers: number[]
 ): boolean {
@@ -232,26 +232,21 @@ export function onAreEqualCapitain(
 ) {
   return currentCapitain === defaultCapitain;
 }
-export function onCheckLineupIsCompleted(
+
+// TODO TAMBEM ADICIONAR SE O CAPITÃO TAMBÉM É O MESMO
+export function isEqualLineups(
   lineup: LineupPlayers,
-  club: FullClubInfo,
-  capitain: number
+  club: FullClubInfo
 ): boolean {
-  const currentPlayersId = lineup?.players
-    .map(({ player }) => player?.atleta_id)
-    .filter(Boolean);
-
   const defaultPlayersId = club?.atletas.map(({ atleta_id }) => atleta_id);
+  const currentPlayersId = lineup.players.map(
+    ({ player }) => player?.atleta_id
+  );
 
-  const hasTotalCurrentPlayers = currentPlayersId.length === 12;
-  const hasCapitain = !!capitain;
-
-  const isEqualCurrentAndDefaultLineups = onHasPlayersEqual(
+  const isEqualCurrentAndDefaultLineups = isPlayersEqual(
     currentPlayersId as number[],
     defaultPlayersId
   );
 
-  return (
-    hasTotalCurrentPlayers && hasCapitain && !isEqualCurrentAndDefaultLineups
-  );
+  return isEqualCurrentAndDefaultLineups;
 }

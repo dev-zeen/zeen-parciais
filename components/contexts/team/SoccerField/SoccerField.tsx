@@ -34,6 +34,8 @@ export function SoccerField({
     (player: LineupPosition, playerIndex: number) => {
       setPositionMarketSearch(player);
       setPlayerIndex(playerIndex);
+
+      console.log("Fim handlePurchasePlayerOnMarket");
     },
     [positionMarketSearch]
   );
@@ -87,7 +89,7 @@ export function SoccerField({
               />
             ) : (
               <AddPlayerButton
-                handlePurchasePlayerOnMarket={(e) =>
+                onPurchasePlayerOnMarket={(e) =>
                   handlePurchasePlayerOnMarket(e, index)
                 }
                 positionLineup={position}
