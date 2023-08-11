@@ -190,6 +190,7 @@ export default () => {
 
     const emptyLineup = clearLineup(lineup?.players as LineupPosition[]);
     const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
+    const newPrice = 0;
 
     const lineupWithoutPlayers: LineupPlayers = {
       players: [...(emptyLineup as LineupPosition[])],
@@ -197,6 +198,7 @@ export default () => {
     };
 
     updateLineup(lineupWithoutPlayers);
+    updatePrice(newPrice);
 
     console.log("Fim handleSellAllPlayers");
   }, [lineup, updateLineup]);
