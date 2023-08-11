@@ -1,6 +1,6 @@
-# Projeto para uso da api do cartola
+# Meu Cartola
 
-![Logo](assets/images/meu-cartola-low-background.png)
+![Logo](assets/images/meu-cartola-readme-V2.png)
 
 ## 🚀 Funcionalidades
 
