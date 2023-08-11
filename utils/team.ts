@@ -29,8 +29,6 @@ export function removePlayerFromLineup(
   if (isTeamPlayer) {
     const playersUpdated = onRemovePlayer(lineup.players, playerId);
     const lineupUpdated = { ...lineup, players: playersUpdated };
-    console.log("executou");
-
     return lineupUpdated;
   }
   const reservePlayersUpdated = onRemovePlayer(lineup.reserves, playerId);
@@ -43,4 +41,8 @@ export function onGetTeamPrice(players: LineupPosition[]) {
     const playerPrice = player?.preco_num ?? 0;
     return acc + playerPrice;
   }, 0);
+}
+
+export function isLineupComplete(lineup: LineupPlayers) {
+  return lineup.players.every((item) => item.player);
 }

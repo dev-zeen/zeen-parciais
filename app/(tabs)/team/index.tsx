@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   Modal,
   RefreshControl,
@@ -14,9 +7,9 @@ import {
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import SelectDropdown from "react-native-select-dropdown";
 
-import { Market } from "@/app/(tabs)/team/market";
 import { Text, View } from "@/components/Themed";
 import { ListPlayersSale } from "@/components/contexts/team/ListPlayersSale/ListPlayersSale";
 import { ListReservePlayers } from "@/components/contexts/team/ListReservePlayers";
@@ -37,7 +30,8 @@ import { useGetMarketStatus } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
-import { onGetTeamPrice } from "@/utils/team";
+import { isLineupComplete, onGetTeamPrice } from "@/utils/team";
+
 import {
   PlayersToSell,
   clearLineup,
@@ -49,7 +43,7 @@ import {
 } from "./team.helpers";
 
 export default () => {
-  const firstRender = useRef(true);
+  const router = useRouter();
 
   const colorTheme = useColorScheme();
 
@@ -90,7 +84,6 @@ export default () => {
   const [showSaveLineupButton, setShowSaveLineupButton] = useState(false);
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
-  const [showMarketModal, setShowMarketModal] = useState(false);
 
   const onCloseModalSell = useCallback(() => {
     setShowModalPlayersToSell(false);
@@ -98,12 +91,8 @@ export default () => {
     handleResetClub();
   }, []);
 
-  console.log("render index team?");
-
   const handleCloseSuccessSellPlayers = useCallback(
     (lineup: LineupPlayers, tacticalFormation: string) => {
-      console.log("Inicio handleCloseSuccessSellPlayers");
-
       setShowModalPlayersToSell(false);
       const lineupUpdated = fillLineupOnChangeTacticalFormation(
         lineup,
@@ -113,16 +102,12 @@ export default () => {
       );
 
       updateLineup(lineupUpdated);
-
-      console.log("fim handleCloseSuccessSellPlayers");
     },
-    [lineup]
+    []
   );
 
   const handleChangeFormation = useCallback(
-    (value: number) => {
-      console.log("Inicio handleChangeFormation");
-
+    (lineup: LineupPlayers, value: number) => {
       const newFormation = onGetDefaultLineupTeam(value);
 
       setTacticalFormation(newFormation);
@@ -138,21 +123,14 @@ export default () => {
         setPlayersToSell(playersToSell);
         setShowModalPlayersToSell(true);
       }
-
-      console.log("fim handleChangeFormation");
     },
-    [lineup]
+    []
   );
 
   const onShowSaveLineupButton = useCallback(
     (lineup: LineupPlayers, club: FullClubInfo) => {
-      console.log("Inicio onUpdateShowSaveLineupButton");
-
       const lineupIsCompleted = isEqualLineups(lineup, club);
-
       setShowSaveLineupButton(!lineupIsCompleted);
-
-      console.log("Fim onUpdateShowSaveLineupButton");
     },
     []
   );
@@ -186,8 +164,6 @@ export default () => {
   );
 
   const handleSellAllPlayers = useCallback(() => {
-    console.log("Inicio handleSellAllPlayers");
-
     const emptyLineup = clearLineup(lineup?.players as LineupPosition[]);
     const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
     const newPrice = 0;
@@ -199,12 +175,13 @@ export default () => {
 
     updateLineup(lineupWithoutPlayers);
     updatePrice(newPrice);
-
-    console.log("Fim handleSellAllPlayers");
   }, [lineup, updateLineup]);
 
+  const handlePressShowMarketModal = useCallback(() => {
+    router.push("/team/market/");
+  }, []);
+
   useEffect(() => {
-    console.log("Inicio useEffect 1");
     if (club) {
       const defaultLineup = fillLineupWithPlayers(
         club,
@@ -216,36 +193,21 @@ export default () => {
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
-    console.log("Fim useEffect 1");
   }, []);
 
   useEffect(() => {
-    console.log("Inicio useEffect 2");
-
     if (lineup) {
-      const isFilledLineup = lineup?.players.every((item) => item.player);
-      console.log("isFilledLineup", isFilledLineup);
-
+      const isFilledLineup = isLineupComplete(lineup);
       if (isFilledLineup) {
         onShowSaveLineupButton(lineup as LineupPlayers, club as FullClubInfo);
       }
     }
-
-    console.log("Fim useEffect 2");
   }, [lineup]);
 
   useEffect(() => {
-    if (firstRender.current && lineup) {
-      const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
-      updatePrice(priceUpdated);
-
-      firstRender.current = false;
-    }
+    const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
+    updatePrice(priceUpdated);
   }, [lineup]);
-
-  const handlePressShowMarketModal = useCallback(() => {
-    setShowMarketModal((previous) => !previous);
-  }, []);
 
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
 
@@ -324,7 +286,7 @@ export default () => {
               defaultValue={tacticalFormation}
               data={listDefaultLineups}
               onSelect={(_selectedItem, index) => {
-                handleChangeFormation(index + 1);
+                handleChangeFormation(lineup, index + 1);
               }}
               buttonTextAfterSelection={(_selectedItem, _index) => {
                 return tacticalFormation;
@@ -376,19 +338,12 @@ export default () => {
           )}
 
           <SoccerField
-            lineup={lineup}
             capitain={capitain}
             isMarketClose={isMarketClose}
             handleChangeCapitain={updateCapitain}
           />
 
           <ListReservePlayers lineup={lineup} isMarketClose={isMarketClose} />
-
-          {showMarketModal && (
-            <Modal animationType="slide" transparent visible={showMarketModal}>
-              <Market handleCloseMarketModal={handlePressShowMarketModal} />
-            </Modal>
-          )}
 
           {showModalPlayersToSell && (
             <Modal

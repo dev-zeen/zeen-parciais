@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
   playerButton: {
     width: 90,
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 16,
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",

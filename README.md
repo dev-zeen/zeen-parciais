@@ -1,6 +1,6 @@
 # Meu Cartola
 
-![Logo](assets/images/meu-cartola-readme-V2.png)
+![Logo](assets/images/meu-cartola-readme.png)
 
 ## 🚀 Funcionalidades
 
