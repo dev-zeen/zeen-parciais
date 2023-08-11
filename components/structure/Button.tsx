@@ -40,7 +40,7 @@ export function Button({
         <Feather
           name={iconName}
           color={"white"}
-          size={14}
+          size={20}
           style={{
             paddingHorizontal: 4,
           }}

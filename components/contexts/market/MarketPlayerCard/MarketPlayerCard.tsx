@@ -67,7 +67,7 @@ export function MarketPlayerCard({
       <View className="flex-1 justify-between">
         <View className="flex-row justify-between items-center flex-1">
           <View className="items-start justify-center">
-            <View className="flex-row items-center gap-0.5">
+            <View className="flex-row items-center gap-1">
               <Text className="flex-row text-sm font-bold">
                 {player.apelido_abreviado}
               </Text>
@@ -200,10 +200,10 @@ export function MarketPlayerCard({
 
 const styles = StyleSheet.create({
   playerButton: {
-    width: 96,
+    width: 90,
     borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
   },

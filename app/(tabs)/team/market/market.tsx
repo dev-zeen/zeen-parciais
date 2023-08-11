@@ -39,12 +39,12 @@ export function Market({
   const updatePrice = useTeamLineupStore((state) => state.updatePrice);
   const price = useTeamLineupStore((state) => state.price);
 
-  console.log("render market?");
-
-  const remainingValue = useMemo(
-    () => club && price && (club?.patrimonio as number) - price,
-    [club, price]
-  );
+  const remainingValue = useMemo(() => {
+    if (club && price) {
+      return club.patrimonio - price;
+    }
+    return club?.patrimonio as number;
+  }, [club, price]);
 
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
   const [showFilterMarketModal, setShowFilterMarketModal] = useState(false);
@@ -54,8 +54,6 @@ export function Market({
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer, targetIndex?: number) => {
-      console.log("PLAYER => ", player);
-
       const playersUpdated = [...(lineup?.players || [])];
 
       const addPlayerToIndex = (index: number) => {
@@ -94,11 +92,6 @@ export function Market({
       handleCloseMarketModal();
     },
     [lineup]
-  );
-
-  console.log(
-    "LINEUP => ",
-    lineup?.players.map((item) => item.player?.apelido_abreviado)
   );
 
   const handleRemovePlayerFromLineup = useCallback(
@@ -156,8 +149,6 @@ export function Market({
     }
   }, [lineup]);
 
-  console.log("EMPTY POSITIONS => ", emptyPositions);
-
   const handleShowMarketFilters = useCallback(() => {
     setShowFilterMarketModal((previous) => !previous);
   }, []);
@@ -179,7 +170,7 @@ export function Market({
             handleRemovePlayerFromLineup(player)
           }
           isButtonDisabled={
-            player.preco_num > (remainingValue as number) ||
+            player.preco_num > remainingValue ||
             !emptyPositions?.has(player.posicao_id)
           }
           isSellPlayer={lineup?.players.some(
@@ -212,14 +203,14 @@ export function Market({
           <View className="justify-center items-center gap-1">
             <Text className="font-light text-xs">Valor atual</Text>
             <Text className="font-bold text-xs text-green-500">
-              {price && numberToString(price)}
+              {numberToString(price)}
             </Text>
           </View>
 
           <View className="justify-center items-center gap-1">
             <Text className="font-light text-xs">Restante</Text>
             <Text className="font-bold text-xs text-green-500">
-              {price && numberToString(remainingValue)}
+              {numberToString(remainingValue)}
             </Text>
           </View>
         </View>
