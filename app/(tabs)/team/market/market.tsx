@@ -46,6 +46,7 @@ export function Market({
     [club, price]
   );
 
+  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
   const [showFilterMarketModal, setShowFilterMarketModal] = useState(false);
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
   const [searchPlayerParam, setSearchPlayerParam] =
@@ -53,6 +54,8 @@ export function Market({
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer, targetIndex?: number) => {
+      console.log("PLAYER => ", player);
+
       const playersUpdated = [...(lineup?.players || [])];
 
       const addPlayerToIndex = (index: number) => {
@@ -90,7 +93,12 @@ export function Market({
 
       handleCloseMarketModal();
     },
-    []
+    [lineup]
+  );
+
+  console.log(
+    "LINEUP => ",
+    lineup?.players.map((item) => item.player?.apelido_abreviado)
   );
 
   const handleRemovePlayerFromLineup = useCallback(
@@ -134,6 +142,22 @@ export function Market({
     }
   }, [marketData, searchPlayerParam, price]);
 
+  useEffect(() => {
+    if (lineup) {
+      const isFilledLineup = lineup?.players.every((item) => item.player);
+      if (isFilledLineup) return;
+
+      const emptyPositionsUpdated = new Set(
+        (lineup?.players || [])
+          .filter(({ player }) => !player)
+          .map(({ position }) => position)
+      );
+      setEmptyPositions(emptyPositionsUpdated);
+    }
+  }, [lineup]);
+
+  console.log("EMPTY POSITIONS => ", emptyPositions);
+
   const handleShowMarketFilters = useCallback(() => {
     setShowFilterMarketModal((previous) => !previous);
   }, []);
@@ -154,14 +178,17 @@ export function Market({
           onPressRemovePlayerFromLineup={() =>
             handleRemovePlayerFromLineup(player)
           }
-          isPurchaseDisabled={player.preco_num > (remainingValue as number)}
+          isButtonDisabled={
+            player.preco_num > (remainingValue as number) ||
+            !emptyPositions?.has(player.posicao_id)
+          }
           isSellPlayer={lineup?.players.some(
             (item) => item.player?.atleta_id === player.atleta_id
           )}
         />
       );
     },
-    [lineup]
+    [lineup, emptyPositions]
   );
 
   if (!marketPlayers || !club) return <Loading />;

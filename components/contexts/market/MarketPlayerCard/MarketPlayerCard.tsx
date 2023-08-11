@@ -12,7 +12,7 @@ type MarketPlayerCardProps = {
   player: FullPlayer;
   onPressAddPlayerToLineup: (player: FullPlayer) => void;
   onPressRemovePlayerFromLineup: (player: FullPlayer) => void;
-  isPurchaseDisabled: boolean;
+  isButtonDisabled: boolean;
   isSellPlayer?: boolean;
 };
 
@@ -20,7 +20,7 @@ export function MarketPlayerCard({
   player,
   onPressAddPlayerToLineup,
   onPressRemovePlayerFromLineup,
-  isPurchaseDisabled,
+  isButtonDisabled,
   isSellPlayer,
 }: MarketPlayerCardProps) {
   const { data: market } = useGetMarket();
@@ -168,27 +168,27 @@ export function MarketPlayerCard({
           >
             {!isSellPlayer ? (
               <TouchableOpacity
-                disabled={isPurchaseDisabled}
+                disabled={isButtonDisabled}
                 style={[
-                  styles.purchasePlayerButton,
-                  isPurchaseDisabled
+                  styles.playerButton,
+                  isButtonDisabled
                     ? styles.purchasePlayerButtonDisabled
                     : styles.purchasePlayerButtonActived,
                 ]}
                 onPress={() => onPressAddPlayerToLineup(player)}
                 activeOpacity={0.6}
               >
-                <Text className="text-white text-xs font-semibold">
-                  {isPurchaseDisabled ? "Caro" : "Comprar"}
+                <Text className="text-white text-sm font-semibold">
+                  {isButtonDisabled ? "Indisp." : "Comprar"}
                 </Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={[styles.purchasePlayerButton, styles.sellPlayerButton]}
+                style={[styles.playerButton, styles.sellPlayerButton]}
                 onPress={() => onPressRemovePlayerFromLineup(player)}
                 activeOpacity={0.6}
               >
-                <Text className="text-white text-xs font-semibold">Vender</Text>
+                <Text className="text-white text-sm font-semibold">Vender</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -199,10 +199,10 @@ export function MarketPlayerCard({
 }
 
 const styles = StyleSheet.create({
-  purchasePlayerButton: {
-    width: 84,
+  playerButton: {
+    width: 96,
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 16,
     paddingHorizontal: 16,
     alignItems: "center",
     justifyContent: "center",

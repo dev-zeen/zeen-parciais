@@ -2,13 +2,13 @@ import { Image, TouchableOpacity } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
-import {
-  ENUM_STATUS_MARKET_PLAYER,
-  OBJECT_STATUS_MARKET_PLAYER,
-} from "@//constants/StatusPlayer";
 import captainImage from "@/assets/images/letter-c.png";
 import { Text, View } from "@/components/Themed";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import {
+  ENUM_STATUS_MARKET_PLAYER,
+  OBJECT_STATUS_MARKET_PLAYER,
+} from "@/constants/StatusPlayer";
 import { LineupPlayer } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarketStatus } from "@/queries/market.query";

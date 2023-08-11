@@ -53,16 +53,16 @@ export function SoccerField({
   }, [positionMarketSearch]);
 
   return (
-    <View className="flex-1 justify-center items-center rounded-lg pt-2">
-      <View className="flex-1 rounded-lg">
+    <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2">
+      <View className="w-full flex-1 rounded-lg items-center justify-center">
         <ImageBackground
           source={footballField}
-          className="flex-1 rounded-lg"
+          className="flex-1 rounded-lg items-center justify-center"
           style={{
-            height: 390,
-            width: 370,
+            height: 400,
+            width: 372,
           }}
-          alt="Campo de futebol"
+          alt="Campinho"
         />
       </View>
 
