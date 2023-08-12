@@ -38,7 +38,9 @@ export function ListReservePlayers({
               ) : (
                 <AddPlayerButton
                   key={item.left}
-                  onPress={() => console.log("Comprar reserva")}
+                  onPurchasePlayerOnMarket={() =>
+                    console.log("Comprar reserva")
+                  }
                   positionLineup={item}
                 />
               )}

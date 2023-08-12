@@ -57,8 +57,8 @@ export function SoccerField({
           source={footballField}
           className="flex-1 rounded-lg items-center justify-center"
           style={{
-            height: 400,
-            width: 372,
+            height: 450,
+            width: 390,
           }}
           alt="Campinho"
         />

@@ -263,6 +263,7 @@ export default ({ position, handleCloseMarketModal, index }: MarketProps) => {
       <FlatList
         contentContainerStyle={{
           gap: 8,
+          paddingVertical: 8,
         }}
         data={marketPlayers}
         renderItem={renderItem}

@@ -6,13 +6,11 @@ import { Text, View } from "@/components/Themed";
 import { LineupPosition } from "@/models/Formations";
 
 type AddPlayerButtonProps = {
-  onPress?: () => void;
   positionLineup: LineupPosition;
   onPurchasePlayerOnMarket: (player: LineupPosition) => void;
 };
 
 export function AddPlayerButton({
-  onPress,
   positionLineup,
   onPurchasePlayerOnMarket,
 }: AddPlayerButtonProps) {
@@ -28,9 +26,9 @@ export function AddPlayerButton({
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={() => onPurchasePlayerOnMarket(positionLineup)}
-        className="justify-center items-center border-2 w-11 h-11 rounded-full border-neutral-200 bg-white"
+        className="justify-center items-center border-2 w-12 h-12 rounded-full border-neutral-200 bg-white"
       >
-        <Feather name="plus" size={18} />
+        <Feather name="plus" size={20} />
       </TouchableOpacity>
 
       <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-2">

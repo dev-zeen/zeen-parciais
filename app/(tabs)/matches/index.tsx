@@ -1,7 +1,9 @@
 import { useCallback } from "react";
 import { FlatList, ListRenderItemInfo, RefreshControl } from "react-native";
 
+import { View } from "@/components/Themed";
 import { MatchCard } from "@/components/contexts/matches/MatchCard";
+import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { Match } from "@/models/Matches";
@@ -34,18 +36,28 @@ export default () => {
 
   return (
     <SafeAreaViewContainer>
-      <FlatList
-        contentContainerStyle={{
+      <View
+        className="mx-2 bg-dark"
+        style={{
           gap: 8,
+          flex: 1,
         }}
-        refreshControl={
-          <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
-        }
-        initialNumToRender={10}
-        data={data?.partidas}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-      />
+      >
+        <MarketStatusCard />
+        <FlatList
+          contentContainerStyle={{
+            gap: 8,
+            paddingVertical: 8,
+          }}
+          refreshControl={
+            <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
+          }
+          initialNumToRender={10}
+          data={data?.partidas}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+        />
+      </View>
     </SafeAreaViewContainer>
   );
 };

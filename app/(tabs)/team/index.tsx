@@ -205,8 +205,10 @@ export default () => {
   }, [lineup]);
 
   useEffect(() => {
-    const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
-    updatePrice(priceUpdated);
+    if (lineup) {
+      const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
+      updatePrice(priceUpdated);
+    }
   }, [lineup]);
 
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
@@ -230,7 +232,7 @@ export default () => {
         }
       >
         <View
-          className={`justify-center items-center ${
+          className={`justify-center items-center pb-2 ${
             colorTheme === "dark" ? `bg-dark` : "bg-light"
           }`}
           style={{ gap: 8 }}
@@ -238,16 +240,16 @@ export default () => {
           <MarketStatusCard />
 
           <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-evenly">
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Patrim.</Text>
-              <Text className="font-bold text-xs">
+            <View className="justify-center items-center">
+              <Text className="font-light text-sm">Patrim.</Text>
+              <Text className="font-bold text-base">
                 {numberToString(club?.patrimonio)}
               </Text>
             </View>
 
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Preço</Text>
-              <Text className="font-bold text-xs text-green-500">
+            <View className="justify-center items-center">
+              <Text className="font-light text-sm">Preço</Text>
+              <Text className="font-bold text-base text-green-500">
                 {numberToString(price)}
               </Text>
             </View>

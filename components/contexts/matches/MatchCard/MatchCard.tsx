@@ -26,7 +26,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
   }, []);
 
   return (
-    <View className="mx-2 rounded-lg items-center justify-center">
+    <View className="rounded-lg items-center justify-center">
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={onPressHandler}

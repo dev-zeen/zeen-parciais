@@ -52,12 +52,12 @@ export function MarketStatusCard() {
             }`}
           ></View>
         </View>
-        <Text className="font-light text-xs">
+        <Text className="font-semibold text-sm">
           {`${MARKET_STATUS_NAMED[marketStatus.status_mercado]}`}
         </Text>
       </View>
       <View>
-        <Text className="italic text-sm font-medium">{`${
+        <Text className="italic text-sm font-semibold">{`${
           marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO
             ? `até ${marketClosingDate}`
             : `Rodada ${marketStatus?.rodada_atual}`

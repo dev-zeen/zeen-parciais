@@ -265,16 +265,11 @@ export default () => {
         initialNumToRender={10}
         maxToRenderPerBatch={20}
         contentContainerStyle={{
-          paddingTop: 4,
+          paddingVertical: 4,
           marginHorizontal: 8,
           backgroundColor:
             colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
           gap: 4,
-        }}
-        style={{
-          paddingBottom: 4,
-          backgroundColor:
-            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
         }}
       />
 

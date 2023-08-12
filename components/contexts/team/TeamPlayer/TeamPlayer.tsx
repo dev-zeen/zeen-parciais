@@ -59,19 +59,22 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           {(player as LineupPlayer) ? (
             <Text
               numberOfLines={1}
-              className={`text-gray-400 font-bold text-center text-xs`}
+              className={`text-gray-400 font-semibold text-center text-xs`}
             >
               {scoreFinal}
             </Text>
           ) : (
-            <Text numberOfLines={1} className="font-bold text-xs">
+            <Text numberOfLines={1} className="font-semibold text-xs">
               -
             </Text>
           )}
         </View>
       ) : (
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-100">
-          <Text numberOfLines={1} className="font-bold text-xs text-gray-500">
+          <Text
+            numberOfLines={1}
+            className="font-semibold text-xs text-gray-500"
+          >
             $ {playerPrice}
           </Text>
         </View>
@@ -82,7 +85,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
         onLongPress={() =>
           removePlayerFromLineup(player as LineupPlayer | FullPlayer)
         }
-        className={`justify-center items-center border-2 w-11 h-11 rounded-full ${
+        className={`justify-center items-center border-2 w-12 h-12 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
             ? "border-red-500 bg-red-500"
             : "border-neutral-200"
@@ -93,7 +96,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           source={{
             uri: player?.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-10 h-10 rounded-full bg-neutral-100 overflow-hidden"
+          className="w-11 h-11 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
         {hasCaptain && (

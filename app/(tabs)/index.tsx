@@ -41,7 +41,7 @@ export default () => {
 
   const colorTheme = useColorScheme();
 
-  const { isAutheticated, handleSuccessAuth } = useContext(AuthContext);
+  const { isAutheticated } = useContext(AuthContext);
 
   const [hasHighlights, setHighlights] = useState(false);
 
@@ -204,6 +204,7 @@ export default () => {
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
             flex: 1,
+            paddingBottom: 8,
           }}
         >
           <MarketStatusCard />
