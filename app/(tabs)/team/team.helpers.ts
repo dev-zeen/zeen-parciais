@@ -77,9 +77,9 @@ export function fillPlayersInLineup({
   });
 }
 
-function onGetPlayerPositions(players: LineupPosition[]): Array<number> {
+function onGetPlayerPositions(starting: LineupPosition[]): Array<number> {
   const positions = new Set<number>();
-  players?.forEach((player) => positions?.add(player.position));
+  starting?.forEach((player) => positions?.add(player.position));
   return Array.from(positions);
 }
 
@@ -88,8 +88,8 @@ export function onGetPlayersOnChangePositionSell(
   newFormation: string
 ): PlayersToSell[] {
   const currentPlayers =
-    currentFormationWithPlayers.players as LineupPosition[];
-  const newPlayers = FORMATIONS[newFormation].players;
+    currentFormationWithPlayers.starting as LineupPosition[];
+  const newPlayers = FORMATIONS[newFormation].starting;
 
   const currentPlayerPositions = onGetPlayerPositions(currentPlayers);
   const playersToSell: PlayersToSell[] = [];
@@ -130,12 +130,12 @@ export function onClearLineup(lineupPlayers: LineupPlayers): LineupPlayers {
     player: undefined,
   });
 
-  const clearLineupPositions = lineupPlayers?.players?.map(clearPlayers);
+  const clearLineupPositions = lineupPlayers?.starting?.map(clearPlayers);
   const clearFormationReserves = lineupPlayers?.reserves?.map(clearPlayers);
 
   return {
     ...lineupPlayers,
-    players: clearLineupPositions,
+    starting: clearLineupPositions,
     reserves: clearFormationReserves,
   };
 }
@@ -150,14 +150,14 @@ export function fillLineupOnChangeTacticalFormation(
     FORMATIONS[tacticalFormation as string]
   );
 
-  if (!lineupPlayers.players || !newLineup.players) {
+  if (!lineupPlayers.starting || !newLineup.starting) {
     return newLineup;
   }
 
-  lineupPlayers.players.forEach((item) => {
+  lineupPlayers.starting.forEach((item) => {
     if (item.player) {
       const { posicao_id, atleta_id } = item.player;
-      const emptyIndex = newLineup.players.findIndex(
+      const emptyIndex = newLineup.starting.findIndex(
         (itemFormation) =>
           itemFormation.position === posicao_id && !itemFormation.player
       );
@@ -171,12 +171,12 @@ export function fillLineupOnChangeTacticalFormation(
               }
             : item.player;
 
-        newLineup.players[emptyIndex].player = player;
+        newLineup.starting[emptyIndex].player = player;
       } else {
         // If the player's position doesn't have a slot in the new formation,
         // you might want to handle this case or log a message.
         // For now, I'll assume you want to keep the player in their original position.
-        newLineup.players.push(item);
+        newLineup.starting.push(item);
       }
     }
   });
@@ -194,7 +194,7 @@ export function fillLineupWithPlayers(
 
   fillPlayersInLineup({
     players: club.atletas,
-    arrayFillTarget: lineupUpdated.players,
+    arrayFillTarget: lineupUpdated.starting,
     playerStats,
     isMarketClose,
   });
@@ -239,7 +239,7 @@ export function isEqualLineups(
   club: FullClubInfo
 ): boolean {
   const defaultPlayersId = club?.atletas.map(({ atleta_id }) => atleta_id);
-  const currentPlayersId = lineup.players.map(
+  const currentPlayersId = lineup.starting.map(
     ({ player }) => player?.atleta_id
   );
 

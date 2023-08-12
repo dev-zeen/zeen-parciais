@@ -12,7 +12,7 @@ export type LineupPosition = {
 };
 
 export interface LineupPlayers {
-  players: LineupPosition[];
+  starting: LineupPosition[];
   reserves: LineupPosition[];
 }
 

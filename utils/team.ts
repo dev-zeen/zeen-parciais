@@ -22,17 +22,30 @@ export function removePlayerFromLineup(
 ) {
   const { atleta_id: playerId } = player;
 
-  const isTeamPlayer = lineup?.players.some(
+  const isTeamPlayer = lineup?.starting.some(
     (item) => item.player?.atleta_id === playerId
   );
 
   if (isTeamPlayer) {
-    const playersUpdated = onRemovePlayer(lineup.players, playerId);
-    const lineupUpdated = { ...lineup, players: playersUpdated };
+    const playersUpdated = onRemovePlayer(lineup.starting, playerId);
+    const reservesUpdated = lineup.reserves.map((item) => {
+      if (item.player?.posicao_id === player.posicao_id) {
+        return {
+          ...item,
+          player: undefined,
+        };
+      }
+      return item;
+    });
+    const lineupUpdated = {
+      ...lineup,
+      starting: playersUpdated,
+      reserves: reservesUpdated,
+    };
     return lineupUpdated;
   }
-  const reservePlayersUpdated = onRemovePlayer(lineup.reserves, playerId);
-  const lineupUpdated = { ...lineup, reserves: reservePlayersUpdated };
+  const reservesPlayersUpdated = onRemovePlayer(lineup.reserves, playerId);
+  const lineupUpdated = { ...lineup, reserves: reservesPlayersUpdated };
   return lineupUpdated;
 }
 
@@ -44,5 +57,27 @@ export function onGetTeamPrice(players: LineupPosition[]) {
 }
 
 export function isLineupComplete(lineup: LineupPlayers) {
-  return lineup.players.every((item) => item.player);
+  return lineup.starting.every((item) => item.player);
+}
+
+export function onGetPlayerLowestPrice(
+  lineup: LineupPlayers,
+  player: LineupPosition
+) {
+  const playersPosition = lineup.starting.filter(
+    (item) => item.position === player.position
+  );
+
+  return playersPosition.reduce((acc, current) => {
+    const currentPrice = current.player?.preco_num;
+
+    if (
+      !acc.player?.preco_num ||
+      (currentPrice && currentPrice < acc.player.preco_num)
+    ) {
+      return current;
+    }
+
+    return acc;
+  }, {} as LineupPosition);
 }

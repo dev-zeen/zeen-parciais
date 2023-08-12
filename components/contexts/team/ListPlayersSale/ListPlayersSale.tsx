@@ -62,7 +62,7 @@ export function ListPlayersSale({
             (player) => player.player?.atleta_id !== id
           );
 
-          return { ...position, players: updatedPlayers };
+          return { ...position, starting: updatedPlayers };
         })
         .filter(
           (position) =>

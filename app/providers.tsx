@@ -2,10 +2,10 @@ import { ReactNode } from "react";
 import ErrorBoundary from "react-native-error-boundary";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 
 import { ErrorBoundaryComponent } from "@/components/structure/ErrorBoundary";
 import { AuthContextProvider } from "@/contexts/Auth.context";
-import { AxiosError } from "axios";
 
 type ProvidersProps = {
   children: ReactNode;

@@ -6,7 +6,6 @@ import WebView, { WebViewMessageEvent } from "react-native-webview";
 
 import enterImage from "@/assets/images/enter.png";
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import Colors from "@/constants/Colors";
 import { INJECT_AUTH_LOGIN } from "@/constants/Generic";
 import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
@@ -46,11 +45,11 @@ export function Login({ title }: LoginProps) {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <>
       <View className="items-center justify-center p-4">
         {title && (
           <View
-            className="flex-row mx-8 p-4"
+            className="flex-row mt-8 mx-8 p-4"
             style={{
               gap: 4,
             }}
@@ -132,6 +131,6 @@ export function Login({ title }: LoginProps) {
           </Modal>
         </View>
       )}
-    </SafeAreaViewContainer>
+    </>
   );
 }

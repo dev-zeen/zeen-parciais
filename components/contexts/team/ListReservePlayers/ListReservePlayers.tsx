@@ -1,8 +1,13 @@
+import { useCallback, useEffect, useState } from "react";
+import { Alert, Modal } from "react-native";
+
+import Market from "@/app/(tabs)/team/market";
 import { Text, View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import { LineupPlayers } from "@/models/Formations";
+import { LineupPlayers, LineupPosition } from "@/models/Formations";
 import { useGetScoredPlayers } from "@/queries/stats.query";
+import { onGetPlayerLowestPrice } from "@/utils/team";
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
@@ -13,7 +18,60 @@ export function ListReservePlayers({
   lineup,
   isMarketClose,
 }: ListReservePlayersProps) {
+  const alertToStartingsPlayerPositionNotFilled = () =>
+    Alert.alert(
+      "Atenção",
+      "Você deve preencher todos os titulares para a posição.",
+      [{ text: "OK" }]
+    );
+
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+
+  const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
+  const [showMarketModal, setShowMarketModal] = useState(false);
+  const [positionMarketSearch, setPositionMarketSearch] =
+    useState<LineupPosition | null>();
+  const [playerIndex, setPlayerIndex] = useState(0);
+
+  const handlePurchasePlayerOnMarket = useCallback(
+    (player: LineupPosition, playerIndex: number) => {
+      const playersSamePositionFromLineupStarting = lineup.starting.filter(
+        (item) => item.position === player.position
+      );
+
+      console.log(
+        "PLAYERS:",
+        playersSamePositionFromLineupStarting.map(
+          (item) => item.player?.apelido_abreviado
+        )
+      );
+
+      const isPlayersFilledInPosition =
+        playersSamePositionFromLineupStarting.every((item) => item.player);
+
+      if (!isPlayersFilledInPosition) {
+        alertToStartingsPlayerPositionNotFilled();
+        return;
+      }
+
+      const lowestPlayer = onGetPlayerLowestPrice(lineup, player);
+      setPlayerLowestPrice(lowestPlayer);
+
+      setPositionMarketSearch(player);
+      setPlayerIndex(playerIndex);
+    },
+    [lineup, positionMarketSearch]
+  );
+
+  const handleCloseMarketModal = useCallback(() => {
+    setShowMarketModal(false);
+    setPositionMarketSearch(null);
+    setPlayerIndex(0);
+  }, []);
+
+  useEffect(() => {
+    if (positionMarketSearch && playerLowestPrice) setShowMarketModal(true);
+  }, [positionMarketSearch, playerLowestPrice]);
 
   return (
     <View className="rounded-lg items-center justify-center">
@@ -21,33 +79,44 @@ export function ListReservePlayers({
         Banco de Reservas
       </Text>
       <View className="flex-row rounded-lg py-2 mb-1 items-center justify-center">
-        {lineup.reserves?.map((item) => {
+        {lineup.reserves?.map((position, index) => {
           return (
             <View
-              key={item.position}
+              key={position.position}
               className="flex-1 justify-center items-center"
             >
-              {item && item.player ? (
+              {position && position.player ? (
                 <TeamPlayer
-                  player={item.player}
+                  player={position.player}
                   isPlayed={
-                    playerStats?.atletas?.[item.player.atleta_id]
+                    playerStats?.atletas?.[position.player.atleta_id]
                       ?.entrou_em_campo
                   }
                 />
               ) : (
                 <AddPlayerButton
-                  key={item.left}
+                  key={position.left}
                   onPurchasePlayerOnMarket={() =>
-                    console.log("Comprar reserva")
+                    handlePurchasePlayerOnMarket(position, index)
                   }
-                  positionLineup={item}
+                  positionLineup={position}
                 />
               )}
             </View>
           );
         })}
       </View>
+
+      {showMarketModal && (
+        <Modal animationType="slide" transparent visible={showMarketModal}>
+          <Market
+            position={positionMarketSearch}
+            handleCloseMarketModal={handleCloseMarketModal}
+            playerIndex={playerIndex}
+            playerLowestPrice={playerLowestPrice?.player}
+          />
+        </Modal>
+      )}
     </View>
   );
 }

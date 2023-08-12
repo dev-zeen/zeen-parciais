@@ -164,12 +164,12 @@ export default () => {
   );
 
   const handleSellAllPlayers = useCallback(() => {
-    const emptyLineup = clearLineup(lineup?.players as LineupPosition[]);
+    const emptyLineup = clearLineup(lineup?.starting as LineupPosition[]);
     const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
     const newPrice = 0;
 
     const lineupWithoutPlayers: LineupPlayers = {
-      players: [...(emptyLineup as LineupPosition[])],
+      starting: [...(emptyLineup as LineupPosition[])],
       reserves: [...(emptyReserves as LineupPosition[])],
     };
 
@@ -206,7 +206,7 @@ export default () => {
 
   useEffect(() => {
     if (lineup) {
-      const priceUpdated = onGetTeamPrice(lineup?.players as LineupPosition[]);
+      const priceUpdated = onGetTeamPrice(lineup?.starting as LineupPosition[]);
       updatePrice(priceUpdated);
     }
   }, [lineup]);

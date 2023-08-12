@@ -28,7 +28,7 @@ export function MarketPlayerCard({
 
   return (
     <View
-      className={`rounded-lg flex-row items-center justify-between p-2 mx-2`}
+      className={`rounded-lg flex-row items-center justify-between p-2`}
       key={player.atleta_id}
     >
       <View>
@@ -36,14 +36,14 @@ export function MarketPlayerCard({
           source={{
             uri: player.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-20 h-20 rounded-3xl mr-2"
+          className="w-16 h-16 rounded-3xl mr-2"
           alt={`Imagem do ${player.nome}`}
         />
         <View
           className="flex-row absolute"
           style={{
-            top: "70%",
-            left: "70%",
+            top: "50%",
+            left: "60%",
             width: 22,
             height: 22,
             borderRadius: 10,
@@ -138,21 +138,21 @@ export function MarketPlayerCard({
               }}
             >
               <View className="items-center justify-center">
-                <Text className="uppercase text-xs">Média</Text>
+                <Text className="text-xs">Média</Text>
                 <Text className="font-bold text-xs">
                   {numberToString(player.media_num)}
                 </Text>
               </View>
 
               <View className="items-center justify-center">
-                <Text className="uppercase text-xs">Última</Text>
+                <Text className="text-xs">Última</Text>
                 <Text className="font-bold text-xs">
                   {numberToString(player.pontos_num)}
                 </Text>
               </View>
 
               <View className="items-center justify-center">
-                <Text className="uppercase text-xs">Min P/ Val</Text>
+                <Text className="text-xs">Min P/ Val</Text>
                 <Text className="font-bold text-xs">
                   {numberToString(player.minimo_para_valorizar)}
                 </Text>
@@ -161,7 +161,7 @@ export function MarketPlayerCard({
           </View>
 
           <View
-            className="items-end justify-end pl-3"
+            className="items-end justify-end"
             style={{
               gap: 8,
             }}

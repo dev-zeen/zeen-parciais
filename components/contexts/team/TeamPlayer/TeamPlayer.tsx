@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Image, TouchableOpacity } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
@@ -30,6 +31,13 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
 
   const removePlayerFromLineup = useTeamLineupStore(
     (state) => state.removePlayerFromLineup
+  );
+
+  const handleRemovePlayerFromLayout = useCallback(
+    (player: LineupPlayer | FullPlayer) => {
+      removePlayerFromLineup(player);
+    },
+    []
   );
 
   const scoreWithMarketStatus = isMarketClose
@@ -83,7 +91,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         onLongPress={() =>
-          removePlayerFromLineup(player as LineupPlayer | FullPlayer)
+          handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)
         }
         className={`justify-center items-center border-2 w-12 h-12 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL

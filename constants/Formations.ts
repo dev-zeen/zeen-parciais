@@ -11,7 +11,7 @@ export const enum Positions {
 
 export const FORMATIONS: TacticalFormations = {
   "3-4-3": {
-    players: [
+    starting: [
       {
         top: "82%",
         left: "39.5%",
@@ -110,7 +110,7 @@ export const FORMATIONS: TacticalFormations = {
     ],
   },
   "3-5-2": {
-    players: [
+    starting: [
       {
         top: "80%",
         left: "39.5%",
@@ -208,7 +208,7 @@ export const FORMATIONS: TacticalFormations = {
     ],
   },
   "4-3-3": {
-    players: [
+    starting: [
       {
         top: "71%",
         left: "41.5%",
@@ -307,7 +307,7 @@ export const FORMATIONS: TacticalFormations = {
     ],
   },
   "4-4-2": {
-    players: [
+    starting: [
       {
         top: "80%",
         left: "39.5%",
@@ -406,7 +406,7 @@ export const FORMATIONS: TacticalFormations = {
     ],
   },
   "4-5-1": {
-    players: [
+    starting: [
       {
         top: "80%",
         left: "39.5%",
@@ -505,7 +505,7 @@ export const FORMATIONS: TacticalFormations = {
     ],
   },
   "5-3-2": {
-    players: [
+    starting: [
       {
         top: "80%",
         left: "39.5%",
@@ -604,7 +604,7 @@ export const FORMATIONS: TacticalFormations = {
     ],
   },
   "5-4-1": {
-    players: [
+    starting: [
       {
         top: "80%",
         left: "39.5%",

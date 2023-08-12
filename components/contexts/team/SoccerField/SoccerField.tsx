@@ -58,13 +58,13 @@ export function SoccerField({
           className="flex-1 rounded-lg items-center justify-center"
           style={{
             height: 450,
-            width: 390,
+            width: 372,
           }}
           alt="Campinho"
         />
       </View>
 
-      {lineup?.players.map((position, index) => {
+      {lineup?.starting.map((position, index) => {
         return (
           <View
             key={`${position.left} + ${position.position} + ${position.top}`}
@@ -102,7 +102,7 @@ export function SoccerField({
           <Market
             position={positionMarketSearch}
             handleCloseMarketModal={handleCloseMarketModal}
-            index={playerIndex}
+            playerIndex={playerIndex}
           />
         </Modal>
       )}

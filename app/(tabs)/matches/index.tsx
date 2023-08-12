@@ -1,5 +1,10 @@
 import { useCallback } from "react";
-import { FlatList, ListRenderItemInfo, RefreshControl } from "react-native";
+import {
+  FlatList,
+  ListRenderItemInfo,
+  RefreshControl,
+  useColorScheme,
+} from "react-native";
 
 import { View } from "@/components/Themed";
 import { MatchCard } from "@/components/contexts/matches/MatchCard";
@@ -10,6 +15,8 @@ import { Match } from "@/models/Matches";
 import { useGetMatchs } from "@/queries/matches.query";
 
 export default () => {
+  const colorTheme = useColorScheme();
+
   const { data, isLoading, refetch: onRefetch, isRefetching } = useGetMatchs();
 
   const keyExtractor = useCallback(
@@ -37,7 +44,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className="mx-2 bg-dark"
+        className={`mx-2 ${colorTheme === "dark" ? `bg-dark` : "bg-light"}`}
         style={{
           gap: 8,
           flex: 1,
@@ -47,7 +54,7 @@ export default () => {
         <FlatList
           contentContainerStyle={{
             gap: 8,
-            paddingVertical: 8,
+            paddingBottom: 8,
           }}
           refreshControl={
             <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
