@@ -33,7 +33,6 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: "ZAG",
-        zone: 2,
       }, // Zagueiro
       {
         top: "59%",

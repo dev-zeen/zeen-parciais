@@ -148,7 +148,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                 <View className={`flex-row ${myTeam && "bg-blue-400"}`}>
                   <Text className="text-xs">
                     {isMarketClose
-                      ? club.playersHavePlayed && `${club.playersHavePlayed}/12`
+                      ? `${club.playersHavePlayed}/12`
                       : diffScore < 0 && numberToString(diffScore)}
                   </Text>
                 </View>

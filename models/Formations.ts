@@ -3,12 +3,11 @@ import { FullPlayer, Player } from "@/models/Stats";
 export interface LineupPlayer extends Player, FullPlayer {}
 
 export type LineupPosition = {
+  position: number;
+  abbr: string;
+  player?: LineupPlayer | FullPlayer | undefined;
   top?: string;
   left?: string;
-  position: number;
-  player?: LineupPlayer | FullPlayer | undefined;
-  abbr?: string;
-  zone?: number;
 };
 
 export interface LineupPlayers {

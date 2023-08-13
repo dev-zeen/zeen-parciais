@@ -10,10 +10,15 @@ import { numberToString } from "@/utils/parseTo";
 
 type TeamPlayerCardProps = {
   player: LineupPlayer;
+  isReservePlayer: boolean;
   onClose: () => void;
 };
 
-export function TeamPlayerCard({ player, onClose }: TeamPlayerCardProps) {
+export function TeamPlayerCard({
+  player,
+  isReservePlayer,
+  onClose,
+}: TeamPlayerCardProps) {
   const colorTheme = useColorScheme();
 
   const { data: positions } = useGetPositions();
@@ -113,24 +118,26 @@ export function TeamPlayerCard({ player, onClose }: TeamPlayerCardProps) {
             </View>
           </View>
 
-          <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
-            <TouchableOpacity
-              activeOpacity={0.6}
-              className={`border-2 border-violet-500 ${
-                colorTheme === "dark" ? "bg-violet-500" : "bg-violet-200"
-              } p-3 rounded-lg`}
-            >
-              <Text>Tornar Capitão</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.6}
-              className={`border-2 border-red-500 ${
-                colorTheme === "dark" ? "bg-red-500" : "bg-red-200"
-              } p-3 rounded-lg`}
-            >
-              <Text>Vender Jogador</Text>
-            </TouchableOpacity>
-          </View>
+          {!isReservePlayer && (
+            <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
+              <TouchableOpacity
+                activeOpacity={0.6}
+                className={`border-2 border-violet-500 ${
+                  colorTheme === "dark" ? "bg-violet-500" : "bg-violet-200"
+                } p-3 rounded-lg`}
+              >
+                <Text>Tornar Capitão</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.6}
+                className={`border-2 border-red-500 ${
+                  colorTheme === "dark" ? "bg-red-500" : "bg-red-200"
+                } p-3 rounded-lg`}
+              >
+                <Text>Vender Jogador</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
       </View>
     </View>

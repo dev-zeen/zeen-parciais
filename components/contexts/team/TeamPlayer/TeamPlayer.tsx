@@ -22,9 +22,15 @@ type TeamPlayerProps = {
   hasCaptain?: boolean;
   handleCapitain?: (id: number) => void;
   isPlayed?: boolean;
+  isReservePlayer?: boolean;
 };
 
-export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
+export function TeamPlayer({
+  player,
+  hasCaptain,
+  isPlayed,
+  isReservePlayer = false,
+}: TeamPlayerProps) {
   const { data: marketStatus } = useGetMarketStatus();
 
   const [activePlayerCard, setActivePlayerCard] = useState(false);
@@ -70,25 +76,19 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
       }}
     >
       {isMarketClose ? (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-100">
-          {(player as LineupPlayer) ? (
-            <Text
-              numberOfLines={1}
-              className={`text-gray-800 font-semibold text-center text-xs`}
-            >
-              {scoreFinal}
-            </Text>
-          ) : (
-            <Text numberOfLines={1} className="font-semibold text-xs">
-              -
-            </Text>
-          )}
-        </View>
-      ) : (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-100">
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
           <Text
             numberOfLines={1}
-            className="font-semibold text-xs text-gray-800"
+            className={`text-blue-500 font-semibold text-center text-xs`}
+          >
+            {scoreFinal}
+          </Text>
+        </View>
+      ) : (
+        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
+          <Text
+            numberOfLines={1}
+            className="font-semibold text-xs text-blue-500"
           >
             $ {playerPrice}
           </Text>
@@ -155,7 +155,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           />
         </View>
       </TouchableOpacity>
-      <View className="border border-neutral-200 bg-white items-center justify-center rounded-lg px-1">
+      <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-1">
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
@@ -175,6 +175,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           <TeamPlayerCard
             player={player as LineupPlayer}
             onClose={handleModalPlayerCard}
+            isReservePlayer={isReservePlayer}
           />
         </Modal>
       )}

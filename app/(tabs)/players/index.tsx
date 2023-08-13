@@ -49,7 +49,8 @@ export default () => {
     refetch: onRefetchPlayersStats,
   } = useGetScoredPlayers(isMarketClose);
 
-  const { refetch: onRefetchAppreciations } = useGetAppreciations(allowRequest);
+  const { data: appreciations, refetch: onRefetchAppreciations } =
+    useGetAppreciations(allowRequest);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState<
@@ -98,7 +99,7 @@ export default () => {
         setCurrentAppreciations(res);
       }
     });
-  }, []);
+  }, [appreciations]);
 
   useEffect(() => {
     if (

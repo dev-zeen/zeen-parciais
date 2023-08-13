@@ -4,7 +4,7 @@ import { ImageBackground, Modal } from "react-native";
 import Market from "@/app/(tabs)/team/market";
 import footballField from "@/assets/images/field.png";
 import { View } from "@/components/Themed";
-import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
+import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
 import { LineupPlayer, LineupPosition } from "@/models/Formations";
 import { useGetScoredPlayers } from "@/queries/stats.query";

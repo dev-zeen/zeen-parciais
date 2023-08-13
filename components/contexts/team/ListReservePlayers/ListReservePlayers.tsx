@@ -3,7 +3,7 @@ import { Alert, Modal } from "react-native";
 
 import Market from "@/app/(tabs)/team/market";
 import { Text, View } from "@/components/Themed";
-import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
+import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
 import {
   LineupPlayer,
@@ -85,6 +85,7 @@ export function ListReservePlayers({
               {position && position.player ? (
                 <TeamPlayer
                   player={position.player as LineupPlayer}
+                  isReservePlayer
                   isPlayed={
                     playerStats?.atletas?.[position.player.atleta_id]
                       ?.entrou_em_campo
