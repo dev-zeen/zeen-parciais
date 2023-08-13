@@ -111,7 +111,9 @@ export function ClubPlayerCard({
 
           <View>
             <View className="flex-row items-center justify-center gap-x-1">
-              <Text className="text-sm font-semibold">{player.apelido}</Text>
+              <Text className="text-sm font-semibold">
+                {player.apelido_abreviado}
+              </Text>
               {isCapitain && (
                 <Image
                   source={captainImage}
@@ -129,7 +131,7 @@ export function ClubPlayerCard({
           </View>
         </View>
 
-        <View className="flex-row justify-between items-center w-20">
+        <View className="flex-row items-center justify-end gap-x-1 w-24">
           <Text
             className={`font-semibold text-sm ${
               scorePlayer(player) > 0
@@ -143,24 +145,23 @@ export function ClubPlayerCard({
               ? "-"
               : numberToString(scorePlayer(player))}
           </Text>
-          {appreciation && (
-            <View className="flex-row items-center justify-end w-10">
-              <Text
-                className={`text-xs font-semibold ${
-                  appreciation && appreciation < 0
-                    ? "text-folly"
-                    : "text-green-400"
-                }`}
-              >
-                {appreciation ? numberToString(appreciation) : null}
-              </Text>
+
+          {appreciation && currentRound === marketStatus?.rodada_atual && (
+            <Text
+              className={`w-12 text-xs font-semibold ${
+                appreciation && appreciation < 0
+                  ? "text-folly"
+                  : "text-green-400"
+              }`}
+            >
+              {appreciation ? numberToString(appreciation) : null}
               <Feather
                 name={
                   appreciation && appreciation < 0 ? "arrow-down" : "arrow-up"
                 }
                 color={appreciation && appreciation < 0 ? "#ef4444" : "#4ade80"}
               />
-            </View>
+            </Text>
           )}
         </View>
       </TouchableOpacity>

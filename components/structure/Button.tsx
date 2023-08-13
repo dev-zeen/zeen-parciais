@@ -40,13 +40,15 @@ export function Button({
         <Feather
           name={iconName}
           color={"white"}
-          size={20}
+          size={16}
           style={{
             paddingHorizontal: 4,
           }}
         />
       )}
-      {!onlyIcon && <Text className="font-medium text-sm">{title}</Text>}
+      {!onlyIcon && (
+        <Text className="text-sm font-semibold text-white">{title}</Text>
+      )}
     </TouchableOpacity>
   );
 }

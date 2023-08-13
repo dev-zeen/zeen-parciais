@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Modal,
   RefreshControl,
@@ -43,6 +50,8 @@ import {
 } from "./team.helpers";
 
 export default () => {
+  const firstRender = useRef(true);
+
   const router = useRouter();
 
   const colorTheme = useColorScheme();
@@ -61,7 +70,6 @@ export default () => {
 
   const {
     data: club,
-    isLoading: isLoadingClub,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
   } = useGetMyClub(allowRequests);
@@ -182,7 +190,7 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    if (club) {
+    if (club && firstRender.current) {
       const defaultLineup = fillLineupWithPlayers(
         club,
         (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number],
@@ -192,8 +200,10 @@ export default () => {
 
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
+
+      firstRender.current = false;
     }
-  }, []);
+  }, [club]);
 
   useEffect(() => {
     if (lineup) {
@@ -219,7 +229,7 @@ export default () => {
     );
   }
 
-  if (!club || isLoadingClub || !lineup) {
+  if (!club || !lineup) {
     return <Loading />;
   }
 
@@ -239,15 +249,15 @@ export default () => {
         >
           <MarketStatusCard />
 
-          <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-evenly">
-            <View className="justify-center items-center">
+          <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-around">
+            <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Patrim.</Text>
               <Text className="font-bold text-base">
                 {numberToString(club?.patrimonio)}
               </Text>
             </View>
 
-            <View className="justify-center items-center">
+            <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Preço</Text>
               <Text className="font-bold text-base text-green-500">
                 {numberToString(price)}
@@ -319,25 +329,16 @@ export default () => {
                 color: "#374151",
               }}
             />
+            {showSaveLineupButton && (
+              <Button
+                variant="success"
+                title="Confirmar"
+                onPress={() => console.log("Confirmar Escalação")}
+                iconName="check"
+                hasIcon
+              />
+            )}
           </View>
-
-          {/* <View
-          className="flex-row w-full justify-center items-center rounded-md p-3"
-          style={{
-            gap: 4,
-          }}>
-          <Icon name="info" size={14} />
-          <Text className="text-gray-200 text-xs">
-            Para selecionar o capitão, mantenha pressionado no jogador
-          </Text>
-        </View> */}
-
-          {showSaveLineupButton && (
-            <Button
-              title="Confirmar Escalação"
-              onPress={() => console.log("Confirmar Escalação")}
-            />
-          )}
 
           <SoccerField
             capitain={capitain}

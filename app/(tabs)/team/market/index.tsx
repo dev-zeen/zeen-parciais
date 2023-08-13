@@ -227,28 +227,26 @@ export default ({
         <View className="justify-between items-center flex-row rounded-lg mb-2 p-2">
           <TouchableOpacity
             onPress={handleCloseMarket}
-            className="p-2 rounded-full bg-white"
+            className="p-2 rounded-full border border-red-400 bg-red-300"
           >
-            <Feather name="x" color="#525252" size={30} />
+            <Feather name="x" color="#525252" size={24} />
           </TouchableOpacity>
 
-          <View className="flex-row justify-evenly">
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Valor atual</Text>
-              <Text className="font-bold text-xs text-green-500">
-                {numberToString(price)}
-              </Text>
-            </View>
-
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Restante</Text>
-              <Text className="font-bold text-xs text-green-500">
-                {numberToString(remainingValue)}
-              </Text>
-            </View>
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Valor atual</Text>
+            <Text className="font-bold text-xs text-green-500">
+              {numberToString(price)}
+            </Text>
           </View>
 
-          <TouchableOpacity className="p-2 bg-white rounded-full">
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Restante</Text>
+            <Text className="font-bold text-xs text-green-500">
+              {numberToString(remainingValue)}
+            </Text>
+          </View>
+
+          <TouchableOpacity className="p-2 bg-white border-2 border-gray-300 rounded-full">
             <Feather name="search" color="#525252" size={30} />
           </TouchableOpacity>
         </View>
@@ -288,10 +286,8 @@ export default ({
           </TouchableOpacity>
         </View>
 
-        {playerLowestPrice ? (
+        {playerLowestPrice && (
           <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />
-        ) : (
-          <></>
         )}
 
         <FlatList

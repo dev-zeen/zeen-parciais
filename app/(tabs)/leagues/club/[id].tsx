@@ -211,14 +211,19 @@ export default () => {
             </View>
           </View>
 
-          <View className="rounded-lg p-2 flex-row items-center justify-center">
+          <View className="rounded-lg p-2 flex-row items-center justify-center gap-x-2">
             <TouchableOpacity
+              className={`p-2 items-center justify-center mx-1 rounded-full border-2 ${
+                currentRound === 1
+                  ? "border-gray-300 bg-gray-100"
+                  : "border-blue-300 bg-blue-50"
+              }`}
               disabled={currentRound === 1}
               onPress={() => setCurrentRound((previous) => previous - 1)}
             >
               <Feather
                 name="chevron-left"
-                size={36}
+                size={24}
                 color={currentRound === 1 ? "#d1d5db" : "#3b82f6"}
               />
             </TouchableOpacity>
@@ -226,6 +231,11 @@ export default () => {
             <Text className="font-semibold">Rodada {currentRound}</Text>
 
             <TouchableOpacity
+              className={`p-2 items-center justify-center mx-1 rounded-full border-2 ${
+                currentRound === marketStatus?.rodada_atual
+                  ? "border-gray-300 bg-gray-100"
+                  : "border-blue-300 bg-blue-50"
+              }`}
               disabled={
                 isMarketClose
                   ? currentRound === marketStatus?.rodada_atual
@@ -235,7 +245,7 @@ export default () => {
             >
               <Feather
                 name="chevron-right"
-                size={36}
+                size={24}
                 color={
                   isMarketClose
                     ? currentRound === marketStatus?.rodada_atual

@@ -27,7 +27,7 @@ export function TeamPlayerCard({
 
   return (
     <View
-      className="flex-1 pt-40 rounded-lg"
+      className="flex-1 pt-64 px-4 pb-8 rounded-lg"
       style={{
         backgroundColor: "rgba(0, 0, 0, 0.5)",
       }}
@@ -49,12 +49,12 @@ export function TeamPlayerCard({
         </View>
 
         <ScrollView className="gap-y-4">
-          <View className="flex-1 flex-row items-center justify-center gap-x-1 mx-2">
+          <View className="flex-1 flex-row items-center justify-start gap-x-1 mx-2">
             <Image
               source={{
                 uri: player.foto.replace("FORMATO", "220x220"),
               }}
-              className="w-28 h-28 rounded-full mr-2"
+              className="w-32 h-32 rounded-full mr-2"
               style={{
                 borderWidth: 2,
                 borderColor: "#F5F5F5",
@@ -113,7 +113,7 @@ export function TeamPlayerCard({
             <View className="items-center justify-center bg-neutral-200 gap-y-1">
               <Text className="text-gray-800 font-semibold">Preço</Text>
               <Text className="text-gray-800 font-bold">
-                {numberToString(player.preco_num)}
+                C$ {numberToString(player.preco_num)}
               </Text>
             </View>
           </View>
