@@ -5,7 +5,11 @@ import Market from "@/app/(tabs)/team/market";
 import { Text, View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import { LineupPlayers, LineupPosition } from "@/models/Formations";
+import {
+  LineupPlayer,
+  LineupPlayers,
+  LineupPosition,
+} from "@/models/Formations";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 import { onGetPlayerLowestPrice } from "@/utils/team";
 
@@ -37,13 +41,6 @@ export function ListReservePlayers({
     (player: LineupPosition, playerIndex: number) => {
       const playersSamePositionFromLineupStarting = lineup.starting.filter(
         (item) => item.position === player.position
-      );
-
-      console.log(
-        "PLAYERS:",
-        playersSamePositionFromLineupStarting.map(
-          (item) => item.player?.apelido_abreviado
-        )
       );
 
       const isPlayersFilledInPosition =
@@ -87,7 +84,7 @@ export function ListReservePlayers({
             >
               {position && position.player ? (
                 <TeamPlayer
-                  player={position.player}
+                  player={position.player as LineupPlayer}
                   isPlayed={
                     playerStats?.atletas?.[position.player.atleta_id]
                       ?.entrou_em_campo
@@ -108,7 +105,12 @@ export function ListReservePlayers({
       </View>
 
       {showMarketModal && (
-        <Modal animationType="slide" transparent visible={showMarketModal}>
+        <Modal
+          animationType="slide"
+          transparent
+          visible={showMarketModal}
+          onRequestClose={() => setShowMarketModal(false)}
+        >
           <Market
             position={positionMarketSearch}
             handleCloseMarketModal={handleCloseMarketModal}

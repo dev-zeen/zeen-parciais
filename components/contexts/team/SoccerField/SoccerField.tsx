@@ -6,7 +6,7 @@ import footballField from "@/assets/images/field.png";
 import { View } from "@/components/Themed";
 import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton.tsx";
 import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import { LineupPosition } from "@/models/Formations";
+import { LineupPlayer, LineupPosition } from "@/models/Formations";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 
@@ -77,7 +77,7 @@ export function SoccerField({
           >
             {position.player ? (
               <TeamPlayer
-                player={position.player}
+                player={position.player as LineupPlayer}
                 hasCaptain={capitain === position.player?.atleta_id}
                 handleCapitain={handleChangeCapitain}
                 isPlayed={
@@ -98,7 +98,12 @@ export function SoccerField({
       })}
 
       {showMarketModal && (
-        <Modal animationType="slide" transparent visible={showMarketModal}>
+        <Modal
+          animationType="slide"
+          transparent
+          visible={showMarketModal}
+          onRequestClose={() => setShowMarketModal(false)}
+        >
           <Market
             position={positionMarketSearch}
             handleCloseMarketModal={handleCloseMarketModal}

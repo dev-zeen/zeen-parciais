@@ -47,7 +47,7 @@ export const useGetBestCaptainPlayers = (
 
 export const useGetPositions = () => useFetch<IPositions>(GET_POSITIONS);
 
-export const useGetAppreciations = (allowRequest?: boolean) => {
+export const useGetAppreciations = (allowRequest: boolean) => {
   return useFetch<Appreciations>(GET_APPRECIATIONS, undefined, {
     enabled: !!allowRequest,
     select: (data) => {

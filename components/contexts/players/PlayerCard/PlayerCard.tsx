@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from "react";
-import { Image, useColorScheme } from "react-native";
+import { useCallback, useContext, useMemo } from "react";
+import { Image } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
+import { AuthContext } from "@/contexts/Auth.context";
 import { Club } from "@/models/Club";
 import { Player, Position } from "@/models/Stats";
 import { GRAY_OPACITY } from "@/styles/colors";
@@ -24,7 +25,8 @@ export function PlayerCard({
   appreciation,
 }: PlayerCardProps) {
   const router = useRouter();
-  const colorTheme = useColorScheme();
+
+  const { isAutheticated } = useContext(AuthContext);
 
   const scoutsColors: { [key: string]: string } = useMemo(() => {
     return {
@@ -89,33 +91,35 @@ export function PlayerCard({
             <Text className="font-semibold ">{playerScore}</Text>
           </View>
 
-          <View className="flex-row items-center justify-end w-10">
-            <Text
-              className={`text-xs font-semibold ${
-                appreciation && appreciation < 0
-                  ? "text-folly"
-                  : "text-green-400"
-              }`}
-            >
-              {appreciation ? numberToString(appreciation) : "0,00"}
-            </Text>
-            <Feather
-              name={
-                !appreciation
-                  ? "arrow-left"
-                  : appreciation && appreciation < 0
-                  ? "arrow-down"
-                  : "arrow-up"
-              }
-              color={
-                !appreciation
-                  ? GRAY_OPACITY
-                  : appreciation && appreciation < 0
-                  ? "#ef4444"
-                  : "#4ade80"
-              }
-            />
-          </View>
+          {isAutheticated && (
+            <View className="flex-row items-center justify-end w-10">
+              <Text
+                className={`text-xs font-semibold ${
+                  appreciation && appreciation < 0
+                    ? "text-folly"
+                    : "text-green-400"
+                }`}
+              >
+                {appreciation ? numberToString(appreciation) : "0,00"}
+              </Text>
+              <Feather
+                name={
+                  !appreciation
+                    ? "arrow-left"
+                    : appreciation && appreciation < 0
+                    ? "arrow-down"
+                    : "arrow-up"
+                }
+                color={
+                  !appreciation
+                    ? GRAY_OPACITY
+                    : appreciation && appreciation < 0
+                    ? "#ef4444"
+                    : "#4ade80"
+                }
+              />
+            </View>
+          )}
         </View>
 
         <View className="flex-row">

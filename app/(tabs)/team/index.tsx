@@ -349,7 +349,7 @@ export default () => {
 
           {showModalPlayersToSell && (
             <Modal
-              animationType="slide"
+              animationType="fade"
               transparent
               visible={showModalPlayersToSell}
             >

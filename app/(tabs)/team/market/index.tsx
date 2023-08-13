@@ -314,6 +314,7 @@ export default ({
           visible={showFilterMarketModal}
           animationType="slide"
           transparent
+          onRequestClose={() => setShowFilterMarketModal(false)}
         >
           <MarketFilter handleClose={() => setShowFilterMarketModal(false)} />
         </Modal>

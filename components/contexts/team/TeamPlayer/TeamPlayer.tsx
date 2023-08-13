@@ -1,10 +1,11 @@
-import { useCallback } from "react";
-import { Image, TouchableOpacity } from "react-native";
+import { useCallback, useState } from "react";
+import { Image, Modal, TouchableOpacity } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
 import captainImage from "@/assets/images/letter-c.png";
 import { Text, View } from "@/components/Themed";
+import { TeamPlayerCard } from "@/components/contexts/team/TeamPlayerCard";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import {
   ENUM_STATUS_MARKET_PLAYER,
@@ -17,7 +18,7 @@ import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 
 type TeamPlayerProps = {
-  player?: LineupPlayer | FullPlayer;
+  player?: LineupPlayer;
   hasCaptain?: boolean;
   handleCapitain?: (id: number) => void;
   isPlayed?: boolean;
@@ -26,12 +27,18 @@ type TeamPlayerProps = {
 export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
   const { data: marketStatus } = useGetMarketStatus();
 
+  const [activePlayerCard, setActivePlayerCard] = useState(false);
+
   const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const removePlayerFromLineup = useTeamLineupStore(
     (state) => state.removePlayerFromLineup
   );
+
+  const handleModalPlayerCard = () => {
+    setActivePlayerCard((previous) => !previous);
+  };
 
   const handleRemovePlayerFromLayout = useCallback(
     (player: LineupPlayer | FullPlayer) => {
@@ -48,7 +55,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
     ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
     : (player as LineupPlayer)?.pontos_num;
 
-  const scoreFinal = isPlayed ? numberToString(scoreWithMarketStatus) : "---";
+  const scoreFinal = isPlayed ? numberToString(scoreWithMarketStatus) : "-";
 
   const playerPrice = numberToString(player?.preco_num);
 
@@ -67,7 +74,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
           {(player as LineupPlayer) ? (
             <Text
               numberOfLines={1}
-              className={`text-gray-400 font-semibold text-center text-xs`}
+              className={`text-gray-800 font-semibold text-center text-xs`}
             >
               {scoreFinal}
             </Text>
@@ -81,7 +88,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-100">
           <Text
             numberOfLines={1}
-            className="font-semibold text-xs text-gray-500"
+            className="font-semibold text-xs text-gray-800"
           >
             $ {playerPrice}
           </Text>
@@ -90,6 +97,7 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
 
       <TouchableOpacity
         activeOpacity={0.6}
+        onPress={handleModalPlayerCard}
         onLongPress={() =>
           handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)
         }
@@ -151,11 +159,25 @@ export function TeamPlayer({ player, hasCaptain, isPlayed }: TeamPlayerProps) {
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
-          className="font-semibold text-gray-500 text-center text-xs"
+          className="font-semibold text-gray-800 text-center text-xs"
         >
           {player?.apelido_abreviado}
         </Text>
       </View>
+
+      {activePlayerCard && (
+        <Modal
+          animationType="fade"
+          transparent
+          visible={activePlayerCard}
+          onRequestClose={() => setActivePlayerCard(false)}
+        >
+          <TeamPlayerCard
+            player={player as LineupPlayer}
+            onClose={handleModalPlayerCard}
+          />
+        </Modal>
+      )}
     </View>
   );
 }

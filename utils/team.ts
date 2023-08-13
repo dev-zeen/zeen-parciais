@@ -1,3 +1,4 @@
+import { PlayersToSell } from "@/app/(tabs)/team/team.helpers";
 import {
   LineupPlayer,
   LineupPlayers,
@@ -80,4 +81,23 @@ export function onGetPlayerLowestPrice(
 
     return acc;
   }, {} as LineupPosition);
+}
+
+export function onRemovePlayerFromSellPlayers(
+  playersSell: PlayersToSell[],
+  id: number
+) {
+  const updatedPlayerSell = playersSell
+    ?.map((position) => {
+      const updatedPlayers = position.players.filter(
+        (player) => player.player?.atleta_id !== id
+      );
+
+      return { ...position, players: updatedPlayers };
+    })
+    .filter(
+      (position) => position.players.length > position.quantityToNewFormation
+    );
+
+  return updatedPlayerSell;
 }

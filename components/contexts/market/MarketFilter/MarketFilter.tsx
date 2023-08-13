@@ -9,7 +9,7 @@ type MarketFilterProps = {
 
 export function MarketFilter({ handleClose }: MarketFilterProps) {
   return (
-    <View className="flex-1 mt-32 mx-2 rounded-lg">
+    <View className="flex-1 pt-32 mx-2 rounded-lg">
       <View
         className="items-center flex-row p-2 mx-2 rounded-lg mb-2"
         style={{

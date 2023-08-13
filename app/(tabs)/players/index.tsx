@@ -35,18 +35,14 @@ export default () => {
   const [currentAppreciations, setCurrentAppreciations] =
     useState<Appreciations>();
 
-  const { data: marketStatus, isLoading: IsLoadingMarketStatus } =
-    useGetMarketStatus();
+  const { data: marketStatus } = useGetMarketStatus();
 
   const { isAutheticated } = useContext(AuthContext);
 
+  const [allowRequest, setAllowRequest] = useState(false);
+
   const isMarketClose =
     marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
-
-  const allowRequest =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
   const {
     isRefetching: isRefetchingPlayersStats,
@@ -59,28 +55,6 @@ export default () => {
   const [filteredDataSource, setFilteredDataSource] = useState<
     Player[] | undefined
   >();
-
-  useEffect(() => {
-    onGetFromStorage<string>(CURRENT_STATS).then((res) => {
-      if (res) {
-        const statsFormated = JSON.parse(res);
-        const data = onGetPlayersPlayedMatch(statsFormated);
-        setFilteredDataSource(data);
-        setCurrentStats(statsFormated);
-      }
-    });
-    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-      if (res) {
-        setCurrentAppreciations(res);
-      }
-    });
-
-    return () => {
-      setCurrentAppreciations(undefined);
-      setFilteredDataSource(undefined);
-      setCurrentStats(undefined);
-    };
-  }, []);
 
   const onSearchFilter = useCallback(
     async (text: string) => {
@@ -106,9 +80,35 @@ export default () => {
   );
 
   const onRefetch = useCallback(async () => {
-    await onRefetchAppreciations();
+    allowRequest && (await onRefetchAppreciations());
     await onRefetchPlayersStats();
   }, [onRefetchAppreciations, onRefetchPlayersStats]);
+
+  useEffect(() => {
+    onGetFromStorage<string>(CURRENT_STATS).then((res) => {
+      if (res) {
+        const statsFormated = JSON.parse(res);
+        const data = onGetPlayersPlayedMatch(statsFormated);
+        setFilteredDataSource(data);
+        setCurrentStats(statsFormated);
+      }
+    });
+    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
+      if (res) {
+        setCurrentAppreciations(res);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (
+      isAutheticated &&
+      marketStatus &&
+      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
+    ) {
+      setAllowRequest(true);
+    }
+  }, [isAutheticated, marketStatus]);
 
   const isRefetching = isRefetchingPlayersStats;
 
@@ -122,7 +122,7 @@ export default () => {
           club={(currentStats as PlayerStats)?.clubes[String(player.clube_id)]}
           position={(currentStats as PlayerStats)?.posicoes[player.posicao_id]}
           appreciation={
-            (currentAppreciations as Appreciations).atletas?.[player.id]
+            (currentAppreciations as Appreciations)?.atletas?.[player.id]
               ?.variacao_num
           }
         />
@@ -153,12 +153,7 @@ export default () => {
     );
   }
 
-  if (
-    IsLoadingMarketStatus ||
-    !marketStatus ||
-    !currentAppreciations ||
-    !currentAppreciations.atletas
-  ) {
+  if (!marketStatus) {
     return <Loading />;
   }
 

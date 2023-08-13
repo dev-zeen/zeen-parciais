@@ -35,7 +35,7 @@ export function AddPlayerButton({
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
-          className="font-semibold text-gray-500 text-center uppercase text-xs"
+          className="font-semibold text-gray-800 text-center uppercase text-xs"
         >
           {positionLineup?.abbr}
         </Text>
