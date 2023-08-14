@@ -4,7 +4,7 @@ import { Player, PlayerStats } from "@/models/Stats";
 import { onSaveStorage } from "@/utils/asyncStorage";
 import { useFetch } from "@/utils/reactQuery";
 
-export const useGetScoredPlayers = (isMarketClose: boolean) =>
+export const useGetScoredPlayers = (isMarketClose?: boolean) =>
   useFetch<PlayerStats>(GET_SCORED_PLAYERS, undefined, {
     staleTime: isMarketClose ? 1000 * 60 : Infinity,
     select: (data) => {

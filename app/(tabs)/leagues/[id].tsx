@@ -227,7 +227,9 @@ export default () => {
 
   return (
     <SafeAreaViewContainer>
-      <View className={`${colorTheme === "dark" ? "bg-dark" : "bg-light"}`}>
+      <View
+        className={`${colorTheme === "dark" ? "bg-dark" : "bg-light"} gap-y-2`}
+      >
         <View className="flex-row justify-center items-center py-2 rounded-t-lg mx-2 mt-2">
           <Image
             source={{
@@ -265,6 +267,7 @@ export default () => {
         initialNumToRender={10}
         maxToRenderPerBatch={20}
         contentContainerStyle={{
+          marginTop: 4,
           paddingVertical: 4,
           marginHorizontal: 8,
           backgroundColor:

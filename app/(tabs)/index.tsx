@@ -217,14 +217,14 @@ export default () => {
               >
                 <TeamBanner team={club} />
               </TouchableOpacity>
-              <View className="flex-row justify-between items-center rounded-lg p-3">
-                <View className="justify-center items-center gap-1">
-                  <Text className="font-light text-xs">Patrim.</Text>
-                  <Text className="font-bold text-sm">
-                    {numberToString(club?.patrimonio)}
-                  </Text>
-                  {marketStatus?.status_mercado ===
-                    MARKET_STATUS_NAME.ABERTO && (
+              {!isMarketClose ? (
+                <View className="flex-row justify-around items-center rounded-lg py-2">
+                  <View className="justify-center items-center gap-1">
+                    <Text className="font-light text-xs">Patrim.</Text>
+                    <Text className="font-bold text-sm">
+                      {numberToString(club?.patrimonio)}
+                    </Text>
+
                     <Text
                       className={`text-sm font-semibold ${
                         club?.variacao_patrimonio > 0
@@ -234,26 +234,15 @@ export default () => {
                     >
                       {numberToString(club?.variacao_patrimonio)}
                     </Text>
-                  )}
-                </View>
+                  </View>
 
-                <View className="justify-center items-center gap-1">
-                  <Text className="font-light text-xs">
-                    {isMarketClose ? "Parcial" : "Ult. Rodada"}
-                  </Text>
+                  <View className="justify-center items-center gap-1">
+                    <Text className="font-light text-xs">Ult. Rodada</Text>
 
-                  {isMarketClose ? (
-                    <Text className="font-bold text-sm text-green-500">
-                      {numberToString(myPartialPoints)}
-                    </Text>
-                  ) : (
                     <Text className="font-bold text-sm">
                       {numberToString(club?.pontos)}
                     </Text>
-                  )}
 
-                  {marketStatus?.status_mercado ===
-                    MARKET_STATUS_NAME.ABERTO && (
                     <Text
                       className={`text-sm font-semibold ${
                         club?.variacao_pontos > 0
@@ -263,37 +252,47 @@ export default () => {
                     >
                       {numberToString(club?.variacao_pontos)}
                     </Text>
-                  )}
-                </View>
+                  </View>
 
-                <View className="justify-center items-center gap-1">
-                  <Text className="font-light text-xs">
-                    {isMarketClose ? "Total Parcial" : "Total"}
-                  </Text>
-                  {isMarketClose && myPartialPoints ? (
-                    <Text className="font-bold text-sm text-green-500">
+                  <View className="justify-center items-center gap-1">
+                    <Text className="font-light text-xs">
+                      {isMarketClose ? "Total Parcial" : "Total"}
+                    </Text>
+                    <Text className="font-bold text-sm">
+                      {numberToString(club?.pontos_campeonato)}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View
+                  className={`flex-row justify-between items-center gap-2 ${
+                    colorTheme === "dark" ? `bg-dark` : "bg-light"
+                  }`}
+                >
+                  <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+                    <Text className="font-semibold text-xs">Parcial</Text>
+                    <Text className="font-bold text-lg text-green-500">
+                      {numberToString(myPartialPoints)}
+                    </Text>
+                  </View>
+                  <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+                    <Text className="font-semibold text-xs">Total</Text>
+
+                    <Text className="font-bold text-lg text-green-500">
                       {numberToString(
                         club?.pontos_campeonato + myPartialPoints
                       )}
                     </Text>
-                  ) : (
-                    <Text className="font-bold text-sm">
-                      {numberToString(club?.pontos_campeonato)}
-                    </Text>
-                  )}
-                </View>
+                  </View>
+                  <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+                    <Text className="font-semibold text-xs">Pontuados</Text>
 
-                {marketStatus?.status_mercado ===
-                  MARKET_STATUS_NAME.FECHADO && (
-                  <View className="justify-center items-center gap-1">
-                    <Text className="font-light text-xs">Pontuados</Text>
-
-                    <Text className="text-sm font-semibold">
+                    <Text className="font-bold text-lg text-green-500">
                       {`${playersHaveAlreadyPlayed || "0"}/12`}
                     </Text>
                   </View>
-                )}
-              </View>
+                </View>
+              )}
 
               <View className="p-2 rounded-lg">
                 <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">
@@ -337,7 +336,7 @@ export default () => {
                                 ?.pontuacao
                             )}
                           </Text>
-                          <Text className="text-sm font-light">*1.5</Text>
+                          <Text className="text-xs font-semibold"> * 1.5</Text>
                         </View>
 
                         <Text
@@ -379,33 +378,3 @@ export default () => {
     </SafeAreaViewContainer>
   );
 };
-
-// const { isAutheticated, handleUnautenticated, handleSuccessAuth } =
-// useContext(AuthContext);
-
-// const { removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
-
-// const handleLogout = async () => {
-//   try {
-//     await removeItem().then(async (_response) => {
-//       handleUnautenticated();
-//     });
-//   } catch (exception) {
-//   }
-// };
-
-// <TouchableOpacity
-//   activeOpacity={0.6}
-//   className={`justify-center flex-row items-center rounded-lg px-4 py-2 mb-2 mx-auto`}
-//   onPress={() => {
-//     setShowModalLogout(true);
-//     handleLogout();
-//   }}
-// >
-//   <Text className={`font-normal text-xs`}>Sair</Text>
-//   <Feather
-//     name="log-out"
-//     size={24}
-//     color={colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint}
-//   />
-// </TouchableOpacity>;

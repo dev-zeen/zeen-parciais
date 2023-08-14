@@ -211,7 +211,12 @@ export default () => {
             </View>
           </View>
 
-          <View className="rounded-lg p-2 flex-row items-center justify-center gap-x-2">
+          <View
+            className="rounded-lg p-2 flex-row items-center justify-center"
+            style={{
+              gap: 8,
+            }}
+          >
             <TouchableOpacity
               className={`p-2 items-center justify-center mx-1 rounded-full border-2 ${
                 currentRound === 1

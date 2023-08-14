@@ -10,10 +10,13 @@ import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
+import { FullPlayer } from "@/models/Stats";
 import { useGetHistoricMyClub, useGetMyClub } from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
+import { onCalculatePartialScore } from "@/utils/partials";
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -21,6 +24,11 @@ export default () => {
   const { isAutheticated } = useContext(AuthContext);
 
   const { data: marketStatus } = useGetMarketStatus();
+
+  const isMarketClose =
+    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const allowRequests = marketStatus
     ? isAutheticated &&
@@ -39,7 +47,16 @@ export default () => {
   const [highestScore, setHighestScore] = useState<TeamHistoryRound>();
   const [lowestScore, setLowestScore] = useState<TeamHistoryRound>();
 
-  const totalScore = club && numberToString(club?.pontos_campeonato);
+  const myPartialPoints = onCalculatePartialScore(
+    club?.atletas as FullPlayer[],
+    club?.capitao_id as number,
+    playerStats
+  );
+
+  const totalScore = numberToString(
+    (club?.pontos_campeonato as number) + (isMarketClose ? myPartialPoints : 0)
+  );
+
   const totalPatrimony = club && numberToString(club?.patrimonio);
 
   const isLoading = isLoadingHistory || !club;

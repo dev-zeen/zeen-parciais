@@ -1,6 +1,5 @@
 import { ReactNode, useState } from "react";
-
-import { Text, TouchableOpacity, View } from "@/components/Themed";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export type ITabs = {
   id: number;
@@ -30,7 +29,7 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
   return (
     <>
       <View
-        className="flex-row items-center justify-center px-2 mb-1"
+        className="flex-row p-1 items-center justify-center bg-gray-200 rounded"
         style={{
           gap: 4,
         }}
@@ -39,23 +38,15 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
           <TouchableOpacity
             activeOpacity={0.6}
             key={tab.id}
-            className={`flex-1 p-2 items-center justify-evenly rounded border-2 border-gray-200 mb-1 ${
-              activeTab === index && "border-2 border-blue-500 "
+            className={`flex-1 p-2 items-center justify-evenly rounded ${
+              activeTab === index ? "bg-white" : "bg-gray-200 opacity-50"
             }`}
             onPress={() => {
               tab?.onPress && tab?.onPress();
               handlePress(index);
             }}
           >
-            <Text
-              className={` ${
-                activeTab === index
-                  ? "font-medium text-xs"
-                  : "font-normal text-xs"
-              }`}
-            >
-              {tab.title}
-            </Text>
+            <Text className={` font-semibold text-xs`}>{tab.title}</Text>
           </TouchableOpacity>
         ))}
       </View>

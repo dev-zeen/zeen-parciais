@@ -321,7 +321,7 @@ export default () => {
                 borderRadius: 16,
                 maxWidth: 100,
                 maxHeight: 40,
-                backgroundColor: "#f5f5f5",
+                backgroundColor: isMarketClose ? "#c5c5c5" : "#f5f5f5",
               }}
               buttonTextStyle={{
                 fontSize: 14,
