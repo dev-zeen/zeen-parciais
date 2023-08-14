@@ -26,7 +26,7 @@ export default () => {
   const { data: marketStatus } = useGetMarketStatus();
 
   const isMarketClose =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 

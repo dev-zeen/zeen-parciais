@@ -36,7 +36,7 @@ export function TeamPlayer({
   const [activePlayerCard, setActivePlayerCard] = useState(false);
 
   const isMarketClose =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const removePlayerFromLineup = useTeamLineupStore(
     (state) => state.removePlayerFromLineup
@@ -48,6 +48,7 @@ export function TeamPlayer({
 
   const handleRemovePlayerFromLayout = useCallback(
     (player: LineupPlayer | FullPlayer) => {
+      if (isMarketClose) return;
       removePlayerFromLineup(player);
     },
     []

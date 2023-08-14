@@ -1,9 +1,10 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Text, View } from "@/components/Themed";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FullPlayer } from "@/models/Stats";
-import { useGetMarket } from "@/queries/market.query";
+import { useGetMarket, useGetMarketStatus } from "@/queries/market.query";
 import { useGetPositions } from "@/queries/players.query";
 import { numberToString } from "@/utils/parseTo";
 import { Feather } from "@expo/vector-icons";
@@ -25,6 +26,11 @@ export function MarketPlayerCard({
 }: MarketPlayerCardProps) {
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
+
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const isMarketClose =
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   return (
     <View
@@ -179,16 +185,24 @@ export function MarketPlayerCard({
                 activeOpacity={0.6}
               >
                 <Text className="text-white text-sm font-semibold">
-                  {isButtonDisabled ? "Indisp." : "Comprar"}
+                  {isButtonDisabled || isMarketClose ? "Indisp." : "Comprar"}
                 </Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                style={[styles.playerButton, styles.sellPlayerButton]}
+                disabled={isMarketClose}
+                style={[
+                  styles.playerButton,
+                  !isMarketClose
+                    ? styles.sellPlayerButton
+                    : styles.purchasePlayerButtonDisabled,
+                ]}
                 onPress={() => onPressRemovePlayerFromLineup(player)}
                 activeOpacity={0.6}
               >
-                <Text className="text-white text-sm font-semibold">Vender</Text>
+                <Text className="text-white text-sm font-semibold">
+                  {isMarketClose ? "Indisp." : "Vender"}
+                </Text>
               </TouchableOpacity>
             )}
           </View>

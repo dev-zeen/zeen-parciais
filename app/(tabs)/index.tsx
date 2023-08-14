@@ -54,7 +54,7 @@ export default () => {
   } = useGetMarketStatus();
 
   const isMarketClose =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const allowRequests =
     isAutheticated &&

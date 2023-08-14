@@ -28,8 +28,11 @@ export default function () {
 
   const { data: marketStatus } = useGetMarketStatus();
 
+  const isMarketClose =
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
   useEffect(() => {
-    if (marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO) {
+    if (isMarketClose) {
       const privateLeagues = dataLeagues?.ligas
         .filter((item) => item.time_dono_id)
         .sort((a, b) => b.time_dono_id - a.time_dono_id);

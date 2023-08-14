@@ -52,6 +52,8 @@ export default ({
   const lineup = useTeamLineupStore((state) => state.lineup);
   const updatePrice = useTeamLineupStore((state) => state.updatePrice);
   const price = useTeamLineupStore((state) => state.price);
+  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const capitain = useTeamLineupStore((state) => state.capitain);
 
   const remainingValue = useMemo(() => {
     if (club && price) {
@@ -120,9 +122,10 @@ export default ({
         player
       );
 
+      if (capitain === player.atleta_id) updateCapitain(0);
+
       const newPrice = onGetTeamPrice(lineupUpdated.starting);
       updatePrice(newPrice);
-
       upateLineup(lineupUpdated);
     },
     []

@@ -1,12 +1,18 @@
+import { useCallback } from "react";
 import { Image, ScrollView, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
+import { Loading } from "@/components/structure/Loading";
 import { LineupPlayer } from "@/models/Formations";
-import { useGetMarket } from "@/queries/market.query";
+import { useGetMarket, useGetMarketStatus } from "@/queries/market.query";
 import { useGetPositions } from "@/queries/players.query";
+import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
+
+import captainImage from "@/assets/images/letter-c.png";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
 
 type TeamPlayerCardProps = {
   player: LineupPlayer;
@@ -21,9 +27,33 @@ export function TeamPlayerCard({
 }: TeamPlayerCardProps) {
   const colorTheme = useColorScheme();
 
-  const { data: positions } = useGetPositions();
+  const capitain = useTeamLineupStore((state) => state.capitain);
+  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
+  const isCapitain = capitain === player.atleta_id;
+
+  const lineup = useTeamLineupStore((state) => state.lineup);
+  const removePlayer = useTeamLineupStore(
+    (state) => state.removePlayerFromLineup
+  );
+
+  const { data: positions } = useGetPositions();
   const { data: market } = useGetMarket();
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const isMarketClose =
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
+  const handleSelectCapitain = useCallback(() => {
+    updateCapitain(player.atleta_id);
+  }, [capitain]);
+
+  const handleRemovePlayerFromLineup = useCallback(() => {
+    removePlayer(player);
+    onClose();
+  }, [lineup]);
+
+  if (!positions || !market || !marketStatus) return <Loading />;
 
   return (
     <View
@@ -49,7 +79,7 @@ export function TeamPlayerCard({
         </View>
 
         <ScrollView className="gap-y-4">
-          <View className="flex-1 flex-row items-center justify-start gap-x-1 mx-2">
+          <View className="flex-1 flex-row items-center justify-between px-8">
             <Image
               source={{
                 uri: player.foto.replace("FORMATO", "220x220"),
@@ -68,9 +98,23 @@ export function TeamPlayerCard({
                 gap: 4,
               }}
             >
-              <Text className="font-light text-base">
-                {positions?.[player.posicao_id].nome}
-              </Text>
+              <View
+                className="flex-row items-center"
+                style={{
+                  gap: 8,
+                }}
+              >
+                {isCapitain && (
+                  <Image
+                    source={captainImage}
+                    className="w-8 h-8 overflow-hidden"
+                    alt={`Foto do ${player?.apelido}`}
+                  />
+                )}
+                <Text className="font-light text-base">
+                  {positions?.[player.posicao_id].nome}
+                </Text>
+              </View>
 
               <Text className="font-semibold text-xl">{player.apelido}</Text>
               <View className="flex-row items-center justify-center">
@@ -118,26 +162,35 @@ export function TeamPlayerCard({
             </View>
           </View>
 
-          {!isReservePlayer && (
-            <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
-              <TouchableOpacity
-                activeOpacity={0.6}
-                className={`border-2 border-violet-500 ${
-                  colorTheme === "dark" ? "bg-violet-500" : "bg-violet-200"
-                } p-3 rounded-lg`}
-              >
-                <Text>Tornar Capitão</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                activeOpacity={0.6}
-                className={`border-2 border-red-500 ${
-                  colorTheme === "dark" ? "bg-red-500" : "bg-red-200"
-                } p-3 rounded-lg`}
-              >
-                <Text>Vender Jogador</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {!isReservePlayer ||
+            (isMarketClose && (
+              <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
+                {!isCapitain && (
+                  <TouchableOpacity
+                    onPress={handleSelectCapitain}
+                    disabled={isCapitain}
+                    activeOpacity={0.6}
+                    className={`${
+                      isCapitain ? "F5F5F5" : "border-2 border-violet-500"
+                    }  ${
+                      colorTheme === "dark" ? "bg-violet-500" : "bg-violet-200"
+                    } p-3 rounded-lg`}
+                  >
+                    <Text>Tornar Capitão</Text>
+                  </TouchableOpacity>
+                )}
+
+                <TouchableOpacity
+                  onPress={handleRemovePlayerFromLineup}
+                  activeOpacity={0.6}
+                  className={`border-2 border-red-500 ${
+                    colorTheme === "dark" ? "bg-red-500" : "bg-red-200"
+                  } p-3 rounded-lg`}
+                >
+                  <Text>Vender Jogador</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
         </ScrollView>
       </View>
     </View>

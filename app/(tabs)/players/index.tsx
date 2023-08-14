@@ -42,7 +42,7 @@ export default () => {
   const [allowRequest, setAllowRequest] = useState(false);
 
   const isMarketClose =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const {
     isRefetching: isRefetchingPlayersStats,

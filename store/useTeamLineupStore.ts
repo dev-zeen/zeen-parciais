@@ -43,6 +43,7 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
 
       return {
         lineup: lineupUpdated,
+        capitain: player.atleta_id === state.capitain ? 0 : state.capitain,
       };
     });
   },

@@ -66,7 +66,7 @@ export default () => {
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
   const isMarketClose =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const {
     data: club,
@@ -229,7 +229,7 @@ export default () => {
     );
   }
 
-  if (!club || !lineup) {
+  if (!club || !lineup || !tacticalFormation) {
     return <Loading />;
   }
 

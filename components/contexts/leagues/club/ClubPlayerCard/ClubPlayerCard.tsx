@@ -40,7 +40,7 @@ export function ClubPlayerCard({
   const { data: positions } = useGetPositions();
 
   const isMarketClose =
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const scorePlayer = useCallback(
     (player: FullPlayer) => {
