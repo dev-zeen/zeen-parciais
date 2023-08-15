@@ -15,21 +15,16 @@ import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard"
 import { PlayerLowestCard } from "@/components/contexts/market/PlayerLowestCard.tsx";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import {
-  LineupPlayer,
-  LineupPlayers,
-  LineupPosition,
-} from "@/models/Formations";
-import { Market as MarketModel } from "@/models/Market";
+import { LineupPlayer, LineupPosition } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club.query";
 import { useGetMarket } from "@/queries/market.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
+import { filterAndSortPlayersFromMarket } from "@/utils/market";
 import { numberToString } from "@/utils/parseTo";
 
 type MarketProps = {
-  position?: LineupPosition | null;
+  position?: LineupPosition | null | undefined;
   playerIndex?: number;
   playerLowestPrice?: LineupPlayer | FullPlayer;
   handleCloseMarketModal?: () => void;
@@ -47,12 +42,8 @@ export default ({
   const { data: club } = useGetMyClub(allowRequest);
   const { data: marketData } = useGetMarket();
 
-  const upateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
-  const updatePrice = useTeamLineupStore((state) => state.updatePrice);
   const price = useTeamLineupStore((state) => state.price);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
-  const capitain = useTeamLineupStore((state) => state.capitain);
   const addPlayerToLineup = useTeamLineupStore(
     (state) => state.addPlayerToLineup
   );
@@ -85,45 +76,26 @@ export default ({
     []
   );
 
-  const handleRemovePlayerFromLineup = useCallback(
-    (lineup: LineupPlayers, player: FullPlayer) => {
-      removePlayerFromLineup(player);
-    },
-    []
-  );
+  const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {
+    removePlayerFromLineup(player);
+  }, []);
 
   const handleShowMarketFilters = useCallback(() => {
     setShowFilterMarketModal((previous) => !previous);
   }, []);
 
   useEffect(() => {
-    const filterAndSortPlayers = (
-      data: MarketModel,
-      position?: LineupPosition
-    ) => {
-      const marketPlayers = data.atletas
-        .filter(
-          (item) =>
-            (!position || item.posicao_id === position.position) &&
-            item.status_id === ENUM_STATUS_MARKET_PLAYER.PROVAVEL
-        )
-        .sort((a, b) => b.preco_num - a.preco_num);
-
-      if (playerLowestPrice) {
-        return marketPlayers.filter(
-          (item) => item.preco_num < playerLowestPrice.preco_num
-        );
-      }
-      return marketPlayers;
-    };
-
     if (marketData) {
       if (position) {
         setSearchPlayerParam(position);
-        const marketPlayersUpdated = filterAndSortPlayers(marketData, position);
+        const marketPlayersUpdated = filterAndSortPlayersFromMarket(
+          marketData,
+          position,
+          playerLowestPrice
+        );
         setMarketPlayers(marketPlayersUpdated);
       } else {
-        const marketPlayersLikely = filterAndSortPlayers(marketData);
+        const marketPlayersLikely = filterAndSortPlayersFromMarket(marketData);
         setMarketPlayers(marketPlayersLikely);
       }
     }
@@ -154,7 +126,7 @@ export default ({
             handleAddPlayerToLineup(player, playerIndex)
           }
           onPressRemovePlayerFromLineup={() =>
-            handleRemovePlayerFromLineup(lineup as LineupPlayers, player)
+            handleRemovePlayerFromLineup(player)
           }
           isButtonDisabled={
             player.preco_num > remainingValue ||

@@ -1,6 +1,7 @@
 import { Image, StyleSheet, TouchableOpacity } from "react-native";
 
 import { Text, View } from "@/components/Themed";
+import { Loading } from "@/components/structure/Loading";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FullPlayer } from "@/models/Stats";
@@ -32,6 +33,8 @@ export function MarketPlayerCard({
   const isMarketClose =
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
+  if (!market || !positions || !marketStatus) return <Loading />;
+
   return (
     <View
       className={`rounded-lg flex-row items-center justify-between p-2`}
@@ -53,10 +56,10 @@ export function MarketPlayerCard({
             width: 22,
             height: 22,
             borderRadius: 10,
+            alignItems: "center",
+            justifyContent: "center",
             backgroundColor:
               OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.background,
-            justifyContent: "center",
-            alignItems: "center",
           }}
         >
           <Feather

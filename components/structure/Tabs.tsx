@@ -23,7 +23,7 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
 
   const onRenderTabContent = (): ReactNode => {
     const tab = tabs[activeTab];
-    return <View className="">{tab.content && tab.content()}</View>;
+    return <View>{tab.content && tab.content()}</View>;
   };
 
   return (

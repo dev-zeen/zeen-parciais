@@ -190,7 +190,7 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    if (club && firstRender.current) {
+    if (!lineup && club && firstRender.current) {
       const defaultLineup = fillLineupWithPlayers(
         club,
         (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number],

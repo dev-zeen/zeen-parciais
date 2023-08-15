@@ -187,8 +187,8 @@ export function fillLineupOnChangeTacticalFormation(
 export function fillLineupWithPlayers(
   club: FullClubInfo,
   lineup: string,
-  playerStats: PlayerStats,
-  isMarketClose: boolean
+  playerStats?: PlayerStats,
+  isMarketClose?: boolean
 ): LineupPlayers {
   const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[lineup]);
 
