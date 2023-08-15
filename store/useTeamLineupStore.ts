@@ -9,6 +9,7 @@ type TeamLineupStore = {
   updateCapitain: (value: number) => void;
   updatePrice: (value: number) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
+  addPlayerToLineup: (player: LineupPlayer | FullPlayer) => void;
   price: number | undefined;
   lineup: LineupPlayers | undefined;
   capitain: number;
@@ -45,6 +46,11 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
         lineup: lineupUpdated,
         capitain: player.atleta_id === state.capitain ? 0 : state.capitain,
       };
+    });
+  },
+  addPlayerToLineup: (player: LineupPlayer | FullPlayer) => {
+    set((state) => {
+      return {};
     });
   },
 }));

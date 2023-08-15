@@ -22,7 +22,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
   const colorTheme = useColorScheme();
 
   const onPressHandler = useCallback(() => {
-    router.push(`/matches/${match.partida_id}`);
+    router.push(`/matches/${JSON.stringify(match)}`);
   }, []);
 
   return (
@@ -30,82 +30,93 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={onPressHandler}
-        className="justify-center items-center p-2 mx-2 rounded-lg"
+        className="w-full justify-center items-center p-2 rounded-lg "
       >
-        <View className="flex-row gap-x-1 justify-center items-center mb-3 ">
-          <Text className=" font-medium text-xs">
-            {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
-              locale: ptBR,
-            })}
-          </Text>
-          <View
-            style={{
-              backgroundColor:
-                colorTheme === "dark"
-                  ? Colors.dark.tabIconDefault
-                  : Colors.light.tabIconDefault,
-            }}
-            className={`w-1 h-1  rounded-full`}
-          />
-          <Text className="font-medium text-xs">{match.local}</Text>
-        </View>
+        <Text className=" font-medium text-xs">
+          {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
+            locale: ptBR,
+          })}
+        </Text>
 
         <View
-          className={`flex-row justify-center items-center p-2 ${
+          className={`flex-row py-2 px-4 w-full items-center justify-between ${
             match.status_transmissao_tr === "CRIADA" && "mb-4"
           }`}
           style={{
-            gap: 4,
+            gap: 24,
           }}
         >
-          <View className="flex-row" style={{ gap: 4 }}>
-            <View className="flex-row items-center justify-center">
-              <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
-            </View>
-
-            <View className="flex-row items-center justify-center">
-              <Text className="font-semibold">{homeClub?.abreviacao}</Text>
-            </View>
-
+          <View className="justify-center items-center" style={{ gap: 4 }}>
             <Image
               source={{
                 uri: homeClub?.escudos["60x60"],
               }}
-              className="w-7 h-7"
+              className="w-10 h-10"
               alt={`Escudo do ${homeClub?.nome}`}
             />
+            <View
+              className="flex-row"
+              style={{
+                gap: 8,
+              }}
+            >
+              <Text className="font-semibold">{homeClub?.abreviacao}</Text>
+
+              <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
+            </View>
           </View>
 
-          <View className="flex-row justify-center items-center">
-            <Text className="font-semibold">
-              {match.placar_oficial_mandante ?? ""}
-            </Text>
+          <View
+            className="items-center justify-center"
+            style={{
+              gap: 4,
+            }}
+          >
+            <View
+              className={`flex-row justify-center items-center border rounded ${
+                colorTheme === "dark" ? "border-gray-400" : "border-gray-300"
+              } px-3 py-1`}
+              style={{
+                gap: 8,
+              }}
+            >
+              <Text className="font-semibold text-base">
+                {match.placar_oficial_mandante ?? "-"}
+              </Text>
 
-            <Feather
-              name="x"
-              size={18}
-              color={colorTheme === "dark" ? "white" : Colors.light.text}
-            />
+              <Feather
+                name="x"
+                size={16}
+                color={
+                  colorTheme === "dark"
+                    ? Colors.light.background
+                    : Colors.dark.background
+                }
+              />
 
-            <Text className="font-semibold">
-              {match.placar_oficial_visitante ?? ""}
-            </Text>
+              <Text className="font-semibold text-base ">
+                {match.placar_oficial_visitante ?? "-"}
+              </Text>
+            </View>
+            <Text className="text-xs">{match.local}</Text>
           </View>
-          <View className="flex-row" style={{ gap: 4 }}>
+
+          <View className="justify-center items-center" style={{ gap: 4 }}>
             <Image
               source={{
                 uri: awayClub?.escudos["60x60"],
               }}
-              className="w-7 h-7"
+              className="w-10 h-10"
               alt={`Escudo do ${awayClub?.nome}`}
             />
-
-            <View className="flex-row items-center justify-center">
+            <View
+              className="flex-row"
+              style={{
+                gap: 8,
+              }}
+            >
               <Text className="font-semibold">{awayClub?.abreviacao}</Text>
-            </View>
-
-            <View className="flex-row items-center justify-center">
-              <Text className="font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
+              <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
             </View>
           </View>
         </View>

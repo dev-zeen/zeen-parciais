@@ -70,13 +70,10 @@ export default ({
 
   const handleAddPlayerToLineup = useCallback(
     (lineup: LineupPlayers, player: FullPlayer, targetIndex?: number) => {
-      if (!lineup) {
-        return;
-      }
-
       const playersUpdated = playerLowestPrice
         ? [...(lineup.reserves || [])]
         : [...(lineup.starting || [])];
+
       const addPlayerToIndex = (index: number) => {
         if (!playersUpdated[index].player) {
           playersUpdated[index].player = player;

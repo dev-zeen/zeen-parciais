@@ -17,6 +17,7 @@ export function Providers({ children }: ProvidersProps): ReactNode {
       queries: {
         retry: 1,
         useErrorBoundary: true,
+        refetchOnReconnect: true,
       },
     },
   });

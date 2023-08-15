@@ -21,6 +21,7 @@ import { Text, View } from "@/components/Themed";
 import { ListPlayersSale } from "@/components/contexts/team/ListPlayersSale/ListPlayersSale";
 import { ListReservePlayers } from "@/components/contexts/team/ListReservePlayers";
 import { SoccerField } from "@/components/contexts/team/SoccerField";
+import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { Button } from "@/components/structure/Button";
 import { Loading } from "@/components/structure/Loading";
@@ -39,7 +40,6 @@ import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 import { isLineupComplete, onGetTeamPrice } from "@/utils/team";
 
-import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import {
   PlayersToSell,
   clearLineup,
@@ -167,9 +167,8 @@ export default () => {
     await handleResetClub();
   }, [handleResetClub, onRefetchStats]);
 
-  const listDefaultLineups = useMemo(
-    () => Object.entries(LINEUPS_DEFAULT_OBJECT).map(([_key, value]) => value),
-    []
+  const listDefaultLineups = Object.entries(LINEUPS_DEFAULT_OBJECT).map(
+    ([_key, value]) => value
   );
 
   const handleSellAllPlayers = useCallback(() => {
