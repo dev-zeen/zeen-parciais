@@ -19,9 +19,8 @@ import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContai
 import { ITabs, Tabs } from "@/components/structure/Tabs";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
-import { FullClubInfo } from "@/models/Club";
-import { FullPlayer, IPositions, PlayerStats } from "@/models/Stats";
-import { useGetMyClub } from "@/queries/club.query";
+import { IPositions } from "@/models/Stats";
+import { useGetMatchSubstitutions, useGetMyClub } from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
 import {
   useGetBestCaptainPlayers,
@@ -34,6 +33,7 @@ import { numberToString } from "@/utils/parseTo";
 import {
   onCalculatePartialScore,
   onGetPlayersHaveAlreadyPlayed,
+  onUpdateTeamWithSubstitutedPlayers,
 } from "@/utils/partials";
 
 export default () => {
@@ -77,11 +77,11 @@ export default () => {
 
   const { data: positions, refetch: onRefetchPositions } = useGetPositions();
 
-  const myPartialPoints = onCalculatePartialScore(
-    club?.atletas as FullPlayer[],
-    club?.capitao_id as number,
-    playerStats
-  );
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: club?.time.time_id,
+  });
+
+  const [partialPoints, setPartialPoints] = useState(0);
 
   const teamCapitain =
     club && club.atletas.find((item) => item.atleta_id === club.capitao_id);
@@ -106,16 +106,6 @@ export default () => {
   useEffect(() => {
     if (topPlayers && topPlayers?.length > 0) setHighlights(true);
   }, [topPlayers]);
-
-  useEffect(() => {
-    if (club && playerStats) {
-      const countPlayersPlayed = onGetPlayersHaveAlreadyPlayed(
-        club as FullClubInfo,
-        playerStats as PlayerStats
-      );
-      setPlayersHaveAlreadyPlayed(countPlayersPlayed);
-    }
-  }, [club, playerStats]);
 
   const playersTabs: ITabs[] = useMemo(
     () => [
@@ -172,6 +162,32 @@ export default () => {
   const onPressHandler = useCallback(() => {
     router.push(`/profile/${club?.time.time_id}`);
   }, []);
+
+  useEffect(() => {
+    if (club && isMarketClose) {
+      const { playersUpdated } = onUpdateTeamWithSubstitutedPlayers(
+        club,
+        substitutions
+      );
+
+      const myPartialPoints = onCalculatePartialScore(
+        playersUpdated,
+        club.capitao_id as number,
+        playerStats
+      );
+
+      setPartialPoints(myPartialPoints);
+
+      if (playersUpdated && playerStats) {
+        const countPlayersPlayed = onGetPlayersHaveAlreadyPlayed(
+          playersUpdated,
+          playerStats
+        );
+
+        setPlayersHaveAlreadyPlayed(countPlayersPlayed);
+      }
+    }
+  }, [club, substitutions, playerStats, isMarketClose]);
 
   const isLoading = isAutheticated
     ? IsLoadingMarketStatus || !positions || IsLoadingMarketStatus || !club
@@ -272,16 +288,14 @@ export default () => {
                   <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
                     <Text className="font-semibold text-xs">Parcial</Text>
                     <Text className="font-bold text-lg text-green-500">
-                      {numberToString(myPartialPoints)}
+                      {numberToString(partialPoints)}
                     </Text>
                   </View>
                   <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
                     <Text className="font-semibold text-xs">Total</Text>
 
                     <Text className="font-bold text-lg text-green-500">
-                      {numberToString(
-                        club?.pontos_campeonato + myPartialPoints
-                      )}
+                      {numberToString(club?.pontos_campeonato + partialPoints)}
                     </Text>
                   </View>
                   <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">

@@ -272,7 +272,7 @@ export default () => {
           marginHorizontal: 8,
           backgroundColor:
             colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
-          gap: 4,
+          gap: 6,
         }}
       />
 

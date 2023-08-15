@@ -229,7 +229,7 @@ export default () => {
     );
   }
 
-  if (!club || !lineup || !tacticalFormation) {
+  if (!club || !lineup) {
     return <Loading />;
   }
 
@@ -265,17 +265,20 @@ export default () => {
             </View>
 
             <Button
-              variant="error"
+              variant={isMarketClose ? "disabled" : "error"}
               onPress={handleSellAllPlayers}
               onlyIcon
               hasIcon
               iconName="trash"
+              disabled={isMarketClose}
             />
             <Button
               onPress={handleResetClub}
+              variant={isMarketClose ? "disabled" : "primary"}
               onlyIcon
               hasIcon
               iconName="refresh-cw"
+              disabled={isMarketClose}
             />
             <Button
               variant="secondary"
@@ -306,9 +309,6 @@ export default () => {
               rowTextForSelection={(item, _index) => {
                 return item;
               }}
-              dropdownStyle={{
-                borderRadius: 16,
-              }}
               rowTextStyle={{
                 fontSize: 14,
                 fontWeight: "bold",
@@ -318,10 +318,19 @@ export default () => {
                 backgroundColor: "#f5f5f5",
               }}
               buttonStyle={{
-                borderRadius: 16,
+                borderRadius: 8,
+                borderBottomWidth: !isMarketClose ? 2 : 0,
+                borderColor: !isMarketClose ? "#3b82f6" : "",
                 maxWidth: 100,
                 maxHeight: 40,
-                backgroundColor: isMarketClose ? "#c5c5c5" : "#f5f5f5",
+                backgroundColor:
+                  colorTheme === "dark"
+                    ? !isMarketClose
+                      ? "white"
+                      : "#9ca3af"
+                    : !isMarketClose
+                    ? "white"
+                    : "#d1d5db",
               }}
               buttonTextStyle={{
                 fontSize: 14,
@@ -329,6 +338,7 @@ export default () => {
                 color: "#374151",
               }}
             />
+
             {showSaveLineupButton && (
               <Button
                 variant="success"

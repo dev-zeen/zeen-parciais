@@ -66,10 +66,10 @@ export function onCalculatePartialScore(
 }
 
 export function onGetPlayersHaveAlreadyPlayed(
-  club: FullClubInfo,
+  players: FullPlayer[],
   stats: PlayerStats
 ) {
-  const count = club.atletas.reduce((acc, current) => {
+  const count = players.reduce((acc, current) => {
     if (stats.atletas[current.atleta_id]) {
       acc += 1;
     }
@@ -81,23 +81,25 @@ export function onGetPlayersHaveAlreadyPlayed(
 
 export function onUpdateTeamWithSubstitutedPlayers(
   club: FullClubInfo,
-  replaces: Substitutions[]
+  replaces?: Substitutions[]
 ) {
   let playersUpdated = [...club.atletas];
   let reservesUpdated = [...club.reservas];
 
-  replaces.forEach((replace) => {
-    const playerJoined = replace.entrou;
-    const playerOut = replace.saiu;
+  if (replaces) {
+    replaces.forEach((replace) => {
+      const playerJoined = replace.entrou;
+      const playerOut = replace.saiu;
 
-    playersUpdated = playersUpdated.map((item) =>
-      item.atleta_id === playerOut.atleta_id ? playerJoined : item
-    );
+      playersUpdated = playersUpdated.map((item) =>
+        item.atleta_id === playerOut.atleta_id ? playerJoined : item
+      );
 
-    reservesUpdated = reservesUpdated.map((item) =>
-      item.atleta_id === playerJoined.atleta_id ? playerOut : item
-    );
-  });
+      reservesUpdated = reservesUpdated.map((item) =>
+        item.atleta_id === playerJoined.atleta_id ? playerOut : item
+      );
+    });
+  }
 
   return {
     playersUpdated,

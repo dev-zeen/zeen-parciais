@@ -162,35 +162,34 @@ export function TeamPlayerCard({
             </View>
           </View>
 
-          {!isReservePlayer ||
-            (isMarketClose && (
-              <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
-                {!isCapitain && (
-                  <TouchableOpacity
-                    onPress={handleSelectCapitain}
-                    disabled={isCapitain}
-                    activeOpacity={0.6}
-                    className={`${
-                      isCapitain ? "F5F5F5" : "border-2 border-violet-500"
-                    }  ${
-                      colorTheme === "dark" ? "bg-violet-500" : "bg-violet-200"
-                    } p-3 rounded-lg`}
-                  >
-                    <Text>Tornar Capitão</Text>
-                  </TouchableOpacity>
-                )}
-
+          {!isMarketClose && (
+            <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
+              {!isCapitain && !isReservePlayer && (
                 <TouchableOpacity
-                  onPress={handleRemovePlayerFromLineup}
+                  onPress={handleSelectCapitain}
+                  disabled={isCapitain}
                   activeOpacity={0.6}
-                  className={`border-2 border-red-500 ${
-                    colorTheme === "dark" ? "bg-red-500" : "bg-red-200"
+                  className={`${
+                    isCapitain ? "F5F5F5" : "border-2 border-violet-500"
+                  }  ${
+                    colorTheme === "dark" ? "bg-violet-500" : "bg-violet-200"
                   } p-3 rounded-lg`}
                 >
-                  <Text>Vender Jogador</Text>
+                  <Text>Tornar Capitão</Text>
                 </TouchableOpacity>
-              </View>
-            ))}
+              )}
+
+              <TouchableOpacity
+                onPress={handleRemovePlayerFromLineup}
+                activeOpacity={0.6}
+                className={`border-2 border-red-500 ${
+                  colorTheme === "dark" ? "bg-red-500" : "bg-red-200"
+                } p-3 rounded-lg`}
+              >
+                <Text>Vender Jogador</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
       </View>
     </View>

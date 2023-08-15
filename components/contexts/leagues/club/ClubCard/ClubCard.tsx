@@ -68,28 +68,48 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     return (
       <View
         key={club?.time_id}
-        className={`rounded-lg p-4 justify-center ${myTeam && "bg-blue-400"}`}
+        className={`rounded-lg p-4 justify-center ${
+          myTeam ? (colorTheme === "dark" ? "bg-blue-600" : "bg-blue-200") : ""
+        }`}
       >
         <TouchableOpacity
           activeOpacity={0.6}
           onPress={onPressHandler}
           className={`
-          ${myTeam && "bg-blue-400"}
+          ${
+            myTeam
+              ? colorTheme === "dark"
+                ? "bg-blue-600"
+                : "bg-blue-200"
+              : ""
+          }
         `}
         >
           <View
             className={`flex-row justify-between items-center ${
-              myTeam && "bg-blue-400"
+              myTeam
+                ? colorTheme === "dark"
+                  ? "bg-blue-600"
+                  : "bg-blue-200"
+                : ""
             }`}
           >
             <View
               className={`flex-row items-center gap-x-1 ${
-                myTeam && "bg-blue-400"
+                myTeam
+                  ? colorTheme === "dark"
+                    ? "bg-blue-600"
+                    : "bg-blue-200"
+                  : ""
               }`}
             >
               <View
                 className={`items-center justify-center gap-x-0.5 w-7 ${
-                  myTeam && "bg-blue-400"
+                  myTeam
+                    ? colorTheme === "dark"
+                      ? "bg-blue-600"
+                      : "bg-blue-200"
+                    : ""
                 }`}
               >
                 <Text className="text-sm font-semibold">{position}</Text>
@@ -98,7 +118,11 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                   orderBy !== "rodada" && (
                     <View
                       className={`flex-row items-center ${
-                        myTeam && "bg-blue-400"
+                        myTeam
+                          ? colorTheme === "dark"
+                            ? "bg-blue-600"
+                            : "bg-blue-200"
+                          : ""
                       }`}
                     >
                       {renderVariationIcon((club.variacao as any)[orderBy])}
@@ -121,13 +145,23 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               <View>
                 <Text
                   numberOfLines={1}
-                  className={`text-sm font-semibold ${myTeam && "bg-blue-400"}`}
+                  className={`text-xs font-bold ${
+                    myTeam
+                      ? colorTheme === "dark"
+                        ? "bg-blue-600"
+                        : "bg-blue-200"
+                      : ""
+                  }`}
                 >
                   {club.nome}
                 </Text>
                 <View
                   className={`flex-row items-center gap-x-1 ${
-                    myTeam && "bg-blue-400"
+                    myTeam
+                      ? colorTheme === "dark"
+                        ? "bg-blue-600"
+                        : "bg-blue-200"
+                      : ""
                   }`}
                 >
                   <Text className="text-xs capitalize">
@@ -139,15 +173,39 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               </View>
             </View>
 
-            <View className={`items-end ${myTeam && "bg-blue-400"}`}>
-              <View className={`flex-row gap-x-2 ${myTeam && "bg-blue-400"}`}>
-                <Text className="text-sm font-semibold">{score}</Text>
+            <View
+              className={`items-end ${
+                myTeam
+                  ? colorTheme === "dark"
+                    ? "bg-blue-600"
+                    : "bg-blue-200"
+                  : ""
+              }`}
+            >
+              <View
+                className={`flex-row gap-x-2 ${
+                  myTeam
+                    ? colorTheme === "dark"
+                      ? "bg-blue-600"
+                      : "bg-blue-200"
+                    : ""
+                }`}
+              >
+                <Text className="text-xs font-semibold">{score}</Text>
               </View>
 
               {!isOrderByPatrimonio && (
-                <View className={`flex-row ${myTeam && "bg-blue-400"}`}>
+                <View
+                  className={`flex-row ${
+                    myTeam
+                      ? colorTheme === "dark"
+                        ? "bg-blue-600"
+                        : "bg-blue-200"
+                      : ""
+                  }`}
+                >
                   <Text className="text-xs">
-                    {isMarketClose
+                    {isMarketClose && club.playersHavePlayed !== undefined
                       ? `${club.playersHavePlayed}/12`
                       : diffScore < 0 && numberToString(diffScore)}
                   </Text>

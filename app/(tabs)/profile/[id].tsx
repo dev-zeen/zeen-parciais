@@ -10,13 +10,19 @@ import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
-import { FullPlayer } from "@/models/Stats";
-import { useGetHistoricMyClub, useGetMyClub } from "@/queries/club.query";
+import {
+  useGetHistoricMyClub,
+  useGetMatchSubstitutions,
+  useGetMyClub,
+} from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 import theme from "@/styles/theme";
 import { numberToString } from "@/utils/parseTo";
-import { onCalculatePartialScore } from "@/utils/partials";
+import {
+  onCalculatePartialScore,
+  onUpdateTeamWithSubstitutedPlayers,
+} from "@/utils/partials";
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -44,17 +50,17 @@ export default () => {
   const { data: historyClub, isLoading: isLoadingHistory } =
     useGetHistoricMyClub(allowRequests);
 
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: club?.time.time_id,
+  });
+
   const [highestScore, setHighestScore] = useState<TeamHistoryRound>();
   const [lowestScore, setLowestScore] = useState<TeamHistoryRound>();
 
-  const myPartialPoints = onCalculatePartialScore(
-    club?.atletas as FullPlayer[],
-    club?.capitao_id as number,
-    playerStats
-  );
+  const [partialScore, setPartialScore] = useState(0);
 
   const totalScore = numberToString(
-    (club?.pontos_campeonato as number) + (isMarketClose ? myPartialPoints : 0)
+    (club?.pontos_campeonato as number) + (isMarketClose ? partialScore : 0)
   );
 
   const totalPatrimony = club && numberToString(club?.patrimonio);
@@ -91,6 +97,23 @@ export default () => {
       setLowestScore(lowestScore as TeamHistoryRound);
     }
   }, [historyClub]);
+
+  useEffect(() => {
+    if (club && isMarketClose) {
+      const { playersUpdated } = onUpdateTeamWithSubstitutedPlayers(
+        club,
+        substitutions
+      );
+
+      const myPartialPoints = onCalculatePartialScore(
+        playersUpdated,
+        club.capitao_id as number,
+        playerStats
+      );
+
+      setPartialScore(myPartialPoints);
+    }
+  }, [club, substitutions, playerStats]);
 
   if (!isAutheticated) {
     return (

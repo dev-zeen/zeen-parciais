@@ -1,4 +1,4 @@
-import { TouchableOpacity } from "react-native";
+import { TouchableOpacity, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
@@ -6,12 +6,19 @@ import { Text } from "@/components/Themed";
 
 interface ButtonProps {
   onPress: () => void;
-  variant?: "primary" | "secondary" | "warning" | "error" | "success";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "warning"
+    | "error"
+    | "success"
+    | "disabled";
   title?: string;
   iconName?: keyof typeof Feather.glyphMap;
   hasIcon?: boolean;
   colorIcon?: string;
   onlyIcon?: boolean;
+  disabled?: boolean;
 }
 
 export function Button({
@@ -21,13 +28,17 @@ export function Button({
   iconName,
   hasIcon,
   onlyIcon,
+  disabled,
 }: ButtonProps) {
+  const colorTheme = useColorScheme();
+
   const variants = {
     primary: "bg-blue-500",
     secondary: "bg-violet-500",
     warning: "bg-orange-500",
     error: "bg-red-500",
     success: "bg-green-500",
+    disabled: colorTheme === "dark" ? "bg-gray-400" : "bg-gray-300",
   };
 
   return (
@@ -35,6 +46,7 @@ export function Button({
       onPress={onPress}
       className={`flex-row px-2 py-3 items-center justify-center rounded-lg ${variants[variant]}`}
       activeOpacity={0.6}
+      disabled={disabled}
     >
       {hasIcon && (
         <Feather

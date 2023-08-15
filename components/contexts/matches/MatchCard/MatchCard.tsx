@@ -116,7 +116,9 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
               <View
                 className={`justify-center items-center bg-folly p-2 m-1 rounded-lg`}
               >
-                <Text className="text-gray-50">Encerrado</Text>
+                <Text className="text-gray-50 text-xs font-semibold">
+                  Encerrado
+                </Text>
               </View>
             )}
           </>
@@ -124,7 +126,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
           <View
             className={`justify-center items-center bg-red-500 p-2 m-1 rounded-lg`}
           >
-            <Text className="text-xs text-white">
+            <Text className="text-xs text-white font-semibold">
               Esta partida é inválida para a rodada
             </Text>
           </View>

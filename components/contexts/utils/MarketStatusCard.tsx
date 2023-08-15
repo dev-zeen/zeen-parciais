@@ -13,7 +13,7 @@ export function MarketStatusCard() {
 
   const MARKET_STATUS_COLOR_NAMED = {
     1: "bg-green-500",
-    2: "bg-red-500",
+    2: "bg-folly",
     3: "bg-yellow-500",
     4: "bg-orange-500",
   };
