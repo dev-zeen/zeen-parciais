@@ -27,7 +27,6 @@ import { useGetMyClub } from "@/queries/club.query";
 import { useGetMarket } from "@/queries/market.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
-import { onGetTeamPrice, onRemovePlayerFromLineup } from "@/utils/team";
 
 type MarketProps = {
   position?: LineupPosition | null;
@@ -57,6 +56,9 @@ export default ({
   const addPlayerToLineup = useTeamLineupStore(
     (state) => state.addPlayerToLineup
   );
+  const removePlayerFromLineup = useTeamLineupStore(
+    (state) => state.removePlayerFromLineup
+  );
 
   const remainingValue = useMemo(() => {
     if (club && price) {
@@ -85,16 +87,7 @@ export default ({
 
   const handleRemovePlayerFromLineup = useCallback(
     (lineup: LineupPlayers, player: FullPlayer) => {
-      const lineupUpdated: LineupPlayers = onRemovePlayerFromLineup(
-        lineup,
-        player
-      );
-
-      if (capitain === player.atleta_id) updateCapitain(0);
-
-      const newPrice = onGetTeamPrice(lineupUpdated.starting);
-      updatePrice(newPrice);
-      upateLineup(lineupUpdated);
+      removePlayerFromLineup(player);
     },
     []
   );

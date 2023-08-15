@@ -55,10 +55,12 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
         state.lineup as LineupPlayers,
         player
       );
+      const priceUpdated = onGetTeamPrice(lineupUpdated.starting);
 
       return {
         lineup: lineupUpdated,
         capitain: player.atleta_id === state.capitain ? 0 : state.capitain,
+        price: priceUpdated,
       };
     });
   },
@@ -75,11 +77,11 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
         isReservePlayer,
       });
 
-      const newPrice = onGetTeamPrice(lineupUpdated.starting);
+      const priceUpdated = onGetTeamPrice(lineupUpdated.starting);
 
       return {
         lineup: lineupUpdated,
-        price: newPrice,
+        price: priceUpdated,
       };
     });
   },
