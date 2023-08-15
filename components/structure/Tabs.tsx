@@ -38,7 +38,7 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
           <TouchableOpacity
             activeOpacity={0.6}
             key={tab.id}
-            className={`flex-1 p-2 items-center justify-evenly rounded ${
+            className={`flex-1 p-3 items-center justify-evenly rounded ${
               activeTab === index ? "bg-white" : "bg-gray-200 opacity-50"
             }`}
             onPress={() => {

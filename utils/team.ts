@@ -6,6 +6,13 @@ import {
 } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 
+type AddPlayerProps = {
+  lineup: LineupPlayers;
+  player: FullPlayer;
+  index?: number;
+  isReservePlayer?: boolean;
+};
+
 function onRemovePlayer(lineupPlayers: LineupPosition[], playerId: number) {
   const updatedPlayers = lineupPlayers.map((item) => {
     if (item.player?.atleta_id === playerId) {
@@ -17,7 +24,7 @@ function onRemovePlayer(lineupPlayers: LineupPosition[], playerId: number) {
   return updatedPlayers;
 }
 
-export function removePlayerFromLineup(
+export function onRemovePlayerFromLineup(
   lineup: LineupPlayers,
   player: LineupPlayer | FullPlayer
 ) {
@@ -100,4 +107,43 @@ export function onRemovePlayerFromSellPlayers(
     );
 
   return updatedPlayerSell;
+}
+
+export function onAddPlayerToLineup({
+  lineup,
+  player,
+  index,
+  isReservePlayer,
+}: AddPlayerProps) {
+  const { starting = [], reserves = [] } = lineup;
+  const playersUpdated = isReservePlayer ? [...reserves] : [...starting];
+
+  const addPlayerToIndex = (index: number) => {
+    if (!playersUpdated[index]?.player) {
+      playersUpdated[index].player = player;
+    }
+  };
+
+  if (
+    typeof index !== "undefined" &&
+    index >= 0 &&
+    index < playersUpdated.length
+  ) {
+    addPlayerToIndex(index);
+  } else {
+    const emptyIndex = playersUpdated.findIndex(
+      (item) => item.position === player.posicao_id && !item.player
+    );
+    if (emptyIndex !== -1) {
+      addPlayerToIndex(emptyIndex);
+    }
+  }
+
+  const updatedField = isReservePlayer ? "reserves" : "starting";
+  const lineupUpdated = {
+    ...lineup,
+    [updatedField]: playersUpdated,
+  };
+
+  return lineupUpdated;
 }

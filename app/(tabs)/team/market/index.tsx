@@ -27,7 +27,7 @@ import { useGetMyClub } from "@/queries/club.query";
 import { useGetMarket } from "@/queries/market.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
-import { onGetTeamPrice, removePlayerFromLineup } from "@/utils/team";
+import { onGetTeamPrice, onRemovePlayerFromLineup } from "@/utils/team";
 
 type MarketProps = {
   position?: LineupPosition | null;
@@ -54,6 +54,9 @@ export default ({
   const price = useTeamLineupStore((state) => state.price);
   const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
   const capitain = useTeamLineupStore((state) => state.capitain);
+  const addPlayerToLineup = useTeamLineupStore(
+    (state) => state.addPlayerToLineup
+  );
 
   const remainingValue = useMemo(() => {
     if (club && price) {
@@ -69,52 +72,20 @@ export default ({
     useState<LineupPosition | null>();
 
   const handleAddPlayerToLineup = useCallback(
-    (lineup: LineupPlayers, player: FullPlayer, targetIndex?: number) => {
-      const playersUpdated = playerLowestPrice
-        ? [...(lineup.reserves || [])]
-        : [...(lineup.starting || [])];
-
-      const addPlayerToIndex = (index: number) => {
-        if (!playersUpdated[index].player) {
-          playersUpdated[index].player = player;
-        }
-      };
-
-      if (
-        typeof targetIndex !== "undefined" &&
-        targetIndex >= 0 &&
-        targetIndex < playersUpdated.length
-      ) {
-        addPlayerToIndex(targetIndex);
-      } else {
-        const emptyIndex = playersUpdated.findIndex(
-          (item) => item.position === player.posicao_id && !item.player
-        );
-        if (emptyIndex !== -1) {
-          addPlayerToIndex(emptyIndex);
-        }
-      }
-
-      const updatedField = playerLowestPrice ? "reserves" : "players";
-      const lineupUpdated = {
-        ...lineup,
-        [updatedField]: playersUpdated,
-      };
-
-      upateLineup(lineupUpdated);
+    (player: FullPlayer, targetIndex?: number) => {
+      addPlayerToLineup({
+        player,
+        index: targetIndex,
+        isReservePlayer: !!playerLowestPrice,
+      });
       if (handleCloseMarketModal) handleCloseMarketModal();
-
-      if (!playerLowestPrice) {
-        const newPrice = onGetTeamPrice(playersUpdated);
-        updatePrice(newPrice);
-      }
     },
     []
   );
 
   const handleRemovePlayerFromLineup = useCallback(
     (lineup: LineupPlayers, player: FullPlayer) => {
-      const lineupUpdated: LineupPlayers = removePlayerFromLineup(
+      const lineupUpdated: LineupPlayers = onRemovePlayerFromLineup(
         lineup,
         player
       );
@@ -187,11 +158,7 @@ export default ({
         <MarketPlayerCard
           player={player}
           onPressAddPlayerToLineup={() =>
-            handleAddPlayerToLineup(
-              lineup as LineupPlayers,
-              player,
-              playerIndex
-            )
+            handleAddPlayerToLineup(player, playerIndex)
           }
           onPressRemovePlayerFromLineup={() =>
             handleRemovePlayerFromLineup(lineup as LineupPlayers, player)

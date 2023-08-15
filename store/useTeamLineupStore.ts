@@ -2,14 +2,28 @@ import { create } from "zustand";
 
 import { LineupPlayer, LineupPlayers } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
-import { removePlayerFromLineup } from "@/utils/team";
+import {
+  onAddPlayerToLineup,
+  onGetTeamPrice,
+  onRemovePlayerFromLineup,
+} from "@/utils/team";
+
+export type AddPlayerToLineupProps = {
+  player: FullPlayer;
+  index?: number;
+  isReservePlayer?: boolean;
+};
 
 type TeamLineupStore = {
   updateLineup: (lineup: LineupPlayers) => void;
   updateCapitain: (value: number) => void;
   updatePrice: (value: number) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
-  addPlayerToLineup: (player: LineupPlayer | FullPlayer) => void;
+  addPlayerToLineup: ({
+    player,
+    index,
+    isReservePlayer,
+  }: AddPlayerToLineupProps) => void;
   price: number | undefined;
   lineup: LineupPlayers | undefined;
   capitain: number;
@@ -37,7 +51,7 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
   },
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => {
     set((state) => {
-      const lineupUpdated: LineupPlayers = removePlayerFromLineup(
+      const lineupUpdated: LineupPlayers = onRemovePlayerFromLineup(
         state.lineup as LineupPlayers,
         player
       );
@@ -48,9 +62,25 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
       };
     });
   },
-  addPlayerToLineup: (player: LineupPlayer | FullPlayer) => {
+  addPlayerToLineup: ({
+    player,
+    index,
+    isReservePlayer,
+  }: AddPlayerToLineupProps) => {
     set((state) => {
-      return {};
+      const lineupUpdated = onAddPlayerToLineup({
+        lineup: state.lineup as LineupPlayers,
+        player,
+        index,
+        isReservePlayer,
+      });
+
+      const newPrice = onGetTeamPrice(lineupUpdated.starting);
+
+      return {
+        lineup: lineupUpdated,
+        price: newPrice,
+      };
     });
   },
 }));

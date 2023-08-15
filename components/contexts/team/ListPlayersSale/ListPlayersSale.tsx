@@ -19,8 +19,8 @@ import { useGetPositions } from "@/queries/players.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 import {
+  onRemovePlayerFromLineup,
   onRemovePlayerFromSellPlayers,
-  removePlayerFromLineup,
 } from "@/utils/team";
 
 type ListPlayersSaleProps = {
@@ -60,7 +60,7 @@ export function ListPlayersSale({
 
       setPlayersSell(positionSellUpdated);
 
-      const lineUpdated = removePlayerFromLineup(
+      const lineUpdated = onRemovePlayerFromLineup(
         lineupState as LineupPlayers,
         player
       );

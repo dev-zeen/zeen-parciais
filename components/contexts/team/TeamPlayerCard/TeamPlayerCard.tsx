@@ -33,7 +33,7 @@ export function TeamPlayerCard({
   const isCapitain = capitain === player.atleta_id;
 
   const lineup = useTeamLineupStore((state) => state.lineup);
-  const removePlayer = useTeamLineupStore(
+  const removePlayerFromLineup = useTeamLineupStore(
     (state) => state.removePlayerFromLineup
   );
 
@@ -49,7 +49,7 @@ export function TeamPlayerCard({
   }, [capitain]);
 
   const handleRemovePlayerFromLineup = useCallback(() => {
-    removePlayer(player);
+    removePlayerFromLineup(player);
     onClose();
   }, [lineup]);
 
