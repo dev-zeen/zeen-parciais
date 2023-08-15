@@ -1,17 +1,22 @@
-import { Image } from "react-native";
+import { Image, useColorScheme } from "react-native";
 
 import maintenanceImage from "@/assets/images/manutencao.png";
+
 import { Text, View } from "@/components/Themed";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import Colors from "@/constants/Colors";
 
 export function MaintenanceMarket() {
+  const colorTheme = useColorScheme();
   return (
     <SafeAreaViewContainer>
       <View
-        className="bg-dark mx-4"
+        className="mx-2 rounded-lg"
         style={{
           gap: 8,
+          backgroundColor:
+            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
         }}
       >
         <MarketStatusCard />

@@ -3,6 +3,7 @@ import { FlatList, ListRenderItemInfo, RefreshControl } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { LeagueCard } from "@/components/contexts/leagues/LeagueCard";
+import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { Loading } from "@/components/structure/Loading";
 import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
@@ -15,18 +16,21 @@ import { useGetMarketStatus } from "@/queries/market.query";
 export default function () {
   const { isAutheticated } = useContext(AuthContext);
 
-  const allowRequest = isAutheticated;
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const allowRequests =
+    isAutheticated &&
+    marketStatus &&
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
   const {
     data: dataLeagues,
     isLoading: isLoadingLeagues,
     refetch: onRefetchLeagues,
     isRefetching: isRefetching,
-  } = useGetLeagues(allowRequest);
+  } = useGetLeagues(allowRequests as boolean);
 
   const [leagues, setLeagues] = useState<LeagueUserDetails[]>();
-
-  const { data: marketStatus } = useGetMarketStatus();
 
   const isMarketClose =
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
@@ -62,6 +66,10 @@ export default function () {
     return (
       <Login title="Para acessar suas ligas, é necessário efetuar o login no Cartola FC." />
     );
+  }
+
+  if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
+    return <MaintenanceMarket />;
   }
 
   if (!dataLeagues || !leagues || isLoadingLeagues) {

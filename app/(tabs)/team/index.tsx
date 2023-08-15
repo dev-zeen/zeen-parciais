@@ -39,6 +39,7 @@ import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
 import { isLineupComplete, onGetTeamPrice } from "@/utils/team";
 
+import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import {
   PlayersToSell,
   clearLineup,
@@ -227,6 +228,10 @@ export default () => {
     return (
       <Login title="Para acessar o seu time, é necessário efetuar o login no Cartola FC." />
     );
+  }
+
+  if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
+    return <MaintenanceMarket />;
   }
 
   if (!club || !lineup) {

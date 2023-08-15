@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { RefreshControl, ScrollView, useColorScheme } from "react-native";
 
 import { Text, View } from "@/components/Themed";
+import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
@@ -119,6 +120,10 @@ export default () => {
     return (
       <Login title="Para acessar as informações do seu perfil é necessário efetuar o login no Cartola FC." />
     );
+  }
+
+  if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
+    return <MaintenanceMarket />;
   }
 
   if (isLoading) {

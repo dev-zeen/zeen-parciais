@@ -94,11 +94,16 @@ export default () => {
         setCurrentStats(statsFormated);
       }
     });
-    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-      if (res) {
-        setCurrentAppreciations(res);
-      }
-    });
+    if (
+      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO ||
+      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_ATUALIZACAO
+    ) {
+      onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
+        if (res) {
+          setCurrentAppreciations(res);
+        }
+      });
+    }
   }, [appreciations]);
 
   useEffect(() => {

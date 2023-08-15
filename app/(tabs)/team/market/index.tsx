@@ -263,7 +263,7 @@ export default ({
             }}
           >
             <Feather name="bar-chart" color="#9ca3af" size={20} />
-            <Text className="text-sm font-semibold">Mais Caros</Text>
+            <Text className="text-xs font-semibold">Mais Caros</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -274,7 +274,7 @@ export default ({
             onPress={handleShowMarketFilters}
           >
             <Feather name="user-check" color="#9ca3af" size={20} />
-            <Text className="text-sm font-semibold">Provavél</Text>
+            <Text className="text-xs font-semibold">Provavél</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -285,7 +285,7 @@ export default ({
             onPress={handleShowMarketFilters}
           >
             <Feather name="filter" color="#9ca3af" size={20} />
-            <Text className="text-sm font-semibold">Filtrar</Text>
+            <Text className="text-xs font-semibold">Filtrar</Text>
           </TouchableOpacity>
         </View>
 

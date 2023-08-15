@@ -29,7 +29,6 @@ export function Providers({ children }: ProvidersProps): ReactNode {
           resetError={props.resetError}
         />
       )}
-      onError={(error) => console.log(error.cause)}
     >
       <AuthContextProvider>
         <QueryClientProvider client={queryClient}>
