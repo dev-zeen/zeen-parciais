@@ -322,8 +322,8 @@ export default () => {
                 backgroundColor: "#f5f5f5",
               }}
               buttonStyle={{
-                borderRadius: 8,
-                borderBottomWidth: !isMarketClose ? 2 : 0,
+                borderRadius: 4,
+                borderWidth: !isMarketClose ? 2 : 0,
                 borderColor: !isMarketClose ? "#3b82f6" : "",
                 maxWidth: 100,
                 maxHeight: 40,

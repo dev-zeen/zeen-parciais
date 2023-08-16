@@ -1,16 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  ListRenderItemInfo,
-  Modal,
-  useColorScheme,
-} from "react-native";
+import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { MarketFilter } from "@/components/contexts/market/MarketFilter";
+import { MarketFilters } from "@/components/contexts/market/MarketFilters";
 import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard";
 import { PlayerLowestCard } from "@/components/contexts/market/PlayerLowestCard.tsx";
 import { Loading } from "@/components/structure/Loading";
@@ -30,6 +25,8 @@ type MarketProps = {
   handleCloseMarketModal?: () => void;
 };
 
+export type TypeFilter = "filter" | "sort" | "status" | "";
+
 export default ({
   position,
   handleCloseMarketModal,
@@ -39,6 +36,7 @@ export default ({
   const colorTheme = useColorScheme();
 
   const allowRequest = true;
+
   const { data: club } = useGetMyClub(allowRequest);
   const { data: marketData } = useGetMarket();
 
@@ -58,8 +56,8 @@ export default ({
     return club?.patrimonio as number;
   }, [club, price]);
 
+  const [isLoading, setIsLoading] = useState(false);
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
-  const [showFilterMarketModal, setShowFilterMarketModal] = useState(false);
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
   const [searchPlayerParam, setSearchPlayerParam] =
     useState<LineupPosition | null>();
@@ -80,9 +78,25 @@ export default ({
     removePlayerFromLineup(player);
   }, []);
 
-  const handleShowMarketFilters = useCallback(() => {
-    setShowFilterMarketModal((previous) => !previous);
+  const handleIsLoading = useCallback(() => {
+    setIsLoading((previous) => !previous);
   }, []);
+
+  const applyFilter = useCallback((data: FullPlayer[]) => {
+    setMarketPlayers(data);
+    handleIsLoading();
+  }, []);
+
+  const handleCloseMarket = useCallback(
+    () =>
+      handleCloseMarketModal ? handleCloseMarketModal() : router.push("/team/"),
+    []
+  );
+
+  const keyExtractor = useCallback(
+    (item: FullPlayer) => `${item.atleta_id}`,
+    []
+  );
 
   useEffect(() => {
     if (marketData) {
@@ -112,11 +126,6 @@ export default ({
     }
   }, [lineup]);
 
-  const keyExtractor = useCallback(
-    (item: FullPlayer) => `${item.atleta_id}`,
-    []
-  );
-
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
@@ -141,13 +150,7 @@ export default ({
     [emptyPositions]
   );
 
-  const handleCloseMarket = useCallback(
-    () =>
-      handleCloseMarketModal ? handleCloseMarketModal() : router.push("/team/"),
-    []
-  );
-
-  if (!marketPlayers || !club) return <Loading />;
+  if (!marketPlayers || !club || isLoading) return <Loading />;
 
   return (
     <SafeAreaViewContainer>
@@ -157,6 +160,27 @@ export default ({
         }`}
       >
         <View className="justify-between items-center flex-row rounded-lg mb-2 p-2">
+          <View
+            className="flex-row items-center"
+            style={{
+              gap: 16,
+            }}
+          >
+            <View className="justify-center items-center gap-1">
+              <Text className="font-light text-xs">Valor atual</Text>
+              <Text className="font-bold text-xs text-green-500">
+                {numberToString(price)}
+              </Text>
+            </View>
+
+            <View className="justify-center items-center gap-1">
+              <Text className="font-light text-xs">Restante</Text>
+              <Text className="font-bold text-xs text-green-500">
+                {numberToString(remainingValue)}
+              </Text>
+            </View>
+          </View>
+
           <TouchableOpacity
             onPress={handleCloseMarket}
             className="p-2 rounded-full border border-red-400 bg-red-300"
@@ -164,59 +188,16 @@ export default ({
             <Feather name="x" color="#525252" size={24} />
           </TouchableOpacity>
 
-          <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Valor atual</Text>
-            <Text className="font-bold text-xs text-green-500">
-              {numberToString(price)}
-            </Text>
-          </View>
-
-          <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Restante</Text>
-            <Text className="font-bold text-xs text-green-500">
-              {numberToString(remainingValue)}
-            </Text>
-          </View>
-
-          <TouchableOpacity className="p-2 bg-white border-2 border-gray-300 rounded-full">
+          {/* <TouchableOpacity className="p-2 bg-white border-2 border-gray-300 rounded-full">
             <Feather name="search" color="#525252" size={30} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
-        <View className="justify-between items-center flex-row rounded-lg mb-2 p-2">
-          <TouchableOpacity
-            onPress={handleShowMarketFilters}
-            className="p-2 rounded-full flex-row items-center justify-center"
-            style={{
-              gap: 8,
-            }}
-          >
-            <Feather name="bar-chart" color="#9ca3af" size={20} />
-            <Text className="text-xs font-semibold">Mais Caros</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="p-2 rounded-full flex-row items-center justify-center"
-            style={{
-              gap: 8,
-            }}
-            onPress={handleShowMarketFilters}
-          >
-            <Feather name="user-check" color="#9ca3af" size={20} />
-            <Text className="text-xs font-semibold">Provavél</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className="p-2 rounded-full flex-row items-center justify-center"
-            style={{
-              gap: 8,
-            }}
-            onPress={handleShowMarketFilters}
-          >
-            <Feather name="filter" color="#9ca3af" size={20} />
-            <Text className="text-xs font-semibold">Filtrar</Text>
-          </TouchableOpacity>
-        </View>
+        <MarketFilters
+          data={marketPlayers}
+          applyFilter={applyFilter}
+          handleIsLoading={handleIsLoading}
+        />
 
         {playerLowestPrice && (
           <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />
@@ -236,17 +217,6 @@ export default ({
           windowSize={6}
         />
       </View>
-
-      {showFilterMarketModal && (
-        <Modal
-          visible={showFilterMarketModal}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setShowFilterMarketModal(false)}
-        >
-          <MarketFilter handleClose={() => setShowFilterMarketModal(false)} />
-        </Modal>
-      )}
     </SafeAreaViewContainer>
   );
 };

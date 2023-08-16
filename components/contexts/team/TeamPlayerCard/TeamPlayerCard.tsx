@@ -64,7 +64,7 @@ export function TeamPlayerCard({
     >
       <View className="flex-1 rounded-lg">
         <View
-          className="items-center flex-row pt-2 mx-2 rounded-lg mb-2"
+          className="items-center justify-end flex-row pt-2 mx-2 rounded-lg mb-2"
           style={{
             marginHorizontal: 4,
             gap: 16,

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { Image } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
@@ -59,22 +59,29 @@ export function PlayerCard({
     }).format(player.pontuacao);
   }, [player]);
 
-  const onPressHandler = useCallback(() => {
-    router.push(`/(tabs)/players/${player.id}`);
-  }, []);
+  // const onPressHandler = useCallback(() => {
+  //   router.push(`/(tabs)/players/${player.id}`);
+  // }, []);
 
   return (
     <TouchableOpacity
       activeOpacity={0.6}
-      onPress={onPressHandler}
-      className={`flex-row justify-between items-center rounded-lg p-4`}
+      // onPress={onPressHandler}
+      className={`flex-row justify-between items-center rounded-lg px-4 py-2`}
     >
-      <View className="flex-row items-center gap-1">
+      <View className="flex-row items-center gap-1 rounded-lg">
+        <Image
+          source={{
+            uri: player.foto.replace("FORMATO", "220x220"),
+          }}
+          className="w-12 h-12"
+          alt={player.apelido}
+        />
         <Image
           source={{
             uri: club?.escudos?.["60x60"],
           }}
-          className="w-7 h-7"
+          className="w-6 h-6"
           alt={`Escudo do ${club?.nome}`}
         />
         <View>

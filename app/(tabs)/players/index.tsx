@@ -196,7 +196,7 @@ export default () => {
             paddingVertical: 4,
             backgroundColor:
               colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
-            gap: 8,
+            gap: 4,
           }}
         />
       </View>
