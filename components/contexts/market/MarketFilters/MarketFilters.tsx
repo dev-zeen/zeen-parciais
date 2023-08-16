@@ -92,12 +92,7 @@ export function MarketFilters({
 
   return (
     <>
-      <View
-        className="flex-row rounded-lg items-center w-full p-2"
-        style={{
-          gap: 8,
-        }}
-      >
+      <View className="flex-row rounded-lg items-center p-2">
         <TouchableOpacity
           onPress={() => setShowOrderMarket(true)}
           className="w-1/3 p-2 rounded-full flex-row items-center justify-center"

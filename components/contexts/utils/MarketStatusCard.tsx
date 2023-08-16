@@ -44,8 +44,6 @@ export function MarketStatusCard() {
 
   return (
     <View className="w-full flex-row items-center justify-between rounded-lg p-4">
-      <Text className="text-xs font-semibold">Meu Cartola</Text>
-
       <View className="flex-row justify-center items-center gap-1">
         <View
           className={`relative inline-flex rounded-full h-3.5 w-3.5 ${

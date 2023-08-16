@@ -1,10 +1,12 @@
-import { Image, StyleSheet, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, useColorScheme } from "react-native";
 
-import { Text, View } from "@/components/Themed";
+import { Text, TouchableOpacity, View } from "@/components/Themed";
+import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { OBJECT_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarket, useGetMarketStatus } from "@/queries/market.query";
+import { useGetMatchs } from "@/queries/matches.query";
 import { useGetPositions } from "@/queries/players.query";
 import { numberToString } from "@/utils/parseTo";
 import { Feather } from "@expo/vector-icons";
@@ -24,10 +26,19 @@ export function MarketPlayerCard({
   isButtonDisabled,
   isSellPlayer,
 }: MarketPlayerCardProps) {
+  const colorTheme = useColorScheme();
+
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
+  const { data: matches } = useGetMatchs();
 
   const { data: marketStatus } = useGetMarketStatus();
+
+  const match = matches?.partidas.find(
+    (match) =>
+      match.clube_casa_id === player.clube_id ||
+      match.clube_visitante_id === player.clube_id
+  );
 
   const isMarketClose =
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
@@ -42,16 +53,16 @@ export function MarketPlayerCard({
           source={{
             uri: player.foto?.replace("FORMATO", "220x220"),
           }}
-          className="w-16 h-16 rounded-3xl mr-2"
+          className="w-20 h-20 rounded-3xl mr-2"
           alt={`Imagem do ${player.nome}`}
         />
         <View
           className="flex-row absolute"
           style={{
-            top: "50%",
+            top: "60%",
             left: "60%",
-            width: 22,
-            height: 22,
+            width: 20,
+            height: 20,
             borderRadius: 10,
             alignItems: "center",
             justifyContent: "center",
@@ -73,36 +84,9 @@ export function MarketPlayerCard({
       <View className="flex-1 justify-between">
         <View className="flex-row justify-between items-center flex-1">
           <View className="items-start justify-center">
-            <View className="flex-row items-center gap-1">
-              <Text className="flex-row text-sm font-bold">
-                {player.apelido_abreviado}
-              </Text>
-              <View className="rounded-full bg-gray-300 h-1 w-1" />
-              <Text className="font-medium text-xs">
-                {OBJECT_STATUS_MARKET_PLAYER[player.status_id].name}
-              </Text>
-              <View
-                className="flex-row"
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 10,
-                  backgroundColor:
-                    OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.background,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Feather
-                  name={
-                    OBJECT_STATUS_MARKET_PLAYER[player?.status_id]
-                      ?.icon as keyof typeof Feather.glyphMap
-                  }
-                  color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.color}
-                  size={14}
-                />
-              </View>
-            </View>
+            <Text className="flex-row text-lg font-bold">
+              {player.apelido_abreviado}
+            </Text>
 
             <View
               className="flex-row items-center justify-start"
@@ -122,17 +106,50 @@ export function MarketPlayerCard({
 
               <View className="rounded-full bg-gray-300 h-1 w-1" />
 
-              <Text className="font-medium uppercase text-xs">
-                {player.jogos_num} Jogos
-              </Text>
+              <View
+                className="flex-row items-center"
+                style={{
+                  gap: 2,
+                }}
+              >
+                <Image
+                  source={{
+                    uri: matches?.clubes[match?.clube_casa_id as number]
+                      ?.escudos["60x60"],
+                  }}
+                  className="w-6 h-6"
+                  alt={`Escudo do ${
+                    matches?.clubes[match?.clube_casa_id as number]?.nome
+                  }`}
+                />
+
+                <Feather
+                  name="x"
+                  size={12}
+                  color={
+                    colorTheme === "dark"
+                      ? Colors.light.background
+                      : Colors.dark.background
+                  }
+                />
+
+                <Image
+                  source={{
+                    uri: matches?.clubes[match?.clube_visitante_id as number]
+                      ?.escudos["60x60"],
+                  }}
+                  className="w-6 h-6"
+                  alt={`Escudo do ${
+                    matches?.clubes[match?.clube_visitante_id as number]?.nome
+                  }`}
+                />
+              </View>
             </View>
           </View>
 
-          <View className="flex-row" style={{ gap: 4 }}>
-            <Text className="flex-row text-sm font-semibold">
-              C$ {numberToString(player.preco_num)}
-            </Text>
-          </View>
+          <Text className="flex-row text-base font-semibold">
+            C$ {numberToString(player.preco_num)}
+          </Text>
         </View>
 
         <View className="flex-row justify-between items-center flex-1">
@@ -145,20 +162,30 @@ export function MarketPlayerCard({
             >
               <View className="items-center justify-center">
                 <Text className="text-xs">Média</Text>
-                <Text className="font-bold text-xs">
+                <Text
+                  className="font-bold text-xs"
+                  style={{
+                    color: player.media_num > 0 ? "#22c55e" : "#ef4444",
+                  }}
+                >
                   {numberToString(player.media_num)}
                 </Text>
               </View>
 
               <View className="items-center justify-center">
                 <Text className="text-xs">Última</Text>
-                <Text className="font-bold text-xs">
+                <Text
+                  className="font-bold text-xs"
+                  style={{
+                    color: player.pontos_num > 0 ? "#22c55e" : "#ef4444",
+                  }}
+                >
                   {numberToString(player.pontos_num)}
                 </Text>
               </View>
 
               <View className="items-center justify-center">
-                <Text className="text-xs">Min P/ Val</Text>
+                <Text className="text-xs">Min. Val.</Text>
                 <Text className="font-bold text-xs">
                   {numberToString(player.minimo_para_valorizar)}
                 </Text>
@@ -166,46 +193,39 @@ export function MarketPlayerCard({
             </View>
           </View>
 
-          <View
-            className="items-end justify-end"
-            style={{
-              gap: 8,
-            }}
-          >
-            {!isSellPlayer ? (
-              <TouchableOpacity
-                disabled={isButtonDisabled}
-                style={[
-                  styles.playerButton,
-                  isButtonDisabled
-                    ? styles.purchasePlayerButtonDisabled
-                    : styles.purchasePlayerButtonActived,
-                ]}
-                onPress={() => onPressAddPlayerToLineup(player)}
-                activeOpacity={0.6}
-              >
-                <Text className="text-white text-sm font-semibold">
-                  {isButtonDisabled || isMarketClose ? "Indisp." : "Comprar"}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                disabled={isMarketClose}
-                style={[
-                  styles.playerButton,
-                  !isMarketClose
-                    ? styles.sellPlayerButton
-                    : styles.purchasePlayerButtonDisabled,
-                ]}
-                onPress={() => onPressRemovePlayerFromLineup(player)}
-                activeOpacity={0.6}
-              >
-                <Text className="text-white text-sm font-semibold">
-                  {isMarketClose ? "Indisp." : "Vender"}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+          {!isSellPlayer ? (
+            <TouchableOpacity
+              disabled={isButtonDisabled}
+              style={[
+                styles.playerButton,
+                isButtonDisabled
+                  ? styles.purchasePlayerButtonDisabled
+                  : styles.purchasePlayerButtonActived,
+              ]}
+              onPress={() => onPressAddPlayerToLineup(player)}
+              activeOpacity={0.6}
+            >
+              <Text className="text-white text-sm font-semibold">
+                {isButtonDisabled || isMarketClose ? "Indisp." : "Comprar"}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              disabled={isMarketClose}
+              style={[
+                styles.playerButton,
+                !isMarketClose
+                  ? styles.sellPlayerButton
+                  : styles.purchasePlayerButtonDisabled,
+              ]}
+              onPress={() => onPressRemovePlayerFromLineup(player)}
+              activeOpacity={0.6}
+            >
+              <Text className="text-white text-sm font-semibold">
+                {isMarketClose ? "Indisp." : "Vender"}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -216,7 +236,7 @@ const styles = StyleSheet.create({
   playerButton: {
     width: 90,
     borderRadius: 8,
-    paddingVertical: 16,
+    paddingVertical: 10,
     paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",

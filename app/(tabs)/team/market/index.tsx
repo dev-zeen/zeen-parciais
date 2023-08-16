@@ -19,7 +19,7 @@ import { filterAndSortPlayersFromMarket } from "@/utils/market";
 import { numberToString } from "@/utils/parseTo";
 
 type MarketProps = {
-  position?: LineupPosition | null | undefined;
+  position?: LineupPosition;
   playerIndex?: number;
   playerLowestPrice?: LineupPlayer | FullPlayer;
   handleCloseMarketModal?: () => void;
@@ -83,7 +83,11 @@ export default ({
   }, []);
 
   const applyFilter = useCallback((data: FullPlayer[]) => {
-    setMarketPlayers(data);
+    const playersUpdated = position
+      ? data.filter((item) => item.posicao_id === position.position)
+      : data;
+
+    setMarketPlayers(playersUpdated);
     handleIsLoading();
   }, []);
 
@@ -126,6 +130,13 @@ export default ({
     }
   }, [lineup]);
 
+  const shouldDisableButton = (player: FullPlayer) => {
+    return (
+      player.preco_num > remainingValue ||
+      (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
+    );
+  };
+
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
@@ -137,10 +148,7 @@ export default ({
           onPressRemovePlayerFromLineup={() =>
             handleRemovePlayerFromLineup(player)
           }
-          isButtonDisabled={
-            player.preco_num > remainingValue ||
-            (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
-          }
+          isButtonDisabled={shouldDisableButton(player)}
           isSellPlayer={lineup?.starting.some(
             (item) => item.player?.atleta_id === player.atleta_id
           )}

@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { FlatList } from "react-native";
+import { FlatList, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
@@ -25,6 +25,8 @@ export function OrderMarket({
   applyFilter,
   handleClose,
 }: OrderMarketProps) {
+  const colorTheme = useColorScheme();
+
   const [selectedOrder, setSelectedOrder] =
     useState<OrderSelectedProps>(currentOrder);
 
@@ -73,11 +75,17 @@ export function OrderMarket({
                 <TouchableOpacity
                   onPress={() => handleSelectOrder(item)}
                   activeOpacity={0.6}
-                  className={`p-4 rounded-lg items-center justify-center border-2 border-blue-400 bg-blue-50 ${
-                    selectedOrder.id === item.id && " bg-blue-400"
-                  }`}
+                  className="p-4 rounded-lg items-center justify-center"
                   style={{
                     gap: 16,
+                    backgroundColor:
+                      colorTheme === "dark"
+                        ? selectedOrder.id === item.id
+                          ? "#1d4ed8"
+                          : "#60a5fa"
+                        : selectedOrder.id === item.id
+                        ? "#60a5fa"
+                        : "eff6ff",
                   }}
                 >
                   <Text className="font-semibold text-sm">{item.title}</Text>

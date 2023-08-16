@@ -116,7 +116,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
               }}
             >
               <Text className="font-semibold">{awayClub?.abreviacao}</Text>
-              <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
+              <Text className="font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
             </View>
           </View>
         </View>

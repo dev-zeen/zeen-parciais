@@ -4,7 +4,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { FlatList, Switch } from "react-native";
+import { FlatList, Switch, useColorScheme } from "react-native";
 
 type MarketFilterByStatusProps = {
   statusSelecteds: FilterStatus[];
@@ -23,6 +23,8 @@ export function MarketFilterByStatus({
   applyFilter,
   handleClose,
 }: MarketFilterByStatusProps) {
+  const colorTheme = useColorScheme();
+
   const [filters, setFilters] = useState<FilterStatus[]>(statusSelecteds);
 
   const isFiltersEmpty = filters.filter((item) => item.selected).length === 0;
@@ -34,15 +36,9 @@ export function MarketFilterByStatus({
 
   const handleChangeFilter = useCallback(
     (filter: FilterStatus) => {
-      const filterUpdated = filters.map((item) => {
-        if (item.id === filter.id) {
-          return {
-            ...filter,
-            selected: !item.selected,
-          };
-        }
-        return item;
-      });
+      const filterUpdated = filters.map((item) =>
+        item.id === filter.id ? { ...filter, selected: !item.selected } : item
+      );
 
       setFilters(filterUpdated);
     },
@@ -55,7 +51,6 @@ export function MarketFilterByStatus({
         className="flex-1 rounded-lg pt-20"
         style={{
           backgroundColor: "rgba(0, 0, 0, 0.5)",
-          flex: 1,
         }}
       >
         <View
@@ -74,7 +69,7 @@ export function MarketFilterByStatus({
           </TouchableOpacity>
         </View>
 
-        <View className="px-2 flex-1">
+        <View className="flex-1 px-2 pb-4">
           <FlatList
             contentContainerStyle={{
               gap: 8,
@@ -83,10 +78,14 @@ export function MarketFilterByStatus({
             data={filters}
             renderItem={({ item }) => {
               return (
-                <View className="flex-row justify-between p-4 rounded-lg items-center border-2 border-blue-400 bg-blue-50">
-                  <Text className="font-semibold text-base text-gray-500">
-                    {item.title}
-                  </Text>
+                <View
+                  className="flex-row justify-between p-4 rounded-lg items-center"
+                  style={{
+                    backgroundColor:
+                      colorTheme === "dark" ? "#3b82f6" : "#eff6ff",
+                  }}
+                >
+                  <Text className="font-semibold text-base">{item.title}</Text>
                   <Switch
                     trackColor={{ false: "#FFF", true: "#bfdbfe" }}
                     thumbColor={item.selected ? "#3b82f6" : "#f4f3f4"}
@@ -102,7 +101,7 @@ export function MarketFilterByStatus({
 
           <TouchableOpacity
             disabled={isFiltersEmpty}
-            onPress={() => handleStatusFilter()}
+            onPress={handleStatusFilter}
             activeOpacity={0.6}
             className={`mx-2 p-4 rounded-lg items-center justify-center  ${
               isFiltersEmpty ? "bg-gray-300" : "bg-blue-500"
