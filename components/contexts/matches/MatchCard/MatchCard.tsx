@@ -15,9 +15,15 @@ interface MatchCardProps {
   match: Match;
   homeClub?: Club;
   awayClub?: Club;
+  isDisabled?: boolean;
 }
 
-export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
+export function MatchCard({
+  match,
+  homeClub,
+  awayClub,
+  isDisabled = false,
+}: MatchCardProps) {
   const router = useRouter();
   const colorTheme = useColorScheme();
 
@@ -28,6 +34,7 @@ export function MatchCard({ match, homeClub, awayClub }: MatchCardProps) {
   return (
     <View className="rounded-lg items-center justify-center">
       <TouchableOpacity
+        disabled={isDisabled}
         activeOpacity={0.6}
         onPress={onPressHandler}
         className="w-full justify-center items-center p-2 rounded-lg "

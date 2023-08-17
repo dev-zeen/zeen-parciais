@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useContext } from "react";
 import {
   FlatList,
   ListRenderItemInfo,
@@ -11,11 +11,14 @@ import { MatchCard } from "@/components/contexts/matches/MatchCard";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { AuthContext } from "@/contexts/Auth.context";
 import { Match } from "@/models/Matches";
 import { useGetMatchs } from "@/queries/matches.query";
 
 export default () => {
   const colorTheme = useColorScheme();
+
+  const { isAutheticated } = useContext(AuthContext);
 
   const { data, isLoading, refetch: onRefetch, isRefetching } = useGetMatchs();
 
@@ -31,6 +34,7 @@ export default () => {
           match={item}
           homeClub={data?.clubes[item.clube_casa_id]}
           awayClub={data?.clubes[item.clube_visitante_id]}
+          isDisabled={!isAutheticated}
         />
       );
     },
