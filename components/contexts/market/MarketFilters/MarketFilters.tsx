@@ -7,6 +7,7 @@ import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarket } from "@/queries/market.query";
 
+import { FilterMarketByTeam } from "@/components/contexts/market/MarketFilters/FilterMarketByTeam";
 import {
   FilterMarketByStatus,
   PlayerStatusFilter,
@@ -15,13 +16,11 @@ import { OrderMarket, OrderSelectedProps } from "./OrderMarket/OrderMarket";
 import { sortedOptions, statusPlayerOptions } from "./filters.helper";
 
 type MarketFilterProps = {
-  data: FullPlayer[];
   applyFilter: (players: FullPlayer[]) => void;
   handleIsLoading: () => void;
 };
 
 export function MarketFilters({
-  data,
   applyFilter,
   handleIsLoading,
 }: MarketFilterProps) {
@@ -37,58 +36,96 @@ export function MarketFilters({
   const [selectedFilterByStatusMarket, setSelectedFilterByStatusMarket] =
     useState<PlayerStatusFilter[]>(statusPlayerOptions);
 
-  const [showFiltersMarket, setShowFiltersMarket] = useState(false);
-  const [selectedFilterMarket, setSelectedFilterMarket] = useState("Provável");
+  const [showFilterMarketByTeam, setShowFilterMarketByTeam] = useState(false);
+  const [teamsSelectedFilter, setTeamsSelectedFilter] = useState<number[]>([]);
+
+  const defaultFilters = useCallback(() => {
+    const data = onGetPlayersFiltered(
+      sortedOptions[0],
+      statusPlayerOptions,
+      []
+    );
+    applyFilter(data);
+  }, []);
+
+  const filterPlayers = useCallback(
+    (players: FullPlayer[], filters: PlayerStatusFilter[], teams: number[]) => {
+      const activeFilters = filters.filter((filter) => filter.selected);
+
+      return players.filter((player) => {
+        if (teams.length > 0) {
+          return (
+            activeFilters.some((filter) => filter.id === player.status_id) &&
+            teams.some((team) => team === player.clube_id)
+          );
+        }
+        return activeFilters.some((filter) => filter.id === player.status_id);
+      });
+    },
+    []
+  );
+
+  const onGetPlayersFiltered = useCallback(
+    (
+      { onSort }: OrderSelectedProps,
+      selectedFilters: PlayerStatusFilter[],
+      selectedTeams: number[]
+    ) => {
+      const filteredPlayers = filterPlayers(
+        market?.atletas as FullPlayer[],
+        selectedFilters,
+        selectedTeams
+      );
+      const sortedData = onSort(filteredPlayers as FullPlayer[]);
+      return sortedData;
+    },
+    [market, selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
+  );
 
   const applyOrderMarket = useCallback(
     (option: OrderSelectedProps) => {
       if (option.id === selectedOrder.id) return;
       handleIsLoading();
-      // const data = onGetPlayersByStatus(selectedFilterByStatusMarket);
-      const marketPlayersUpdated = option.onSort(data as FullPlayer[]);
-      applyFilter(marketPlayersUpdated);
       setSelectedOrder(option);
+      const data = onGetPlayersFiltered(
+        option,
+        selectedFilterByStatusMarket,
+        teamsSelectedFilter
+      );
+      applyFilter(data);
       setShowOrderMarket(false);
     },
-    [selectedOrder, selectedFilterByStatusMarket]
-  );
-
-  const onGetPlayersByStatus = useCallback(
-    (filtersStatus: PlayerStatusFilter[]) => {
-      const filtersSelecteds = filtersStatus.filter((item) => item.selected);
-
-      const marketPlayersFilteredByStatus = market?.atletas.filter((player) =>
-        filtersSelecteds.some((item) => item.id === player.status_id)
-      );
-
-      return marketPlayersFilteredByStatus;
-    },
-    [market]
-  );
-
-  const onGetOrderMarketPlayers = useCallback(
-    (marketPlayers: FullPlayer[]) => {
-      const marketPlayersOrdened = selectedOrder.onSort(marketPlayers);
-      return marketPlayersOrdened;
-    },
-    [selectedOrder]
+    [selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
   );
 
   const applyFilterByStatus = useCallback(
     (filters: PlayerStatusFilter[]) => {
       handleIsLoading();
       setShowOrderMarket(false);
-
       setSelectedFilterByStatusMarket(filters);
 
-      const marketPlayersFiltered = onGetPlayersByStatus(filters);
-      const marketPlayersUpdated = onGetOrderMarketPlayers(
-        marketPlayersFiltered as FullPlayer[]
+      const data = onGetPlayersFiltered(
+        selectedOrder,
+        filters,
+        teamsSelectedFilter
       );
-
-      applyFilter(marketPlayersUpdated as FullPlayer[]);
+      applyFilter(data);
     },
-    [selectedOrder]
+    [selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
+  );
+
+  const applyFilterByTeams = useCallback(
+    (clubsSelecteds: number[]) => {
+      setTeamsSelectedFilter(clubsSelecteds);
+      handleIsLoading();
+      const data = onGetPlayersFiltered(
+        selectedOrder,
+        selectedFilterByStatusMarket,
+        clubsSelecteds
+      );
+      applyFilter(data);
+    },
+    [selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
   );
 
   const filtersSelecteds = useMemo(
@@ -102,6 +139,18 @@ export function MarketFilters({
         ? `${filtersSelecteds[0].title} + ${filtersSelecteds.length - 1}`
         : filtersSelecteds[0].title,
     [filtersSelecteds]
+  );
+
+  const titleFilterByTeams = useMemo(
+    () =>
+      teamsSelectedFilter.length > 1
+        ? `${market?.clubes[teamsSelectedFilter[0]].nome} + ${
+            teamsSelectedFilter.length - 1
+          }`
+        : teamsSelectedFilter.length === 1
+        ? market?.clubes[teamsSelectedFilter[0]].nome
+        : "Times",
+    [teamsSelectedFilter]
   );
 
   return (
@@ -136,10 +185,10 @@ export function MarketFilters({
           style={{
             gap: 8,
           }}
-          onPress={() => setShowFiltersMarket(true)}
+          onPress={() => setShowFilterMarketByTeam(true)}
         >
           <Feather name="filter" color="#9ca3af" size={20} />
-          <Text className="text-xs font-semibold">Filtrar</Text>
+          <Text className="text-xs font-semibold">{titleFilterByTeams}</Text>
         </TouchableOpacity>
       </View>
 
@@ -173,20 +222,21 @@ export function MarketFilters({
         </Modal>
       )}
 
-      {/* {showFiltersMarket && (
+      {showFilterMarketByTeam && (
         <Modal
-          visible={!!showFiltersMarket}
+          visible={showFilterMarketByTeam}
           animationType="fade"
           transparent
-          onRequestClose={() => setShowFiltersMarket(false)}
+          onRequestClose={() => setShowFilterMarketByTeam(false)}
         >
-          <MarketFilter
-            type="filter"
-            applyFilter={applyFilter}
-            handleClose={() => setShowFiltersMarket(false)}
+          <FilterMarketByTeam
+            applyFilter={applyFilterByTeams}
+            handleClose={() => setShowFilterMarketByTeam(false)}
+            selectedTeams={teamsSelectedFilter}
+            defaultFilters={defaultFilters}
           />
         </Modal>
-      )} */}
+      )}
     </>
   );
 }

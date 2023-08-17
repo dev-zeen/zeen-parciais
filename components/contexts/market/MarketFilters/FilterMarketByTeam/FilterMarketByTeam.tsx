@@ -1,123 +1,158 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
-import { TypeFilter } from "@/app/(tabs)/team/market";
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { FullPlayer } from "@/models/Stats";
-import { FlatList } from "react-native";
+import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import Colors from "@/constants/Colors";
+import { Market } from "@/models/Market";
+import { Match } from "@/models/Matches";
+import { useGetMarket } from "@/queries/market.query";
+import { useGetMatchs } from "@/queries/matches.query";
+
+import { MatchCardFilter } from "./MatchCardFilter";
 
 type FilterMarketByTeamProps = {
-  type: "filter" | "sort" | "status";
-  applyFilter: (players: FullPlayer[]) => void;
+  applyFilter: (teams: number[]) => void;
   handleClose: () => void;
+  defaultFilters: () => void;
+  selectedTeams: number[];
 };
 
 export function FilterMarketByTeam({
-  type,
   applyFilter,
   handleClose,
+  defaultFilters,
+  selectedTeams,
 }: FilterMarketByTeamProps) {
-  const title =
-    type === "filter" ? "Filtrar" : type === "sort" ? "Ordenar" : "Status";
+  const colorTheme = useColorScheme();
+  const { data: market } = useGetMarket();
+  const { data: matches } = useGetMatchs();
 
-  const [selectedFilter, setSelectedFilter] = useState<TypeFilter>("");
+  const [selectedsTeams, setSelectedsTeams] = useState<number[]>(
+    selectedTeams || []
+  );
 
-  const handleFilterSelect = () => {
-    // Aplicar o filtro selecionado e passar o valor para a função "applyFilter"
-    // Fechar o modal
-    handleClose();
+  const handlePressTeam = (id: number) => {
+    const isExists = selectedsTeams.includes(id);
+
+    if (isExists) {
+      const selectedsTeamsUpdated = selectedsTeams.filter(
+        (teamId) => teamId !== id
+      );
+      setSelectedsTeams(selectedsTeamsUpdated);
+    } else {
+      setSelectedsTeams([...selectedsTeams, id]);
+    }
   };
 
-  const sortedOptions = [
-    {
-      id: 1,
-      title: "Mais Caros",
+  const handlePressFilter = useCallback(() => {
+    applyFilter(selectedsTeams);
+    handleClose();
+  }, [selectedsTeams]);
+
+  const renderItem = useCallback(
+    ({ item: match }: ListRenderItemInfo<Match>) => {
+      return (
+        <MatchCardFilter
+          market={market as Market}
+          match={match}
+          selecteds={selectedsTeams}
+          handlePressTeam={handlePressTeam}
+        />
+      );
     },
-    {
-      id: 2,
-      title: "Mais Baratos",
-    },
-    {
-      id: 3,
-      title: "Maior Média",
-    },
-    {
-      id: 4,
-      title: "Menos Pontos para Valorizar",
-    },
-  ];
+    [market, matches, selectedsTeams]
+  );
+
+  const keyExtractor = useCallback(
+    (item: Match) => `${item.clube_casa_id}`,
+    []
+  );
 
   return (
-    <View
-      className="flex-1 pt-32 rounded-lg"
-      style={{
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        flex: 1,
-        gap: 8,
-      }}
-    >
+    <SafeAreaViewContainer>
       <View
-        className="items-center justify-between flex-row p-2 mx-2 rounded-lg"
+        className="mx-2"
+        style={{
+          gap: 8,
+          backgroundColor:
+            colorTheme === "dark"
+              ? Colors.dark.backgroundFull
+              : Colors.light.backgroundFull,
+        }}
+      >
+        <View
+          className="rounded-lg"
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          <View
+            className="items-center justify-between flex-row p-2 rounded-lg"
+            style={{
+              gap: 16,
+            }}
+          >
+            <Text className="font-semibold text-lg">Filtrar Por Time</Text>
+
+            <TouchableOpacity
+              onPress={handleClose}
+              className="p-2 rounded-full border border-red-400 bg-red-300"
+            >
+              <Feather name="x" color="#525252" size={24} />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View className="flex-row px-8 py-3 rounded-lg items-center justify-evenly">
+          <Text>Mandates</Text>
+          <Text>Visitantes</Text>
+        </View>
+      </View>
+
+      <FlatList
+        contentContainerStyle={{
+          gap: 8,
+          paddingVertical: 8,
+          paddingHorizontal: 8,
+
+          backgroundColor:
+            colorTheme === "dark"
+              ? Colors.dark.backgroundFull
+              : Colors.light.backgroundFull,
+        }}
+        initialNumToRender={10}
+        data={matches?.partidas}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+      />
+
+      <TouchableOpacity
+        disabled={selectedsTeams.length === 0}
+        onPress={handlePressFilter}
+        activeOpacity={0.6}
+        className={`mx-2 p-4 rounded-lg items-center justify-center  ${
+          selectedsTeams.length === 0 ? "bg-gray-300" : "bg-blue-500"
+        }`}
         style={{
           gap: 16,
         }}
       >
-        <Text className="font-semibold text-lg">{title}</Text>
+        <Text className="font-semibold text-sm text-white">Filtrar</Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleClose}
-          className="p-2 rounded-full border border-red-400 bg-red-300"
-        >
-          <Feather name="x" color="#525252" size={24} />
-        </TouchableOpacity>
-      </View>
-
-      {type === "sort" && (
-        <View className="mx-2 px-2 flex-1 rounded-lg">
-          <FlatList
-            contentContainerStyle={{
-              gap: 8,
-              padding: 8,
-            }}
-            data={sortedOptions}
-            renderItem={({ item }) => {
-              return (
-                <TouchableOpacity
-                  activeOpacity={0.6}
-                  className="bg-blue-500 p-4 rounded-lg items-center justify-center"
-                  style={{
-                    gap: 16,
-                  }}
-                >
-                  <Text className="text-white font-semibold text-sm">
-                    {item.title}
-                  </Text>
-                </TouchableOpacity>
-              );
-            }}
-            keyExtractor={(item) => item.title}
-          />
-        </View>
-      )}
-
-      {type === "status" && (
-        <View className="mx-2 px-2 flex-1 rounded-lg">
-          <View className="items-center justify-center">
-            <Text>Market Status Player</Text>
-          </View>
-        </View>
-      )}
-
-      {type === "filter" && (
-        <View className="mx-2 px-2 flex-1 rounded-lg">
-          {/* <ScrollView className="mx-2 px-2 flex-1 rounded-lg"> */}
-          <View className="items-center justify-center">
-            <Text>Market Filter</Text>
-          </View>
-          {/* </ScrollView> */}
-        </View>
-      )}
-    </View>
+      <TouchableOpacity
+        onPress={defaultFilters}
+        activeOpacity={0.6}
+        className={`mx-2 p-4 rounded-lg items-center justify-center bg-yellow-400-500"`}
+        style={{
+          gap: 16,
+        }}
+      >
+        <Text className="font-semibold text-sm text-white">Limpar Filtros</Text>
+      </TouchableOpacity>
+    </SafeAreaViewContainer>
   );
 }

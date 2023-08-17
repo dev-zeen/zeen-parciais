@@ -25,8 +25,6 @@ type MarketProps = {
   handleCloseMarketModal?: () => void;
 };
 
-export type TypeFilter = "filter" | "sort" | "status" | "";
-
 export default ({
   position,
   handleCloseMarketModal,
@@ -209,7 +207,6 @@ export default ({
         </View>
 
         <MarketFilters
-          data={marketPlayers}
           applyFilter={applyFilter}
           handleIsLoading={handleIsLoading}
         />
