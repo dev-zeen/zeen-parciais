@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { Image, TouchableOpacity, useColorScheme } from "react-native";
 
+import { Feather } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useRouter } from "expo-router";
@@ -9,7 +10,6 @@ import { Text, View } from "@/components/Themed";
 import Colors from "@/constants/Colors";
 import { Club } from "@/models/Club";
 import { Match } from "@/models/Matches";
-import { Feather } from "@expo/vector-icons";
 
 interface MatchCardProps {
   match: Match;
@@ -32,28 +32,27 @@ export function MatchCard({
   }, []);
 
   return (
-    <View className="rounded-lg items-center justify-center">
-      <TouchableOpacity
-        disabled={isDisabled}
-        activeOpacity={0.6}
-        onPress={onPressHandler}
-        className="w-full justify-center items-center p-2 rounded-lg "
-      >
-        <Text className=" font-medium text-xs">
+    <TouchableOpacity
+      disabled={isDisabled}
+      activeOpacity={0.6}
+      onPress={onPressHandler}
+    >
+      <View className="flex-1 p-2 rounded-lg ">
+        <Text className="font-medium text-xs text-center">
           {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
             locale: ptBR,
           })}
         </Text>
 
         <View
-          className={`flex-row py-2 px-4 w-full items-center justify-between ${
+          className={`flex-row py-2 px-4 justify-between ${
             match.status_transmissao_tr === "CRIADA" && "mb-4"
           }`}
           style={{
             gap: 24,
           }}
         >
-          <View className="justify-center items-center" style={{ gap: 4 }}>
+          <View className="items-center" style={{ gap: 4 }}>
             <Image
               source={{
                 uri: homeClub?.escudos["60x60"],
@@ -61,16 +60,10 @@ export function MatchCard({
               className="w-10 h-10"
               alt={`Escudo do ${homeClub?.nome}`}
             />
-            <View
-              className="flex-row"
-              style={{
-                gap: 8,
-              }}
-            >
-              <Text className="font-semibold">{homeClub?.abreviacao}</Text>
 
-              <Text className="font-semibold">{`${match.clube_casa_posicao}º`}</Text>
-            </View>
+            <Text className="font-semibold">
+              {homeClub?.abreviacao} {`${match.clube_casa_posicao}º`}
+            </Text>
           </View>
 
           <View
@@ -82,7 +75,7 @@ export function MatchCard({
             <View
               className={`flex-row justify-center items-center border rounded ${
                 colorTheme === "dark" ? "border-gray-400" : "border-gray-300"
-              } px-3 py-1`}
+              } px-4 py-1`}
               style={{
                 gap: 8,
               }}
@@ -116,15 +109,10 @@ export function MatchCard({
               className="w-10 h-10"
               alt={`Escudo do ${awayClub?.nome}`}
             />
-            <View
-              className="flex-row"
-              style={{
-                gap: 8,
-              }}
-            >
-              <Text className="font-semibold">{awayClub?.abreviacao}</Text>
-              <Text className="font-semibold">{`${match.clube_visitante_posicao}º`}</Text>
-            </View>
+
+            <Text className="font-semibold">
+              {awayClub?.abreviacao} {`${match.clube_visitante_posicao}º`}
+            </Text>
           </View>
         </View>
 
@@ -149,7 +137,7 @@ export function MatchCard({
             </Text>
           </View>
         )}
-      </TouchableOpacity>
-    </View>
+      </View>
+    </TouchableOpacity>
   );
 }
