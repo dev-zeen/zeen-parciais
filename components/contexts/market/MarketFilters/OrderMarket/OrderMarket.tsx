@@ -4,13 +4,14 @@ import { FlatList, useColorScheme } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { sortedOptions } from "@/components/contexts/market/MarketFilters/filters.helper";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { FullPlayer } from "@/models/Stats";
 
+import { sortedOptions } from "@/components/contexts/market/MarketFilters/filters.helper";
+
 type OrderMarketProps = {
   currentOrder: OrderSelectedProps;
-  applyFilter: (option: OrderSelectedProps) => void;
+  applyOrderMarket: (option: OrderSelectedProps) => void;
   handleClose: () => void;
 };
 
@@ -22,7 +23,7 @@ export type OrderSelectedProps = {
 
 export function OrderMarket({
   currentOrder,
-  applyFilter,
+  applyOrderMarket,
   handleClose,
 }: OrderMarketProps) {
   const colorTheme = useColorScheme();
@@ -32,7 +33,7 @@ export function OrderMarket({
 
   const handleSelectOrder = useCallback(
     (option: OrderSelectedProps) => {
-      applyFilter(option);
+      applyOrderMarket(option);
       setSelectedOrder(option);
     },
     [selectedOrder]
@@ -77,7 +78,6 @@ export function OrderMarket({
                   activeOpacity={0.6}
                   className="p-4 rounded-lg items-center justify-center"
                   style={{
-                    gap: 16,
                     backgroundColor:
                       colorTheme === "dark"
                         ? selectedOrder.id === item.id
@@ -85,7 +85,7 @@ export function OrderMarket({
                           : "#60a5fa"
                         : selectedOrder.id === item.id
                         ? "#60a5fa"
-                        : "eff6ff",
+                        : "#eff6ff",
                   }}
                 >
                   <Text className="font-semibold text-sm">{item.title}</Text>

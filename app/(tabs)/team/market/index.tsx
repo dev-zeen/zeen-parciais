@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
@@ -34,6 +34,8 @@ export default ({
   playerLowestPrice,
 }: MarketProps) => {
   const colorTheme = useColorScheme();
+
+  const isFirstRender = useRef(true);
 
   const allowRequest = true;
 
@@ -103,7 +105,7 @@ export default ({
   );
 
   useEffect(() => {
-    if (marketData) {
+    if (marketData && isFirstRender.current) {
       if (position) {
         setSearchPlayerParam(position);
         const marketPlayersUpdated = filterAndSortPlayersFromMarket(
@@ -116,6 +118,8 @@ export default ({
         const marketPlayersLikely = filterAndSortPlayersFromMarket(marketData);
         setMarketPlayers(marketPlayersLikely);
       }
+
+      isFirstRender.current = false;
     }
   }, [marketData, searchPlayerParam, price]);
 
@@ -130,12 +134,15 @@ export default ({
     }
   }, [lineup]);
 
-  const shouldDisableButton = (player: FullPlayer) => {
-    return (
-      player.preco_num > remainingValue ||
-      (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
-    );
-  };
+  const shouldDisableButton = useCallback(
+    (player: FullPlayer) => {
+      return (
+        player.preco_num > remainingValue ||
+        (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
+      );
+    },
+    [emptyPositions]
+  );
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {

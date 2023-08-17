@@ -4,19 +4,15 @@ import { Modal } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { MarketFilterByStatus } from "@/components/contexts/market/MarketFilters/MarketFilterByStatus";
-import { FilterStatus } from "@/components/contexts/market/MarketFilters/MarketFilterByStatus/MarketFilterByStatus";
-import {
-  OrderMarket,
-  OrderSelectedProps,
-} from "@/components/contexts/market/MarketFilters/OrderMarket/OrderMarket";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMarket } from "@/queries/market.query";
 
 import {
-  sortedOptions,
-  statusPlayerOptions,
-} from "@/components/contexts/market/MarketFilters/filters.helper";
+  FilterMarketByStatus,
+  PlayerStatusFilter,
+} from "./FilterMarketByStatus/FilterMarketByStatus";
+import { OrderMarket, OrderSelectedProps } from "./OrderMarket/OrderMarket";
+import { sortedOptions, statusPlayerOptions } from "./filters.helper";
 
 type MarketFilterProps = {
   data: FullPlayer[];
@@ -39,42 +35,60 @@ export function MarketFilters({
   const [showFilterByStatusMarket, setShowFilterByStatusMarket] =
     useState(false);
   const [selectedFilterByStatusMarket, setSelectedFilterByStatusMarket] =
-    useState<FilterStatus[]>(statusPlayerOptions);
+    useState<PlayerStatusFilter[]>(statusPlayerOptions);
 
   const [showFiltersMarket, setShowFiltersMarket] = useState(false);
   const [selectedFilterMarket, setSelectedFilterMarket] = useState("Provável");
 
-  const applyFilterSort = useCallback(
+  const applyOrderMarket = useCallback(
     (option: OrderSelectedProps) => {
       if (option.id === selectedOrder.id) return;
       handleIsLoading();
-      const marketPlayersUpdated = option.onSort(data);
+      // const data = onGetPlayersByStatus(selectedFilterByStatusMarket);
+      const marketPlayersUpdated = option.onSort(data as FullPlayer[]);
       applyFilter(marketPlayersUpdated);
       setSelectedOrder(option);
       setShowOrderMarket(false);
     },
-    [data, selectedOrder]
+    [selectedOrder, selectedFilterByStatusMarket]
   );
 
-  const applyFilterByStatus = useCallback(
-    (filters: FilterStatus[]) => {
-      handleIsLoading();
-      setShowOrderMarket(false);
-      const filtersSelecteds = filters.filter((item) => item.selected);
+  const onGetPlayersByStatus = useCallback(
+    (filtersStatus: PlayerStatusFilter[]) => {
+      const filtersSelecteds = filtersStatus.filter((item) => item.selected);
 
-      setSelectedFilterByStatusMarket(filters);
-
-      const marketPlayersFiltered = market?.atletas.filter((player) =>
+      const marketPlayersFilteredByStatus = market?.atletas.filter((player) =>
         filtersSelecteds.some((item) => item.id === player.status_id)
       );
 
-      const marketPlayersUpdated = selectedOrder.onSort(
+      return marketPlayersFilteredByStatus;
+    },
+    [market]
+  );
+
+  const onGetOrderMarketPlayers = useCallback(
+    (marketPlayers: FullPlayer[]) => {
+      const marketPlayersOrdened = selectedOrder.onSort(marketPlayers);
+      return marketPlayersOrdened;
+    },
+    [selectedOrder]
+  );
+
+  const applyFilterByStatus = useCallback(
+    (filters: PlayerStatusFilter[]) => {
+      handleIsLoading();
+      setShowOrderMarket(false);
+
+      setSelectedFilterByStatusMarket(filters);
+
+      const marketPlayersFiltered = onGetPlayersByStatus(filters);
+      const marketPlayersUpdated = onGetOrderMarketPlayers(
         marketPlayersFiltered as FullPlayer[]
       );
 
       applyFilter(marketPlayersUpdated as FullPlayer[]);
     },
-    [market, selectedOrder]
+    [selectedOrder]
   );
 
   const filtersSelecteds = useMemo(
@@ -87,7 +101,7 @@ export function MarketFilters({
       filtersSelecteds.length > 1
         ? `${filtersSelecteds[0].title} + ${filtersSelecteds.length - 1}`
         : filtersSelecteds[0].title,
-    [selectedFilterByStatusMarket]
+    [filtersSelecteds]
   );
 
   return (
@@ -138,7 +152,7 @@ export function MarketFilters({
         >
           <OrderMarket
             currentOrder={selectedOrder as OrderSelectedProps}
-            applyFilter={applyFilterSort}
+            applyOrderMarket={applyOrderMarket}
             handleClose={() => setShowOrderMarket(false)}
           />
         </Modal>
@@ -151,7 +165,7 @@ export function MarketFilters({
           transparent
           onRequestClose={() => setShowFilterByStatusMarket(false)}
         >
-          <MarketFilterByStatus
+          <FilterMarketByStatus
             statusSelecteds={selectedFilterByStatusMarket}
             applyFilter={applyFilterByStatus}
             handleClose={() => setShowFilterByStatusMarket(false)}

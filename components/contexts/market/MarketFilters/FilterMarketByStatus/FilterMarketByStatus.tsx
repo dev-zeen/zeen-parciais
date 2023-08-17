@@ -6,26 +6,26 @@ import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { FlatList, Switch, useColorScheme } from "react-native";
 
-type MarketFilterByStatusProps = {
-  statusSelecteds: FilterStatus[];
-  applyFilter: (filters: FilterStatus[]) => void;
+type FilterMarketByStatusProps = {
+  statusSelecteds: PlayerStatusFilter[];
+  applyFilter: (filters: PlayerStatusFilter[]) => void;
   handleClose: () => void;
 };
 
-export type FilterStatus = {
+export type PlayerStatusFilter = {
   id: number;
   title: string;
   selected: boolean;
 };
 
-export function MarketFilterByStatus({
+export function FilterMarketByStatus({
   statusSelecteds,
   applyFilter,
   handleClose,
-}: MarketFilterByStatusProps) {
+}: FilterMarketByStatusProps) {
   const colorTheme = useColorScheme();
 
-  const [filters, setFilters] = useState<FilterStatus[]>(statusSelecteds);
+  const [filters, setFilters] = useState<PlayerStatusFilter[]>(statusSelecteds);
 
   const isFiltersEmpty = filters.filter((item) => item.selected).length === 0;
 
@@ -35,7 +35,7 @@ export function MarketFilterByStatus({
   }, [filters]);
 
   const handleChangeFilter = useCallback(
-    (filter: FilterStatus) => {
+    (filter: PlayerStatusFilter) => {
       const filterUpdated = filters.map((item) =>
         item.id === filter.id ? { ...filter, selected: !item.selected } : item
       );

@@ -7,17 +7,17 @@ import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { FullPlayer } from "@/models/Stats";
 import { FlatList } from "react-native";
 
-type MarketFilterProps = {
+type FilterMarketByTeamProps = {
   type: "filter" | "sort" | "status";
   applyFilter: (players: FullPlayer[]) => void;
   handleClose: () => void;
 };
 
-export function MarketFilter({
+export function FilterMarketByTeam({
   type,
   applyFilter,
   handleClose,
-}: MarketFilterProps) {
+}: FilterMarketByTeamProps) {
   const title =
     type === "filter" ? "Filtrar" : type === "sort" ? "Ordenar" : "Status";
 
