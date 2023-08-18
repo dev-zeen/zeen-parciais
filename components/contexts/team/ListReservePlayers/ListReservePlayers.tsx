@@ -34,7 +34,7 @@ export function ListReservePlayers({
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
   const [showMarketModal, setShowMarketModal] = useState(false);
   const [positionMarketSearch, setPositionMarketSearch] =
-    useState<LineupPosition | null>();
+    useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
 
   const handlePurchasePlayerOnMarket = useCallback(
@@ -62,7 +62,7 @@ export function ListReservePlayers({
 
   const handleCloseMarketModal = useCallback(() => {
     setShowMarketModal(false);
-    setPositionMarketSearch(null);
+    setPositionMarketSearch(undefined);
     setPlayerIndex(0);
   }, []);
 

@@ -26,7 +26,7 @@ export function SoccerField({
   const lineup = useTeamLineupStore((state) => state.lineup);
 
   const [positionMarketSearch, setPositionMarketSearch] =
-    useState<LineupPosition | null>();
+    useState<LineupPosition>();
 
   const [playerIndex, setPlayerIndex] = useState(0);
 
@@ -42,7 +42,7 @@ export function SoccerField({
 
   const handleCloseMarketModal = useCallback(() => {
     setShowMarketModal(false);
-    setPositionMarketSearch(null);
+    setPositionMarketSearch(undefined);
     setPlayerIndex(0);
   }, []);
 

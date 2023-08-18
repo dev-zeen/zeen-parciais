@@ -7,9 +7,10 @@ import {
   GET_MATCH_SUBSTITUTIONS,
   GET_MATCH_SUBSTITUTIONS_BY_ROUND,
   GET_MY_CLUB,
+  SAVE_TEAM,
 } from "@/constants/Endpoits";
 import { FullClubInfo, Substitutions, TeamHistoryRound } from "@/models/Club";
-import { useFetch, usePrefetch } from "@/utils/reactQuery";
+import { useFetch, usePost, usePrefetch } from "@/utils/reactQuery";
 
 export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
@@ -75,4 +76,8 @@ export const useGetMatchSubstitutions = ({
   return useFetch<Substitutions[]>(round ? urlWithRound : url, undefined, {
     enabled: requestWithRound ? !!id && !!round : !!id,
   });
+};
+
+export const useSaveTeam = () => {
+  return usePost(SAVE_TEAM);
 };

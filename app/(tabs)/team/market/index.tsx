@@ -132,16 +132,6 @@ export default ({
     }
   }, [lineup]);
 
-  const shouldDisableButton = useCallback(
-    (player: FullPlayer) => {
-      return (
-        player.preco_num > remainingValue ||
-        (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
-      );
-    },
-    [emptyPositions]
-  );
-
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
@@ -153,14 +143,17 @@ export default ({
           onPressRemovePlayerFromLineup={() =>
             handleRemovePlayerFromLineup(player)
           }
-          isButtonDisabled={shouldDisableButton(player)}
+          isButtonDisabled={
+            (!playerLowestPrice && player.preco_num > remainingValue) ||
+            (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
+          }
           isSellPlayer={lineup?.starting.some(
             (item) => item.player?.atleta_id === player.atleta_id
           )}
         />
       );
     },
-    [emptyPositions]
+    [emptyPositions, lineup]
   );
 
   if (!marketPlayers || !club || isLoading) return <Loading />;

@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import {
+  Alert,
   Modal,
   RefreshControl,
   ScrollView,
@@ -33,20 +34,25 @@ import { AuthContext } from "@/contexts/Auth.context";
 import { FullClubInfo } from "@/models/Club";
 import { LineupPlayers, LineupPosition } from "@/models/Formations";
 import { PlayerStats } from "@/models/Stats";
-import { useGetMyClub } from "@/queries/club.query";
+import { useGetMyClub, useSaveTeam } from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 import { numberToString } from "@/utils/parseTo";
-import { isLineupComplete, onGetTeamPrice } from "@/utils/team";
+import {
+  isLineupComplete,
+  onGetPayloadSaveTeam,
+  onGetTeamPrice,
+} from "@/utils/team";
 
 import {
   PlayersToSell,
   clearLineup,
   fillLineupOnChangeTacticalFormation,
   fillLineupWithPlayers,
-  isEqualLineups,
+  listDefaultLineups,
   onGetDefaultLineupTeam,
+  onGetEqualLineups,
   onGetPlayersOnChangePositionSell,
 } from "./team.helpers";
 
@@ -74,6 +80,8 @@ export default () => {
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
   } = useGetMyClub(allowRequests);
+
+  const { mutate } = useSaveTeam();
 
   const { data: playerStats, refetch: onRefetchStats } =
     useGetScoredPlayers(isMarketClose);
@@ -136,14 +144,6 @@ export default () => {
     []
   );
 
-  const onShowSaveLineupButton = useCallback(
-    (lineup: LineupPlayers, club: FullClubInfo) => {
-      const lineupIsCompleted = isEqualLineups(lineup, club);
-      setShowSaveLineupButton(!lineupIsCompleted);
-    },
-    []
-  );
-
   const handleResetClub = useCallback(async () => {
     await onRefetchClub().then((res) => {
       const defaultFormation = onGetDefaultLineupTeam(
@@ -167,8 +167,44 @@ export default () => {
     await handleResetClub();
   }, [handleResetClub, onRefetchStats]);
 
-  const listDefaultLineups = Object.entries(LINEUPS_DEFAULT_OBJECT).map(
-    ([_key, value]) => value
+  const onSuccessSavedTeam = useCallback(
+    () =>
+      Alert.alert("Boa cartoleiro!", "Time escalado com sucesso.", [
+        { text: "OK" },
+      ]),
+    []
+  );
+
+  const handleSaveTeam = useCallback(() => {
+    const payload = onGetPayloadSaveTeam({
+      lineup: lineup as LineupPlayers,
+      capitain,
+      tacticalFormation,
+    });
+
+    mutate(payload, {
+      onSuccess: () => {
+        onSuccessSavedTeam();
+        setShowSaveLineupButton(false);
+      },
+    });
+  }, [lineup, capitain, tacticalFormation]);
+
+  const handlePressShowMarketModal = useCallback(() => {
+    router.push("/team/market/");
+  }, []);
+
+  const onShowSaveLineupButton = useCallback(
+    (lineup: LineupPlayers, club: FullClubInfo) => {
+      if (lineup && club) {
+        const isEqualLineups = onGetEqualLineups(lineup, club);
+        const isSameCapitain = club.capitao_id === capitain;
+
+        if (!isSameCapitain || !isEqualLineups) setShowSaveLineupButton(true);
+        if (isSameCapitain && isEqualLineups) setShowSaveLineupButton(false);
+      }
+    },
+    [club, lineup, capitain]
   );
 
   const handleSellAllPlayers = useCallback(() => {
@@ -184,10 +220,6 @@ export default () => {
     updateLineup(lineupWithoutPlayers);
     updatePrice(newPrice);
   }, [lineup, updateLineup]);
-
-  const handlePressShowMarketModal = useCallback(() => {
-    router.push("/team/market/");
-  }, []);
 
   useEffect(() => {
     if (!lineup && club && firstRender.current) {
@@ -206,13 +238,16 @@ export default () => {
   }, [club]);
 
   useEffect(() => {
-    if (lineup) {
+    if (lineup && club) {
       const isFilledLineup = isLineupComplete(lineup);
+
       if (isFilledLineup) {
         onShowSaveLineupButton(lineup as LineupPlayers, club as FullClubInfo);
+      } else {
+        setShowSaveLineupButton(false);
       }
     }
-  }, [lineup]);
+  }, [lineup, capitain, club]);
 
   useEffect(() => {
     if (lineup) {
@@ -253,7 +288,7 @@ export default () => {
         >
           <MarketStatusCard />
 
-          <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-around">
+          <View className="w-full flex-1 flex-row items-center rounded-lg px-2 py-3 justify-around">
             <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Patrim.</Text>
               <Text className="font-bold text-base">
@@ -265,6 +300,13 @@ export default () => {
               <Text className="font-light text-sm">Preço</Text>
               <Text className="font-bold text-base text-green-500">
                 {numberToString(price)}
+              </Text>
+            </View>
+
+            <View className="w-16 justify-center items-center">
+              <Text className="font-light text-sm">Rest.</Text>
+              <Text className="font-bold text-base text-green-500">
+                {numberToString(club?.patrimonio - (price as number))}
               </Text>
             </View>
 
@@ -293,7 +335,7 @@ export default () => {
             />
           </View>
 
-          <View className="w-full flex-1 flex-row items-center rounded-lg p-3 justify-evenly">
+          <View className="w-full flex-row items-center rounded-lg p-3 justify-between">
             <SelectDropdown
               disabled={isMarketClose}
               dropdownIconPosition="right"
@@ -303,7 +345,7 @@ export default () => {
                 );
               }}
               defaultValue={tacticalFormation}
-              data={listDefaultLineups}
+              data={listDefaultLineups()}
               onSelect={(_selectedItem, index) => {
                 handleChangeFormation(lineup, index + 1);
               }}
@@ -325,7 +367,7 @@ export default () => {
                 borderRadius: 4,
                 borderWidth: !isMarketClose ? 2 : 0,
                 borderColor: !isMarketClose ? "#3b82f6" : "",
-                maxWidth: 100,
+                maxWidth: 120,
                 maxHeight: 40,
                 backgroundColor:
                   colorTheme === "dark"
@@ -347,7 +389,7 @@ export default () => {
               <Button
                 variant="success"
                 title="Confirmar"
-                onPress={() => console.log("Confirmar Escalação")}
+                onPress={handleSaveTeam}
                 iconName="check"
                 hasIcon
               />

@@ -213,10 +213,6 @@ export function isPlayersEqual(
   currentPlayers: number[],
   defaultPlayers: number[]
 ): boolean {
-  if (!currentPlayers || !defaultPlayers) {
-    return false;
-  }
-
   const sortedCurrentPlayers = currentPlayers.slice().sort();
   const sortedDefaultPlayers = defaultPlayers.slice().sort();
 
@@ -226,15 +222,7 @@ export function isPlayersEqual(
   );
 }
 
-export function onAreEqualCapitain(
-  currentCapitain: number,
-  defaultCapitain: number
-) {
-  return currentCapitain === defaultCapitain;
-}
-
-// TODO TAMBEM ADICIONAR SE O CAPITÃO TAMBÉM É O MESMO
-export function isEqualLineups(
+export function onGetEqualLineups(
   lineup: LineupPlayers,
   club: FullClubInfo
 ): boolean {
@@ -243,10 +231,24 @@ export function isEqualLineups(
     ({ player }) => player?.atleta_id
   );
 
-  const isEqualCurrentAndDefaultLineups = isPlayersEqual(
+  const isEqualLineupPlayers = isPlayersEqual(
     currentPlayersId as number[],
     defaultPlayersId
   );
 
-  return isEqualCurrentAndDefaultLineups;
+  const defaultReservesId = club?.reservas.map(({ atleta_id }) => atleta_id);
+  const currentReservesId = lineup.reserves
+    .map(({ player }) => player?.atleta_id)
+    .filter(Boolean);
+
+  const isEqualLineupReserves = isPlayersEqual(
+    defaultReservesId as number[],
+    currentReservesId as number[]
+  );
+
+  return isEqualLineupPlayers && isEqualLineupReserves;
+}
+
+export function listDefaultLineups() {
+  return Object.entries(LINEUPS_DEFAULT_OBJECT).map(([_key, value]) => value);
 }

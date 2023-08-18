@@ -1,4 +1,5 @@
 import { PlayersToSell } from "@/app/(tabs)/team/team.helpers";
+import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
 import {
   LineupPlayer,
   LineupPlayers,
@@ -11,6 +12,12 @@ type AddPlayerProps = {
   player: FullPlayer;
   index?: number;
   isReservePlayer?: boolean;
+};
+
+type SaveTeamProps = {
+  lineup: LineupPlayers;
+  capitain: number;
+  tacticalFormation: string;
 };
 
 function onRemovePlayer(lineupPlayers: LineupPosition[], playerId: number) {
@@ -146,4 +153,36 @@ export function onAddPlayerToLineup({
   };
 
   return lineupUpdated;
+}
+
+export function onGetPayloadSaveTeam({
+  lineup,
+  capitain,
+  tacticalFormation,
+}: SaveTeamProps) {
+  const atletas = lineup.starting.map((position) => position.player?.atleta_id);
+
+  const reservas = lineup.reserves.reduce((obj, reserve, index) => {
+    const { player } = reserve;
+    if (player) {
+      (obj as any)[index + 1] = player.atleta_id;
+    }
+    return obj;
+  }, {});
+
+  const esquema = Number(getKeyFormationByValue(tacticalFormation));
+  const capitao = capitain;
+
+  return {
+    atletas,
+    reservas,
+    esquema,
+    capitao,
+  };
+}
+
+export function getKeyFormationByValue(value: string) {
+  return Object.keys(LINEUPS_DEFAULT_OBJECT).find(
+    (key) => (LINEUPS_DEFAULT_OBJECT as any)[key as any] === value
+  );
 }

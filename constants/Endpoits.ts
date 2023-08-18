@@ -28,6 +28,7 @@ export const GET_CLUB_HISTORY = "/auth/stats/historico";
 export const GET_LEAGUE_BY_SLUG = "/auth/liga/:slug";
 export const GET_ALL_LEAGUES = "/auth/ligas";
 export const REFRESH_TOKEN = "/refresh";
+export const SAVE_TEAM = "/auth/time/salvar";
 
 // Logout
 export const LOGOUT =
