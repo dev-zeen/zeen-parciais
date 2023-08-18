@@ -80,14 +80,14 @@ export function Login({ title }: LoginProps) {
             }}
           >
             <TouchableOpacity
-              className="rounded-full"
+              className="rounded-full p-1"
               onPress={() => {
                 setShowModalAuth(false);
               }}
               style={{
                 position: "absolute",
-                top: 80,
-                left: 30,
+                top: 30,
+                left: 10,
                 zIndex: 9999,
                 backgroundColor:
                   colorTheme === "dark" ? Colors.light.tint : Colors.dark.tint,

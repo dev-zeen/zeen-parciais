@@ -4,7 +4,7 @@ import { RefreshControl, ScrollView, useColorScheme } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { ModalLogout } from "@/components/contexts/auth/LogoutModal";
+import { LogoutModal } from "@/components/contexts/auth/LogoutModal";
 import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
@@ -231,7 +231,7 @@ export default () => {
       </TouchableOpacity>
 
       {showModalLogout && (
-        <ModalLogout
+        <LogoutModal
           isVisible={showModalLogout}
           handleLogoutSuccess={handleLogout}
         />

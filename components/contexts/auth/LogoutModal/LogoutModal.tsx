@@ -8,15 +8,15 @@ import { INJECT_AUTH_LOGOUT } from "@/constants/Generic";
 import { URL_HOME } from "@/constants/Urls";
 import { AuthContext } from "@/contexts/Auth.context";
 
-type ModalLogoutProps = {
+type LogoutModalProps = {
   isVisible: boolean;
   handleLogoutSuccess: () => void;
 };
 
-export function ModalLogout({
+export function LogoutModal({
   isVisible,
   handleLogoutSuccess,
-}: ModalLogoutProps) {
+}: LogoutModalProps) {
   const { handleUnautenticated } = useContext(AuthContext);
 
   async function handleWebViewMessage(event?: WebViewMessageEvent) {
