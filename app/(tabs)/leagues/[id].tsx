@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   Image,
@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 
 import { Text, View } from "@/components/Themed";
 import { ClubCard } from "@/components/contexts/leagues/club/ClubCard";
@@ -19,6 +19,7 @@ import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { AuthContext } from "@/contexts/Auth.context";
 import { League, TeamLeague } from "@/models/Leagues";
 import { MarketStatus } from "@/models/Market";
 import { PlayerStats } from "@/models/Stats";
@@ -40,6 +41,8 @@ export interface ClubByLeague extends TeamLeague {
 
 export default () => {
   const colorTheme = useColorScheme();
+
+  const { isAutheticated } = useContext(AuthContext);
 
   const { id: slug } = useLocalSearchParams();
 
@@ -220,6 +223,8 @@ export default () => {
   const keyExtractor = useCallback((item: TeamLeague) => `${item.time_id}`, []);
 
   const isLoading = !clubs || isLoadingClubsByLeague;
+
+  if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
   if (isLoading) {
     return <Loading />;

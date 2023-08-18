@@ -18,9 +18,7 @@ export function PlayerLowestCard({ player }: PlayerLowestCardProps) {
   const { data: market } = useGetMarket();
 
   return (
-    <View
-      className={`rounded-lg flex-row items-center justify-between p-2 border-2 border-orange-500 mb-1`}
-    >
+    <View className="rounded-lg flex-row items-center justify-between p-2 border-2 border-orange-500 mb-1">
       <View>
         <Image
           source={{

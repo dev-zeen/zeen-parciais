@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
 
-import { useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 
 import { fillLineupWithPlayers } from "@/app/(tabs)/team/team.helpers";
 import { View } from "@/components/Themed";
@@ -13,6 +13,7 @@ import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
 import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
 import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
+import { AuthContext } from "@/contexts/Auth.context";
 import { Match } from "@/models/Matches";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club.query";
@@ -22,9 +23,11 @@ import useTeamLineupStore from "@/store/useTeamLineupStore";
 export default () => {
   const colorTheme = useColorScheme();
 
+  const { isAutheticated } = useContext(AuthContext);
+
   const { id } = useLocalSearchParams();
 
-  const allowRequest = true;
+  const allowRequest = isAutheticated;
 
   const { data: marketStatus } = useGetMarketStatus();
   const { data: market } = useGetMarket();
@@ -196,6 +199,8 @@ export default () => {
     (item: FullPlayer) => `${item.atleta_id}`,
     []
   );
+
+  if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
 
   if (!market || !match || !homeTeamPlayers || !awayTeamPlayers) {
     return <Loading />;

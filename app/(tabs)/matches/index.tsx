@@ -38,7 +38,7 @@ export default () => {
         />
       );
     },
-    [data]
+    [data, isAutheticated]
   );
 
   if (isLoading || !data) {

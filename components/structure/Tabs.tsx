@@ -46,7 +46,7 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
               handlePress(index);
             }}
           >
-            <Text className={` font-semibold text-xs`}>{tab.title}</Text>
+            <Text className="font-semibold text-xs">{tab.title}</Text>
           </TouchableOpacity>
         ))}
       </View>

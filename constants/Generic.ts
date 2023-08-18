@@ -11,9 +11,12 @@ export const INJECT_AUTH_LOGIN = `
 export const INJECT_AUTH_LOGOUT = `
   window.localStorage.clear()
   window.sessionStorage.clear()
+  localStorage.clear()
+  sessionStorage.clear()
   var data = {
     ls: JSON.stringify(window.localStorage),
     ss: JSON.stringify(window.sessionStorage)
   }
-  window.ReactNativeWebView.postMessage()
+  window.ReactNativeWebView.clearCache(true)
+  window.ReactNativeWebView.postMessage() 
 `;

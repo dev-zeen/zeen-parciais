@@ -166,7 +166,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className={`flex-1 justify-center rounded-lg mx-2`}
+        className="flex-1 justify-center rounded-lg mx-2"
         style={{
           gap: 8,
           backgroundColor:

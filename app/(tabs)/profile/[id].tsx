@@ -1,13 +1,17 @@
 import { useContext, useEffect, useState } from "react";
 import { RefreshControl, ScrollView, useColorScheme } from "react-native";
 
-import { Text, View } from "@/components/Themed";
+import { Feather } from "@expo/vector-icons";
+
+import { Text, TouchableOpacity, View } from "@/components/Themed";
+import { ModalLogout } from "@/components/contexts/auth/LogoutModal";
 import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
 import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
 import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
@@ -60,9 +64,15 @@ export default () => {
 
   const [partialScore, setPartialScore] = useState(0);
 
+  const [showModalLogout, setShowModalLogout] = useState(false);
+
   const totalScore = numberToString(
     (club?.pontos_campeonato as number) + (isMarketClose ? partialScore : 0)
   );
+
+  const handleLogout = () => {
+    setShowModalLogout(false);
+  };
 
   const totalPatrimony = club && numberToString(club?.patrimonio);
 
@@ -201,6 +211,31 @@ export default () => {
           </View>
         </View>
       </ScrollView>
+
+      <TouchableOpacity
+        activeOpacity={0.6}
+        className="justify-center flex-row items-center rounded-lg p-4 mb-2 mx-2"
+        style={{
+          gap: 8,
+        }}
+        onPress={() => {
+          setShowModalLogout(true);
+        }}
+      >
+        <Text>Sair</Text>
+        <Feather
+          name="log-out"
+          size={24}
+          color={colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint}
+        />
+      </TouchableOpacity>
+
+      {showModalLogout && (
+        <ModalLogout
+          isVisible={showModalLogout}
+          handleLogoutSuccess={handleLogout}
+        />
+      )}
     </SafeAreaViewContainer>
   );
 };

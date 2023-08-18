@@ -45,7 +45,7 @@ export function MarketPlayerCard({
 
   return (
     <View
-      className={`rounded-lg flex-row items-center justify-between p-2`}
+      className="rounded-lg flex-row items-center justify-between p-2"
       key={player.atleta_id}
     >
       <View className="rounded-lg ">

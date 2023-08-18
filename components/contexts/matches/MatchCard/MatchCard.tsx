@@ -119,9 +119,7 @@ export function MatchCard({
         {match.valida ? (
           <>
             {match.status_transmissao_tr === "ENCERRADA" && (
-              <View
-                className={`justify-center items-center bg-folly p-2 m-1 rounded-lg`}
-              >
+              <View className="justify-center items-center bg-folly p-2 m-1 rounded-lg">
                 <Text className="text-gray-50 text-xs font-semibold">
                   Encerrado
                 </Text>
@@ -129,9 +127,7 @@ export function MatchCard({
             )}
           </>
         ) : (
-          <View
-            className={`justify-center items-center bg-red-500 p-2 m-1 rounded-lg`}
-          >
+          <View className="justify-center items-center bg-red-500 p-2 m-1 rounded-lg">
             <Text className="text-xs text-white font-semibold">
               Esta partida é inválida para a rodada
             </Text>

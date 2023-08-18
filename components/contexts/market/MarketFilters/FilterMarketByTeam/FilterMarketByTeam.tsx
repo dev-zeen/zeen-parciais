@@ -142,7 +142,7 @@ export function FilterMarketByTeam({
         <TouchableOpacity
           onPress={defaultFilters}
           activeOpacity={0.6}
-          className={`w-32 mx-2 p-4 rounded-lg items-center justify-center bg-orange-400`}
+          className="w-32 mx-2 p-4 rounded-lg items-center justify-center bg-orange-400"
           style={{
             gap: 16,
           }}

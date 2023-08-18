@@ -67,7 +67,7 @@ export function PlayerCard({
     <TouchableOpacity
       activeOpacity={0.6}
       // onPress={onPressHandler}
-      className={`flex-row justify-between items-center rounded-lg px-4 py-2`}
+      className="flex-row justify-between items-center rounded-lg px-4 py-2"
     >
       <View className="flex-row items-center gap-1 rounded-lg">
         <Image

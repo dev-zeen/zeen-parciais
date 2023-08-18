@@ -22,11 +22,11 @@ export function Login({ title }: LoginProps) {
 
   const { handleSuccessAuth, handleUnautenticated } = useContext(AuthContext);
 
-  const { setItem, removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
+  const { setItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
 
   const [showModalAuth, setShowModalAuth] = useState(false);
 
-  function _handleGetLoginPage() {
+  function handleGetLoginPage() {
     setShowModalAuth(true);
   }
 
@@ -36,17 +36,9 @@ export function Login({ title }: LoginProps) {
     if (token) handleSuccessAuth();
   }
 
-  async function handleLogout() {
-    try {
-      await removeItem().then(async (_response) => {
-        handleUnautenticated();
-      });
-    } catch (exception) {}
-  }
-
   return (
     <>
-      <View className="items-center justify-center p-4">
+      <View className="flex-1 items-center justify-center p-4 rounded-lg">
         {title && (
           <View
             className="flex-row mt-8 mx-8 p-4"
@@ -65,16 +57,15 @@ export function Login({ title }: LoginProps) {
           alt={`Imagem de Login`}
         />
         <TouchableOpacity
-          onPress={_handleGetLoginPage}
+          onPress={handleGetLoginPage}
           activeOpacity={0.6}
-          className="flex-row items-center justify-center px-4 py-3 border-2 border-blue-500 rounded-lg"
+          className="flex-row items-center justify-center px-4 py-3 bg-blue-500 rounded-lg"
+          style={{
+            gap: 8,
+          }}
         >
-          <Feather
-            name="log-in"
-            size={24}
-            color={colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint}
-          />
-          <Text> Entrar no Cartola </Text>
+          <Feather name="log-in" size={24} color={Colors.light.background} />
+          <Text className="text-white"> Entrar no Cartola </Text>
         </TouchableOpacity>
       </View>
 
@@ -119,6 +110,7 @@ export function Login({ title }: LoginProps) {
               source={{
                 uri: URL_AUTH,
               }}
+              incognito
               className="rounded-lg"
               injectedJavaScript={INJECT_AUTH_LOGIN}
               onMessage={handleWebViewMessage}

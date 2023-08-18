@@ -1,8 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 
 import { Text, TouchableOpacity, View } from "@/components/Themed";
 import { MarketFilters } from "@/components/contexts/market/MarketFilters";
@@ -10,6 +17,7 @@ import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard"
 import { PlayerLowestCard } from "@/components/contexts/market/PlayerLowestCard.tsx";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { AuthContext } from "@/contexts/Auth.context";
 import { LineupPlayer, LineupPosition } from "@/models/Formations";
 import { FullPlayer } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club.query";
@@ -35,7 +43,9 @@ export default ({
 
   const isFirstRender = useRef(true);
 
-  const allowRequest = true;
+  const { isAutheticated } = useContext(AuthContext);
+
+  const allowRequest = isAutheticated;
 
   const { data: club } = useGetMyClub(allowRequest);
   const { data: marketData } = useGetMarket();
@@ -157,6 +167,8 @@ export default ({
     },
     [emptyPositions, lineup]
   );
+
+  if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
   if (!marketPlayers || !club || isLoading) return <Loading />;
 

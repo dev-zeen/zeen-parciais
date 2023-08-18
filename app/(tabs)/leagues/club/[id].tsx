@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import {
   RefreshControl,
   ScrollView,
@@ -7,7 +7,7 @@ import {
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
-import { useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams } from "expo-router";
 
 import { Text, View } from "@/components/Themed";
 import { ClubPlayerCard } from "@/components/contexts/leagues/club/ClubPlayerCard";
@@ -16,6 +16,7 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { APPRECIATIONS } from "@/constants/Keys";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
+import { AuthContext } from "@/contexts/Auth.context";
 import { MarketStatus } from "@/models/Market";
 import { Appreciations } from "@/models/Player";
 import { FullPlayer } from "@/models/Stats";
@@ -36,6 +37,9 @@ export interface PlayerClub extends FullPlayer {
 
 export default () => {
   const colorTheme = useColorScheme();
+
+  const { isAutheticated } = useContext(AuthContext);
+
   const { id } = useLocalSearchParams();
 
   const [currentAppreciations, setCurrentAppreciations] =
@@ -133,6 +137,8 @@ export default () => {
     },
     [currentRound, playerStats, marketStatus, club, currentAppreciations]
   );
+
+  if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
   if (!club) {
     return <Loading />;

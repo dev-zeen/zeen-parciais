@@ -19,7 +19,7 @@ export function AuthContextProvider({
 }: {
   children: ReactNode;
 }): ReactNode {
-  const { getItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
+  const { getItem, removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
 
   const [isAutheticated, setIsAutheticated] = useState(false);
 
@@ -37,6 +37,7 @@ export function AuthContextProvider({
   }
 
   async function handleUnautenticated() {
+    await removeItem();
     setIsAutheticated(false);
   }
 

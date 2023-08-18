@@ -224,7 +224,7 @@ export default () => {
           }}
         >
           <MarketStatusCard />
-          {club ? (
+          {club && isAutheticated ? (
             <>
               <TouchableOpacity
                 className="flex-1 rounded-lg"
