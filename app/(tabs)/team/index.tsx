@@ -175,7 +175,32 @@ export default () => {
     []
   );
 
+  const emptyReservePlayers = () =>
+    Alert.alert(
+      "Atenção",
+      "Seu time ainda não possui todos os reservas selecionados, deseja escalar mesmo assim",
+      [
+        {
+          text: "Não",
+          style: "cancel",
+        },
+        { text: "Sim", onPress: () => onSaveTeam() },
+      ]
+    );
+
   const handleSaveTeam = useCallback(() => {
+    if (!isReservesCompleted()) {
+      emptyReservePlayers();
+      return;
+    }
+    onSaveTeam();
+  }, [lineup, capitain, tacticalFormation]);
+
+  const isReservesCompleted = useCallback(() => {
+    return lineup?.reserves.every((item) => item.player);
+  }, [lineup, capitain, tacticalFormation]);
+
+  const onSaveTeam = useCallback(() => {
     const payload = onGetPayloadSaveTeam({
       lineup: lineup as LineupPlayers,
       capitain,

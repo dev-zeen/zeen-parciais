@@ -129,30 +129,43 @@ export function FilterMarketByTeam({
         renderItem={renderItem}
       />
 
-      <TouchableOpacity
-        disabled={selectedsTeams.length === 0}
-        onPress={handlePressFilter}
-        activeOpacity={0.6}
-        className={`mx-2 p-4 rounded-lg items-center justify-center  ${
-          selectedsTeams.length === 0 ? "bg-gray-300" : "bg-blue-500"
-        }`}
+      <View
+        className="flex-row items-center justify-center pt-4"
         style={{
           gap: 16,
+          backgroundColor:
+            colorTheme === "dark"
+              ? Colors.dark.backgroundFull
+              : Colors.light.backgroundFull,
         }}
       >
-        <Text className="font-semibold text-sm text-white">Filtrar</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={defaultFilters}
+          activeOpacity={0.6}
+          className={`w-32 mx-2 p-4 rounded-lg items-center justify-center bg-orange-400`}
+          style={{
+            gap: 16,
+          }}
+        >
+          <Text className="font-semibold text-sm text-white">
+            Limpar Filtros
+          </Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={defaultFilters}
-        activeOpacity={0.6}
-        className={`mx-2 p-4 rounded-lg items-center justify-center bg-yellow-400-500"`}
-        style={{
-          gap: 16,
-        }}
-      >
-        <Text className="font-semibold text-sm text-white">Limpar Filtros</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          disabled={selectedsTeams.length === 0}
+          onPress={handlePressFilter}
+          activeOpacity={0.6}
+          className={`w-32 mx-2 p-4 rounded-lg items-center justify-center  ${
+            selectedsTeams.length === 0 ? "bg-gray-300" : "bg-blue-500"
+          }`}
+          style={{
+            gap: 16,
+          }}
+        >
+          <Text className="font-semibold text-sm text-white">Filtrar</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaViewContainer>
   );
 }

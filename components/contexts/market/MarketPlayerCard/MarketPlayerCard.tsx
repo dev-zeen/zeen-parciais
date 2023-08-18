@@ -48,7 +48,7 @@ export function MarketPlayerCard({
       className={`rounded-lg flex-row items-center justify-between p-2`}
       key={player.atleta_id}
     >
-      <View>
+      <View className="rounded-lg ">
         <Image
           source={{
             uri: player.foto?.replace("FORMATO", "220x220"),

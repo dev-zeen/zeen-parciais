@@ -23,13 +23,13 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
 
   const onRenderTabContent = (): ReactNode => {
     const tab = tabs[activeTab];
-    return <View>{tab.content && tab.content()}</View>;
+    return tab.content && tab.content();
   };
 
   return (
     <>
       <View
-        className="flex-row p-1 items-center justify-center bg-gray-200 rounded"
+        className="flex-row p-1 mx-2 items-center justify-center bg-gray-200 rounded"
         style={{
           gap: 4,
         }}
@@ -50,7 +50,7 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
           </TouchableOpacity>
         ))}
       </View>
-      <View>{onRenderTabContent()}</View>
+      {onRenderTabContent()}
     </>
   );
 }

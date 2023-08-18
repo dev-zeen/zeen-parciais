@@ -380,8 +380,8 @@ export default () => {
             <Login />
           )}
           {topPlayers && bestPlayers && (
-            <View className="rounded-lg p-2 flex-1">
-              <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">
+            <View className="rounded-lg p-2">
+              <Text className="text-base font-semibold mt-1 mx-2 mb-2">
                 Mais Escalados
               </Text>
               <Tabs tabs={playersTabs} />

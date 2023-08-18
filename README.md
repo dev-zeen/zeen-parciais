@@ -9,3 +9,4 @@
 - Acompanhar ligas
 - Acompanhar partidas
 - Gerenciar seu perfil
+- [Trello](https://trello.com/b/wJZMzuli/meu-cartola)

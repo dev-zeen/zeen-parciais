@@ -218,10 +218,8 @@ export default () => {
             }}
           >
             <TouchableOpacity
-              className={`p-2 items-center justify-center mx-1 rounded-full border-2 ${
-                currentRound === 1
-                  ? "border-gray-300 bg-gray-100"
-                  : "border-blue-300 bg-blue-50"
+              className={`p-2 items-center justify-center mx-1 rounded-full ${
+                currentRound === 1 ? "bg-gray-100" : "bg-blue-50"
               }`}
               disabled={currentRound === 1}
               onPress={() => setCurrentRound((previous) => previous - 1)}
@@ -236,10 +234,10 @@ export default () => {
             <Text className="font-semibold">Rodada {currentRound}</Text>
 
             <TouchableOpacity
-              className={`p-2 items-center justify-center mx-1 rounded-full border-2 ${
+              className={`p-2 items-center justify-center mx-1 rounded-full ${
                 currentRound === marketStatus?.rodada_atual
-                  ? "border-gray-300 bg-gray-100"
-                  : "border-blue-300 bg-blue-50"
+                  ? "bg-gray-100"
+                  : "bg-blue-50"
               }`}
               disabled={
                 isMarketClose

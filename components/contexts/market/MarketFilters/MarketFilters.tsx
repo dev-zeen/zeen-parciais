@@ -18,11 +18,13 @@ import { sortedOptions, statusPlayerOptions } from "./filters.helper";
 type MarketFilterProps = {
   applyFilter: (players: FullPlayer[]) => void;
   handleIsLoading: () => void;
+  maximumPrice?: number;
 };
 
 export function MarketFilters({
   applyFilter,
   handleIsLoading,
+  maximumPrice,
 }: MarketFilterProps) {
   const { data: market } = useGetMarket();
 
@@ -40,12 +42,18 @@ export function MarketFilters({
   const [teamsSelectedFilter, setTeamsSelectedFilter] = useState<number[]>([]);
 
   const defaultFilters = useCallback(() => {
+    handleIsLoading();
+    setSelectedOrder(sortedOptions[0]);
+    setSelectedFilterByStatusMarket(statusPlayerOptions);
+    setTeamsSelectedFilter([]);
+
     const data = onGetPlayersFiltered(
       sortedOptions[0],
       statusPlayerOptions,
       []
     );
     applyFilter(data);
+    setShowFilterMarketByTeam(false);
   }, []);
 
   const filterPlayers = useCallback(
@@ -76,7 +84,11 @@ export function MarketFilters({
         selectedFilters,
         selectedTeams
       );
-      const sortedData = onSort(filteredPlayers as FullPlayer[]);
+      const sortedData = maximumPrice
+        ? onSort(filteredPlayers as FullPlayer[]).filter(
+            (item) => item.preco_num < maximumPrice
+          )
+        : onSort(filteredPlayers as FullPlayer[]);
       return sortedData;
     },
     [market, selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]

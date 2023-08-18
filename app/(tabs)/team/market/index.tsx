@@ -82,13 +82,15 @@ export default ({
     setIsLoading((previous) => !previous);
   }, []);
 
-  const applyFilter = useCallback((data: FullPlayer[]) => {
-    const playersUpdated = position
-      ? data.filter((item) => item.posicao_id === position.position)
-      : data;
+  const applyFilter = useCallback((data?: FullPlayer[]) => {
+    if (data) {
+      const playersUpdated = position
+        ? data.filter((item) => item.posicao_id === position.position)
+        : data;
 
-    setMarketPlayers(playersUpdated);
-    handleIsLoading();
+      setMarketPlayers(playersUpdated);
+      handleIsLoading();
+    }
   }, []);
 
   const handleCloseMarket = useCallback(
@@ -202,6 +204,7 @@ export default ({
         <MarketFilters
           applyFilter={applyFilter}
           handleIsLoading={handleIsLoading}
+          maximumPrice={playerLowestPrice?.preco_num}
         />
 
         {playerLowestPrice && (

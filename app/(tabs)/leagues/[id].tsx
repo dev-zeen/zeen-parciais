@@ -228,9 +228,12 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className={`${colorTheme === "dark" ? "bg-dark" : "bg-light"} gap-y-2`}
+        className={`${colorTheme === "dark" ? "bg-dark" : "bg-light"}`}
+        style={{
+          gap: 8,
+        }}
       >
-        <View className="flex-row justify-center items-center py-2 rounded-t-lg mx-2 mt-2">
+        <View className="flex-row justify-center items-center py-2 rounded-lg mx-2 mt-2">
           <Image
             source={{
               uri: league?.liga.url_flamula_png,
@@ -252,9 +255,7 @@ export default () => {
           </Text>
         </View>
 
-        <View className="mx-2 rounded-lg">
-          <Tabs tabs={tabs} />
-        </View>
+        <Tabs tabs={tabs} />
       </View>
 
       <FlatList
@@ -268,7 +269,7 @@ export default () => {
         maxToRenderPerBatch={20}
         contentContainerStyle={{
           marginTop: 4,
-          paddingVertical: 4,
+          paddingVertical: 8,
           marginHorizontal: 8,
           backgroundColor:
             colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",

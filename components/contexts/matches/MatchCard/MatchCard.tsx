@@ -37,7 +37,7 @@ export function MatchCard({
       activeOpacity={0.6}
       onPress={onPressHandler}
     >
-      <View className="flex-1 p-2 rounded-lg ">
+      <View className="p-2 rounded-lg ">
         <Text className="font-medium text-xs text-center">
           {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
             locale: ptBR,

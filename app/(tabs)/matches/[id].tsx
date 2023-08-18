@@ -1,14 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  ListRenderItemInfo,
-  View,
-  useColorScheme,
-} from "react-native";
+import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
 
 import { useLocalSearchParams } from "expo-router";
 
 import { fillLineupWithPlayers } from "@/app/(tabs)/team/team.helpers";
+import { View } from "@/components/Themed";
 import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard";
 import { MatchCard } from "@/components/contexts/matches/MatchCard";
 import { Loading } from "@/components/structure/Loading";
@@ -88,7 +84,6 @@ export default () => {
         content: () => {
           return (
             <FlatList
-              style={{ marginBottom: 350 }}
               contentContainerStyle={{
                 gap: 8,
                 paddingVertical: 8,
@@ -109,7 +104,6 @@ export default () => {
         content: () => {
           return (
             <FlatList
-              style={{ marginBottom: 350 }}
               contentContainerStyle={{
                 gap: 8,
                 paddingVertical: 8,
@@ -117,8 +111,6 @@ export default () => {
               data={awayTeamPlayers}
               renderItem={renderItem}
               keyExtractor={keyExtractor}
-              maxToRenderPerBatch={6}
-              initialNumToRender={6}
             />
           );
         },
@@ -179,20 +171,22 @@ export default () => {
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
-        <MarketPlayerCard
-          player={player}
-          onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
-          onPressRemovePlayerFromLineup={() =>
-            handleRemovePlayerFromLineup(player)
-          }
-          isButtonDisabled={
-            player.preco_num > remainingValue ||
-            !emptyPositions?.has(player.posicao_id)
-          }
-          isSellPlayer={lineup?.starting.some(
-            (item) => item.player?.atleta_id === player.atleta_id
-          )}
-        />
+        <View className="mx-2 rounded-lg">
+          <MarketPlayerCard
+            player={player}
+            onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
+            onPressRemovePlayerFromLineup={() =>
+              handleRemovePlayerFromLineup(player)
+            }
+            isButtonDisabled={
+              player.preco_num > remainingValue ||
+              !emptyPositions?.has(player.posicao_id)
+            }
+            isSellPlayer={lineup?.starting.some(
+              (item) => item.player?.atleta_id === player.atleta_id
+            )}
+          />
+        </View>
       );
     },
     [lineup, homeTeamPlayers, awayTeamPlayers]
@@ -210,7 +204,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className="mx-2 rounded-lg"
+        className="mx-2 rounded-lg mb-2"
         style={{
           gap: 8,
           backgroundColor:
@@ -224,8 +218,8 @@ export default () => {
           homeClub={market?.clubes[match?.clube_casa_id as number]}
           awayClub={market?.clubes[match?.clube_visitante_id as number]}
         />
-        <Tabs tabs={tabs} />
       </View>
+      <Tabs tabs={tabs} />
     </SafeAreaViewContainer>
   );
 };

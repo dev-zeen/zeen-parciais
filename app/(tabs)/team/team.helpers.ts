@@ -213,8 +213,8 @@ export function isPlayersEqual(
   currentPlayers: number[],
   defaultPlayers: number[]
 ): boolean {
-  const sortedCurrentPlayers = currentPlayers.slice().sort();
-  const sortedDefaultPlayers = defaultPlayers.slice().sort();
+  const sortedCurrentPlayers = currentPlayers?.slice().sort();
+  const sortedDefaultPlayers = defaultPlayers?.slice().sort();
 
   return (
     JSON.stringify(sortedCurrentPlayers) ===
@@ -236,8 +236,10 @@ export function onGetEqualLineups(
     defaultPlayersId
   );
 
-  const defaultReservesId = club?.reservas.map(({ atleta_id }) => atleta_id);
-  const currentReservesId = lineup.reserves
+  const defaultReservesId = club?.reservas
+    ? club?.reservas?.map(({ atleta_id }) => atleta_id)
+    : [];
+  const currentReservesId = lineup?.reserves
     .map(({ player }) => player?.atleta_id)
     .filter(Boolean);
 
