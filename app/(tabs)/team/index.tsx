@@ -124,7 +124,7 @@ export default () => {
   );
 
   const handleChangeFormation = useCallback(
-    (lineup: LineupPlayers, value: number) => {
+    (value: number) => {
       const newFormation = onGetDefaultLineupTeam(value);
 
       setTacticalFormation(newFormation);
@@ -141,7 +141,7 @@ export default () => {
         setShowModalPlayersToSell(true);
       }
     },
-    []
+    [lineup]
   );
 
   const handleResetClub = useCallback(async () => {
@@ -372,7 +372,7 @@ export default () => {
               defaultValue={tacticalFormation}
               data={listDefaultLineups()}
               onSelect={(_selectedItem, index) => {
-                handleChangeFormation(lineup, index + 1);
+                handleChangeFormation(index + 1);
               }}
               buttonTextAfterSelection={(_selectedItem, _index) => {
                 return tacticalFormation;

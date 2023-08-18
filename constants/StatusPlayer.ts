@@ -40,7 +40,7 @@ export const OBJECT_STATUS_MARKET_PLAYER: STATUS_MARKET_PLAYER = {
     background: "#f87171",
   },
   7: {
-    name: "Provavél",
+    name: "Provável",
     id: 7,
     icon: "check",
     color: "white",

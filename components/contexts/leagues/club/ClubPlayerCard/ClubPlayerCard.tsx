@@ -63,9 +63,9 @@ export function ClubPlayerCard({
     [currentRound]
   );
 
-  const onPressHandler = useCallback(() => {
-    router.push(`/leagues/player/${player.atleta_id}`);
-  }, []);
+  // const onPressHandler = useCallback(() => {
+  //   router.push(`/leagues/player/${player.atleta_id}`);
+  // }, []);
 
   return (
     <View
@@ -80,7 +80,7 @@ export function ClubPlayerCard({
       <TouchableOpacity
         className="justify-between flex-row"
         activeOpacity={0.6}
-        onPress={onPressHandler}
+        // onPress={onPressHandler}
       >
         <View className="flex-row gap-x-2 items-center">
           <View className="justify-center items-center px-1 gap-y-1">

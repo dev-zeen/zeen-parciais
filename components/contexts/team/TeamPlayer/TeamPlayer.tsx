@@ -102,7 +102,7 @@ export function TeamPlayer({
         onLongPress={() =>
           handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)
         }
-        className={`justify-center items-center border-2 w-12 h-12 rounded-full ${
+        className={`justify-center items-center border-2 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
             ? "border-red-500 bg-red-500"
             : "border-neutral-200"
@@ -113,15 +113,15 @@ export function TeamPlayer({
           source={{
             uri: player?.foto.replace("FORMATO", "220x220"),
           }}
-          className="w-11 h-11 rounded-full bg-neutral-100 overflow-hidden"
+          className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
         {hasCaptain && (
           <View
             className="relative w-0.5 h-0.5 justify-center items-center"
             style={{
-              bottom: "85%",
-              right: "50%",
+              bottom: "80%",
+              right: "25%",
               backgroundColor:
                 OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
                   ?.background,

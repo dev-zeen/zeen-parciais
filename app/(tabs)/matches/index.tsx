@@ -13,6 +13,8 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { AuthContext } from "@/contexts/Auth.context";
 import { Match } from "@/models/Matches";
+import { FullPlayer } from "@/models/Stats";
+import { useGetMyClub } from "@/queries/club.query";
 import { useGetMatchs } from "@/queries/matches.query";
 
 export default () => {
@@ -20,7 +22,16 @@ export default () => {
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const { data, isLoading, refetch: onRefetch, isRefetching } = useGetMatchs();
+  const allowRequest = isAutheticated;
+
+  const {
+    data: matches,
+    isLoading,
+    refetch: onRefetch,
+    isRefetching,
+  } = useGetMatchs();
+
+  const { data: club } = useGetMyClub(allowRequest);
 
   const keyExtractor = useCallback(
     (item: Match) => `${item.clube_casa_id}`,
@@ -32,16 +43,17 @@ export default () => {
       return (
         <MatchCard
           match={item}
-          homeClub={data?.clubes[item.clube_casa_id]}
-          awayClub={data?.clubes[item.clube_visitante_id]}
+          players={club?.atletas as FullPlayer[]}
+          homeClub={matches?.clubes[item.clube_casa_id]}
+          awayClub={matches?.clubes[item.clube_visitante_id]}
           isDisabled={!isAutheticated}
         />
       );
     },
-    [data, isAutheticated]
+    [matches, isAutheticated, club]
   );
 
-  if (isLoading || !data) {
+  if (isLoading || !matches || !club) {
     return <Loading />;
   }
 
@@ -64,7 +76,7 @@ export default () => {
             <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
           }
           initialNumToRender={10}
-          data={data?.partidas}
+          data={matches?.partidas}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
         />
