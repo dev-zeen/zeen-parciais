@@ -114,7 +114,8 @@ export default () => {
         const leagueWithPartials = onGetLeagueWithPartials(
           league as League,
           clubsByLeague,
-          playerStats as PlayerStats
+          playerStats as PlayerStats,
+          marketStatus as MarketStatus
         );
         const sortedClubs = mergeSort(leagueWithPartials, compareFn);
         setClubs(sortedClubs);

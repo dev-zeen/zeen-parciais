@@ -136,33 +136,37 @@ export function ClubPlayerCard({
             className={`font-semibold text-sm ${
               scorePlayer(player) > 0
                 ? "text-green-500"
-                : scorePlayer(player) === -1000
+                : scorePlayer(player) <= -30
                 ? ""
                 : "text-red-500"
             }`}
           >
-            {scorePlayer(player) === -1000
+            {scorePlayer(player) < -30
               ? "-"
               : numberToString(scorePlayer(player))}
           </Text>
 
-          {appreciation && currentRound === marketStatus?.rodada_atual && (
-            <Text
-              className={`w-12 text-xs font-semibold ${
-                appreciation && appreciation < 0
-                  ? "text-folly"
-                  : "text-green-400"
-              }`}
-            >
-              {appreciation ? numberToString(appreciation) : null}
-              <Feather
-                name={
-                  appreciation && appreciation < 0 ? "arrow-down" : "arrow-up"
-                }
-                color={appreciation && appreciation < 0 ? "#ef4444" : "#4ade80"}
-              />
-            </Text>
-          )}
+          {appreciation &&
+            playerStats?.atletas[player.atleta_id]?.entrou_em_campo &&
+            currentRound === marketStatus?.rodada_atual && (
+              <Text
+                className={`w-12 text-xs font-semibold ${
+                  appreciation && appreciation < 0
+                    ? "text-folly"
+                    : "text-green-400"
+                }`}
+              >
+                {appreciation ? numberToString(appreciation) : null}
+                <Feather
+                  name={
+                    appreciation && appreciation < 0 ? "arrow-down" : "arrow-up"
+                  }
+                  color={
+                    appreciation && appreciation < 0 ? "#ef4444" : "#4ade80"
+                  }
+                />
+              </Text>
+            )}
         </View>
       </TouchableOpacity>
     </View>

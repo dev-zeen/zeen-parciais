@@ -1,9 +1,14 @@
 import { useContext, useEffect, useState } from "react";
-import { RefreshControl, ScrollView, useColorScheme } from "react-native";
+import {
+  RefreshControl,
+  ScrollView,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native";
 
 import { Feather } from "@expo/vector-icons";
 
-import { Text, TouchableOpacity, View } from "@/components/Themed";
+import { Text, View } from "@/components/Themed";
 import { LogoutModal } from "@/components/contexts/auth/LogoutModal";
 import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
@@ -214,7 +219,7 @@ export default () => {
 
       <TouchableOpacity
         activeOpacity={0.6}
-        className="justify-center flex-row items-center rounded-lg p-4 mb-2 mx-2"
+        className="justify-center flex-row items-center rounded-lg p-3 mb-4 mx-8 bg-folly"
         style={{
           gap: 8,
         }}

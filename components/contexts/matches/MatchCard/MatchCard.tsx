@@ -14,7 +14,7 @@ import { FullPlayer } from "@/models/Stats";
 
 interface MatchCardProps {
   match: Match;
-  players: FullPlayer[];
+  players?: FullPlayer[];
   homeClub?: Club;
   awayClub?: Club;
   isDisabled?: boolean;
@@ -31,18 +31,28 @@ export function MatchCard({
   const colorTheme = useColorScheme();
 
   const amountPlayersMyClubHomeTeam = useCallback(() => {
-    return players?.filter((player) => player.clube_id === match.clube_casa_id)
-      .length;
+    if (players) {
+      return players?.filter(
+        (player) => player.clube_id === match.clube_casa_id
+      ).length;
+    }
+    return 0;
   }, [players, match]);
 
   const amountPlayersMyClubAwayTeam = useCallback(() => {
-    return players?.filter(
-      (player) => player.clube_id === match.clube_visitante_id
-    ).length;
+    if (players) {
+      return players?.filter(
+        (player) => player.clube_id === match.clube_visitante_id
+      ).length;
+    }
+    return 0;
   }, [players, match]);
 
   const onPressHandler = useCallback(() => {
-    router.push(`/matches/${JSON.stringify(match)}`);
+    if (match.status_transmissao_tr === "CRIADA") {
+      return router.push(`/matches/${JSON.stringify(match)}`);
+    }
+    return null;
   }, []);
 
   return (
@@ -174,7 +184,7 @@ export function MatchCard({
         {match.valida ? (
           <>
             {match.status_transmissao_tr === "ENCERRADA" && (
-              <View className="justify-center items-center bg-folly p-2 m-1 rounded-lg">
+              <View className="justify-center items-center bg-folly p-2 my-1 mx-16 rounded-lg">
                 <Text className="text-gray-50 text-xs font-semibold">
                   Encerrado
                 </Text>
@@ -182,7 +192,7 @@ export function MatchCard({
             )}
           </>
         ) : (
-          <View className="justify-center items-center bg-red-500 p-2 m-1 rounded-lg">
+          <View className="justify-center items-center bg-red-500 p-2 my-1 mx-16 rounded-lg">
             <Text className="text-xs text-white font-semibold">
               Esta partida é inválida para a rodada
             </Text>

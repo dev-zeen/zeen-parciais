@@ -22,6 +22,7 @@ import { Appreciations } from "@/models/Player";
 import { FullPlayer } from "@/models/Stats";
 import { useGetClub, useGetMatchSubstitutions } from "@/queries/club.query";
 import { useGetMarketStatus } from "@/queries/market.query";
+import { useGetAppreciations } from "@/queries/players.query";
 import { useGetScoredPlayers } from "@/queries/stats.query";
 import { onGetFromStorage } from "@/utils/asyncStorage";
 import { numberToString } from "@/utils/parseTo";
@@ -42,16 +43,6 @@ export default () => {
 
   const { id } = useLocalSearchParams();
 
-  const [currentAppreciations, setCurrentAppreciations] =
-    useState<Appreciations>();
-  const [currentRound, setCurrentRound] = useState(0);
-  const [reservePlayers, setReservePlayers] = useState<
-    FullPlayer[] | PlayerClub[]
-  >();
-  const [startingPlayers, setStartingPlayers] = useState<
-    FullPlayer[] | PlayerClub[]
-  >();
-
   const { data: marketStatus } = useGetMarketStatus();
 
   const isMarketClose =
@@ -63,17 +54,23 @@ export default () => {
     refetch: onRefetchStats,
   } = useGetScoredPlayers(isMarketClose);
 
-  useEffect(() => {
-    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-      if (res) {
-        setCurrentAppreciations(res);
-      }
-    });
+  const {
+    data: appreciations,
+    refetch: onRefetchAppreciations,
+    isRefetching: isRefetchingAppreciations,
+  } = useGetAppreciations(isAutheticated);
 
-    return () => {
-      setCurrentAppreciations(undefined);
-    };
-  }, []);
+  const [currentAppreciations, setCurrentAppreciations] =
+    useState<Appreciations>();
+  const [currentRound, setCurrentRound] = useState(0);
+  const [reservePlayers, setReservePlayers] = useState<
+    FullPlayer[] | PlayerClub[]
+  >();
+  const [startingPlayers, setStartingPlayers] = useState<
+    FullPlayer[] | PlayerClub[]
+  >();
+
+  const [clubAppreciation, setClubAppreciation] = useState(0);
 
   const { data: club } = useGetClub(id as string, currentRound);
 
@@ -98,6 +95,32 @@ export default () => {
     : 0;
 
   useEffect(() => {
+    if (currentRound === marketStatus?.rodada_atual && isMarketClose) {
+      const currentSum = club?.atletas.reduce((acc, current) => {
+        if (appreciations?.atletas[current.atleta_id]?.variacao_num) {
+          return (acc +=
+            appreciations?.atletas[current.atleta_id]?.variacao_num);
+        }
+        return acc;
+      }, 0);
+
+      setClubAppreciation(currentSum as number);
+    }
+  }, [appreciations, marketStatus, currentRound, club]);
+
+  useEffect(() => {
+    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
+      if (res) {
+        setCurrentAppreciations(res);
+      }
+    });
+
+    return () => {
+      setCurrentAppreciations(undefined);
+    };
+  }, [appreciations]);
+
+  useEffect(() => {
     if (club && substitutions && substitutions?.length > 0) {
       const { playersUpdated, reservesUpdated } =
         onUpdateTeamWithSubstitutedPlayers(club, substitutions);
@@ -117,6 +140,12 @@ export default () => {
           : marketStatus.rodada_atual - 1
       );
   }, [marketStatus]);
+
+  const onRefetch = useCallback(() => {
+    Promise.all([onRefetchStats(), onRefetchAppreciations()]);
+  }, []);
+
+  const isRefetching = isRefetchingPlayerStats || isRefetchingAppreciations;
 
   const renderItem = useCallback(
     (player: PlayerClub, isReserve?: boolean) => {
@@ -140,7 +169,7 @@ export default () => {
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (!club) {
+  if (!club || !playerStats || !marketStatus) {
     return <Loading />;
   }
 
@@ -150,10 +179,7 @@ export default () => {
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         refreshControl={
-          <RefreshControl
-            onRefresh={onRefetchStats}
-            refreshing={isRefetchingPlayerStats}
-          />
+          <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
         }
       >
         <View
@@ -169,9 +195,35 @@ export default () => {
           <View className="flex-row justify-between items-center rounded-lg p-3">
             <View className="justify-center items-center gap-1">
               <Text className="font-light text-xs">Patrim.</Text>
-              <Text className="font-semibold text-sm">
-                {numberToString(club.patrimonio)}
-              </Text>
+              <View className="flex-row">
+                <Text className="font-semibold text-sm">
+                  {isMarketClose && currentRound === marketStatus?.rodada_atual
+                    ? numberToString(club.patrimonio + clubAppreciation)
+                    : numberToString(club.patrimonio)}
+                </Text>
+                {isMarketClose &&
+                  currentRound === marketStatus?.rodada_atual && (
+                    <View className="flex-row pl-2 justify-center items-center">
+                      <Text className="font-semibold text-sm">
+                        {numberToString(clubAppreciation)}
+                      </Text>
+
+                      <Feather
+                        size={16}
+                        name={
+                          clubAppreciation && clubAppreciation < 0
+                            ? "arrow-down"
+                            : "arrow-up"
+                        }
+                        color={
+                          clubAppreciation && clubAppreciation < 0
+                            ? "#ef4444"
+                            : "#4ade80"
+                        }
+                      />
+                    </View>
+                  )}
+              </View>
             </View>
 
             <View className="justify-center items-center gap-1">

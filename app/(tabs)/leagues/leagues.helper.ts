@@ -1,5 +1,6 @@
 import { ClubByLeague } from "@/app/(tabs)/leagues/[id]";
 import { League, TeamLeague } from "@/models/Leagues";
+import { MarketStatus } from "@/models/Market";
 import { PlayerStats } from "@/models/Stats";
 import {
   ClubsByLeagueUtils,
@@ -93,7 +94,8 @@ export function mergeSort(
 export const onGetLeagueWithPartials = (
   league: League,
   clubsByLeague: ClubsByLeagueUtils,
-  playerStats: PlayerStats
+  playerStats: PlayerStats,
+  marketStatus: MarketStatus
 ): ClubByLeague[] => {
   const partialsByClub =
     clubsByLeague &&
@@ -123,14 +125,22 @@ export const onGetLeagueWithPartials = (
           ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
           : 0,
         campeonato:
-          clubLeague.pontos.campeonato +
-          (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0),
+          marketStatus.rodada_atual !== 20
+            ? clubLeague.pontos.campeonato +
+              (club
+                ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
+                : 0)
+            : clubLeague.pontos.campeonato,
         mes:
           clubLeague.pontos.mes +
           (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0),
         turno:
-          clubLeague.pontos.turno +
-          (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0),
+          marketStatus.rodada_atual !== 20
+            ? clubLeague.pontos.turno +
+              (club
+                ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
+                : 0)
+            : club.partial + (captain ? captain.pontuacao * 0.5 : 0),
       },
     };
 
