@@ -1,5 +1,10 @@
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
+import {
+  FlatList,
+  ListRenderItemInfo,
+  RefreshControl,
+  useColorScheme,
+} from "react-native";
 
 import { Redirect, useLocalSearchParams } from "expo-router";
 
@@ -7,18 +12,30 @@ import { fillLineupWithPlayers } from "@/app/(tabs)/team/team.helpers";
 import { View } from "@/components/Themed";
 import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard";
 import { MatchCard } from "@/components/contexts/matches/MatchCard";
+import { PlayerCard } from "@/components/contexts/players/PlayerCard";
 import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { ITabs, Tabs } from "@/components/structure/Tabs";
 import Colors from "@/constants/Colors";
 import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
+import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
 import { AuthContext } from "@/contexts/Auth.context";
 import { Match } from "@/models/Matches";
-import { FullPlayer } from "@/models/Stats";
+import { Appreciations } from "@/models/Player";
+import { FullPlayer, Player, PlayerStats } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club.query";
 import { useGetMarket, useGetMarketStatus } from "@/queries/market.query";
+import { useGetAppreciations } from "@/queries/players.query";
+import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
+
+interface IMatch extends Match {
+  home?: number;
+  away?: number;
+}
+
+interface FullPlayerPartials extends Player, FullPlayer {}
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -38,6 +55,9 @@ export default () => {
   const price = useTeamLineupStore((state) => state.price);
   const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
+  const isMarketClose =
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
   const addPlayerToLineup = useTeamLineupStore(
     (state) => state.addPlayerToLineup
   );
@@ -45,15 +65,27 @@ export default () => {
     (state) => state.removePlayerFromLineup
   );
 
-  const [match, setMatch] = useState<Match>();
+  const [match, setMatch] = useState<IMatch>();
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
 
+  const {
+    data: appreciations,
+    refetch: onRefetchAppreciations,
+    isRefetching: isRefetchingAppreciations,
+  } = useGetAppreciations(allowRequest);
+
+  const {
+    data: playerStats,
+    isRefetching: isRefetchingStats,
+    refetch: onRefetchStats,
+  } = useGetScoredPlayers();
+
   const [homeTeamPlayers, setHomeTeamPlayers] = useState<
-    FullPlayer[] | undefined
+    FullPlayerPartials[] | undefined
   >();
 
   const [awayTeamPlayers, setAwayTeamPlayers] = useState<
-    FullPlayer[] | undefined
+    FullPlayerPartials[] | undefined
   >();
 
   const handleAddPlayerToLineup = useCallback(
@@ -83,7 +115,9 @@ export default () => {
     () => [
       {
         id: 1,
-        title: market?.clubes[match?.clube_casa_id as number]?.nome as string,
+        title: isMarketClose
+          ? (playerStats?.clubes[match?.home as number]?.nome as string)
+          : (market?.clubes[match?.clube_casa_id as number]?.nome as string),
         content: () => {
           return (
             <FlatList
@@ -91,35 +125,51 @@ export default () => {
                 gap: 8,
                 paddingVertical: 8,
               }}
+              refreshControl={
+                <RefreshControl
+                  onRefresh={onRefetch}
+                  refreshing={isRefetchingStats && isRefetchingAppreciations}
+                />
+              }
               data={homeTeamPlayers}
-              renderItem={renderItem}
+              renderItem={isMarketClose ? renderItemWithPartials : renderItem}
               keyExtractor={keyExtractor}
-              maxToRenderPerBatch={6}
-              initialNumToRender={6}
+              maxToRenderPerBatch={10}
+              initialNumToRender={10}
             />
           );
         },
       },
       {
         id: 2,
-        title: market?.clubes[match?.clube_visitante_id as number]
-          ?.nome as string,
+        title: isMarketClose
+          ? (playerStats?.clubes[match?.away as number]?.nome as string)
+          : (market?.clubes[match?.clube_visitante_id as number]
+              ?.nome as string),
         content: () => {
           return (
             <FlatList
+              refreshControl={
+                <RefreshControl
+                  onRefresh={onRefetch}
+                  refreshing={isRefetchingStats && isRefetchingAppreciations}
+                />
+              }
               contentContainerStyle={{
                 gap: 8,
                 paddingVertical: 8,
               }}
               data={awayTeamPlayers}
-              renderItem={renderItem}
+              renderItem={isMarketClose ? renderItemWithPartials : renderItem}
               keyExtractor={keyExtractor}
+              maxToRenderPerBatch={10}
+              initialNumToRender={10}
             />
           );
         },
       },
     ],
-    [awayTeamPlayers, homeTeamPlayers]
+    [awayTeamPlayers, homeTeamPlayers, appreciations, playerStats]
   );
 
   useEffect(() => {
@@ -130,7 +180,7 @@ export default () => {
   }, [id]);
 
   useEffect(() => {
-    if (!lineup && club) {
+    if (!lineup && club && !isMarketClose) {
       const defaultLineup = fillLineupWithPlayers(
         club,
         (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number]
@@ -142,7 +192,7 @@ export default () => {
   }, [club, lineup]);
 
   useEffect(() => {
-    if (market && match) {
+    if (market && match && !isMarketClose) {
       const filterPlayers = (teamId: number) =>
         market?.atletas
           .filter(
@@ -150,7 +200,7 @@ export default () => {
               item.clube_id === Number(market.clubes[teamId].id) &&
               item.status_id === ENUM_STATUS_MARKET_PLAYER.PROVAVEL
           )
-          .sort((a, b) => a.posicao_id - b.posicao_id);
+          .sort((a, b) => a.posicao_id - b.posicao_id) as FullPlayerPartials[];
 
       const homeTeamPlayersUpdated = filterPlayers(match.clube_casa_id);
       const awayTeamPlayersUpdated = filterPlayers(match.clube_visitante_id);
@@ -159,6 +209,30 @@ export default () => {
       setAwayTeamPlayers(awayTeamPlayersUpdated);
     }
   }, [match, market, lineup]);
+
+  useEffect(() => {
+    if (playerStats && match && isMarketClose) {
+      const filterPlayersWithPartials = (teamId: number) =>
+        Object.entries(playerStats?.atletas)
+          .map(([key, value]) => {
+            return {
+              ...value,
+            };
+          })
+          .filter((item) => item.clube_id === teamId)
+          .sort((a, b) => a.posicao_id - b.posicao_id);
+
+      const homeTeamPlayersUpdated = filterPlayersWithPartials(
+        match?.home as number
+      );
+      const awayTeamPlayersUpdated = filterPlayersWithPartials(
+        match?.away as number
+      );
+
+      setHomeTeamPlayers(homeTeamPlayersUpdated as FullPlayerPartials[]);
+      setAwayTeamPlayers(awayTeamPlayersUpdated as FullPlayerPartials[]);
+    }
+  }, [match, market, appreciations]);
 
   useEffect(() => {
     if (lineup) {
@@ -170,6 +244,22 @@ export default () => {
       setEmptyPositions(emptyPositionsUpdated);
     }
   }, [lineup]);
+
+  const renderItemWithPartials = useCallback(
+    ({ item: player }: ListRenderItemInfo<FullPlayerPartials>) => {
+      return (
+        <PlayerCard
+          player={player}
+          club={(playerStats as PlayerStats)?.clubes[String(player.clube_id)]}
+          position={(playerStats as PlayerStats)?.posicoes[player.posicao_id]}
+          appreciation={
+            (appreciations as Appreciations)?.atletas?.[player.id]?.variacao_num
+          }
+        />
+      );
+    },
+    [playerStats, appreciations]
+  );
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
@@ -196,13 +286,21 @@ export default () => {
   );
 
   const keyExtractor = useCallback(
-    (item: FullPlayer) => `${item.atleta_id}`,
+    (item: FullPlayer) => `${item.foto} + ${item.apelido}`,
     []
   );
 
+  const isLoading = isMarketClose
+    ? !market || !match || !appreciations || !playerStats
+    : !market || !match || !homeTeamPlayers || !awayTeamPlayers;
+
+  const onRefetch = useCallback(() => {
+    Promise.all([onRefetchAppreciations(), onRefetchStats()]);
+  }, []);
+
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
 
-  if (!market || !match || !homeTeamPlayers || !awayTeamPlayers) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -220,8 +318,16 @@ export default () => {
       >
         <MatchCard
           match={match as Match}
-          homeClub={market?.clubes[match?.clube_casa_id as number]}
-          awayClub={market?.clubes[match?.clube_visitante_id as number]}
+          homeClub={
+            isMarketClose
+              ? playerStats?.clubes[match?.home as number]
+              : market?.clubes[match?.clube_casa_id as number]
+          }
+          awayClub={
+            isMarketClose
+              ? playerStats?.clubes[match?.away as number]
+              : market?.clubes[match?.clube_visitante_id as number]
+          }
         />
       </View>
       <Tabs tabs={tabs} />

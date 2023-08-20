@@ -125,12 +125,8 @@ export const onGetLeagueWithPartials = (
           ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
           : 0,
         campeonato:
-          marketStatus.rodada_atual !== 20
-            ? clubLeague.pontos.campeonato +
-              (club
-                ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
-                : 0)
-            : clubLeague.pontos.campeonato,
+          clubLeague.pontos.campeonato +
+          (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0),
         mes:
           clubLeague.pontos.mes +
           (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0),

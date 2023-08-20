@@ -345,11 +345,10 @@ export default () => {
             />
             <Button
               onPress={handleResetClub}
-              variant={isMarketClose ? "disabled" : "primary"}
+              variant="primary"
               onlyIcon
               hasIcon
               iconName="refresh-cw"
-              disabled={isMarketClose}
             />
             <Button
               variant="secondary"
@@ -421,11 +420,7 @@ export default () => {
             )}
           </View>
 
-          <SoccerField
-            capitain={capitain}
-            isMarketClose={isMarketClose}
-            handleChangeCapitain={updateCapitain}
-          />
+          <SoccerField isMarketClose={isMarketClose} />
 
           <ListReservePlayers lineup={lineup} isMarketClose={isMarketClose} />
 

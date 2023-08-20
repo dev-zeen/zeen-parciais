@@ -223,7 +223,7 @@ export default () => {
 
   const keyExtractor = useCallback((item: TeamLeague) => `${item.time_id}`, []);
 
-  const isLoading = !clubs || isLoadingClubsByLeague;
+  const isLoading = !clubs || isLoadingClubsByLeague || !playerStats || !league;
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
@@ -272,7 +272,7 @@ export default () => {
         renderItem={(data) => renderItem(data)}
         keyExtractor={keyExtractor}
         initialNumToRender={10}
-        maxToRenderPerBatch={20}
+        maxToRenderPerBatch={10}
         contentContainerStyle={{
           marginTop: 4,
           paddingVertical: 8,

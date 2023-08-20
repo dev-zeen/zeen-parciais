@@ -31,6 +31,11 @@ import {
   onUpdateTeamWithSubstitutedPlayers,
 } from "@/utils/partials";
 
+const TYPE_VIEW = {
+  CAMPO: "CAMPO",
+  LISTA: "LISTA",
+};
+
 export interface PlayerClub extends FullPlayer {
   isReplaced?: boolean;
   isJoined?: boolean;
@@ -44,6 +49,8 @@ export default () => {
   const { id } = useLocalSearchParams();
 
   const { data: marketStatus } = useGetMarketStatus();
+
+  const typeViewDefault = TYPE_VIEW.LISTA;
 
   const isMarketClose =
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
@@ -322,24 +329,32 @@ export default () => {
           </View>
         </View>
 
-        <View
-          className={`justify-center rounded-lg mx-2 ${
-            colorTheme === "dark" ? `bg-dark` : "bg-light"
-          }`}
-          style={{
-            gap: 8,
-          }}
-        >
-          <View className="rounded-lg py-2">
-            <Text className="font-semibold text-center text-lg">Titulares</Text>
-            {startingPlayers?.map((player) => renderItem(player))}
-          </View>
+        {typeViewDefault === TYPE_VIEW.CAMPO && <View></View>}
 
-          <View className="rounded-lg py-2 mb-2">
-            <Text className="font-semibold text-center text-lg">Reservas</Text>
-            {reservePlayers?.map((player) => renderItem(player, true))}
+        {typeViewDefault === TYPE_VIEW.LISTA && (
+          <View
+            className={`justify-center rounded-lg mx-2 ${
+              colorTheme === "dark" ? `bg-dark` : "bg-light"
+            }`}
+            style={{
+              gap: 8,
+            }}
+          >
+            <View className="rounded-lg py-2">
+              <Text className="font-semibold text-center text-lg">
+                Titulares
+              </Text>
+              {startingPlayers?.map((player) => renderItem(player))}
+            </View>
+
+            <View className="rounded-lg py-2 mb-2">
+              <Text className="font-semibold text-center text-lg">
+                Reservas
+              </Text>
+              {reservePlayers?.map((player) => renderItem(player, true))}
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaViewContainer>
   );

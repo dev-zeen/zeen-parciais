@@ -45,6 +45,7 @@ export default () => {
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const {
+    data: playerStats,
     isRefetching: isRefetchingPlayersStats,
     refetch: onRefetchPlayersStats,
   } = useGetScoredPlayers(isMarketClose);
@@ -104,7 +105,7 @@ export default () => {
         }
       });
     }
-  }, [appreciations]);
+  }, [appreciations, playerStats]);
 
   useEffect(() => {
     if (
@@ -179,7 +180,6 @@ export default () => {
           placeholder="Buscar Jogador"
           placeholderTextColor={GRAY_OPACITY}
           className="rounded-lg p-3 border-2 border-gray-300 bg-white mx-4"
-          autoCapitalize="none"
           autoCorrect={false}
         />
 

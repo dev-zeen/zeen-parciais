@@ -49,11 +49,14 @@ export function MatchCard({
   }, [players, match]);
 
   const onPressHandler = useCallback(() => {
-    if (match.status_transmissao_tr === "CRIADA") {
-      return router.push(`/matches/${JSON.stringify(match)}`);
-    }
-    return null;
-  }, []);
+    const payload = {
+      ...match,
+      transmissao: "",
+      home: match.clube_casa_id,
+      away: match.clube_visitante_id,
+    };
+    router.push(`/matches/${JSON.stringify(payload)}`);
+  }, [match]);
 
   return (
     <TouchableOpacity

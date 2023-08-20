@@ -11,19 +11,15 @@ import { useGetScoredPlayers } from "@/queries/stats.query";
 import useTeamLineupStore from "@/store/useTeamLineupStore";
 
 type SoccerFieldProps = {
-  capitain: number;
   isMarketClose: boolean;
-  handleChangeCapitain?: (id: number) => void;
 };
 
-export function SoccerField({
-  capitain,
-  isMarketClose,
-  handleChangeCapitain,
-}: SoccerFieldProps) {
+export function SoccerField({ isMarketClose }: SoccerFieldProps) {
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const lineup = useTeamLineupStore((state) => state.lineup);
+  const capitain = useTeamLineupStore((state) => state.capitain);
+  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
   const [positionMarketSearch, setPositionMarketSearch] =
     useState<LineupPosition>();
@@ -79,7 +75,7 @@ export function SoccerField({
               <TeamPlayer
                 player={position.player as LineupPlayer}
                 hasCaptain={capitain === position.player?.atleta_id}
-                handleCapitain={handleChangeCapitain}
+                handleCapitain={updateCapitain}
                 isPlayed={
                   playerStats?.atletas?.[position.player.atleta_id]
                     ?.entrou_em_campo

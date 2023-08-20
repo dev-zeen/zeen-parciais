@@ -16,7 +16,7 @@ import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
 import { Loading } from "@/components/structure/Loading";
 import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import Colors from "@/constants/Colors";
+import { tintColorDark } from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { TeamHistoryRound } from "@/models/Club";
@@ -227,12 +227,8 @@ export default () => {
           setShowModalLogout(true);
         }}
       >
-        <Text>Sair</Text>
-        <Feather
-          name="log-out"
-          size={24}
-          color={colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint}
-        />
+        <Text className="text-white">Sair</Text>
+        <Feather name="log-out" size={24} color={tintColorDark} />
       </TouchableOpacity>
 
       {showModalLogout && (
