@@ -15,6 +15,9 @@ export type AddPlayerToLineupProps = {
 };
 
 type TeamLineupStore = {
+  lineup: LineupPlayers | undefined;
+  capitain: number;
+  price: number | undefined;
   updateLineup: (lineup: LineupPlayers) => void;
   updateCapitain: (value: number) => void;
   updatePrice: (value: number) => void;
@@ -24,16 +27,17 @@ type TeamLineupStore = {
     index,
     isReservePlayer,
   }: AddPlayerToLineupProps) => void;
-  price: number | undefined;
-  lineup: LineupPlayers | undefined;
-  capitain: number;
+  reset: () => void;
 };
 
-const useTeamLineupStore = create<TeamLineupStore>((set) => ({
+const initialState = {
   lineup: undefined,
   capitain: 0,
   price: 0,
+};
 
+const useTeamLineupStore = create<TeamLineupStore>((set) => ({
+  ...initialState,
   updateLineup: (lineupUpdated: LineupPlayers) => {
     set((_state) => ({
       lineup: lineupUpdated,
@@ -84,6 +88,9 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
         price: priceUpdated,
       };
     });
+  },
+  reset: () => {
+    set(initialState);
   },
 }));
 

@@ -13,7 +13,6 @@ import { Loading } from "@/components/structure/Loading";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
 import { AuthContext } from "@/contexts/Auth.context";
 import { Match } from "@/models/Matches";
-import { FullPlayer } from "@/models/Stats";
 import { useGetMyClub } from "@/queries/club.query";
 import { useGetMatchs } from "@/queries/matches.query";
 
@@ -31,7 +30,7 @@ export default () => {
     isRefetching,
   } = useGetMatchs();
 
-  const { data: club } = useGetMyClub(allowRequest);
+  const { data: club } = useGetMyClub(!!allowRequest);
 
   const keyExtractor = useCallback(
     (item: Match) => `${item.clube_casa_id}`,
@@ -43,7 +42,7 @@ export default () => {
       return (
         <MatchCard
           match={item}
-          players={club?.atletas as FullPlayer[]}
+          players={club?.atletas}
           homeClub={matches?.clubes[item.clube_casa_id]}
           awayClub={matches?.clubes[item.clube_visitante_id]}
           isDisabled={!isAutheticated}

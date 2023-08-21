@@ -7,6 +7,8 @@ import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContai
 import { INJECT_AUTH_LOGOUT } from "@/constants/Generic";
 import { URL_HOME } from "@/constants/Urls";
 import { AuthContext } from "@/contexts/Auth.context";
+import useTeamLineupStore from "@/store/useTeamLineupStore";
+import { useQueryClient } from "@tanstack/react-query";
 
 type LogoutModalProps = {
   isVisible: boolean;
@@ -17,10 +19,20 @@ export function LogoutModal({
   isVisible,
   handleLogoutSuccess,
 }: LogoutModalProps) {
+  const queryClient = useQueryClient();
+
+  const resetStore = useTeamLineupStore((state) => state.reset);
+
   const { handleUnautenticated } = useContext(AuthContext);
 
   async function handleWebViewMessage(event?: WebViewMessageEvent) {
-    handleUnautenticated();
+    try {
+      resetStore();
+      queryClient.clear();
+      handleUnautenticated();
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   return (
@@ -37,6 +49,7 @@ export function LogoutModal({
           onNavigationStateChange={(event) => {
             handleLogoutSuccess();
             handleWebViewMessage();
+            queryClient.clear();
           }}
         />
       </Modal>

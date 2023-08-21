@@ -39,7 +39,10 @@ export default () => {
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const [allowRequest, setAllowRequest] = useState(false);
+  const allowRequest =
+    isAutheticated &&
+    marketStatus &&
+    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
 
   const isMarketClose =
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
@@ -51,7 +54,7 @@ export default () => {
   } = useGetScoredPlayers(isMarketClose);
 
   const { data: appreciations, refetch: onRefetchAppreciations } =
-    useGetAppreciations(allowRequest);
+    useGetAppreciations(!!allowRequest);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredDataSource, setFilteredDataSource] = useState<
@@ -82,9 +85,9 @@ export default () => {
   );
 
   const onRefetch = useCallback(async () => {
-    allowRequest && (await onRefetchAppreciations());
+    !!allowRequest && (await onRefetchAppreciations());
     await onRefetchPlayersStats();
-  }, [onRefetchAppreciations, onRefetchPlayersStats]);
+  }, [allowRequest]);
 
   useEffect(() => {
     onGetFromStorage<string>(CURRENT_STATS).then((res) => {
@@ -106,16 +109,6 @@ export default () => {
       });
     }
   }, [appreciations, playerStats]);
-
-  useEffect(() => {
-    if (
-      isAutheticated &&
-      marketStatus &&
-      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
-    ) {
-      setAllowRequest(true);
-    }
-  }, [isAutheticated, marketStatus]);
 
   const isRefetching = isRefetchingPlayersStats;
 

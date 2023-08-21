@@ -47,7 +47,7 @@ export default ({
 
   const allowRequest = isAutheticated;
 
-  const { data: club } = useGetMyClub(allowRequest);
+  const { data: club } = useGetMyClub(!!allowRequest);
   const { data: marketData } = useGetMarket();
 
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -168,7 +168,7 @@ export default ({
     [emptyPositions, lineup]
   );
 
-  if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
+  if (!isAutheticated) return <Redirect href="/(tabs)/team" />;
 
   if (!marketPlayers || !club || isLoading) return <Loading />;
 

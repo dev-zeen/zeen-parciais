@@ -79,7 +79,7 @@ export default () => {
     data: club,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(allowRequests);
+  } = useGetMyClub(!!allowRequests);
 
   const { mutate } = useSaveTeam();
 

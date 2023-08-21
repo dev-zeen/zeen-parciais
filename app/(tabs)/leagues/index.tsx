@@ -28,7 +28,7 @@ export default function () {
     isLoading: isLoadingLeagues,
     refetch: onRefetchLeagues,
     isRefetching: isRefetching,
-  } = useGetLeagues(allowRequests as boolean);
+  } = useGetLeagues(!!allowRequests);
 
   const [leagues, setLeagues] = useState<LeagueUserDetails[]>();
 

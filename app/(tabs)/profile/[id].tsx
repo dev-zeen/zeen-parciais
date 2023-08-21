@@ -37,7 +37,7 @@ import {
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { isAutheticated } = useContext(AuthContext);
+  const { isAutheticated, handleUnautenticated } = useContext(AuthContext);
 
   const { data: marketStatus } = useGetMarketStatus();
 
@@ -55,10 +55,10 @@ export default () => {
     data: club,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(allowRequests);
+  } = useGetMyClub(!!allowRequests);
 
   const { data: historyClub, isLoading: isLoadingHistory } =
-    useGetHistoricMyClub(allowRequests);
+    useGetHistoricMyClub(!!allowRequests);
 
   const { data: substitutions } = useGetMatchSubstitutions({
     id: club?.time.time_id,
@@ -76,6 +76,7 @@ export default () => {
   );
 
   const handleLogout = () => {
+    handleUnautenticated();
     setShowModalLogout(false);
   };
 

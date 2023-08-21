@@ -48,7 +48,7 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
   const { data: market } = useGetMarket();
-  const { data: club } = useGetMyClub(allowRequest);
+  const { data: club } = useGetMyClub(!!allowRequest);
 
   const lineup = useTeamLineupStore((state) => state.lineup);
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
@@ -72,7 +72,7 @@ export default () => {
     data: appreciations,
     refetch: onRefetchAppreciations,
     isRefetching: isRefetchingAppreciations,
-  } = useGetAppreciations(allowRequest);
+  } = useGetAppreciations(!!allowRequest);
 
   const {
     data: playerStats,
