@@ -1,6 +1,12 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { FlatList, ListRenderItemInfo, RefreshControl } from "react-native";
+import {
+  FlatList,
+  Image,
+  ListRenderItemInfo,
+  RefreshControl,
+} from "react-native";
 
+import errorImage from "@/assets/images/error-background.png";
 import { Text, View } from "@/components/Themed";
 import { LeagueCard } from "@/components/contexts/leagues/LeagueCard";
 import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
@@ -74,6 +80,21 @@ export default function () {
 
   if (!dataLeagues || !leagues || isLoadingLeagues) {
     return <Loading />;
+  }
+
+  if (leagues.length === 0) {
+    return (
+      <SafeAreaViewContainer>
+        <View className="rounded-lg py-2 mx-2 items-center justify-center flex-1">
+          <Image
+            source={errorImage}
+            className="w-48 h-48 rounded-full"
+            alt={`Imagem de erro na aplicação`}
+          />
+          <Text>Você não está em nenhuma liga privada</Text>
+        </View>
+      </SafeAreaViewContainer>
+    );
   }
 
   return (

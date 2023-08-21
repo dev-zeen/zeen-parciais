@@ -52,7 +52,7 @@ export default () => {
     [matches, isAutheticated, club]
   );
 
-  if (isLoading || !matches || !club) {
+  if (isLoading || !matches) {
     return <Loading />;
   }
 

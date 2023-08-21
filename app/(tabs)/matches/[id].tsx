@@ -169,7 +169,14 @@ export default () => {
         },
       },
     ],
-    [awayTeamPlayers, homeTeamPlayers, appreciations, playerStats]
+    [
+      awayTeamPlayers,
+      homeTeamPlayers,
+      appreciations,
+      playerStats,
+      isRefetchingStats,
+      isRefetchingAppreciations,
+    ]
   );
 
   useEffect(() => {

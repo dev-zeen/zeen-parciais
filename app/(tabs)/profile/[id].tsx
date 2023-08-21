@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 import { Text, View } from "@/components/Themed";
 import { LogoutModal } from "@/components/contexts/auth/LogoutModal";
@@ -78,6 +79,7 @@ export default () => {
   const handleLogout = () => {
     handleUnautenticated();
     setShowModalLogout(false);
+    router.push("/(tabs)/");
   };
 
   const totalPatrimony = club && numberToString(club?.patrimonio);
@@ -190,31 +192,33 @@ export default () => {
             </View>
           </View>
 
-          <View
-            className={`flex-row gap-2 ${
-              colorTheme === "dark" ? `bg-dark` : "bg-light"
-            }`}
-          >
-            <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
-              <Text className="font-semibold">Maior Pontuação</Text>
-              <Text className="font-semibold text-xl text-blue-500">
-                {numberToString(highestScore?.pontos as number)}
-              </Text>
-              <Text className="font-light">
-                Rodada {highestScore?.rodada_id}
-              </Text>
-            </View>
+          {historyClub && historyClub.length > 0 && (
+            <View
+              className={`flex-row gap-2 ${
+                colorTheme === "dark" ? `bg-dark` : "bg-light"
+              }`}
+            >
+              <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
+                <Text className="font-semibold">Maior Pontuação</Text>
+                <Text className="font-semibold text-xl text-blue-500">
+                  {numberToString(highestScore?.pontos as number)}
+                </Text>
+                <Text className="font-light">
+                  Rodada {highestScore?.rodada_id}
+                </Text>
+              </View>
 
-            <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
-              <Text className="font-semibold">Menor Pontuação</Text>
-              <Text className="font-semibold text-xl text-red-500">
-                {numberToString(lowestScore?.pontos as number)}
-              </Text>
-              <Text className="font-light">
-                Rodada {lowestScore?.rodada_id}
-              </Text>
+              <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
+                <Text className="font-semibold">Menor Pontuação</Text>
+                <Text className="font-semibold text-xl text-red-500">
+                  {numberToString(lowestScore?.pontos as number)}
+                </Text>
+                <Text className="font-light">
+                  Rodada {lowestScore?.rodada_id}
+                </Text>
+              </View>
             </View>
-          </View>
+          )}
         </View>
       </ScrollView>
 

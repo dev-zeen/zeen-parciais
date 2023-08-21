@@ -42,7 +42,7 @@ export default () => {
   const allowRequest =
     isAutheticated &&
     marketStatus &&
-    marketStatus?.status_mercado === MARKET_STATUS_NAME.FECHADO;
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
   const isMarketClose =
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
