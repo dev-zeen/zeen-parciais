@@ -201,7 +201,7 @@ export default () => {
         },
       },
     ],
-    [orderBy, handleOnPressOrderBy]
+    [handleOnPressOrderBy]
   );
 
   const renderItem = useCallback(

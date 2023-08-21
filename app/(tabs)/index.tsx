@@ -101,6 +101,7 @@ export default () => {
     onRefetchStats,
     onRefetchPositions,
     topPlayers,
+    club,
   ]);
 
   useEffect(() => {
@@ -161,7 +162,7 @@ export default () => {
 
   const onPressHandler = useCallback(() => {
     router.push(`/profile/${club?.time.time_id}`);
-  }, []);
+  }, [router, club]);
 
   useEffect(() => {
     if (club && isMarketClose) {
