@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Modal,
@@ -57,8 +50,6 @@ import {
 } from "./team.helpers";
 
 export default () => {
-  const firstRender = useRef(true);
-
   const router = useRouter();
 
   const colorTheme = useColorScheme();
@@ -93,8 +84,9 @@ export default () => {
   const capitain = useTeamLineupStore((state) => state.capitain);
   const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
-  const defaultLineupTeam = onGetDefaultLineupTeam(
-    club?.time.esquema_id as number
+  const defaultLineupTeam = useMemo(
+    () => onGetDefaultLineupTeam(club?.time.esquema_id as number),
+    [club]
   );
 
   const [tacticalFormation, setTacticalFormation] = useState(defaultLineupTeam);

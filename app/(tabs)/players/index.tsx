@@ -153,7 +153,11 @@ export default () => {
     );
   }
 
-  if (!marketStatus) {
+  const isLoading = isMarketClose
+    ? !playerStats || !marketStatus
+    : !currentStats;
+
+  if (isLoading) {
     return <Loading />;
   }
 

@@ -68,7 +68,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     return (
       <View
         key={club?.time_id}
-        className={`rounded-lg p-2 justify-center ${
+        className={`rounded-lg p-3 justify-center ${
           myTeam ? (colorTheme === "dark" ? "bg-blue-600" : "bg-blue-200") : ""
         }`}
       >
@@ -204,7 +204,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                       : ""
                   }`}
                 >
-                  <Text className="text-xs font-semibold">
+                  <Text className="text-xs">
                     {isMarketClose && club.playersHavePlayed !== undefined
                       ? `${club.playersHavePlayed}/12`
                       : diffScore < 0 && numberToString(diffScore)}

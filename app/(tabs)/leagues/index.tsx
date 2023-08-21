@@ -6,18 +6,20 @@ import {
   RefreshControl,
 } from "react-native";
 
-import errorImage from "@/assets/images/error-background.png";
+import emptyLeaguesImage from "@/assets/images/no-leagues.png";
 import { Text, View } from "@/components/Themed";
 import { LeagueCard } from "@/components/contexts/leagues/LeagueCard";
 import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
 import { Loading } from "@/components/structure/Loading";
 import { Login } from "@/components/structure/Login";
 import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import Colors from "@/constants/Colors";
 import { MARKET_STATUS_NAME } from "@/constants/Market";
 import { AuthContext } from "@/contexts/Auth.context";
 import { LeagueUserDetails } from "@/models/Leagues";
 import { useGetLeagues } from "@/queries/leagues.query";
 import { useGetMarketStatus } from "@/queries/market.query";
+import { Feather } from "@expo/vector-icons";
 
 export default function () {
   const { isAutheticated } = useContext(AuthContext);
@@ -87,11 +89,32 @@ export default function () {
       <SafeAreaViewContainer>
         <View className="rounded-lg py-2 mx-2 items-center justify-center flex-1">
           <Image
-            source={errorImage}
-            className="w-48 h-48 rounded-full"
+            source={emptyLeaguesImage}
+            className="w-96 h-96 rounded-full"
             alt={`Imagem de erro na aplicação`}
           />
-          <Text>Você não está em nenhuma liga privada</Text>
+          <View
+            className="flex-row py-4 px-8 rounded-lg items-center justify-center"
+            style={{
+              gap: 8,
+            }}
+          >
+            <Feather name="alert-triangle" color="#eab308" size={16} />
+            <Text className="text-sm font-semibold text-center">
+              Você não está em nenhuma liga privada
+            </Text>
+          </View>
+          <View
+            className="flex-row py-4 px-8 rounded-lg justify-center"
+            style={{
+              gap: 8,
+            }}
+          >
+            <Feather name="info" size={16} color={Colors.light.tint} />
+            <Text className="text-xs text-center">
+              As ligas públicas serão exibidas após a abertura do mercado
+            </Text>
+          </View>
         </View>
       </SafeAreaViewContainer>
     );

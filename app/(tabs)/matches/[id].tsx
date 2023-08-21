@@ -121,6 +121,9 @@ export default () => {
         content: () => {
           return (
             <FlatList
+              style={{
+                paddingHorizontal: 8,
+              }}
               contentContainerStyle={{
                 gap: 8,
                 paddingVertical: 8,
@@ -149,6 +152,9 @@ export default () => {
         content: () => {
           return (
             <FlatList
+              style={{
+                paddingHorizontal: 8,
+              }}
               refreshControl={
                 <RefreshControl
                   onRefresh={onRefetch}
@@ -262,10 +268,13 @@ export default () => {
           appreciation={
             (appreciations as Appreciations)?.atletas?.[player.id]?.variacao_num
           }
+          isPlayerOnMyLineup={lineup?.starting.some(
+            (item) => String(item.player?.atleta_id) === player.id
+          )}
         />
       );
     },
-    [playerStats, appreciations]
+    [playerStats, appreciations, lineup]
   );
 
   const renderItem = useCallback(

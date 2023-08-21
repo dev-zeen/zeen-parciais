@@ -9,7 +9,6 @@ const cartolaApi = axios.create({
 cartolaApi.interceptors.request.use(
   async (instance: InternalAxiosRequestConfig) => {
     const token = await getTokenFromStorage();
-
     if (token) {
       instance.headers.Authorization = `Bearer ${token}`;
       return instance;
