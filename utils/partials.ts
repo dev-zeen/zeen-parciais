@@ -1,5 +1,5 @@
-import { FullClubInfo, Substitutions } from "@/models/Club";
-import { FullPlayer, Player, PlayerStats } from "@/models/Stats";
+import { FullClubInfo, Substitutions } from '@/models/Club';
+import { FullPlayer, Player, PlayerStats } from '@/models/Stats';
 
 type ClubsWithRoundPartial = {
   club: string;
@@ -19,23 +19,16 @@ export function onGetClubsLeagueWithPartial(
   clubs: ClubsByLeagueUtils,
   stats: PlayerStats
 ): ClubsWithRoundPartial[] {
-  const result: ClubsWithRoundPartial[] = Object.entries(clubs).map(
-    ([clubKey, item]) => {
-      const players = item.atletas
-        .map((playerId: number) => stats.atletas[playerId])
-        .filter(Boolean);
+  const result: ClubsWithRoundPartial[] = Object.entries(clubs).map(([clubKey, item]) => {
+    const players = item.atletas.map((playerId: number) => stats.atletas[playerId]).filter(Boolean);
 
-      return {
-        club: clubKey,
-        partial: players.reduce(
-          (sum, player) => sum + (player as Player)?.pontuacao,
-          0
-        ),
-        captain: stats.atletas[item.capitao],
-        players,
-      };
-    }
-  );
+    return {
+      club: clubKey,
+      partial: players.reduce((sum, player) => sum + (player as Player)?.pontuacao, 0),
+      captain: stats.atletas[item.capitao],
+      players,
+    };
+  });
 
   return result;
 }
@@ -65,10 +58,7 @@ export function onCalculatePartialScore(
   return totalPoints;
 }
 
-export function onGetPlayersHaveAlreadyPlayed(
-  players: FullPlayer[],
-  stats: PlayerStats
-) {
+export function onGetPlayersHaveAlreadyPlayed(players: FullPlayer[], stats: PlayerStats) {
   const count = players.reduce((acc, current) => {
     if (stats.atletas[current.atleta_id]) {
       acc += 1;
@@ -79,10 +69,7 @@ export function onGetPlayersHaveAlreadyPlayed(
   return count;
 }
 
-export function onUpdateTeamWithSubstitutedPlayers(
-  club: FullClubInfo,
-  replaces?: Substitutions[]
-) {
+export function onUpdateTeamWithSubstitutedPlayers(club: FullClubInfo, replaces?: Substitutions[]) {
   let playersUpdated = [...club.atletas];
   let reservesUpdated = [...club.reservas];
 

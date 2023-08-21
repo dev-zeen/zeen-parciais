@@ -3,12 +3,12 @@ import {
   GET_POSITIONS,
   GET_TOP_PLAYERS,
   GET_TOP_RANKED_PLAYERS,
-} from "@/constants/Endpoits";
-import { APPRECIATIONS } from "@/constants/Keys";
-import { Appreciations, TopPlayer } from "@/models/Player";
-import { IPositions } from "@/models/Stats";
-import { onSaveStorage } from "@/utils/asyncStorage";
-import { useFetch } from "@/utils/reactQuery";
+} from '@/constants/Endpoits';
+import { APPRECIATIONS } from '@/constants/Keys';
+import { Appreciations, TopPlayer } from '@/models/Player';
+import { IPositions } from '@/models/Stats';
+import { onSaveStorage } from '@/utils/asyncStorage';
+import { useFetch } from '@/utils/reactQuery';
 
 interface useGetTopPlayersProps {
   [key: string]: string;
@@ -31,10 +31,7 @@ export const useGetTopPlayers = (filters?: useGetTopPlayersProps) =>
     }
   );
 
-export const useGetBestCaptainPlayers = (
-  hasHighlights: boolean,
-  filters?: useGetTopPlayersProps
-) =>
+export const useGetBestCaptainPlayers = (hasHighlights: boolean, filters?: useGetTopPlayersProps) =>
   useFetch<BestPlayers>(
     GET_TOP_PLAYERS,
     {

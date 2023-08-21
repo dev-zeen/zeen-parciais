@@ -1,34 +1,28 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  ListRenderItemInfo,
-  RefreshControl,
-  useColorScheme,
-} from "react-native";
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
-import { Redirect, useLocalSearchParams } from "expo-router";
-
-import { fillLineupWithPlayers } from "@/app/(tabs)/team/team.helpers";
-import { View } from "@/components/Themed";
-import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard";
-import { MatchCard } from "@/components/contexts/matches/MatchCard";
-import { PlayerCard } from "@/components/contexts/players/PlayerCard";
-import { Loading } from "@/components/structure/Loading";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { ITabs, Tabs } from "@/components/structure/Tabs";
-import Colors from "@/constants/Colors";
-import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import { AuthContext } from "@/contexts/Auth.context";
-import { Match } from "@/models/Matches";
-import { Appreciations } from "@/models/Player";
-import { FullPlayer, Player, PlayerStats } from "@/models/Stats";
-import { useGetMyClub } from "@/queries/club.query";
-import { useGetMarket, useGetMarketStatus } from "@/queries/market.query";
-import { useGetAppreciations } from "@/queries/players.query";
-import { useGetScoredPlayers } from "@/queries/stats.query";
-import useTeamLineupStore from "@/store/useTeamLineupStore";
+import { fillLineupWithPlayers } from '@/app/(tabs)/team/team.helpers';
+import { View } from '@/components/Themed';
+import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
+import { MatchCard } from '@/components/contexts/matches/MatchCard';
+import { PlayerCard } from '@/components/contexts/players/PlayerCard';
+import { Loading } from '@/components/structure/Loading';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { ITabs, Tabs } from '@/components/structure/Tabs';
+import Colors from '@/constants/Colors';
+import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { AuthContext } from '@/contexts/Auth.context';
+import { Match } from '@/models/Matches';
+import { Appreciations } from '@/models/Player';
+import { FullPlayer, Player, PlayerStats } from '@/models/Stats';
+import { useGetMyClub } from '@/queries/club.query';
+import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
+import { useGetAppreciations } from '@/queries/players.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 interface IMatch extends Match {
   home?: number;
@@ -55,15 +49,10 @@ export default () => {
   const price = useTeamLineupStore((state) => state.price);
   const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
-  const isMarketClose =
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
-  const addPlayerToLineup = useTeamLineupStore(
-    (state) => state.addPlayerToLineup
-  );
-  const removePlayerFromLineup = useTeamLineupStore(
-    (state) => state.removePlayerFromLineup
-  );
+  const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
+  const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const [match, setMatch] = useState<IMatch>();
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
@@ -80,13 +69,9 @@ export default () => {
     refetch: onRefetchStats,
   } = useGetScoredPlayers();
 
-  const [homeTeamPlayers, setHomeTeamPlayers] = useState<
-    FullPlayerPartials[] | undefined
-  >();
+  const [homeTeamPlayers, setHomeTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
 
-  const [awayTeamPlayers, setAwayTeamPlayers] = useState<
-    FullPlayerPartials[] | undefined
-  >();
+  const [awayTeamPlayers, setAwayTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer) => {
@@ -94,14 +79,14 @@ export default () => {
         player,
       });
     },
-    [lineup]
+    [addPlayerToLineup]
   );
 
   const handleRemovePlayerFromLineup = useCallback(
     (player: FullPlayer) => {
       removePlayerFromLineup(player);
     },
-    [lineup]
+    [removePlayerFromLineup]
   );
 
   const remainingValue = useMemo(() => {
@@ -110,6 +95,50 @@ export default () => {
     }
     return club?.patrimonio as number;
   }, [club, price]);
+
+  const onRefetch = useCallback(() => {
+    Promise.all([onRefetchAppreciations(), onRefetchStats()]);
+  }, [onRefetchAppreciations, onRefetchStats]);
+
+  const renderItemWithPartials = useCallback(
+    ({ item: player }: ListRenderItemInfo<FullPlayerPartials>) => {
+      return (
+        <PlayerCard
+          player={player}
+          club={(playerStats as PlayerStats)?.clubes[String(player.clube_id)]}
+          position={(playerStats as PlayerStats)?.posicoes[player.posicao_id]}
+          appreciation={(appreciations as Appreciations)?.atletas?.[player.id]?.variacao_num}
+          isPlayerOnMyLineup={lineup?.starting.some(
+            (item) => String(item.player?.atleta_id) === player.id
+          )}
+        />
+      );
+    },
+    [appreciations, lineup, playerStats]
+  );
+
+  const renderItem = useCallback(
+    ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
+      return (
+        <View className="mx-2 rounded-lg">
+          <MarketPlayerCard
+            player={player}
+            onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
+            onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
+            isButtonDisabled={
+              player.preco_num > remainingValue || !emptyPositions?.has(player.posicao_id)
+            }
+            isSellPlayer={lineup?.starting.some(
+              (item) => item.player?.atleta_id === player.atleta_id
+            )}
+          />
+        </View>
+      );
+    },
+    [emptyPositions, handleAddPlayerToLineup, handleRemovePlayerFromLineup, lineup, remainingValue]
+  );
+
+  const keyExtractor = useCallback((item: FullPlayer) => `${item.foto} + ${item.apelido}`, []);
 
   const tabs: ITabs[] = useMemo(
     () => [
@@ -147,8 +176,7 @@ export default () => {
         id: 2,
         title: isMarketClose
           ? (playerStats?.clubes[match?.away as number]?.nome as string)
-          : (market?.clubes[match?.clube_visitante_id as number]
-              ?.nome as string),
+          : (market?.clubes[match?.clube_visitante_id as number]?.nome as string),
         content: () => {
           return (
             <FlatList
@@ -176,12 +204,18 @@ export default () => {
       },
     ],
     [
-      awayTeamPlayers,
-      homeTeamPlayers,
-      appreciations,
+      isMarketClose,
       playerStats,
+      match,
+      market,
+      onRefetch,
       isRefetchingStats,
       isRefetchingAppreciations,
+      homeTeamPlayers,
+      renderItemWithPartials,
+      renderItem,
+      keyExtractor,
+      awayTeamPlayers,
     ]
   );
 
@@ -202,7 +236,7 @@ export default () => {
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
-  }, [club, lineup]);
+  }, [club, isMarketClose, lineup, updateCapitain, updateLineup]);
 
   useEffect(() => {
     if (market && match && !isMarketClose) {
@@ -221,7 +255,7 @@ export default () => {
       setHomeTeamPlayers(homeTeamPlayersUpdated);
       setAwayTeamPlayers(awayTeamPlayersUpdated);
     }
-  }, [match, market, lineup]);
+  }, [match, market, lineup, isMarketClose]);
 
   useEffect(() => {
     if (playerStats && match && isMarketClose) {
@@ -235,84 +269,26 @@ export default () => {
           .filter((item) => item.clube_id === teamId)
           .sort((a, b) => a.posicao_id - b.posicao_id);
 
-      const homeTeamPlayersUpdated = filterPlayersWithPartials(
-        match?.home as number
-      );
-      const awayTeamPlayersUpdated = filterPlayersWithPartials(
-        match?.away as number
-      );
+      const homeTeamPlayersUpdated = filterPlayersWithPartials(match?.home as number);
+      const awayTeamPlayersUpdated = filterPlayersWithPartials(match?.away as number);
 
       setHomeTeamPlayers(homeTeamPlayersUpdated as FullPlayerPartials[]);
       setAwayTeamPlayers(awayTeamPlayersUpdated as FullPlayerPartials[]);
     }
-  }, [match, market, appreciations]);
+  }, [match, market, appreciations, playerStats, isMarketClose]);
 
   useEffect(() => {
     if (lineup) {
       const emptyPositionsUpdated = new Set(
-        (lineup?.starting || [])
-          .filter(({ player }) => !player)
-          .map(({ position }) => position)
+        (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)
       );
       setEmptyPositions(emptyPositionsUpdated);
     }
   }, [lineup]);
 
-  const renderItemWithPartials = useCallback(
-    ({ item: player }: ListRenderItemInfo<FullPlayerPartials>) => {
-      return (
-        <PlayerCard
-          player={player}
-          club={(playerStats as PlayerStats)?.clubes[String(player.clube_id)]}
-          position={(playerStats as PlayerStats)?.posicoes[player.posicao_id]}
-          appreciation={
-            (appreciations as Appreciations)?.atletas?.[player.id]?.variacao_num
-          }
-          isPlayerOnMyLineup={lineup?.starting.some(
-            (item) => String(item.player?.atleta_id) === player.id
-          )}
-        />
-      );
-    },
-    [playerStats, appreciations, lineup]
-  );
-
-  const renderItem = useCallback(
-    ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
-      return (
-        <View className="mx-2 rounded-lg">
-          <MarketPlayerCard
-            player={player}
-            onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
-            onPressRemovePlayerFromLineup={() =>
-              handleRemovePlayerFromLineup(player)
-            }
-            isButtonDisabled={
-              player.preco_num > remainingValue ||
-              !emptyPositions?.has(player.posicao_id)
-            }
-            isSellPlayer={lineup?.starting.some(
-              (item) => item.player?.atleta_id === player.atleta_id
-            )}
-          />
-        </View>
-      );
-    },
-    [lineup, homeTeamPlayers, awayTeamPlayers]
-  );
-
-  const keyExtractor = useCallback(
-    (item: FullPlayer) => `${item.foto} + ${item.apelido}`,
-    []
-  );
-
   const isLoading = isMarketClose
     ? !market || !match || !appreciations || !playerStats
     : !market || !match || !homeTeamPlayers || !awayTeamPlayers;
-
-  const onRefetch = useCallback(() => {
-    Promise.all([onRefetchAppreciations(), onRefetchStats()]);
-  }, []);
 
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
 
@@ -327,11 +303,8 @@ export default () => {
         style={{
           gap: 8,
           backgroundColor:
-            colorTheme === "dark"
-              ? Colors.dark.backgroundFull
-              : Colors.light.backgroundFull,
-        }}
-      >
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        }}>
         <MatchCard
           match={match as Match}
           homeClub={

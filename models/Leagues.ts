@@ -1,4 +1,4 @@
-import { MyClubDetails } from "@/models/Club";
+import { MyClubDetails } from '@/models/Club';
 
 export interface LeagueUserDetails {
   liga_id: number;
@@ -7,7 +7,7 @@ export interface LeagueUserDetails {
   nome: string;
   descricao: string;
   slug: string;
-  tipo: "A" | "M" | "F";
+  tipo: 'A' | 'M' | 'F';
   mata_mata: boolean;
   editorial: boolean;
   patrocinador: boolean;

@@ -1,10 +1,9 @@
-import { useCallback, useState } from "react";
+import { Feather } from '@expo/vector-icons';
+import { useCallback, useState } from 'react';
+import { FlatList, Switch, useColorScheme } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-
-import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { FlatList, Switch, useColorScheme } from "react-native";
+import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 
 type FilterMarketByStatusProps = {
   statusSelecteds: PlayerStatusFilter[];
@@ -50,21 +49,18 @@ export function FilterMarketByStatus({
       <View
         className="flex-1 rounded-lg pt-20"
         style={{
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-        }}
-      >
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        }}>
         <View
           className="items-center justify-between flex-row p-2 rounded-t-lg"
           style={{
             gap: 16,
-          }}
-        >
+          }}>
           <Text className="font-semibold text-lg">Filtrar Jogadores</Text>
 
           <TouchableOpacity
             onPress={handleClose}
-            className="p-2 rounded-full border border-red-400 bg-red-300"
-          >
+            className="p-2 rounded-full border border-red-400 bg-red-300">
             <Feather name="x" color="#525252" size={24} />
           </TouchableOpacity>
         </View>
@@ -81,14 +77,12 @@ export function FilterMarketByStatus({
                 <View
                   className="flex-row justify-between p-4 rounded-lg items-center"
                   style={{
-                    backgroundColor:
-                      colorTheme === "dark" ? "#3b82f6" : "#eff6ff",
-                  }}
-                >
+                    backgroundColor: colorTheme === 'dark' ? '#3b82f6' : '#eff6ff',
+                  }}>
                   <Text className="font-semibold text-base">{item.title}</Text>
                   <Switch
-                    trackColor={{ false: "#FFF", true: "#bfdbfe" }}
-                    thumbColor={item.selected ? "#3b82f6" : "#f4f3f4"}
+                    trackColor={{ false: '#FFF', true: '#bfdbfe' }}
+                    thumbColor={item.selected ? '#3b82f6' : '#f4f3f4'}
                     ios_backgroundColor="#FFF"
                     onValueChange={() => handleChangeFilter(item)}
                     value={item.selected}
@@ -104,12 +98,11 @@ export function FilterMarketByStatus({
             onPress={handleStatusFilter}
             activeOpacity={0.6}
             className={`mx-2 p-4 rounded-lg items-center justify-center  ${
-              isFiltersEmpty ? "bg-gray-300" : "bg-blue-500"
+              isFiltersEmpty ? 'bg-gray-300' : 'bg-blue-500'
             }`}
             style={{
               gap: 16,
-            }}
-          >
+            }}>
             <Text className="font-semibold text-sm text-white">Filtrar</Text>
           </TouchableOpacity>
         </View>

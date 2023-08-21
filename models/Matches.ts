@@ -1,8 +1,8 @@
-import { IClub } from "@/models/Club";
+import { IClub } from '@/models/Club';
 
 export interface Match {
-  aproveitamento_mandante: Array<"d" | "e" | "v">;
-  aproveitamento_visitante: Array<"d" | "e" | "v">;
+  aproveitamento_mandante: ('d' | 'e' | 'v')[];
+  aproveitamento_visitante: ('d' | 'e' | 'v')[];
   campeonato_id: number;
   clube_casa_id: number;
   clube_casa_posicao: number;
@@ -16,7 +16,7 @@ export interface Match {
   placar_oficial_mandante?: string;
   placar_oficial_visitante?: string;
   status_cronometro_tr?: string;
-  status_transmissao_tr?: "CRIADA" | "EM_ANDAMENTO" | "ENCERRADA";
+  status_transmissao_tr?: 'CRIADA' | 'EM_ANDAMENTO' | 'ENCERRADA';
   timestamp: number;
   transmissao: {
     label: string;

@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { StyleSheet } from "react-native";
+import { useState } from 'react';
+import { StyleSheet } from 'react-native';
+import Dialog from 'react-native-dialog';
 
-import Dialog from "react-native-dialog";
-
-import { View } from "@/components/Themed";
+import { View } from '@/components/Themed';
 
 type DialogComponentProps = {
   title?: string;
@@ -19,7 +18,7 @@ export function DialogComponent({
   title,
   subtitile,
   isVisible,
-  buttonPrimaryLabel = "OK",
+  buttonPrimaryLabel = 'OK',
   buttonCancelLabel,
   onPressConfirm,
   onPressCancel,
@@ -39,15 +38,9 @@ export function DialogComponent({
     <View style={styles.container}>
       <Dialog.Container visible={visible}>
         {title && <Dialog.Title>{title}</Dialog.Title>}
-        {subtitile && (
-          <Dialog.Description style={styles.subtitle}>
-            {subtitile}
-          </Dialog.Description>
-        )}
+        {subtitile && <Dialog.Description style={styles.subtitle}>{subtitile}</Dialog.Description>}
         <Dialog.Button label={buttonPrimaryLabel} onPress={handleConfirm} />
-        {buttonCancelLabel && (
-          <Dialog.Button label={buttonCancelLabel} onPress={handleCancel} />
-        )}
+        {buttonCancelLabel && <Dialog.Button label={buttonCancelLabel} onPress={handleCancel} />}
       </Dialog.Container>
     </View>
   );
@@ -55,9 +48,9 @@ export function DialogComponent({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
     elevation: 4,
   },
   subtitle: {

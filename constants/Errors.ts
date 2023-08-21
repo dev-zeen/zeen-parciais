@@ -8,28 +8,28 @@ type StatusErrorMessagesProps = {
 
 export const StatusErrorMessages: StatusErrorMessagesProps = {
   401: {
-    message: "Entre na sua conta Globo para acessar seus dados.",
+    message: 'Entre na sua conta Globo para acessar seus dados.',
     code: 401,
-    buttonText: "Voltar",
+    buttonText: 'Voltar',
   },
   404: {
-    message: "Página não encontrada.",
+    message: 'Página não encontrada.',
     code: 404,
-    buttonText: "Tente Novamente",
+    buttonText: 'Tente Novamente',
   },
   500: {
-    message: "Servidor do cartola está instavél, tente novamente mais tarde.",
+    message: 'Servidor do cartola está instavél, tente novamente mais tarde.',
     code: 503,
-    buttonText: "Tente Novamente",
+    buttonText: 'Tente Novamente',
   },
   503: {
-    message: "Mercado em Manutenção.",
+    message: 'Mercado em Manutenção.',
     code: 503,
-    buttonText: "Atualizar",
+    buttonText: 'Atualizar',
   },
   1: {
-    message: "Erro Inesperado, já estamos trabalhando para resolver.",
+    message: 'Erro Inesperado, já estamos trabalhando para resolver.',
     code: 1,
-    buttonText: "Atualizar",
+    buttonText: 'Atualizar',
   },
 };

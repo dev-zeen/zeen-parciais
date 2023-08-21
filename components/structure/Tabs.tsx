@@ -1,5 +1,5 @@
-import { ReactNode, useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { ReactNode, useState } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 export type ITabs = {
   id: number;
@@ -32,20 +32,18 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
         className="flex-row p-1 mx-2 items-center justify-center bg-gray-200 rounded"
         style={{
           gap: 4,
-        }}
-      >
+        }}>
         {tabs.map((tab, index) => (
           <TouchableOpacity
             activeOpacity={0.6}
             key={tab.id}
             className={`flex-1 p-3 items-center justify-evenly rounded ${
-              activeTab === index ? "bg-white" : "bg-gray-200 opacity-50"
+              activeTab === index ? 'bg-white' : 'bg-gray-200 opacity-40'
             }`}
             onPress={() => {
-              tab?.onPress && tab?.onPress();
               handlePress(index);
-            }}
-          >
+              tab?.onPress && tab?.onPress();
+            }}>
             <Text className="font-semibold text-xs">{tab.title}</Text>
           </TouchableOpacity>
         ))}

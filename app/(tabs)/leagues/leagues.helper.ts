@@ -1,19 +1,16 @@
-import { ClubByLeague } from "@/app/(tabs)/leagues/[id]";
-import { League, TeamLeague } from "@/models/Leagues";
-import { MarketStatus } from "@/models/Market";
-import { PlayerStats } from "@/models/Stats";
-import {
-  ClubsByLeagueUtils,
-  onGetClubsLeagueWithPartial,
-} from "@/utils/partials";
+import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
+import { League, TeamLeague } from '@/models/Leagues';
+import { MarketStatus } from '@/models/Market';
+import { PlayerStats } from '@/models/Stats';
+import { ClubsByLeagueUtils, onGetClubsLeagueWithPartial } from '@/utils/partials';
 
 export const enum OrderByOptions {
-  CAMPEONATO = "campeonato",
-  TURNO = "turno",
-  MES = "mes",
-  RODADA = "rodada",
-  PATRIMONIO = "patrimonio",
-  CAPITAO = "capitao",
+  CAMPEONATO = 'campeonato',
+  TURNO = 'turno',
+  MES = 'mes',
+  RODADA = 'rodada',
+  PATRIMONIO = 'patrimonio',
+  CAPITAO = 'capitao',
 }
 
 function merge(
@@ -84,11 +81,7 @@ export function mergeSort(
   const left = arr.slice(0, middle);
   const right = arr.slice(middle);
 
-  return merge(
-    mergeSort(left, compareFn),
-    mergeSort(right, compareFn),
-    compareFn
-  );
+  return merge(mergeSort(left, compareFn), mergeSort(right, compareFn), compareFn);
 }
 
 export const onGetLeagueWithPartials = (
@@ -100,10 +93,7 @@ export const onGetLeagueWithPartials = (
   const partialsByClub =
     clubsByLeague &&
     playerStats &&
-    onGetClubsLeagueWithPartial(
-      clubsByLeague as ClubsByLeagueUtils,
-      playerStats
-    );
+    onGetClubsLeagueWithPartial(clubsByLeague as ClubsByLeagueUtils, playerStats);
 
   const clubMap = partialsByClub?.reduce((map, club) => {
     map.set(String(club.club), club);
@@ -121,9 +111,7 @@ export const onGetLeagueWithPartials = (
       playersHavePlayed: players.length,
       pontos: {
         ...clubLeague.pontos,
-        rodada: club
-          ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
-          : 0,
+        rodada: club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0,
         campeonato:
           clubLeague.pontos.campeonato +
           (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0),
@@ -133,9 +121,7 @@ export const onGetLeagueWithPartials = (
         turno:
           marketStatus.rodada_atual !== 20
             ? clubLeague.pontos.turno +
-              (club
-                ? club.partial + (captain ? captain.pontuacao * 0.5 : 0)
-                : 0)
+              (club ? club.partial + (captain ? captain.pontuacao * 0.5 : 0) : 0)
             : club.partial + (captain ? captain.pontuacao * 0.5 : 0),
       },
     };

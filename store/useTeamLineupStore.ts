@@ -1,12 +1,8 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
-import { LineupPlayer, LineupPlayers } from "@/models/Formations";
-import { FullPlayer } from "@/models/Stats";
-import {
-  onAddPlayerToLineup,
-  onGetTeamPrice,
-  onRemovePlayerFromLineup,
-} from "@/utils/team";
+import { LineupPlayer, LineupPlayers } from '@/models/Formations';
+import { FullPlayer } from '@/models/Stats';
+import { onAddPlayerToLineup, onGetTeamPrice, onRemovePlayerFromLineup } from '@/utils/team';
 
 export type AddPlayerToLineupProps = {
   player: FullPlayer;
@@ -22,11 +18,7 @@ type TeamLineupStore = {
   updateCapitain: (value: number) => void;
   updatePrice: (value: number) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
-  addPlayerToLineup: ({
-    player,
-    index,
-    isReservePlayer,
-  }: AddPlayerToLineupProps) => void;
+  addPlayerToLineup: ({ player, index, isReservePlayer }: AddPlayerToLineupProps) => void;
   reset: () => void;
 };
 
@@ -38,19 +30,19 @@ const initialState = {
 
 const useTeamLineupStore = create<TeamLineupStore>((set) => ({
   ...initialState,
-  updateLineup: (lineupUpdated: LineupPlayers) => {
+  updateLineup: (lineup: LineupPlayers) => {
     set((_state) => ({
-      lineup: lineupUpdated,
+      lineup,
     }));
   },
-  updateCapitain: (newCapitain: number) => {
+  updateCapitain: (capitain: number) => {
     set((_state) => ({
-      capitain: newCapitain,
+      capitain,
     }));
   },
-  updatePrice: (priceUpdated: number) => {
+  updatePrice: (price: number) => {
     set((_state) => ({
-      price: priceUpdated,
+      price,
     }));
   },
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => {
@@ -68,23 +60,19 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
       };
     });
   },
-  addPlayerToLineup: ({
-    player,
-    index,
-    isReservePlayer,
-  }: AddPlayerToLineupProps) => {
+  addPlayerToLineup: ({ player, index, isReservePlayer }: AddPlayerToLineupProps) => {
     set((state) => {
-      const lineupUpdated = onAddPlayerToLineup({
+      const lineup = onAddPlayerToLineup({
         lineup: state.lineup as LineupPlayers,
         player,
         index,
         isReservePlayer,
       });
 
-      const priceUpdated = onGetTeamPrice(lineupUpdated.starting);
+      const priceUpdated = onGetTeamPrice(lineup.starting);
 
       return {
-        lineup: lineupUpdated,
+        lineup,
         price: priceUpdated,
       };
     });

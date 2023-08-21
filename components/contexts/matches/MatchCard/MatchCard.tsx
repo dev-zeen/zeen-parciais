@@ -1,16 +1,15 @@
-import { useCallback } from "react";
-import { Image, TouchableOpacity, useColorScheme } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useRouter } from "expo-router";
-
-import { Text, View } from "@/components/Themed";
-import Colors from "@/constants/Colors";
-import { Club } from "@/models/Club";
-import { Match } from "@/models/Matches";
-import { FullPlayer } from "@/models/Stats";
+import { Text, View } from '@/components/Themed';
+import Colors from '@/constants/Colors';
+import { Club } from '@/models/Club';
+import { Match } from '@/models/Matches';
+import { FullPlayer } from '@/models/Stats';
 
 interface MatchCardProps {
   match: Match;
@@ -32,18 +31,14 @@ export function MatchCard({
 
   const amountPlayersMyClubHomeTeam = useCallback(() => {
     if (players) {
-      return players?.filter(
-        (player) => player.clube_id === match.clube_casa_id
-      ).length;
+      return players?.filter((player) => player.clube_id === match.clube_casa_id).length;
     }
     return 0;
   }, [players, match]);
 
   const amountPlayersMyClubAwayTeam = useCallback(() => {
     if (players) {
-      return players?.filter(
-        (player) => player.clube_id === match.clube_visitante_id
-      ).length;
+      return players?.filter((player) => player.clube_id === match.clube_visitante_id).length;
     }
     return 0;
   }, [players, match]);
@@ -51,19 +46,15 @@ export function MatchCard({
   const onPressHandler = useCallback(() => {
     const payload = {
       ...match,
-      transmissao: "",
+      transmissao: '',
       home: match.clube_casa_id,
       away: match.clube_visitante_id,
     };
     router.push(`/matches/${JSON.stringify(payload)}`);
-  }, [match]);
+  }, [match, router]);
 
   return (
-    <TouchableOpacity
-      disabled={isDisabled}
-      activeOpacity={0.6}
-      onPress={onPressHandler}
-    >
+    <TouchableOpacity disabled={isDisabled} activeOpacity={0.6} onPress={onPressHandler}>
       <View className="p-2 rounded-lg">
         <Text className="font-medium text-xs text-center">
           {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
@@ -73,16 +64,15 @@ export function MatchCard({
 
         <View
           className={`flex-row py-1 px-4 justify-between ${
-            match.status_transmissao_tr === "CRIADA" && "mb-4"
+            match.status_transmissao_tr === 'CRIADA' && 'mb-4'
           }`}
           style={{
             gap: 24,
-          }}
-        >
+          }}>
           <View className="items-center justify-center" style={{ gap: 4 }}>
             <Image
               source={{
-                uri: homeClub?.escudos["60x60"],
+                uri: homeClub?.escudos['60x60'],
               }}
               className="w-12 h-12"
               alt={`Escudo do ${homeClub?.nome}`}
@@ -95,20 +85,17 @@ export function MatchCard({
             {amountPlayersMyClubHomeTeam() > 0 && (
               <View
                 style={{
-                  alignItems: "center",
-                  justifyContent: "center",
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   borderRadius: 9999,
-                  position: "absolute",
+                  position: 'absolute',
                   width: 20,
                   height: 20,
                   top: 15,
                   left: 55,
-                  backgroundColor: "#22c55e",
-                }}
-              >
-                <Text className="font-semibold text-xs">
-                  {amountPlayersMyClubHomeTeam()}
-                </Text>
+                  backgroundColor: '#22c55e',
+                }}>
+                <Text className="font-semibold text-xs">{amountPlayersMyClubHomeTeam()}</Text>
               </View>
             )}
           </View>
@@ -117,32 +104,26 @@ export function MatchCard({
             className="items-center justify-center"
             style={{
               gap: 4,
-            }}
-          >
+            }}>
             <View
               className={`flex-row justify-center items-center border rounded ${
-                colorTheme === "dark" ? "border-gray-400" : "border-gray-300"
+                colorTheme === 'dark' ? 'border-gray-400' : 'border-gray-300'
               } px-4 py-2`}
               style={{
                 gap: 8,
-              }}
-            >
+              }}>
               <Text className="font-semibold text-base">
-                {match.placar_oficial_mandante ?? "-"}
+                {match.placar_oficial_mandante ?? '-'}
               </Text>
 
               <Feather
                 name="x"
                 size={16}
-                color={
-                  colorTheme === "dark"
-                    ? Colors.light.background
-                    : Colors.dark.background
-                }
+                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
               />
 
               <Text className="font-semibold text-base ">
-                {match.placar_oficial_visitante ?? "-"}
+                {match.placar_oficial_visitante ?? '-'}
               </Text>
             </View>
 
@@ -152,7 +133,7 @@ export function MatchCard({
           <View className="justify-center items-center" style={{ gap: 4 }}>
             <Image
               source={{
-                uri: awayClub?.escudos["60x60"],
+                uri: awayClub?.escudos['60x60'],
               }}
               className="w-12 h-12"
               alt={`Escudo do ${awayClub?.nome}`}
@@ -165,20 +146,17 @@ export function MatchCard({
             {amountPlayersMyClubAwayTeam() > 0 && (
               <View
                 style={{
-                  alignItems: "center",
-                  justifyContent: "center",
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   borderRadius: 9999,
-                  position: "absolute",
+                  position: 'absolute',
                   width: 20,
                   height: 20,
                   top: 15,
                   left: -22,
-                  backgroundColor: "#22c55e",
-                }}
-              >
-                <Text className="font-semibold text-xs">
-                  {amountPlayersMyClubAwayTeam()}
-                </Text>
+                  backgroundColor: '#22c55e',
+                }}>
+                <Text className="font-semibold text-xs">{amountPlayersMyClubAwayTeam()}</Text>
               </View>
             )}
           </View>
@@ -186,11 +164,9 @@ export function MatchCard({
 
         {match.valida ? (
           <>
-            {match.status_transmissao_tr === "ENCERRADA" && (
+            {match.status_transmissao_tr === 'ENCERRADA' && (
               <View className="justify-center items-center bg-folly p-2 my-1 mx-16 rounded-lg">
-                <Text className="text-gray-50 text-xs font-semibold">
-                  Encerrado
-                </Text>
+                <Text className="text-gray-50 text-xs font-semibold">Encerrado</Text>
               </View>
             )}
           </>

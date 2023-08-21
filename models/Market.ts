@@ -1,6 +1,6 @@
-import { IClub } from "@/models/Club";
-import { PlayerStatus } from "@/models/Player";
-import { FullPlayer, IPositions } from "@/models/Stats";
+import { IClub } from '@/models/Club';
+import { PlayerStatus } from '@/models/Player';
+import { FullPlayer, IPositions } from '@/models/Stats';
 
 export interface MarketStatus {
   rodada_atual: number;

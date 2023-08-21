@@ -1,24 +1,20 @@
-import { useContext } from "react";
-import { Modal } from "react-native";
+import { useQueryClient } from '@tanstack/react-query';
+import { useContext } from 'react';
+import { Modal } from 'react-native';
+import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import WebView, { WebViewMessageEvent } from "react-native-webview";
-
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { INJECT_AUTH_LOGOUT } from "@/constants/Generic";
-import { URL_HOME } from "@/constants/Urls";
-import { AuthContext } from "@/contexts/Auth.context";
-import useTeamLineupStore from "@/store/useTeamLineupStore";
-import { useQueryClient } from "@tanstack/react-query";
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { INJECT_AUTH_LOGOUT } from '@/constants/Generic';
+import { URL_HOME } from '@/constants/Urls';
+import { AuthContext } from '@/contexts/Auth.context';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 type LogoutModalProps = {
   isVisible: boolean;
   handleLogoutSuccess: () => void;
 };
 
-export function LogoutModal({
-  isVisible,
-  handleLogoutSuccess,
-}: LogoutModalProps) {
+export function LogoutModal({ isVisible, handleLogoutSuccess }: LogoutModalProps) {
   const queryClient = useQueryClient();
 
   const resetStore = useTeamLineupStore((state) => state.reset);

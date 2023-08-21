@@ -1,17 +1,16 @@
-import { useContext, useState } from "react";
-import { Image, Modal, useColorScheme } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { useContext, useState } from 'react';
+import { Image, Modal, useColorScheme } from 'react-native';
+import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import WebView, { WebViewMessageEvent } from "react-native-webview";
-
-import enterImage from "@/assets/images/enter.png";
-import { Text, TouchableOpacity, View } from "@/components/Themed";
-import Colors from "@/constants/Colors";
-import { INJECT_AUTH_LOGIN } from "@/constants/Generic";
-import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
-import { URL_AUTH, URL_HOME } from "@/constants/Urls";
-import { AuthContext } from "@/contexts/Auth.context";
-import { Feather } from "@expo/vector-icons";
+import enterImage from '@/assets/images/enter.png';
+import { Text, TouchableOpacity, View } from '@/components/Themed';
+import Colors from '@/constants/Colors';
+import { INJECT_AUTH_LOGIN } from '@/constants/Generic';
+import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
+import { URL_AUTH, URL_HOME } from '@/constants/Urls';
+import { AuthContext } from '@/contexts/Auth.context';
 
 type LoginProps = {
   title?: string;
@@ -44,26 +43,20 @@ export function Login({ title }: LoginProps) {
             className="flex-row mt-8 mx-8 p-4"
             style={{
               gap: 4,
-            }}
-          >
+            }}>
             <Feather name="info" size={24} color={Colors.light.tint} />
             <Text className="text-sm font-semibold text-center">{title}</Text>
           </View>
         )}
 
-        <Image
-          source={enterImage}
-          className="w-56 h-56"
-          alt={`Imagem de Login`}
-        />
+        <Image source={enterImage} className="w-56 h-56" alt={`Imagem de Login`} />
         <TouchableOpacity
           onPress={handleGetLoginPage}
           activeOpacity={0.6}
           className="flex-row items-center justify-center px-4 py-3 bg-blue-500 rounded-lg"
           style={{
             gap: 8,
-          }}
-        >
+          }}>
           <Feather name="log-in" size={24} color={Colors.light.background} />
           <Text className="text-white"> Entrar no Cartola </Text>
         </TouchableOpacity>
@@ -77,35 +70,30 @@ export function Login({ title }: LoginProps) {
             visible={showModalAuth}
             style={{
               flex: 1,
-            }}
-          >
+            }}>
             <TouchableOpacity
               className="rounded-full p-1"
               onPress={() => {
                 setShowModalAuth(false);
               }}
               style={{
-                position: "absolute",
+                position: 'absolute',
                 top: 30,
                 left: 10,
                 zIndex: 9999,
-                backgroundColor:
-                  colorTheme === "dark" ? Colors.light.tint : Colors.dark.tint,
-              }}
-            >
+                backgroundColor: colorTheme === 'dark' ? Colors.light.tint : Colors.dark.tint,
+              }}>
               <Feather
                 name="x"
                 size={30}
-                color={
-                  colorTheme === "dark" ? Colors.dark.tint : Colors.light.tint
-                }
+                color={colorTheme === 'dark' ? Colors.dark.tint : Colors.light.tint}
               />
             </TouchableOpacity>
 
             <WebView
               style={{
-                justifyContent: "center",
-                alignItems: "center",
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
               source={{
                 uri: URL_AUTH,

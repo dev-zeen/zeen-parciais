@@ -1,11 +1,10 @@
-import { ReactNode } from "react";
-import ErrorBoundary from "react-native-error-boundary";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+import { ReactNode } from 'react';
+import ErrorBoundary from 'react-native-error-boundary';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AxiosError } from "axios";
-
-import { ErrorBoundaryComponent } from "@/components/structure/ErrorBoundary";
-import { AuthContextProvider } from "@/contexts/Auth.context";
+import { ErrorBoundaryComponent } from '@/components/structure/ErrorBoundary';
+import { AuthContextProvider } from '@/contexts/Auth.context';
 
 type ProvidersProps = {
   children: ReactNode;
@@ -29,12 +28,9 @@ export function Providers({ children }: ProvidersProps): ReactNode {
           error={props.error as AxiosError<Error>}
           resetError={props.resetError}
         />
-      )}
-    >
+      )}>
       <AuthContextProvider>
-        <QueryClientProvider client={queryClient}>
-          {children}
-        </QueryClientProvider>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       </AuthContextProvider>
     </ErrorBoundary>
   );

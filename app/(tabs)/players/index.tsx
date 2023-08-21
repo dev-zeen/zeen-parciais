@@ -1,41 +1,40 @@
-import { useCallback, useContext, useEffect, useState } from "react";
+import { Feather } from '@expo/vector-icons';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   FlatList,
   ListRenderItemInfo,
   RefreshControl,
   TextInput,
   useColorScheme,
-} from "react-native";
+} from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-
-import { onGetPlayersPlayedMatch } from "@/app/(tabs)/players/players.helper";
-import { Text, View } from "@/components/Themed";
-import { PlayerCard } from "@/components/contexts/players/PlayerCard/PlayerCard";
-import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
-import { Loading } from "@/components/structure/Loading";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import Colors from "@/constants/Colors";
-import { APPRECIATIONS, CURRENT_STATS } from "@/constants/Keys";
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { AuthContext } from "@/contexts/Auth.context";
-import { Appreciations } from "@/models/Player";
-import { Player, PlayerStats } from "@/models/Stats";
-import { useGetMarketStatus } from "@/queries/market.query";
-import { useGetAppreciations } from "@/queries/players.query";
-import { useGetScoredPlayers } from "@/queries/stats.query";
-import { GRAY_OPACITY } from "@/styles/colors";
-import { onGetFromStorage } from "@/utils/asyncStorage";
-import { normalizeQuery } from "@/utils/format";
+import { onGetPlayersPlayedMatch } from '@/app/(tabs)/players/players.helper';
+import { Text, View } from '@/components/Themed';
+import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
+import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
+import { Loading } from '@/components/structure/Loading';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import Colors from '@/constants/Colors';
+import { APPRECIATIONS, CURRENT_STATS } from '@/constants/Keys';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { AuthContext } from '@/contexts/Auth.context';
+import { Appreciations } from '@/models/Player';
+import { Player, PlayerStats } from '@/models/Stats';
+import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
+import { useGetAppreciations } from '@/queries/players.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import { GRAY_OPACITY } from '@/styles/colors';
+import { onGetFromStorage } from '@/utils/asyncStorage';
+import { normalizeQuery } from '@/utils/format';
 
 export default () => {
   const colorTheme = useColorScheme();
 
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
-  const [currentAppreciations, setCurrentAppreciations] =
-    useState<Appreciations>();
+  const [currentAppreciations, setCurrentAppreciations] = useState<Appreciations>();
 
   const { data: marketStatus } = useGetMarketStatus();
+  const { data: market } = useGetMarket();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -44,8 +43,7 @@ export default () => {
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
-  const isMarketClose =
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const {
     data: playerStats,
@@ -53,30 +51,27 @@ export default () => {
     refetch: onRefetchPlayersStats,
   } = useGetScoredPlayers(isMarketClose);
 
-  const { data: appreciations, refetch: onRefetchAppreciations } =
-    useGetAppreciations(!!allowRequest);
+  const { data: appreciations, refetch: onRefetchAppreciations } = useGetAppreciations(
+    !!allowRequest
+  );
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredDataSource, setFilteredDataSource] = useState<
-    Player[] | undefined
-  >();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredDataSource, setFilteredDataSource] = useState<Player[] | undefined>();
 
   const onSearchFilter = useCallback(
     async (text: string) => {
       if (text.length > 2) {
-        const newData = onGetPlayersPlayedMatch(
-          currentStats as PlayerStats
-        )?.filter((item: Player) => {
-          const itemData = normalizeQuery(item.apelido);
-          const textData = normalizeQuery(text);
-          return itemData.includes(textData);
-        });
+        const newData = onGetPlayersPlayedMatch(currentStats as PlayerStats)?.filter(
+          (item: Player) => {
+            const itemData = normalizeQuery(item.apelido);
+            const textData = normalizeQuery(text);
+            return itemData.includes(textData);
+          }
+        );
         setFilteredDataSource(newData);
         setSearchQuery(text);
       } else {
-        const playersPlayedMatch = onGetPlayersPlayedMatch(
-          currentStats as PlayerStats
-        );
+        const playersPlayedMatch = onGetPlayersPlayedMatch(currentStats as PlayerStats);
         setFilteredDataSource(playersPlayedMatch);
         setSearchQuery(text);
       }
@@ -87,17 +82,28 @@ export default () => {
   const onRefetch = useCallback(async () => {
     !!allowRequest && (await onRefetchAppreciations());
     await onRefetchPlayersStats();
-  }, [allowRequest]);
+  }, [allowRequest, onRefetchAppreciations, onRefetchPlayersStats]);
 
   useEffect(() => {
     onGetFromStorage<string>(CURRENT_STATS).then((res) => {
       if (res) {
         const statsFormated = JSON.parse(res);
+
         const data = onGetPlayersPlayedMatch(statsFormated);
-        setFilteredDataSource(data);
+        const statsMarketNotClosed: Player[] = data.map((item) => {
+          return {
+            ...item,
+            pontuacao: market?.atletas.find((player) => String(player.atleta_id) === item.id)
+              ?.pontos_num as number,
+          };
+        });
+        setFilteredDataSource(isMarketClose ? data : statsMarketNotClosed);
         setCurrentStats(statsFormated);
       }
     });
+  }, [playerStats, isMarketClose, market]);
+
+  useEffect(() => {
     if (
       marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO ||
       marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_ATUALIZACAO
@@ -108,7 +114,7 @@ export default () => {
         }
       });
     }
-  }, [appreciations, playerStats]);
+  }, [marketStatus, appreciations]);
 
   const isRefetching = isRefetchingPlayersStats;
 
@@ -121,10 +127,7 @@ export default () => {
           player={player}
           club={(currentStats as PlayerStats)?.clubes[String(player.clube_id)]}
           position={(currentStats as PlayerStats)?.posicoes[player.posicao_id]}
-          appreciation={
-            (currentAppreciations as Appreciations)?.atletas?.[player.id]
-              ?.variacao_num
-          }
+          appreciation={(currentAppreciations as Appreciations)?.atletas?.[player.id]?.variacao_num}
         />
       );
     },
@@ -141,21 +144,17 @@ export default () => {
           className="flex-row py-4 px-8 rounded-lg items-center justify-center m-2"
           style={{
             gap: 8,
-          }}
-        >
+          }}>
           <Feather name="info" size={24} color={Colors.light.tint} />
           <Text className="text-sm font-semibold text-center">
-            Os jogadores serão exibidos assim que obtiverem suas pontuações
-            durante os jogos.
+            Os jogadores serão exibidos assim que obtiverem suas pontuações durante os jogos.
           </Text>
         </View>
       </SafeAreaViewContainer>
     );
   }
 
-  const isLoading = isMarketClose
-    ? !playerStats || !marketStatus
-    : !currentStats;
+  const isLoading = isMarketClose ? !playerStats || !marketStatus : !currentStats || !market;
 
   if (isLoading) {
     return <Loading />;
@@ -167,10 +166,8 @@ export default () => {
         className="flex-1 justify-center rounded-lg mx-2"
         style={{
           gap: 8,
-          backgroundColor:
-            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
-        }}
-      >
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        }}>
         <TextInput
           onChangeText={onSearchFilter}
           value={searchQuery}
@@ -181,9 +178,7 @@ export default () => {
         />
 
         <FlatList
-          refreshControl={
-            <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
-          }
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
           data={filteredDataSource}
           keyExtractor={keyExtractor}
           renderItem={renderItem}
@@ -191,8 +186,7 @@ export default () => {
           maxToRenderPerBatch={25}
           contentContainerStyle={{
             paddingVertical: 4,
-            backgroundColor:
-              colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
+            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
             gap: 4,
           }}
         />

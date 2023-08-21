@@ -1,7 +1,7 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from 'expo-router';
 
-import { Text, View } from "@/components/Themed";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
+import { Text, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 
 export default () => {
   const { id } = useLocalSearchParams();

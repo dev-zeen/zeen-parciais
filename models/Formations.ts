@@ -1,4 +1,4 @@
-import { FullPlayer, Player } from "@/models/Stats";
+import { FullPlayer, Player } from '@/models/Stats';
 
 export interface LineupPlayer extends Player, FullPlayer {}
 

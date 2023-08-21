@@ -1,4 +1,4 @@
-import { QueryObserverOptions } from "@tanstack/react-query";
+import { QueryObserverOptions } from '@tanstack/react-query';
 
 import {
   GET_CLUB_BY_ID,
@@ -8,9 +8,9 @@ import {
   GET_MATCH_SUBSTITUTIONS_BY_ROUND,
   GET_MY_CLUB,
   SAVE_TEAM,
-} from "@/constants/Endpoits";
-import { FullClubInfo, Substitutions, TeamHistoryRound } from "@/models/Club";
-import { useFetch, usePost, usePrefetch } from "@/utils/reactQuery";
+} from '@/constants/Endpoits';
+import { FullClubInfo, Substitutions, TeamHistoryRound } from '@/models/Club';
+import { useFetch, usePost, usePrefetch } from '@/utils/reactQuery';
 
 export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
@@ -22,17 +22,13 @@ export const usePrefetchMyClub = (allowRequest?: boolean) =>
     enabled: !!allowRequest,
   });
 
-export const useGetClub = (
-  id?: number | string,
-  round?: number,
-  config?: QueryObserverOptions
-) => {
-  const url = GET_CLUB_BY_ID.replace(":id", String(id));
+export const useGetClub = (id?: number | string, round?: number, config?: QueryObserverOptions) => {
+  const url = GET_CLUB_BY_ID.replace(':id', String(id));
 
-  const urlWithRound = GET_CLUB_BY_ID_AND_ROUND.replace(
-    ":id",
-    String(id)
-  ).replace(":round", String(round));
+  const urlWithRound = GET_CLUB_BY_ID_AND_ROUND.replace(':id', String(id)).replace(
+    ':round',
+    String(round)
+  );
 
   return useFetch<FullClubInfo>(round ? urlWithRound : url, undefined, {
     enabled: !!id,
@@ -61,17 +57,13 @@ interface SubstitutionsParams {
   round?: number;
   requestWithRound?: boolean;
 }
-export const useGetMatchSubstitutions = ({
-  id,
-  round,
-  requestWithRound,
-}: SubstitutionsParams) => {
-  const url = GET_MATCH_SUBSTITUTIONS.replace(":clubId", String(id));
+export const useGetMatchSubstitutions = ({ id, round, requestWithRound }: SubstitutionsParams) => {
+  const url = GET_MATCH_SUBSTITUTIONS.replace(':clubId', String(id));
 
-  const urlWithRound = GET_MATCH_SUBSTITUTIONS_BY_ROUND.replace(
-    ":clubId",
-    String(id)
-  ).replace(":round", String(round));
+  const urlWithRound = GET_MATCH_SUBSTITUTIONS_BY_ROUND.replace(':clubId', String(id)).replace(
+    ':round',
+    String(round)
+  );
 
   return useFetch<Substitutions[]>(round ? urlWithRound : url, undefined, {
     enabled: requestWithRound ? !!id && !!round : !!id,

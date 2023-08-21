@@ -1,10 +1,9 @@
-import { useCallback } from "react";
-import { Image, TouchableOpacity } from "react-native";
+import { useRouter } from 'expo-router';
+import { useCallback } from 'react';
+import { Image, TouchableOpacity } from 'react-native';
 
-import { useRouter } from "expo-router";
-
-import { Text, View } from "@/components/Themed";
-import { LeagueUserDetails } from "@/models/Leagues";
+import { Text, View } from '@/components/Themed';
+import { LeagueUserDetails } from '@/models/Leagues';
 
 interface CardLeagueStatsProps {
   league: LeagueUserDetails;
@@ -14,18 +13,16 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
   const router = useRouter();
 
   const typeLeague = {
-    A: "Aberta",
-    M: "Moderada",
-    F: "Fechada",
+    A: 'Aberta',
+    M: 'Moderada',
+    F: 'Fechada',
   };
 
-  const totalClubs = new Intl.NumberFormat("pt-BR").format(
-    league.total_times_liga
-  );
+  const totalClubs = new Intl.NumberFormat('pt-BR').format(league.total_times_liga);
 
   const onPressHandler = useCallback(() => {
     router.push(`/leagues/${league.slug}`);
-  }, []);
+  }, [league.slug, router]);
 
   return (
     <View className="rounded-lg mx-2 px-2">

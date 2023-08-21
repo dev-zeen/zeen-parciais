@@ -1,31 +1,30 @@
-import { useEffect, useState } from "react";
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useEffect, useState } from 'react';
 
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
-import { Text, View } from "@/components/Themed";
-import { Loading } from "@/components/structure/Loading";
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { useGetMarketStatus } from "@/queries/market.query";
+import { Text, View } from '@/components/Themed';
+import { Loading } from '@/components/structure/Loading';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { useGetMarketStatus } from '@/queries/market.query';
 
 export function MarketStatusCard() {
   const { data: marketStatus } = useGetMarketStatus();
 
   const MARKET_STATUS_COLOR_NAMED = {
-    1: "bg-green-500",
-    2: "",
-    3: "bg-yellow-500",
-    4: "bg-orange-500",
+    1: 'bg-green-500',
+    2: '',
+    3: 'bg-yellow-500',
+    4: 'bg-orange-500',
   };
 
   const MARKET_STATUS_NAMED = {
-    1: "Mercado Aberto",
-    2: "Mercado Fechado",
-    3: "Mercado em Atualização",
-    4: "Mercado em Manutenção",
+    1: 'Mercado Aberto',
+    2: 'Mercado Fechado',
+    3: 'Mercado em Atualização',
+    4: 'Mercado em Manutenção',
   };
 
-  const [marketClosingDate, setMarketClosingDate] = useState<string>("");
+  const [marketClosingDate, setMarketClosingDate] = useState<string>('');
 
   useEffect(() => {
     if (marketStatus) {
@@ -68,9 +67,7 @@ export function MarketStatusCard() {
           <View
             className={`relative inline-flex rounded-full h-3.5 w-3.5 ${MARKET_STATUS_COLOR_NAMED[1]}`}
           />
-          <Text className="text-xs font-semibold">
-            Atualizado em tempo real
-          </Text>
+          <Text className="text-xs font-semibold">Atualização em tempo real</Text>
         </View>
       )}
     </View>

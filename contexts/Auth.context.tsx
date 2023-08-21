@@ -1,8 +1,7 @@
-import { ReactNode, createContext, useEffect, useState } from "react";
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { ReactNode, createContext, useEffect, useState } from 'react';
 
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-
-import { ACCESS_TOKEN_KEY_STORAGE } from "@/constants/Keys";
+import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 
 type AuthContextProps = {
   isAutheticated: boolean;
@@ -10,15 +9,9 @@ type AuthContextProps = {
   handleUnautenticated: () => void;
 };
 
-export const AuthContext = createContext<AuthContextProps>(
-  {} as AuthContextProps
-);
+export const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
-export function AuthContextProvider({
-  children,
-}: {
-  children: ReactNode;
-}): ReactNode {
+export function AuthContextProvider({ children }: { children: ReactNode }): ReactNode {
   const { getItem, removeItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
 
   const [isAutheticated, setIsAutheticated] = useState(false);
@@ -45,7 +38,7 @@ export function AuthContextProvider({
     if (!isAutheticated) {
       handleGetToken();
     }
-  }, [isAutheticated]);
+  }, [handleGetToken, isAutheticated]);
 
   return (
     <AuthContext.Provider
@@ -53,8 +46,7 @@ export function AuthContextProvider({
         isAutheticated,
         handleSuccessAuth,
         handleUnautenticated,
-      }}
-    >
+      }}>
       {children}
     </AuthContext.Provider>
   );

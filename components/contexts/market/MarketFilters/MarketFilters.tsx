@@ -1,19 +1,18 @@
-import { useCallback, useMemo, useState } from "react";
-import { Modal } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { useCallback, useMemo, useState } from 'react';
+import { Modal } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-
-import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { FullPlayer } from "@/models/Stats";
-import { useGetMarket } from "@/queries/market.query";
-
-import { FilterMarketByTeam } from "@/components/contexts/market/MarketFilters/FilterMarketByTeam";
 import {
   FilterMarketByStatus,
   PlayerStatusFilter,
-} from "./FilterMarketByStatus/FilterMarketByStatus";
-import { OrderMarket, OrderSelectedProps } from "./OrderMarket/OrderMarket";
-import { sortedOptions, statusPlayerOptions } from "./filters.helper";
+} from './FilterMarketByStatus/FilterMarketByStatus';
+import { OrderMarket, OrderSelectedProps } from './OrderMarket/OrderMarket';
+import { sortedOptions, statusPlayerOptions } from './filters.helper';
+
+import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { FilterMarketByTeam } from '@/components/contexts/market/MarketFilters/FilterMarketByTeam';
+import { FullPlayer } from '@/models/Stats';
+import { useGetMarket } from '@/queries/market.query';
 
 type MarketFilterProps = {
   applyFilter: (players: FullPlayer[]) => void;
@@ -21,40 +20,18 @@ type MarketFilterProps = {
   maximumPrice?: number;
 };
 
-export function MarketFilters({
-  applyFilter,
-  handleIsLoading,
-  maximumPrice,
-}: MarketFilterProps) {
+export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: MarketFilterProps) {
   const { data: market } = useGetMarket();
 
   const [showOrderMarket, setShowOrderMarket] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<OrderSelectedProps>(
-    sortedOptions[0]
-  );
+  const [selectedOrder, setSelectedOrder] = useState<OrderSelectedProps>(sortedOptions[0]);
 
-  const [showFilterByStatusMarket, setShowFilterByStatusMarket] =
-    useState(false);
+  const [showFilterByStatusMarket, setShowFilterByStatusMarket] = useState(false);
   const [selectedFilterByStatusMarket, setSelectedFilterByStatusMarket] =
     useState<PlayerStatusFilter[]>(statusPlayerOptions);
 
   const [showFilterMarketByTeam, setShowFilterMarketByTeam] = useState(false);
   const [teamsSelectedFilter, setTeamsSelectedFilter] = useState<number[]>([]);
-
-  const defaultFilters = useCallback(() => {
-    handleIsLoading();
-    setSelectedOrder(sortedOptions[0]);
-    setSelectedFilterByStatusMarket(statusPlayerOptions);
-    setTeamsSelectedFilter([]);
-
-    const data = onGetPlayersFiltered(
-      sortedOptions[0],
-      statusPlayerOptions,
-      []
-    );
-    applyFilter(data);
-    setShowFilterMarketByTeam(false);
-  }, []);
 
   const filterPlayers = useCallback(
     (players: FullPlayer[], filters: PlayerStatusFilter[], teams: number[]) => {
@@ -85,29 +62,41 @@ export function MarketFilters({
         selectedTeams
       );
       const sortedData = maximumPrice
-        ? onSort(filteredPlayers as FullPlayer[]).filter(
-            (item) => item.preco_num < maximumPrice
-          )
+        ? onSort(filteredPlayers as FullPlayer[]).filter((item) => item.preco_num < maximumPrice)
         : onSort(filteredPlayers as FullPlayer[]);
       return sortedData;
     },
-    [market, selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
+    [filterPlayers, market?.atletas, maximumPrice]
   );
+
+  const defaultFilters = useCallback(() => {
+    handleIsLoading();
+    setSelectedOrder(sortedOptions[0]);
+    setSelectedFilterByStatusMarket(statusPlayerOptions);
+    setTeamsSelectedFilter([]);
+
+    const data = onGetPlayersFiltered(sortedOptions[0], statusPlayerOptions, []);
+    applyFilter(data);
+    setShowFilterMarketByTeam(false);
+  }, [applyFilter, handleIsLoading, onGetPlayersFiltered]);
 
   const applyOrderMarket = useCallback(
     (option: OrderSelectedProps) => {
       if (option.id === selectedOrder.id) return;
       handleIsLoading();
       setSelectedOrder(option);
-      const data = onGetPlayersFiltered(
-        option,
-        selectedFilterByStatusMarket,
-        teamsSelectedFilter
-      );
+      const data = onGetPlayersFiltered(option, selectedFilterByStatusMarket, teamsSelectedFilter);
       applyFilter(data);
       setShowOrderMarket(false);
     },
-    [selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
+    [
+      selectedOrder,
+      handleIsLoading,
+      onGetPlayersFiltered,
+      selectedFilterByStatusMarket,
+      teamsSelectedFilter,
+      applyFilter,
+    ]
   );
 
   const applyFilterByStatus = useCallback(
@@ -116,14 +105,10 @@ export function MarketFilters({
       setShowOrderMarket(false);
       setSelectedFilterByStatusMarket(filters);
 
-      const data = onGetPlayersFiltered(
-        selectedOrder,
-        filters,
-        teamsSelectedFilter
-      );
+      const data = onGetPlayersFiltered(selectedOrder, filters, teamsSelectedFilter);
       applyFilter(data);
     },
-    [selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
+    [handleIsLoading, onGetPlayersFiltered, selectedOrder, teamsSelectedFilter, applyFilter]
   );
 
   const applyFilterByTeams = useCallback(
@@ -137,7 +122,13 @@ export function MarketFilters({
       );
       applyFilter(data);
     },
-    [selectedOrder, selectedFilterByStatusMarket, teamsSelectedFilter]
+    [
+      handleIsLoading,
+      onGetPlayersFiltered,
+      selectedOrder,
+      selectedFilterByStatusMarket,
+      applyFilter,
+    ]
   );
 
   const filtersSelecteds = useMemo(
@@ -156,13 +147,11 @@ export function MarketFilters({
   const titleFilterByTeams = useMemo(
     () =>
       teamsSelectedFilter.length > 1
-        ? `${market?.clubes[teamsSelectedFilter[0]].nome} + ${
-            teamsSelectedFilter.length - 1
-          }`
+        ? `${market?.clubes[teamsSelectedFilter[0]].nome} + ${teamsSelectedFilter.length - 1}`
         : teamsSelectedFilter.length === 1
         ? market?.clubes[teamsSelectedFilter[0]].nome
-        : "Times",
-    [teamsSelectedFilter]
+        : 'Times',
+    [market, teamsSelectedFilter]
   );
 
   return (
@@ -173,8 +162,7 @@ export function MarketFilters({
           className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
           style={{
             gap: 8,
-          }}
-        >
+          }}>
           <Feather name="bar-chart" color="#9ca3af" size={20} />
           <Text className="text-xs font-semibold">{selectedOrder?.title}</Text>
         </TouchableOpacity>
@@ -184,8 +172,7 @@ export function MarketFilters({
           style={{
             gap: 8,
           }}
-          onPress={() => setShowFilterByStatusMarket(true)}
-        >
+          onPress={() => setShowFilterByStatusMarket(true)}>
           <Feather name="user-check" color="#9ca3af" size={20} />
           <Text className="text-xs font-semibold" numberOfLines={1}>
             {titleFilterByStatus}
@@ -197,8 +184,7 @@ export function MarketFilters({
           style={{
             gap: 8,
           }}
-          onPress={() => setShowFilterMarketByTeam(true)}
-        >
+          onPress={() => setShowFilterMarketByTeam(true)}>
           <Feather name="filter" color="#9ca3af" size={20} />
           <Text className="text-xs font-semibold">{titleFilterByTeams}</Text>
         </TouchableOpacity>
@@ -209,8 +195,7 @@ export function MarketFilters({
           visible={showOrderMarket}
           animationType="fade"
           transparent
-          onRequestClose={() => setShowOrderMarket(false)}
-        >
+          onRequestClose={() => setShowOrderMarket(false)}>
           <OrderMarket
             currentOrder={selectedOrder as OrderSelectedProps}
             applyOrderMarket={applyOrderMarket}
@@ -224,8 +209,7 @@ export function MarketFilters({
           visible={showFilterByStatusMarket}
           animationType="fade"
           transparent
-          onRequestClose={() => setShowFilterByStatusMarket(false)}
-        >
+          onRequestClose={() => setShowFilterByStatusMarket(false)}>
           <FilterMarketByStatus
             statusSelecteds={selectedFilterByStatusMarket}
             applyFilter={applyFilterByStatus}
@@ -239,8 +223,7 @@ export function MarketFilters({
           visible={showFilterMarketByTeam}
           animationType="fade"
           transparent
-          onRequestClose={() => setShowFilterMarketByTeam(false)}
-        >
+          onRequestClose={() => setShowFilterMarketByTeam(false)}>
           <FilterMarketByTeam
             applyFilter={applyFilterByTeams}
             handleClose={() => setShowFilterMarketByTeam(false)}

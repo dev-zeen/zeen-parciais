@@ -1,10 +1,8 @@
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator } from 'react-native';
 
-import { View } from "@/components/Themed";
+import { View } from '@/components/Themed';
 
-type LoadingProps = {};
-
-export function Loading({}: LoadingProps) {
+export function Loading() {
   return (
     <View className="flex-1 items-center justify-center">
       <ActivityIndicator />

@@ -1,1 +1,1 @@
-export { LeagueCard } from "./LeagueCard";
+export { LeagueCard } from './LeagueCard';

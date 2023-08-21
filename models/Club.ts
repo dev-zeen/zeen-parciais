@@ -1,4 +1,4 @@
-import { FullPlayer } from "@/models/Stats";
+import { FullPlayer } from '@/models/Stats';
 
 interface IEmblem {
   [key: string]: string;

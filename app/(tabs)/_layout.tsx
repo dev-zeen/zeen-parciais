@@ -1,17 +1,13 @@
-import { useColorScheme } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
+import { useColorScheme } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-
-import Colors from "@/constants/Colors";
+import Colors from '@/constants/Colors';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof Feather>["name"];
-  color: string;
-}) {
+function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name']; color: string }) {
   return <Feather size={24} style={{ marginBottom: -3 }} {...props} />;
 }
 
@@ -21,13 +17,12 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-      }}
-    >
+        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+      }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: "Início",
+          title: 'Início',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           // headerRight: () => (
@@ -49,8 +44,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="team"
         options={{
-          tabBarLabel: "Time",
-          headerTitle: "Time",
+          tabBarLabel: 'Time',
+          headerTitle: 'Time',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="shield" color={color} />,
         }}
@@ -58,19 +53,17 @@ export default function TabLayout() {
       <Tabs.Screen
         name="leagues"
         options={{
-          tabBarLabel: "Ligas",
-          headerTitle: "Ligas",
+          tabBarLabel: 'Ligas',
+          headerTitle: 'Ligas',
           headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="bar-chart-2" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
         }}
       />
       <Tabs.Screen
         name="players"
         options={{
-          tabBarLabel: "Jogadores",
-          headerTitle: "Jogadores",
+          tabBarLabel: 'Jogadores',
+          headerTitle: 'Jogadores',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="users" color={color} />,
         }}
@@ -78,7 +71,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="matches"
         options={{
-          tabBarLabel: "Partidas",
+          tabBarLabel: 'Partidas',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="tv" color={color} />,
         }}
@@ -86,7 +79,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile/[id]"
         options={{
-          tabBarLabel: "Perfil",
+          tabBarLabel: 'Perfil',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
         }}

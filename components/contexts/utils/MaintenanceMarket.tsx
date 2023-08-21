@@ -1,11 +1,10 @@
-import { Image, useColorScheme } from "react-native";
+import { Image, useColorScheme } from 'react-native';
 
-import maintenanceImage from "@/assets/images/manutencao.png";
-
-import { Text, View } from "@/components/Themed";
-import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import Colors from "@/constants/Colors";
+import maintenanceImage from '@/assets/images/manutencao.png';
+import { Text, View } from '@/components/Themed';
+import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import Colors from '@/constants/Colors';
 
 export function MaintenanceMarket() {
   const colorTheme = useColorScheme();
@@ -15,18 +14,15 @@ export function MaintenanceMarket() {
         className="mx-2 rounded-lg"
         style={{
           gap: 8,
-          backgroundColor:
-            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
-        }}
-      >
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        }}>
         <MarketStatusCard />
 
         <View
           className="items-center justify-center p-4 rounded-lg"
           style={{
             gap: 16,
-          }}
-        >
+          }}>
           <Text className="font-semibold text-sm">Mercado em Manutenção</Text>
           <Image
             source={maintenanceImage}

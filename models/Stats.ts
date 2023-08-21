@@ -1,4 +1,4 @@
-import { IClub } from "@/models/Club";
+import { IClub } from '@/models/Club';
 
 export interface Position {
   id: number;
@@ -18,7 +18,7 @@ export interface Player {
   pontuacao: number;
   posicao_id: number;
   clube_id: number;
-  entrou_em_campo: boolean;
+  entrou_em_campo?: boolean;
 }
 
 export interface IPlayerStats {
@@ -49,6 +49,7 @@ export interface FullPlayer {
   scout?: IScout;
   apelido: string;
   apelido_abreviado: string;
+  entrou_em_campo?: boolean;
   nome: string;
   foto: string;
   posicao_id: number;

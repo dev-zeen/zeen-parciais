@@ -1,8 +1,8 @@
-import { GET_SCORED_PLAYERS } from "@/constants/Endpoits";
-import { CURRENT_STATS } from "@/constants/Keys";
-import { Player, PlayerStats } from "@/models/Stats";
-import { onSaveStorage } from "@/utils/asyncStorage";
-import { useFetch } from "@/utils/reactQuery";
+import { GET_SCORED_PLAYERS } from '@/constants/Endpoits';
+import { CURRENT_STATS } from '@/constants/Keys';
+import { Player, PlayerStats } from '@/models/Stats';
+import { onSaveStorage } from '@/utils/asyncStorage';
+import { useFetch } from '@/utils/reactQuery';
 
 export const useGetScoredPlayers = (isMarketClose?: boolean) =>
   useFetch<PlayerStats>(GET_SCORED_PLAYERS, undefined, {

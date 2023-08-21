@@ -1,39 +1,28 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import {
-  FlatList,
-  Image,
-  ListRenderItemInfo,
-  RefreshControl,
-  useColorScheme,
-} from "react-native";
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
-import { useAsyncStorage } from "@react-native-async-storage/async-storage";
-import { Redirect, useLocalSearchParams } from "expo-router";
+import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from './leagues.helper';
 
-import { Text, View } from "@/components/Themed";
-import { ClubCard } from "@/components/contexts/leagues/club/ClubCard";
-import { DialogComponent } from "@/components/structure/Dialog";
-import { Loading } from "@/components/structure/Loading";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { ITabs, Tabs } from "@/components/structure/Tabs";
-import Colors from "@/constants/Colors";
-import { CLUBS_BY_LEAGUE_KEY_STORAGE } from "@/constants/Keys";
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { AuthContext } from "@/contexts/Auth.context";
-import { League, TeamLeague } from "@/models/Leagues";
-import { MarketStatus } from "@/models/Market";
-import { PlayerStats } from "@/models/Stats";
-import { useGetClubsByLeagueId, useGetLeague } from "@/queries/leagues.query";
-import { useGetMarketStatus } from "@/queries/market.query";
-import { useGetScoredPlayers } from "@/queries/stats.query";
-import theme from "@/styles/theme";
-import { ClubsByLeagueUtils } from "@/utils/partials";
-
-import {
-  OrderByOptions,
-  mergeSort,
-  onGetLeagueWithPartials,
-} from "./leagues.helper";
+import { Text, View } from '@/components/Themed';
+import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
+import { DialogComponent } from '@/components/structure/Dialog';
+import { Loading } from '@/components/structure/Loading';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { ITabs, Tabs } from '@/components/structure/Tabs';
+import Colors from '@/constants/Colors';
+import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { AuthContext } from '@/contexts/Auth.context';
+import { League, TeamLeague } from '@/models/Leagues';
+import { MarketStatus } from '@/models/Market';
+import { PlayerStats } from '@/models/Stats';
+import { useGetClubsByLeagueId, useGetLeague } from '@/queries/leagues.query';
+import { useGetMarketStatus } from '@/queries/market.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import theme from '@/styles/theme';
+import { ClubsByLeagueUtils } from '@/utils/partials';
 
 export interface ClubByLeague extends TeamLeague {
   playersHavePlayed?: number;
@@ -48,13 +37,12 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const isMarketClose =
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
-  const { data: playerStats, refetch: onRefetchStats } =
-    useGetScoredPlayers(isMarketClose);
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
+
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
 
   const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
@@ -72,13 +60,11 @@ export default () => {
 
   const isRefetching = isRefetchingLeague;
 
-  const { isLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
+  const { data: clubsByLeague, isInitialLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
     league?.liga.liga_id
   );
 
-  const { getItem } = useAsyncStorage(
-    CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`)
-  );
+  const { getItem } = useAsyncStorage(CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`));
 
   const handleConfirmDialog = () => {
     setShowModalPublicLeague(false);
@@ -87,7 +73,7 @@ export default () => {
   const onGetClubsByLeagueFromStorage = useCallback(async () => {
     const data = await getItem();
     return data;
-  }, [league]);
+  }, [getItem]);
 
   const handleOrderByPatrimony = useCallback(() => {
     const newOrderBy =
@@ -102,13 +88,10 @@ export default () => {
   const handleSortClubs = useCallback(
     async (sortBy: string) => {
       const clubsByLeague: ClubsByLeagueUtils | undefined =
-        await onGetClubsByLeagueFromStorage().then((data) =>
-          data ? JSON.parse(data) : ""
-        );
+        await onGetClubsByLeagueFromStorage().then((data) => (data ? JSON.parse(data) : ''));
 
       const compareFn = (a: ClubByLeague, b: ClubByLeague) =>
-        ((b.pontos as any)[sortBy] as number) -
-        ((a.pontos as any)[sortBy] as number);
+        ((b.pontos as any)[sortBy] as number) - ((a.pontos as any)[sortBy] as number);
 
       if (isMarketClose && clubsByLeague) {
         const leagueWithPartials = onGetLeagueWithPartials(
@@ -124,14 +107,13 @@ export default () => {
         setClubs(clubByLeagues);
       }
     },
-    [league]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onGetClubsByLeagueFromStorage, clubsByLeague, isMarketClose, league, playerStats, marketStatus]
   );
 
   const handleOnPressOrderBy = useCallback(
     async (sortProp: string) => {
-      if (sortProp === orderBy) return;
       setOrderBy(sortProp as OrderByOptions);
-
       if (sortProp === OrderByOptions.PATRIMONIO) {
         const newOrderByPatrimony = handleOrderByPatrimony();
         setClubs(newOrderByPatrimony);
@@ -140,7 +122,7 @@ export default () => {
 
       await handleSortClubs(sortProp);
     },
-    [league, orderBy]
+    [handleOrderByPatrimony, handleSortClubs]
   );
 
   useEffect(() => {
@@ -149,7 +131,7 @@ export default () => {
       return;
     }
     handleSortClubs(orderBy);
-  }, [league]);
+  }, [handleOrderByPatrimony, handleSortClubs, league, orderBy]);
 
   useEffect(() => {
     if (league && !league?.liga.time_dono_id) {
@@ -161,47 +143,51 @@ export default () => {
     () => [
       {
         id: 1,
-        title: "Rodada",
+        title: 'Rodada',
         onPress() {
           const sortProp = OrderByOptions.RODADA;
+          if (sortProp === orderBy) return;
           handleOnPressOrderBy(sortProp);
         },
       },
       {
         id: 2,
-        title: "Total",
+        title: 'Total',
         onPress() {
           const sortProp = OrderByOptions.CAMPEONATO;
+          if (sortProp === orderBy) return;
           handleOnPressOrderBy(sortProp);
         },
       },
       {
         id: 3,
-        title: "Turno",
+        title: 'Turno',
         onPress() {
           const sortProp = OrderByOptions.TURNO;
+          if (sortProp === orderBy) return;
           handleOnPressOrderBy(sortProp);
         },
       },
       {
         id: 4,
-        title: "Mês",
+        title: 'Mês',
         onPress() {
           const sortProp = OrderByOptions.MES;
+          if (sortProp === orderBy) return;
           handleOnPressOrderBy(sortProp);
         },
       },
-
       {
         id: 5,
-        title: "C$",
+        title: 'C$',
         onPress() {
           const sortProp = OrderByOptions.PATRIMONIO;
+          if (sortProp === orderBy) return;
           handleOnPressOrderBy(sortProp);
         },
       },
     ],
-    [handleOnPressOrderBy]
+    [handleOnPressOrderBy, orderBy]
   );
 
   const renderItem = useCallback(
@@ -218,12 +204,14 @@ export default () => {
         />
       );
     },
-    [clubs, orderBy]
+    [clubs, isMarketClose, league, marketStatus, orderBy]
   );
 
   const keyExtractor = useCallback((item: TeamLeague) => `${item.time_id}`, []);
 
-  const isLoading = !clubs || isLoadingClubsByLeague || !playerStats || !league;
+  const isLoading = isMarketClose
+    ? !clubs || isLoadingClubsByLeague || !league || !playerStats
+    : !clubs || isLoadingClubsByLeague || !league;
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
@@ -234,11 +222,10 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className={`${colorTheme === "dark" ? "bg-dark" : "bg-light"}`}
+        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
         style={{
           gap: 8,
-        }}
-      >
+        }}>
         <View className="flex-row justify-center items-center py-2 rounded-lg mx-2 mt-2">
           <Image
             source={{
@@ -252,11 +239,10 @@ export default () => {
           />
           <Text
             style={{
-              fontWeight: "700",
+              fontWeight: '700',
               fontSize: theme.Tokens.TEXT.md,
-              textTransform: "uppercase",
-            }}
-          >
+              textTransform: 'uppercase',
+            }}>
             {league?.liga.nome}
           </Text>
         </View>
@@ -265,9 +251,7 @@ export default () => {
       </View>
 
       <FlatList
-        refreshControl={
-          <RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />
-        }
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
         data={clubs}
         renderItem={(data) => renderItem(data)}
         keyExtractor={keyExtractor}
@@ -277,8 +261,7 @@ export default () => {
           marginTop: 4,
           paddingVertical: 8,
           marginHorizontal: 8,
-          backgroundColor:
-            colorTheme === "dark" ? Colors.dark.backgroundFull : "#F5F5F5",
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
           gap: 6,
         }}
       />

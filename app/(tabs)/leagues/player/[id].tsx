@@ -1,9 +1,9 @@
-import { Redirect, useLocalSearchParams } from "expo-router";
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useContext } from 'react';
 
-import { Text, View } from "@/components/Themed";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { AuthContext } from "@/contexts/Auth.context";
-import { useContext } from "react";
+import { Text, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { AuthContext } from '@/contexts/Auth.context';
 
 export default () => {
   const { id } = useLocalSearchParams();

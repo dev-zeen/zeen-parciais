@@ -1,8 +1,8 @@
-import { Image } from "react-native";
+import { Image } from 'react-native';
 
-import cartolaProImage from "@/assets/images/pro.png";
-import { Text, View } from "@/components/Themed";
-import { FullClubInfo } from "@/models/Club";
+import cartolaProImage from '@/assets/images/pro.png';
+import { Text, View } from '@/components/Themed';
+import { FullClubInfo } from '@/models/Club';
 
 type TeamBannerProps = {
   team: FullClubInfo;
@@ -30,9 +30,7 @@ export function TeamBanner({ team }: TeamBannerProps) {
         )}
 
         <Text className="font-semibold text-sm">{team.time.nome}</Text>
-        <Text className="font-light text-xs capitalize">
-          {team.time.nome_cartola}
-        </Text>
+        <Text className="font-light text-xs capitalize">{team.time.nome_cartola}</Text>
       </View>
     </View>
   );

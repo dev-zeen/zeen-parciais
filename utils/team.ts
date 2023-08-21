@@ -1,11 +1,7 @@
-import { PlayersToSell } from "@/app/(tabs)/team/team.helpers";
-import { LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
-import {
-  LineupPlayer,
-  LineupPlayers,
-  LineupPosition,
-} from "@/models/Formations";
-import { FullPlayer } from "@/models/Stats";
+import { PlayersToSell } from '@/app/(tabs)/team/team.helpers';
+import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
+import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { FullPlayer } from '@/models/Stats';
 
 type AddPlayerProps = {
   lineup: LineupPlayers;
@@ -31,15 +27,10 @@ function onRemovePlayer(lineupPlayers: LineupPosition[], playerId: number) {
   return updatedPlayers;
 }
 
-export function onRemovePlayerFromLineup(
-  lineup: LineupPlayers,
-  player: LineupPlayer | FullPlayer
-) {
+export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPlayer | FullPlayer) {
   const { atleta_id: playerId } = player;
 
-  const isTeamPlayer = lineup?.starting.some(
-    (item) => item.player?.atleta_id === playerId
-  );
+  const isTeamPlayer = lineup?.starting.some((item) => item.player?.atleta_id === playerId);
 
   if (isTeamPlayer) {
     const playersUpdated = onRemovePlayer(lineup.starting, playerId);
@@ -75,21 +66,13 @@ export function isLineupComplete(lineup: LineupPlayers) {
   return lineup.starting.every((item) => item.player);
 }
 
-export function onGetPlayerLowestPrice(
-  lineup: LineupPlayers,
-  player: LineupPosition
-) {
-  const playersPosition = lineup.starting.filter(
-    (item) => item.position === player.position
-  );
+export function onGetPlayerLowestPrice(lineup: LineupPlayers, player: LineupPosition) {
+  const playersPosition = lineup.starting.filter((item) => item.position === player.position);
 
   return playersPosition.reduce((acc, current) => {
     const currentPrice = current.player?.preco_num;
 
-    if (
-      !acc.player?.preco_num ||
-      (currentPrice && currentPrice < acc.player.preco_num)
-    ) {
+    if (!acc.player?.preco_num || (currentPrice && currentPrice < acc.player.preco_num)) {
       return current;
     }
 
@@ -97,31 +80,19 @@ export function onGetPlayerLowestPrice(
   }, {} as LineupPosition);
 }
 
-export function onRemovePlayerFromSellPlayers(
-  playersSell: PlayersToSell[],
-  id: number
-) {
+export function onRemovePlayerFromSellPlayers(playersSell: PlayersToSell[], id: number) {
   const updatedPlayerSell = playersSell
     ?.map((position) => {
-      const updatedPlayers = position.players.filter(
-        (player) => player.player?.atleta_id !== id
-      );
+      const updatedPlayers = position.players.filter((player) => player.player?.atleta_id !== id);
 
       return { ...position, players: updatedPlayers };
     })
-    .filter(
-      (position) => position.players.length > position.quantityToNewFormation
-    );
+    .filter((position) => position.players.length > position.quantityToNewFormation);
 
   return updatedPlayerSell;
 }
 
-export function onAddPlayerToLineup({
-  lineup,
-  player,
-  index,
-  isReservePlayer,
-}: AddPlayerProps) {
+export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: AddPlayerProps) {
   const { starting = [], reserves = [] } = lineup;
   const playersUpdated = isReservePlayer ? [...reserves] : [...starting];
 
@@ -131,11 +102,7 @@ export function onAddPlayerToLineup({
     }
   };
 
-  if (
-    typeof index !== "undefined" &&
-    index >= 0 &&
-    index < playersUpdated.length
-  ) {
+  if (typeof index !== 'undefined' && index >= 0 && index < playersUpdated.length) {
     addPlayerToIndex(index);
   } else {
     const emptyIndex = playersUpdated.findIndex(
@@ -146,7 +113,7 @@ export function onAddPlayerToLineup({
     }
   }
 
-  const updatedField = isReservePlayer ? "reserves" : "starting";
+  const updatedField = isReservePlayer ? 'reserves' : 'starting';
   const lineupUpdated = {
     ...lineup,
     [updatedField]: playersUpdated,
@@ -155,11 +122,7 @@ export function onAddPlayerToLineup({
   return lineupUpdated;
 }
 
-export function onGetPayloadSaveTeam({
-  lineup,
-  capitain,
-  tacticalFormation,
-}: SaveTeamProps) {
+export function onGetPayloadSaveTeam({ lineup, capitain, tacticalFormation }: SaveTeamProps) {
   const atletas = lineup.starting.map((position) => position.player?.atleta_id);
 
   const reservas = lineup.reserves.reduce((obj, reserve, index) => {

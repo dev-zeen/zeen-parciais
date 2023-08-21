@@ -1,11 +1,7 @@
-import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from "@/constants/Formations";
-import { FullClubInfo } from "@/models/Club";
-import {
-  LineupPlayer,
-  LineupPlayers,
-  LineupPosition,
-} from "@/models/Formations";
-import { FullPlayer, PlayerStats } from "@/models/Stats";
+import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
+import { FullClubInfo } from '@/models/Club';
+import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { FullPlayer, PlayerStats } from '@/models/Stats';
 
 type FillPlayersInLineup = {
   players: FullPlayer[];
@@ -25,13 +21,8 @@ export function onGetDefaultLineupTeam(id: number): string {
   return (LINEUPS_DEFAULT_OBJECT as any)[id];
 }
 
-export function isPlayerInClub(
-  player: FullPlayer | LineupPlayer,
-  playersLineup: LineupPosition[]
-) {
-  return playersLineup.some(
-    (item) => item.player?.atleta_id === player.atleta_id
-  );
+export function isPlayerInClub(player: FullPlayer | LineupPlayer, playersLineup: LineupPosition[]) {
+  return playersLineup.some((item) => item.player?.atleta_id === player.atleta_id);
 }
 
 export function clearLineup(lineupPlayers: LineupPosition[]) {
@@ -77,7 +68,7 @@ export function fillPlayersInLineup({
   });
 }
 
-function onGetPlayerPositions(starting: LineupPosition[]): Array<number> {
+function onGetPlayerPositions(starting: LineupPosition[]): number[] {
   const positions = new Set<number>();
   starting?.forEach((player) => positions?.add(player.position));
   return Array.from(positions);
@@ -87,26 +78,23 @@ export function onGetPlayersOnChangePositionSell(
   currentFormationWithPlayers: LineupPlayers,
   newFormation: string
 ): PlayersToSell[] {
-  const currentPlayers =
-    currentFormationWithPlayers.starting as LineupPosition[];
+  const currentPlayers = currentFormationWithPlayers.starting as LineupPosition[];
   const newPlayers = FORMATIONS[newFormation].starting;
 
   const currentPlayerPositions = onGetPlayerPositions(currentPlayers);
   const playersToSell: PlayersToSell[] = [];
 
-  const currentPlayerMap: Record<string, LineupPosition[]> =
-    currentPlayerPositions.reduce((map, position) => {
-      (map as any)[position] = currentPlayers.filter(
-        (player) => player.position === position
-      );
+  const currentPlayerMap: Record<string, LineupPosition[]> = currentPlayerPositions.reduce(
+    (map, position) => {
+      (map as any)[position] = currentPlayers.filter((player) => player.position === position);
       return map;
-    }, {});
+    },
+    {}
+  );
 
   currentPlayerPositions.forEach((position) => {
     const currentPlayersInPosition = currentPlayerMap[position];
-    const newPlayersInPosition = newPlayers.filter(
-      (player) => player.position === position
-    );
+    const newPlayersInPosition = newPlayers.filter((player) => player.position === position);
 
     const currentPlayerCountInPosition = currentPlayersInPosition.length;
     const newPlayerCountInPosition = newPlayersInPosition.length;
@@ -146,9 +134,7 @@ export function fillLineupOnChangeTacticalFormation(
   playerStats?: PlayerStats,
   isMarketClose?: boolean
 ): LineupPlayers {
-  const newLineup: LineupPlayers = onClearLineup(
-    FORMATIONS[tacticalFormation as string]
-  );
+  const newLineup: LineupPlayers = onClearLineup(FORMATIONS[tacticalFormation as string]);
 
   if (!lineupPlayers.starting || !newLineup.starting) {
     return newLineup;
@@ -158,8 +144,7 @@ export function fillLineupOnChangeTacticalFormation(
     if (item.player) {
       const { posicao_id, atleta_id } = item.player;
       const emptyIndex = newLineup.starting.findIndex(
-        (itemFormation) =>
-          itemFormation.position === posicao_id && !itemFormation.player
+        (itemFormation) => itemFormation.position === posicao_id && !itemFormation.player
       );
 
       if (emptyIndex !== -1) {
@@ -209,39 +194,21 @@ export function fillLineupWithPlayers(
   return lineupUpdated;
 }
 
-export function isPlayersEqual(
-  currentPlayers: number[],
-  defaultPlayers: number[]
-): boolean {
+export function isPlayersEqual(currentPlayers: number[], defaultPlayers: number[]): boolean {
   const sortedCurrentPlayers = currentPlayers?.slice().sort();
   const sortedDefaultPlayers = defaultPlayers?.slice().sort();
 
-  return (
-    JSON.stringify(sortedCurrentPlayers) ===
-    JSON.stringify(sortedDefaultPlayers)
-  );
+  return JSON.stringify(sortedCurrentPlayers) === JSON.stringify(sortedDefaultPlayers);
 }
 
-export function onGetEqualLineups(
-  lineup: LineupPlayers,
-  club: FullClubInfo
-): boolean {
+export function onGetEqualLineups(lineup: LineupPlayers, club: FullClubInfo): boolean {
   const defaultPlayersId = club?.atletas.map(({ atleta_id }) => atleta_id);
-  const currentPlayersId = lineup.starting.map(
-    ({ player }) => player?.atleta_id
-  );
+  const currentPlayersId = lineup.starting.map(({ player }) => player?.atleta_id);
 
-  const isEqualLineupPlayers = isPlayersEqual(
-    currentPlayersId as number[],
-    defaultPlayersId
-  );
+  const isEqualLineupPlayers = isPlayersEqual(currentPlayersId as number[], defaultPlayersId);
 
-  const defaultReservesId = club?.reservas
-    ? club?.reservas?.map(({ atleta_id }) => atleta_id)
-    : [];
-  const currentReservesId = lineup?.reserves
-    .map(({ player }) => player?.atleta_id)
-    .filter(Boolean);
+  const defaultReservesId = club?.reservas ? club?.reservas?.map(({ atleta_id }) => atleta_id) : [];
+  const currentReservesId = lineup?.reserves.map(({ player }) => player?.atleta_id).filter(Boolean);
 
   const isEqualLineupReserves = isPlayersEqual(
     defaultReservesId as number[],

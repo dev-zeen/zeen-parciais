@@ -1,4 +1,4 @@
-import { IPlayerStats, Player, PlayerStats } from "@/models/Stats";
+import { IPlayerStats, Player, PlayerStats } from '@/models/Stats';
 
 export function onGetPlayersPlayedMatch(playerStats: PlayerStats): Player[] {
   const allPlayers =

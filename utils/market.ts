@@ -1,7 +1,7 @@
-import { ENUM_STATUS_MARKET_PLAYER } from "@/constants/StatusPlayer";
-import { LineupPlayer, LineupPosition } from "@/models/Formations";
-import { Market } from "@/models/Market";
-import { FullPlayer } from "@/models/Stats";
+import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { LineupPlayer, LineupPosition } from '@/models/Formations';
+import { Market } from '@/models/Market';
+import { FullPlayer } from '@/models/Stats';
 
 export function filterAndSortPlayersFromMarket(
   market: Market,
@@ -17,9 +17,7 @@ export function filterAndSortPlayersFromMarket(
     .sort((a, b) => b.preco_num - a.preco_num);
 
   if (playerLowestPrice) {
-    return marketPlayers.filter(
-      (item) => item.preco_num < playerLowestPrice.preco_num
-    );
+    return marketPlayers.filter((item) => item.preco_num < playerLowestPrice.preco_num);
   }
   return marketPlayers;
 }

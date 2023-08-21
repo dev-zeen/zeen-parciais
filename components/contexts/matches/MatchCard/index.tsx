@@ -1,1 +1,1 @@
-export { MatchCard } from "./MatchCard";
+export { MatchCard } from './MatchCard';

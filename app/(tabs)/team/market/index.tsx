@@ -1,30 +1,22 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { FlatList, ListRenderItemInfo, useColorScheme } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { Redirect, router } from 'expo-router';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { FlatList, ListRenderItemInfo, useColorScheme } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-import { Redirect, router } from "expo-router";
-
-import { Text, TouchableOpacity, View } from "@/components/Themed";
-import { MarketFilters } from "@/components/contexts/market/MarketFilters";
-import { MarketPlayerCard } from "@/components/contexts/market/MarketPlayerCard";
-import { PlayerLowestCard } from "@/components/contexts/market/PlayerLowestCard.tsx";
-import { Loading } from "@/components/structure/Loading";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { AuthContext } from "@/contexts/Auth.context";
-import { LineupPlayer, LineupPosition } from "@/models/Formations";
-import { FullPlayer } from "@/models/Stats";
-import { useGetMyClub } from "@/queries/club.query";
-import { useGetMarket } from "@/queries/market.query";
-import useTeamLineupStore from "@/store/useTeamLineupStore";
-import { filterAndSortPlayersFromMarket } from "@/utils/market";
-import { numberToString } from "@/utils/parseTo";
+import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { MarketFilters } from '@/components/contexts/market/MarketFilters';
+import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
+import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
+import { Loading } from '@/components/structure/Loading';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { AuthContext } from '@/contexts/Auth.context';
+import { LineupPlayer, LineupPosition } from '@/models/Formations';
+import { FullPlayer } from '@/models/Stats';
+import { useGetMyClub } from '@/queries/club.query';
+import { useGetMarket } from '@/queries/market.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
+import { filterAndSortPlayersFromMarket } from '@/utils/market';
+import { numberToString } from '@/utils/parseTo';
 
 type MarketProps = {
   position?: LineupPosition;
@@ -52,12 +44,8 @@ export default ({
 
   const lineup = useTeamLineupStore((state) => state.lineup);
   const price = useTeamLineupStore((state) => state.price);
-  const addPlayerToLineup = useTeamLineupStore(
-    (state) => state.addPlayerToLineup
-  );
-  const removePlayerFromLineup = useTeamLineupStore(
-    (state) => state.removePlayerFromLineup
-  );
+  const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
+  const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const remainingValue = useMemo(() => {
     if (club && price) {
@@ -69,8 +57,6 @@ export default ({
   const [isLoading, setIsLoading] = useState(false);
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
-  const [searchPlayerParam, setSearchPlayerParam] =
-    useState<LineupPosition | null>();
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer, targetIndex?: number) => {
@@ -81,43 +67,44 @@ export default ({
       });
       if (handleCloseMarketModal) handleCloseMarketModal();
     },
-    []
+    [addPlayerToLineup, handleCloseMarketModal, playerLowestPrice]
   );
 
-  const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {
-    removePlayerFromLineup(player);
-  }, []);
+  const handleRemovePlayerFromLineup = useCallback(
+    (player: FullPlayer) => {
+      removePlayerFromLineup(player);
+    },
+    [removePlayerFromLineup]
+  );
 
   const handleIsLoading = useCallback(() => {
     setIsLoading((previous) => !previous);
   }, []);
 
-  const applyFilter = useCallback((data?: FullPlayer[]) => {
-    if (data) {
-      const playersUpdated = position
-        ? data.filter((item) => item.posicao_id === position.position)
-        : data;
+  const applyFilter = useCallback(
+    (data?: FullPlayer[]) => {
+      if (data) {
+        const playersUpdated = position
+          ? data.filter((item) => item.posicao_id === position.position)
+          : data;
 
-      setMarketPlayers(playersUpdated);
-      handleIsLoading();
-    }
-  }, []);
+        setMarketPlayers(playersUpdated);
+        handleIsLoading();
+      }
+    },
+    [handleIsLoading, position]
+  );
 
   const handleCloseMarket = useCallback(
-    () =>
-      handleCloseMarketModal ? handleCloseMarketModal() : router.push("/team/"),
-    []
+    () => (handleCloseMarketModal ? handleCloseMarketModal() : router.push('/team/')),
+    [handleCloseMarketModal]
   );
 
-  const keyExtractor = useCallback(
-    (item: FullPlayer) => `${item.atleta_id}`,
-    []
-  );
+  const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
   useEffect(() => {
     if (marketData && isFirstRender.current) {
       if (position) {
-        setSearchPlayerParam(position);
         const marketPlayersUpdated = filterAndSortPlayersFromMarket(
           marketData,
           position,
@@ -131,14 +118,12 @@ export default ({
 
       isFirstRender.current = false;
     }
-  }, [marketData, searchPlayerParam, price]);
+  }, [marketData, playerLowestPrice, position]);
 
   useEffect(() => {
     if (lineup) {
       const emptyPositionsUpdated = new Set(
-        (lineup?.starting || [])
-          .filter(({ player }) => !player)
-          .map(({ position }) => position)
+        (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)
       );
       setEmptyPositions(emptyPositionsUpdated);
     }
@@ -149,12 +134,8 @@ export default ({
       return (
         <MarketPlayerCard
           player={player}
-          onPressAddPlayerToLineup={() =>
-            handleAddPlayerToLineup(player, playerIndex)
-          }
-          onPressRemovePlayerFromLineup={() =>
-            handleRemovePlayerFromLineup(player)
-          }
+          onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
+          onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
           isButtonDisabled={
             (!playerLowestPrice && player.preco_num > remainingValue) ||
             (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
@@ -165,7 +146,15 @@ export default ({
         />
       );
     },
-    [emptyPositions, lineup]
+    [
+      emptyPositions,
+      handleAddPlayerToLineup,
+      handleRemovePlayerFromLineup,
+      lineup?.starting,
+      playerIndex,
+      playerLowestPrice,
+      remainingValue,
+    ]
   );
 
   if (!isAutheticated) return <Redirect href="/(tabs)/team" />;
@@ -174,23 +163,16 @@ export default ({
 
   return (
     <SafeAreaViewContainer>
-      <View
-        className={`flex-1 mx-2 ${
-          colorTheme === "dark" ? "bg-dark" : "bg-light"
-        }`}
-      >
+      <View className={`flex-1 mx-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View className="justify-between items-center flex-row rounded-lg mb-2 p-2">
           <View
             className="flex-row items-center"
             style={{
               gap: 16,
-            }}
-          >
+            }}>
             <View className="justify-center items-center gap-1">
               <Text className="font-light text-xs">Valor atual</Text>
-              <Text className="font-bold text-xs text-green-500">
-                {numberToString(price)}
-              </Text>
+              <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
             </View>
 
             <View className="justify-center items-center gap-1">
@@ -203,8 +185,7 @@ export default ({
 
           <TouchableOpacity
             onPress={handleCloseMarket}
-            className="p-2 rounded-full border border-red-400 bg-red-300"
-          >
+            className="p-2 rounded-full border border-red-400 bg-red-300">
             <Feather name="x" color="#525252" size={24} />
           </TouchableOpacity>
 
@@ -219,9 +200,7 @@ export default ({
           maximumPrice={playerLowestPrice?.preco_num}
         />
 
-        {playerLowestPrice && (
-          <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />
-        )}
+        {playerLowestPrice && <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />}
 
         <FlatList
           contentContainerStyle={{

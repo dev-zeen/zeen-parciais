@@ -1,39 +1,26 @@
-import { useContext, useEffect, useState } from "react";
-import {
-  RefreshControl,
-  ScrollView,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useContext, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
-
-import { Text, View } from "@/components/Themed";
-import { LogoutModal } from "@/components/contexts/auth/LogoutModal";
-import { MaintenanceMarket } from "@/components/contexts/utils/MaintenanceMarket";
-import { MarketStatusCard } from "@/components/contexts/utils/MarketStatusCard";
-import { TeamBanner } from "@/components/contexts/utils/TeamBanner";
-import { Loading } from "@/components/structure/Loading";
-import { Login } from "@/components/structure/Login";
-import { SafeAreaViewContainer } from "@/components/structure/SafeAreaViewContainer";
-import { tintColorDark } from "@/constants/Colors";
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import { AuthContext } from "@/contexts/Auth.context";
-import { TeamHistoryRound } from "@/models/Club";
-import {
-  useGetHistoricMyClub,
-  useGetMatchSubstitutions,
-  useGetMyClub,
-} from "@/queries/club.query";
-import { useGetMarketStatus } from "@/queries/market.query";
-import { useGetScoredPlayers } from "@/queries/stats.query";
-import theme from "@/styles/theme";
-import { numberToString } from "@/utils/parseTo";
-import {
-  onCalculatePartialScore,
-  onUpdateTeamWithSubstitutedPlayers,
-} from "@/utils/partials";
+import { Text, View } from '@/components/Themed';
+import { LogoutModal } from '@/components/contexts/auth/LogoutModal';
+import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
+import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
+import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
+import { Loading } from '@/components/structure/Loading';
+import { Login } from '@/components/structure/Login';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { tintColorDark } from '@/constants/Colors';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { AuthContext } from '@/contexts/Auth.context';
+import { TeamHistoryRound } from '@/models/Club';
+import { useGetHistoricMyClub, useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
+import { useGetMarketStatus } from '@/queries/market.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import theme from '@/styles/theme';
+import { numberToString } from '@/utils/parseTo';
+import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -42,14 +29,12 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const isMarketClose =
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const allowRequests = marketStatus
-    ? isAutheticated &&
-      marketStatus.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
+    ? isAutheticated && marketStatus.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
     : false;
 
   const {
@@ -58,8 +43,7 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(!!allowRequests);
 
-  const { data: historyClub, isLoading: isLoadingHistory } =
-    useGetHistoricMyClub(!!allowRequests);
+  const { data: historyClub, isLoading: isLoadingHistory } = useGetHistoricMyClub(!!allowRequests);
 
   const { data: substitutions } = useGetMatchSubstitutions({
     id: club?.time.time_id,
@@ -79,7 +63,7 @@ export default () => {
   const handleLogout = () => {
     handleUnautenticated();
     setShowModalLogout(false);
-    router.push("/(tabs)/");
+    router.push('/(tabs)/');
   };
 
   const totalPatrimony = club && numberToString(club?.patrimonio);
@@ -119,10 +103,7 @@ export default () => {
 
   useEffect(() => {
     if (club && isMarketClose) {
-      const { playersUpdated } = onUpdateTeamWithSubstitutedPlayers(
-        club,
-        substitutions
-      );
+      const { playersUpdated } = onUpdateTeamWithSubstitutedPlayers(club, substitutions);
 
       const myPartialPoints = onCalculatePartialScore(
         playersUpdated,
@@ -132,7 +113,7 @@ export default () => {
 
       setPartialScore(myPartialPoints);
     }
-  }, [club, substitutions, playerStats]);
+  }, [club, substitutions, playerStats, isMarketClose]);
 
   if (!isAutheticated) {
     return (
@@ -152,33 +133,18 @@ export default () => {
     <SafeAreaViewContainer>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            onRefresh={onRefetchClub}
-            refreshing={isRefetchingClub}
-          />
-        }
-        className={`flex-1 rounded-lg ${
-          colorTheme === "dark" ? `bg-dark` : "bg-light"
-        }`}
-      >
+        refreshControl={<RefreshControl onRefresh={onRefetchClub} refreshing={isRefetchingClub} />}
+        className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
         <View
-          className={`flex-1 rounded-lg ${
-            colorTheme === "dark" ? `bg-dark` : "bg-light"
-          }`}
+          className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
           style={{
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
             flex: 1,
-          }}
-        >
+          }}>
           <MarketStatusCard />
           <TeamBanner team={club} />
-          <View
-            className={`flex-row gap-2 ${
-              colorTheme === "dark" ? `bg-dark` : "bg-light"
-            }`}
-          >
+          <View className={`flex-row gap-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
             <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
               <Text className="font-semibold">Total de Pontos</Text>
               <Text className="font-semibold text-xl">{totalScore}</Text>
@@ -193,19 +159,13 @@ export default () => {
           </View>
 
           {historyClub && historyClub.length > 0 && (
-            <View
-              className={`flex-row gap-2 ${
-                colorTheme === "dark" ? `bg-dark` : "bg-light"
-              }`}
-            >
+            <View className={`flex-row gap-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
               <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
                 <Text className="font-semibold">Maior Pontuação</Text>
                 <Text className="font-semibold text-xl text-blue-500">
                   {numberToString(highestScore?.pontos as number)}
                 </Text>
-                <Text className="font-light">
-                  Rodada {highestScore?.rodada_id}
-                </Text>
+                <Text className="font-light">Rodada {highestScore?.rodada_id}</Text>
               </View>
 
               <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
@@ -213,9 +173,7 @@ export default () => {
                 <Text className="font-semibold text-xl text-red-500">
                   {numberToString(lowestScore?.pontos as number)}
                 </Text>
-                <Text className="font-light">
-                  Rodada {lowestScore?.rodada_id}
-                </Text>
+                <Text className="font-light">Rodada {lowestScore?.rodada_id}</Text>
               </View>
             </View>
           )}
@@ -230,17 +188,13 @@ export default () => {
         }}
         onPress={() => {
           setShowModalLogout(true);
-        }}
-      >
+        }}>
         <Text className="text-white">Sair</Text>
         <Feather name="log-out" size={24} color={tintColorDark} />
       </TouchableOpacity>
 
       {showModalLogout && (
-        <LogoutModal
-          isVisible={showModalLogout}
-          handleLogoutSuccess={handleLogout}
-        />
+        <LogoutModal isVisible={showModalLogout} handleLogoutSuccess={handleLogout} />
       )}
     </SafeAreaViewContainer>
   );

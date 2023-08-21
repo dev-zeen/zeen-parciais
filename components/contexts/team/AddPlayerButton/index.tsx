@@ -1,1 +1,1 @@
-export { AddPlayerButton } from "./AddPlayerButton";
+export { AddPlayerButton } from './AddPlayerButton';

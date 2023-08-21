@@ -1,1 +1,1 @@
-export { ClubPlayerCard } from "./ClubPlayerCard";
+export { ClubPlayerCard } from './ClubPlayerCard';

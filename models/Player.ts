@@ -1,6 +1,6 @@
-import { Position } from "@/models/Stats";
+import { Position } from '@/models/Stats';
 
-export type IPlayerStatus = Omit<Position, "abreviacao">;
+export type IPlayerStatus = Omit<Position, 'abreviacao'>;
 
 export type PlayerStatus = {
   [key: string]: IPlayerStatus;
