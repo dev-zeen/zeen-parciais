@@ -2,24 +2,24 @@
 
 module.exports = {
   content: [
-    "./App.{js,jsx,ts,tsx}",
-    "./app/**/*.{js,jsx,ts,tsx}",
-    "./components/**/*.{js,jsx,ts,tsx}",
+    './App.{js,jsx,ts,tsx}',
+    './app/**/*.{js,jsx,ts,tsx}',
+    './components/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
     extend: {
       fontFamily: {
-        body: ["Lato"],
+        body: ['Lato'],
       },
       colors: {
         folly: {
-          DEFAULT: "#FF4365",
+          DEFAULT: '#FF4365',
         },
         light: {
-          DEFAULT: "#f5f5f5",
+          DEFAULT: '#f5f5f5',
         },
         dark: {
-          DEFAULT: "#12294D",
+          DEFAULT: '#12294D',
         },
       },
     },

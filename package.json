@@ -8,8 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "eslint .",
-    "test:eslint": "echo \"\\033[33mRunning eslint check\" &&  eslint ."
+    "lint": "eslint ."
   },
   "jest": {
     "preset": "jest-expo"

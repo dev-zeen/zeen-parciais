@@ -104,7 +104,7 @@ const useGenericMutation = <T, S>(
 
       return previousData;
     },
-    onError: (err, _, context) => {
+    onError: (_err, _, context) => {
       queryClient.setQueryData([url!, params], context);
     },
     onSettled: () => {

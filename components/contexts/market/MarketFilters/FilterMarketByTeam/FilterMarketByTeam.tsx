@@ -31,21 +31,24 @@ export function FilterMarketByTeam({
 
   const [selectedsTeams, setSelectedsTeams] = useState<number[]>(selectedTeams || []);
 
-  const handlePressTeam = (id: number) => {
-    const isExists = selectedsTeams.includes(id);
+  const handlePressTeam = useCallback(
+    (id: number) => {
+      const isExists = selectedsTeams.includes(id);
 
-    if (isExists) {
-      const selectedsTeamsUpdated = selectedsTeams.filter((teamId) => teamId !== id);
-      setSelectedsTeams(selectedsTeamsUpdated);
-    } else {
-      setSelectedsTeams([...selectedsTeams, id]);
-    }
-  };
+      if (isExists) {
+        const selectedsTeamsUpdated = selectedsTeams.filter((teamId) => teamId !== id);
+        setSelectedsTeams(selectedsTeamsUpdated);
+      } else {
+        setSelectedsTeams([...selectedsTeams, id]);
+      }
+    },
+    [selectedsTeams]
+  );
 
   const handlePressFilter = useCallback(() => {
     applyFilter(selectedsTeams);
     handleClose();
-  }, [selectedsTeams]);
+  }, [applyFilter, handleClose, selectedsTeams]);
 
   const renderItem = useCallback(
     ({ item: match }: ListRenderItemInfo<Match>) => {
@@ -58,7 +61,7 @@ export function FilterMarketByTeam({
         />
       );
     },
-    [market, matches, selectedsTeams]
+    [handlePressTeam, market, selectedsTeams]
   );
 
   const keyExtractor = useCallback((item: Match) => `${item.clube_casa_id}`, []);

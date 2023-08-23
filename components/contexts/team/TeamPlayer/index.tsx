@@ -1,1 +1,1 @@
-export { TeamPlayer } from "./TeamPlayer";
+export { TeamPlayer } from './TeamPlayer';

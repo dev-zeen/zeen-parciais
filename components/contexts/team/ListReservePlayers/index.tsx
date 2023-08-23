@@ -1,1 +1,1 @@
-export { ListReservePlayers } from "./ListReservePlayers";
+export { ListReservePlayers } from './ListReservePlayers';

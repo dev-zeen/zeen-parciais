@@ -16,15 +16,6 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
 
   const [isAutheticated, setIsAutheticated] = useState(false);
 
-  async function handleGetToken() {
-    const token = await getItem().then((item) => {
-      if (item) {
-        setIsAutheticated(true);
-      }
-    });
-    return token;
-  }
-
   async function handleSuccessAuth() {
     setIsAutheticated(true);
   }
@@ -35,10 +26,19 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
   }
 
   useEffect(() => {
+    function handleGetToken() {
+      const token = getItem().then((item) => {
+        if (item) {
+          setIsAutheticated(true);
+        }
+      });
+      return token;
+    }
+
     if (!isAutheticated) {
       handleGetToken();
     }
-  }, [handleGetToken, isAutheticated]);
+  }, [getItem, isAutheticated]);
 
   return (
     <AuthContext.Provider

@@ -1,1 +1,1 @@
-export { SoccerField } from "./SoccerField";
+export { SoccerField } from './SoccerField';

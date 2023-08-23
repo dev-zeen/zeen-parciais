@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useCallback } from 'react';
 import { Image, useColorScheme } from 'react-native';
 
@@ -32,7 +31,6 @@ export function ClubPlayerCard({
   isReserve,
   isCapitain,
 }: ClubPlayerCardProps) {
-  const router = useRouter();
   const colorTheme = useColorScheme();
 
   const { data: market } = useGetMarket();
@@ -58,7 +56,7 @@ export function ClubPlayerCard({
 
       return isCapitain ? score * 1.5 : score;
     },
-    [currentRound]
+    [currentRound, isCapitain, isMarketClose, marketStatus?.rodada_atual, playerStats]
   );
 
   // const onPressHandler = useCallback(() => {

@@ -31,7 +31,7 @@ export function FilterMarketByStatus({
   const handleStatusFilter = useCallback(() => {
     applyFilter(filters);
     handleClose();
-  }, [filters]);
+  }, [applyFilter, filters, handleClose]);
 
   const handleChangeFilter = useCallback(
     (filter: PlayerStatusFilter) => {

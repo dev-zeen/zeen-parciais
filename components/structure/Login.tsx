@@ -19,7 +19,7 @@ type LoginProps = {
 export function Login({ title }: LoginProps) {
   const colorTheme = useColorScheme();
 
-  const { handleSuccessAuth, handleUnautenticated } = useContext(AuthContext);
+  const { handleSuccessAuth } = useContext(AuthContext);
 
   const { setItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
 
