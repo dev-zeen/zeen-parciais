@@ -120,7 +120,7 @@ export default () => {
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
       return (
-        <View className="mx-2 rounded-lg">
+        <View className="rounded-lg">
           <MarketPlayerCard
             player={player}
             onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}

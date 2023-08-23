@@ -42,20 +42,24 @@ export function MarketPlayerCard({
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   return (
-    <View className="rounded-lg flex-row items-center justify-between p-1.5" key={player.atleta_id}>
-      <View className="rounded-lg ">
+    <View className="rounded-lg flex-row items-center justify-between p-2" key={player.atleta_id}>
+      <View
+        className="flex-row"
+        style={{
+          gap: 8,
+        }}>
         <Image
           source={{
             uri: player.foto?.replace('FORMATO', '220x220'),
           }}
-          className="w-20 h-20 rounded-3xl mr-2"
+          className="w-20 h-20 rounded-3xl "
           alt={`Imagem do ${player.nome}`}
         />
         <View
           className="flex-row absolute"
           style={{
-            top: '60%',
-            left: '60%',
+            top: '65%',
+            left: '25%',
             width: 20,
             height: 20,
             borderRadius: 10,
@@ -71,145 +75,153 @@ export function MarketPlayerCard({
             size={14}
           />
         </View>
-      </View>
 
-      <View className="flex-1 justify-between">
-        <View className="flex-row justify-between items-center flex-1">
-          <View className="items-start justify-center">
-            <Text className="flex-row text-lg font-bold">{player.apelido_abreviado}</Text>
+        <View
+          className="items-start justify-center"
+          style={{
+            gap: 4,
+          }}>
+          <Text className="flex-row text-lg font-bold">{player.apelido_abreviado}</Text>
+
+          <View
+            className="flex-row items-center justify-start"
+            style={{
+              gap: 4,
+            }}>
+            <Text className="font-medium uppercase text-xs">
+              {positions?.[player.posicao_id].abreviacao}
+            </Text>
+
+            <View className="rounded-full bg-gray-300 h-1 w-1" />
+
+            <Text className="font-medium uppercase text-xs">
+              {market?.clubes[player.clube_id].abreviacao}
+            </Text>
+
+            <View className="rounded-full bg-gray-300 h-1 w-1" />
 
             <View
-              className="flex-row items-center justify-start"
+              className="flex-row items-center"
               style={{
-                gap: 4,
+                gap: 2,
               }}>
-              <Text className="font-medium uppercase text-xs">
-                {positions?.[player.posicao_id].abreviacao}
-              </Text>
+              <Image
+                source={{
+                  uri: matches?.clubes[match?.clube_casa_id as number]?.escudos['60x60'],
+                }}
+                className="w-6 h-6"
+                alt={`Escudo do ${matches?.clubes[match?.clube_casa_id as number]?.nome}`}
+              />
 
-              <View className="rounded-full bg-gray-300 h-1 w-1" />
+              <Feather
+                name="x"
+                size={12}
+                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+              />
 
-              <Text className="font-medium uppercase text-xs">
-                {market?.clubes[player.clube_id].abreviacao}
-              </Text>
+              <Image
+                source={{
+                  uri: matches?.clubes[match?.clube_visitante_id as number]?.escudos['60x60'],
+                }}
+                className="w-6 h-6"
+                alt={`Escudo do ${matches?.clubes[match?.clube_visitante_id as number]?.nome}`}
+              />
+            </View>
+          </View>
 
-              <View className="rounded-full bg-gray-300 h-1 w-1" />
-
-              <View
-                className="flex-row items-center"
+          <View
+            className="flex-row items-start justify-start"
+            style={{
+              gap: 8,
+            }}>
+            <View className="items-center justify-center">
+              <Text className="text-xs">Média</Text>
+              <Text
+                className="font-bold text-xs"
                 style={{
-                  gap: 2,
+                  color: player.media_num > 0 ? '#22c55e' : '#ef4444',
                 }}>
-                <Image
-                  source={{
-                    uri: matches?.clubes[match?.clube_casa_id as number]?.escudos['60x60'],
-                  }}
-                  className="w-6 h-6"
-                  alt={`Escudo do ${matches?.clubes[match?.clube_casa_id as number]?.nome}`}
-                />
+                {numberToString(player.media_num)}
+              </Text>
+            </View>
 
-                <Feather
-                  name="x"
-                  size={12}
-                  color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
-                />
+            <View className="items-center justify-center">
+              <Text className="text-xs">Última</Text>
+              <Text
+                className="font-bold text-xs"
+                style={{
+                  color: player.pontos_num > 0 ? '#22c55e' : '#ef4444',
+                }}>
+                {numberToString(player.pontos_num)}
+              </Text>
+            </View>
 
-                <Image
-                  source={{
-                    uri: matches?.clubes[match?.clube_visitante_id as number]?.escudos['60x60'],
-                  }}
-                  className="w-6 h-6"
-                  alt={`Escudo do ${matches?.clubes[match?.clube_visitante_id as number]?.nome}`}
-                />
-              </View>
+            <View className="items-center justify-center">
+              <Text className="text-xs">Min. Val.</Text>
+              <Text className="font-bold text-xs">
+                {player.minimo_para_valorizar === null
+                  ? '-'
+                  : numberToString(player.minimo_para_valorizar)}
+              </Text>
             </View>
           </View>
-
-          <Text className="flex-row font-semibold text-base">
-            C$ {numberToString(player.preco_num)}
-          </Text>
-        </View>
-
-        <View className="flex-row justify-between items-center flex-1">
-          <View className="items-start justify-start" style={{ gap: 8 }}>
-            <View
-              className="flex-row justify-between items-center flex-1"
-              style={{
-                gap: 8,
-              }}>
-              <View className="items-center justify-center">
-                <Text className="text-xs">Média</Text>
-                <Text
-                  className="font-bold text-xs"
-                  style={{
-                    color: player.media_num > 0 ? '#22c55e' : '#ef4444',
-                  }}>
-                  {numberToString(player.media_num)}
-                </Text>
-              </View>
-
-              <View className="items-center justify-center">
-                <Text className="text-xs">Última</Text>
-                <Text
-                  className="font-bold text-xs"
-                  style={{
-                    color: player.pontos_num > 0 ? '#22c55e' : '#ef4444',
-                  }}>
-                  {numberToString(player.pontos_num)}
-                </Text>
-              </View>
-
-              <View className="items-center justify-center">
-                <Text className="text-xs">Min. Val.</Text>
-                <Text className="font-bold text-xs">
-                  {player.minimo_para_valorizar === null
-                    ? '-'
-                    : numberToString(player.minimo_para_valorizar)}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {!isSellPlayer ? (
-            <TouchableOpacity
-              disabled={isButtonDisabled}
-              style={[
-                styles.playerButton,
-                isButtonDisabled
-                  ? styles.purchasePlayerButtonDisabled
-                  : styles.purchasePlayerButtonActived,
-              ]}
-              onPress={() => onPressAddPlayerToLineup(player)}
-              activeOpacity={0.6}>
-              <Text className="text-white text-sm font-semibold">
-                {isButtonDisabled || isMarketClose ? 'Indisp.' : 'Comprar'}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              disabled={isMarketClose}
-              style={[
-                styles.playerButton,
-                !isMarketClose ? styles.sellPlayerButton : styles.purchasePlayerButtonDisabled,
-              ]}
-              onPress={() => onPressRemovePlayerFromLineup(player)}
-              activeOpacity={0.6}>
-              <Text className="text-white text-sm font-semibold">
-                {isMarketClose ? 'Indisp.' : 'Vender'}
-              </Text>
-            </TouchableOpacity>
-          )}
         </View>
       </View>
+
+      {!isSellPlayer ? (
+        <TouchableOpacity
+          disabled={isButtonDisabled}
+          style={[
+            styles.playerButton,
+            isButtonDisabled
+              ? styles.purchasePlayerButtonDisabled
+              : styles.purchasePlayerButtonActived,
+          ]}
+          onPress={() => onPressAddPlayerToLineup(player)}
+          activeOpacity={0.6}>
+          {isButtonDisabled || isMarketClose ? (
+            <Text className="text-white text-sm font-semibold">Indisp.</Text>
+          ) : (
+            <>
+              <Text className="text-white text-sm font-semibold">Comprar</Text>
+              <Text className="text-white text-sm font-semibold">
+                C$ {numberToString(player.preco_num)}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          disabled={isMarketClose}
+          style={[
+            styles.playerButton,
+            !isMarketClose ? styles.sellPlayerButton : styles.purchasePlayerButtonDisabled,
+          ]}
+          onPress={() => onPressRemovePlayerFromLineup(player)}
+          activeOpacity={0.6}>
+          {isMarketClose ? (
+            <Text className="text-white text-sm font-semibold">Indisp.</Text>
+          ) : (
+            <>
+              <Text className="text-white text-sm font-semibold">Vender</Text>
+              <Text className="text-white text-sm font-semibold">
+                C$ {numberToString(player.preco_num)}
+              </Text>
+            </>
+          )}
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   playerButton: {
-    width: 110,
+    width: 100,
+    height: 75,
     borderRadius: 8,
-    paddingVertical: 20,
+    paddingVertical: 8,
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
   },

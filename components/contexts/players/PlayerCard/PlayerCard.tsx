@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useContext, useMemo } from 'react';
 import { Image, useColorScheme } from 'react-native';
 
@@ -25,8 +24,6 @@ export function PlayerCard({
   isPlayerOnMyLineup,
 }: PlayerCardProps) {
   const colorTheme = useColorScheme();
-
-  const router = useRouter();
 
   const { isAutheticated } = useContext(AuthContext);
 
