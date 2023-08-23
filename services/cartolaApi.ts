@@ -10,6 +10,7 @@ cartolaApi.interceptors.request.use(async (instance: InternalAxiosRequestConfig)
   const token = await getTokenFromStorage();
   if (token) {
     instance.headers.Authorization = `Bearer ${token}`;
+    instance.timeout = 10000;
     return instance;
   }
 

@@ -26,7 +26,9 @@ export const fetcher = async <T>({
   pageParam?: any;
 }): Promise<T> => {
   const [url, params] = queryKey;
-  const res = await api.get<T>(url, { params: { ...params, pageParam } });
+  const res = await api.get<T>(url, {
+    params: { ...params, pageParam },
+  });
   return res.data;
 };
 
