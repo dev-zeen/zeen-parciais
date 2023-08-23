@@ -1,21 +1,17 @@
-import { useCallback, useState } from "react";
-import { Image, Modal, TouchableOpacity } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { useCallback, useState } from 'react';
+import { Image, Modal, TouchableOpacity } from 'react-native';
 
-import { Feather } from "@expo/vector-icons";
-
-import captainImage from "@/assets/images/letter-c.png";
-import { Text, View } from "@/components/Themed";
-import { TeamPlayerCard } from "@/components/contexts/team/TeamPlayerCard";
-import { MARKET_STATUS_NAME } from "@/constants/Market";
-import {
-  ENUM_STATUS_MARKET_PLAYER,
-  OBJECT_STATUS_MARKET_PLAYER,
-} from "@/constants/StatusPlayer";
-import { LineupPlayer } from "@/models/Formations";
-import { FullPlayer } from "@/models/Stats";
-import { useGetMarketStatus } from "@/queries/market.query";
-import useTeamLineupStore from "@/store/useTeamLineupStore";
-import { numberToString } from "@/utils/parseTo";
+import captainImage from '@/assets/images/letter-c.png';
+import { Text, View } from '@/components/Themed';
+import { TeamPlayerCard } from '@/components/contexts/team/TeamPlayerCard';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { ENUM_STATUS_MARKET_PLAYER, OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { LineupPlayer } from '@/models/Formations';
+import { FullPlayer } from '@/models/Stats';
+import { useGetMarketStatus } from '@/queries/market.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
+import { numberToString } from '@/utils/parseTo';
 
 type TeamPlayerProps = {
   player?: LineupPlayer;
@@ -35,12 +31,9 @@ export function TeamPlayer({
 
   const [activePlayerCard, setActivePlayerCard] = useState(false);
 
-  const isMarketClose =
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
-  const removePlayerFromLineup = useTeamLineupStore(
-    (state) => state.removePlayerFromLineup
-  );
+  const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const handleModalPlayerCard = () => {
     setActivePlayerCard((previous) => !previous);
@@ -51,7 +44,7 @@ export function TeamPlayer({
       if (isMarketClose) return;
       removePlayerFromLineup(player);
     },
-    []
+    [isMarketClose, removePlayerFromLineup]
   );
 
   const scoreWithMarketStatus = isMarketClose
@@ -62,7 +55,7 @@ export function TeamPlayer({
     ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
     : (player as LineupPlayer)?.pontos_num;
 
-  const scoreFinal = isPlayed ? numberToString(scoreWithMarketStatus) : "-";
+  const scoreFinal = isPlayed ? numberToString(scoreWithMarketStatus) : '-';
 
   const playerPrice = numberToString(player?.preco_num);
 
@@ -73,24 +66,17 @@ export function TeamPlayer({
         gap: 2,
         maxWidth: 90,
         minWidth: 90,
-        backgroundColor: "transparent",
-      }}
-    >
+        backgroundColor: 'transparent',
+      }}>
       {isMarketClose ? (
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
-          <Text
-            numberOfLines={1}
-            className="text-blue-500 font-semibold text-center text-xs"
-          >
+          <Text numberOfLines={1} className="text-blue-500 font-semibold text-center text-xs">
             {scoreFinal}
           </Text>
         </View>
       ) : (
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
-          <Text
-            numberOfLines={1}
-            className="font-semibold text-xs text-blue-500"
-          >
+          <Text numberOfLines={1} className="font-semibold text-xs text-blue-500">
             $ {playerPrice}
           </Text>
         </View>
@@ -99,19 +85,16 @@ export function TeamPlayer({
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={handleModalPlayerCard}
-        onLongPress={() =>
-          handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)
-        }
+        onLongPress={() => handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)}
         className={`justify-center items-center border-2 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
-            ? "border-red-500 bg-red-500"
-            : "border-neutral-200"
+            ? 'border-red-500 bg-red-500'
+            : 'border-neutral-200'
         }`}
-        key={player?.foto}
-      >
+        key={player?.foto}>
         <Image
           source={{
-            uri: player?.foto.replace("FORMATO", "220x220"),
+            uri: player?.foto.replace('FORMATO', '220x220'),
           }}
           className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
@@ -120,13 +103,10 @@ export function TeamPlayer({
           <View
             className="relative w-0.5 h-0.5 justify-center items-center"
             style={{
-              bottom: "80%",
-              right: "25%",
-              backgroundColor:
-                OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
-                  ?.background,
-            }}
-          >
+              bottom: '80%',
+              right: '25%',
+              backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.background,
+            }}>
             <Image
               source={captainImage}
               className="w-5 h-5 rounded-full overflow-hidden"
@@ -139,19 +119,14 @@ export function TeamPlayer({
           style={{
             bottom: -2,
             right: 0,
-            backgroundColor:
-              OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
-                ?.background,
-          }}
-        >
+            backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.background,
+          }}>
           <Feather
             name={
               OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
                 ?.icon as keyof typeof Feather.glyphMap
             }
-            color={
-              OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.color
-            }
+            color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.color}
             size={14}
           />
         </View>
@@ -160,8 +135,7 @@ export function TeamPlayer({
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
-          className="font-semibold text-gray-800 text-center text-xs"
-        >
+          className="font-semibold text-gray-800 text-center text-xs">
           {player?.apelido_abreviado}
         </Text>
       </View>
@@ -171,8 +145,7 @@ export function TeamPlayer({
           animationType="fade"
           transparent
           visible={activePlayerCard}
-          onRequestClose={() => setActivePlayerCard(false)}
-        >
+          onRequestClose={() => setActivePlayerCard(false)}>
           <TeamPlayerCard
             player={player as LineupPlayer}
             onClose={handleModalPlayerCard}

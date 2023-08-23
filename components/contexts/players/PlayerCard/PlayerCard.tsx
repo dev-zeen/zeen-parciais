@@ -55,17 +55,15 @@ export function PlayerCard({
     };
   }, []);
 
-  const playerScore = useMemo(() => {
-    return new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: 2,
-    }).format(player.pontuacao);
-  }, [player]);
+  const playerScore = new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+  }).format(player.pontuacao);
 
   const stylePlayerInMyLineup = isPlayerOnMyLineup
     ? colorTheme === 'dark'
       ? 'bg-blue-600'
       : 'bg-blue-200'
-    : false;
+    : '';
 
   // const onPressHandler = useCallback(() => {
   //   router.push(`/(tabs)/players/${player.id}`);
@@ -98,7 +96,7 @@ export function PlayerCard({
       </View>
       <View className={`justify-center items-end ${stylePlayerInMyLineup}`}>
         <View className={`flex-row items-center justify-center ${stylePlayerInMyLineup}`}>
-          {isAutheticated && appreciation && (
+          {isAutheticated && appreciation ? (
             <View
               className={`flex-row items-center justify-end w-10 mr-0.5 ${stylePlayerInMyLineup}`}>
               <Text
@@ -111,15 +109,19 @@ export function PlayerCard({
                 }`}>
                 {numberToString(appreciation)}
               </Text>
-              {appreciation !== 0 && (
+              {appreciation !== 0 ? (
                 <Feather
                   name={appreciation < 0 ? 'arrow-down' : 'arrow-up'}
                   color={
                     appreciation < 0 ? '#ef4444' : colorTheme === 'dark' ? '#93c5fd' : '#3b82f6'
                   }
                 />
+              ) : (
+                <></>
               )}
             </View>
+          ) : (
+            <></>
           )}
 
           <Text className="font-semibold">{playerScore}</Text>

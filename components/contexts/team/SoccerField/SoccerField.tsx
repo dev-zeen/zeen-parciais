@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
-import { ImageBackground, Modal } from "react-native";
+import { useCallback, useEffect, useState } from 'react';
+import { ImageBackground, Modal } from 'react-native';
 
-import Market from "@/app/(tabs)/team/market";
-import footballField from "@/assets/images/field.png";
-import { View } from "@/components/Themed";
-import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton";
-import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import { LineupPlayer, LineupPosition } from "@/models/Formations";
-import { useGetScoredPlayers } from "@/queries/stats.query";
-import useTeamLineupStore from "@/store/useTeamLineupStore";
+import Market from '@/app/(tabs)/team/market';
+import footballField from '@/assets/images/field.png';
+import { View } from '@/components/Themed';
+import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
+import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { LineupPlayer, LineupPosition } from '@/models/Formations';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 type SoccerFieldProps = {
   isMarketClose: boolean;
@@ -21,8 +21,7 @@ export function SoccerField({ isMarketClose }: SoccerFieldProps) {
   const capitain = useTeamLineupStore((state) => state.capitain);
   const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
 
-  const [positionMarketSearch, setPositionMarketSearch] =
-    useState<LineupPosition>();
+  const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
 
   const [playerIndex, setPlayerIndex] = useState(0);
 
@@ -33,7 +32,7 @@ export function SoccerField({ isMarketClose }: SoccerFieldProps) {
       setPositionMarketSearch(player);
       setPlayerIndex(playerIndex);
     },
-    [positionMarketSearch]
+    []
   );
 
   const handleCloseMarketModal = useCallback(() => {
@@ -68,24 +67,18 @@ export function SoccerField({ isMarketClose }: SoccerFieldProps) {
             style={{
               top: position.top as any,
               left: position.left as any,
-              backgroundColor: "transparent",
-            }}
-          >
+              backgroundColor: 'transparent',
+            }}>
             {position.player ? (
               <TeamPlayer
                 player={position.player as LineupPlayer}
                 hasCaptain={capitain === position.player?.atleta_id}
                 handleCapitain={updateCapitain}
-                isPlayed={
-                  playerStats?.atletas?.[position.player.atleta_id]
-                    ?.entrou_em_campo
-                }
+                isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
               />
             ) : (
               <AddPlayerButton
-                onPurchasePlayerOnMarket={(e) =>
-                  handlePurchasePlayerOnMarket(e, index)
-                }
+                onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
                 positionLineup={position}
               />
             )}
@@ -98,8 +91,7 @@ export function SoccerField({ isMarketClose }: SoccerFieldProps) {
           animationType="slide"
           transparent
           visible={showMarketModal}
-          onRequestClose={() => setShowMarketModal(false)}
-        >
+          onRequestClose={() => setShowMarketModal(false)}>
           <Market
             position={positionMarketSearch}
             handleCloseMarketModal={handleCloseMarketModal}

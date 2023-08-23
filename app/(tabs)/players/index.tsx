@@ -88,17 +88,32 @@ export default () => {
     onGetFromStorage<string>(CURRENT_STATS).then((res) => {
       if (res) {
         const statsFormated = JSON.parse(res);
-
-        const data = onGetPlayersPlayedMatch(statsFormated);
-        const statsMarketNotClosed: Player[] = data.map((item) => {
-          return {
-            ...item,
-            pontuacao: market?.atletas.find((player) => String(player.atleta_id) === item.id)
-              ?.pontos_num as number,
-          };
-        });
-        setFilteredDataSource(isMarketClose ? data : statsMarketNotClosed);
         setCurrentStats(statsFormated);
+
+        if (isMarketClose && !market) {
+          const data = onGetPlayersPlayedMatch(statsFormated);
+          setFilteredDataSource(data);
+        } else {
+          const statsMarketNotClosed = market?.atletas
+            .filter((item) => item.entrou_em_campo)
+            .map((item) => {
+              if (item.entrou_em_campo) {
+                return {
+                  id: item.atleta_id,
+                  apelido: item.apelido_abreviado,
+                  foto: item.foto,
+                  pontuacao: item.pontos_num,
+                  posicao_id: item.posicao_id,
+                  clube_id: item.clube_id,
+                  entrou_em_campo: item.entrou_em_campo,
+                  scout: {},
+                };
+              }
+            })
+            .sort((a, b) => (b?.pontuacao as number) - (a?.pontuacao as number));
+
+          setFilteredDataSource(statsMarketNotClosed as any);
+        }
       }
     });
   }, [playerStats, isMarketClose, market]);
@@ -109,16 +124,44 @@ export default () => {
       marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_ATUALIZACAO
     ) {
       onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-        if (res) {
-          setCurrentAppreciations(res);
+        if (isMarketClose && !market) {
+          if (res) {
+            setCurrentAppreciations(res);
+          }
+        } else {
+          const newAppreciations = market?.atletas.reduce(
+            (acc, current) => {
+              if (current.entrou_em_campo) {
+                return {
+                  ...acc,
+                  atletas: {
+                    ...acc.atletas,
+                    [current?.atleta_id]: {
+                      posicao_id: current?.posicao_id,
+                      variacao_num: current?.variacao_num,
+                    },
+                  },
+                };
+              } else {
+                return {
+                  ...acc,
+                };
+              }
+            },
+            {
+              atletas: {},
+            } as Appreciations
+          );
+
+          setCurrentAppreciations(newAppreciations);
         }
       });
     }
-  }, [marketStatus, appreciations]);
+  }, [marketStatus, appreciations, isMarketClose, market]);
 
   const isRefetching = isRefetchingPlayersStats;
 
-  const keyExtractor = useCallback((item: Player) => `${item.foto}`, []);
+  const keyExtractor = useCallback((item: Player) => `${item?.foto} + ${item.id}`, []);
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<Player>) => {

@@ -1,40 +1,30 @@
-import { useCallback, useEffect, useState } from "react";
-import { Alert, Modal } from "react-native";
+import { useCallback, useEffect, useState } from 'react';
+import { Alert, Modal } from 'react-native';
 
-import Market from "@/app/(tabs)/team/market";
-import { Text, View } from "@/components/Themed";
-import { AddPlayerButton } from "@/components/contexts/team/AddPlayerButton";
-import { TeamPlayer } from "@/components/contexts/team/TeamPlayer";
-import {
-  LineupPlayer,
-  LineupPlayers,
-  LineupPosition,
-} from "@/models/Formations";
-import { useGetScoredPlayers } from "@/queries/stats.query";
-import { onGetPlayerLowestPrice } from "@/utils/team";
+import Market from '@/app/(tabs)/team/market';
+import { Text, View } from '@/components/Themed';
+import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
+import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import { onGetPlayerLowestPrice } from '@/utils/team';
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
   isMarketClose: boolean;
 };
 
-export function ListReservePlayers({
-  lineup,
-  isMarketClose,
-}: ListReservePlayersProps) {
+export function ListReservePlayers({ lineup, isMarketClose }: ListReservePlayersProps) {
   const alertToStartingsPlayerPositionNotFilled = () =>
-    Alert.alert(
-      "Atenção",
-      "Você deve preencher todos os titulares para a posição.",
-      [{ text: "OK" }]
-    );
+    Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
+      { text: 'OK' },
+    ]);
 
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
   const [showMarketModal, setShowMarketModal] = useState(false);
-  const [positionMarketSearch, setPositionMarketSearch] =
-    useState<LineupPosition>();
+  const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
 
   const handlePurchasePlayerOnMarket = useCallback(
@@ -43,8 +33,9 @@ export function ListReservePlayers({
         (item) => item.position === player.position
       );
 
-      const isPlayersFilledInPosition =
-        playersSamePositionFromLineupStarting.every((item) => item.player);
+      const isPlayersFilledInPosition = playersSamePositionFromLineupStarting.every(
+        (item) => item.player
+      );
 
       if (!isPlayersFilledInPosition) {
         alertToStartingsPlayerPositionNotFilled();
@@ -57,7 +48,7 @@ export function ListReservePlayers({
       setPositionMarketSearch(player);
       setPlayerIndex(playerIndex);
     },
-    [lineup, positionMarketSearch]
+    [lineup]
   );
 
   const handleCloseMarketModal = useCallback(() => {
@@ -72,31 +63,21 @@ export function ListReservePlayers({
 
   return (
     <View className="rounded-lg items-center justify-center">
-      <Text className="font-semibold text-base text-center">
-        Banco de Reservas
-      </Text>
+      <Text className="font-semibold text-base text-center">Banco de Reservas</Text>
       <View className="flex-row rounded-lg py-2 mb-1 items-center justify-center">
         {lineup.reserves?.map((position, index) => {
           return (
-            <View
-              key={position.position}
-              className="flex-1 justify-center items-center"
-            >
+            <View key={position.position} className="flex-1 justify-center items-center">
               {position && position.player ? (
                 <TeamPlayer
                   player={position.player as LineupPlayer}
                   isReservePlayer
-                  isPlayed={
-                    playerStats?.atletas?.[position.player.atleta_id]
-                      ?.entrou_em_campo
-                  }
+                  isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
                 />
               ) : (
                 <AddPlayerButton
                   key={position.left}
-                  onPurchasePlayerOnMarket={() =>
-                    handlePurchasePlayerOnMarket(position, index)
-                  }
+                  onPurchasePlayerOnMarket={() => handlePurchasePlayerOnMarket(position, index)}
                   positionLineup={position}
                 />
               )}
@@ -110,8 +91,7 @@ export function ListReservePlayers({
           animationType="slide"
           transparent
           visible={showMarketModal}
-          onRequestClose={() => setShowMarketModal(false)}
-        >
+          onRequestClose={() => setShowMarketModal(false)}>
           <Market
             position={positionMarketSearch}
             handleCloseMarketModal={handleCloseMarketModal}
