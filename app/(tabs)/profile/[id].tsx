@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useContext, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
@@ -25,7 +25,9 @@ import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/u
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { isAutheticated, handleUnautenticated } = useContext(AuthContext);
+  const router = useRouter();
+
+  const { isAutheticated } = useContext(AuthContext);
 
   const { data: marketStatus } = useGetMarketStatus();
 
@@ -61,9 +63,8 @@ export default () => {
   );
 
   const handleLogout = () => {
-    handleUnautenticated();
     setShowModalLogout(false);
-    router.push('/(tabs)/');
+    // router.push('/(tabs)/');
   };
 
   const totalPatrimony = club && numberToString(club?.patrimonio);

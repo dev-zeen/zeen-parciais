@@ -1,15 +1,15 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useState } from 'react';
-import { Image, Modal, useColorScheme } from 'react-native';
+import { Image, Modal, Platform, useColorScheme } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import enterImage from '@/assets/images/enter.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import { INJECT_AUTH_LOGIN } from '@/constants/Generic';
+import { INJECT_AUTH_LOGIN_ANDROID, INJECT_AUTH_LOGIN_IOS } from '@/constants/Generic';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
-import { URL_AUTH, URL_HOME } from '@/constants/Urls';
+import { URL_AUTH } from '@/constants/Urls';
 import { AuthContext } from '@/contexts/Auth.context';
 
 type LoginProps = {
@@ -32,7 +32,11 @@ export function Login({ title }: LoginProps) {
   async function handleWebViewMessage(event: WebViewMessageEvent) {
     const token = event.nativeEvent.data;
     await setItem(token);
-    if (token) handleSuccessAuth();
+    if (token) {
+      handleSuccessAuth();
+      setShowModalAuth(false);
+    }
+    // TODO ADICIONAR ALERT PARA QUANDO DER ERRO NO LOGIN
   }
 
   return (
@@ -100,13 +104,17 @@ export function Login({ title }: LoginProps) {
               }}
               incognito
               className="rounded-lg"
-              injectedJavaScript={INJECT_AUTH_LOGIN}
-              onMessage={handleWebViewMessage}
-              onNavigationStateChange={(event: any) => {
-                if (event.url.startsWith(URL_HOME)) {
-                  handleSuccessAuth();
-                }
-              }}
+              injectedJavaScript={
+                Platform.OS === 'ios' ? INJECT_AUTH_LOGIN_IOS : INJECT_AUTH_LOGIN_ANDROID
+              }
+              onMessage={(e) => handleWebViewMessage(e)}
+              // onNavigationStateChange={(event: any) => {
+              //   console.log('onNavigationStateChange', event);
+
+              //   // if (event.url.startsWith(URL_HOME)) {
+              //   //   setShowModalAuth(false);
+              //   // }
+              // }}
             />
           </Modal>
         </View>

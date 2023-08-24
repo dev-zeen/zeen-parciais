@@ -4,8 +4,8 @@ import { Modal } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { INJECT_AUTH_LOGOUT } from '@/constants/Generic';
-import { URL_HOME } from '@/constants/Urls';
+import { INJECT_AUTH_LOGOUT_IOS } from '@/constants/Generic';
+import { URL_AUTH, URL_HOME } from '@/constants/Urls';
 import { AuthContext } from '@/contexts/Auth.context';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
@@ -22,13 +22,10 @@ export function LogoutModal({ isVisible, handleLogoutSuccess }: LogoutModalProps
   const { handleUnautenticated } = useContext(AuthContext);
 
   async function handleWebViewMessage(event?: WebViewMessageEvent) {
-    try {
-      resetStore();
-      queryClient.clear();
-      handleUnautenticated();
-    } catch (err) {
-      console.error(err);
-    }
+    resetStore();
+    queryClient.clear();
+    handleUnautenticated();
+    handleLogoutSuccess();
   }
 
   return (
@@ -40,12 +37,12 @@ export function LogoutModal({ isVisible, handleLogoutSuccess }: LogoutModalProps
             uri: URL_HOME,
           }}
           className="rounded-lg"
-          injectedJavaScript={INJECT_AUTH_LOGOUT}
-          onMessage={(event) => handleWebViewMessage(event)}
-          onNavigationStateChange={(event) => {
-            handleLogoutSuccess();
-            handleWebViewMessage();
-            queryClient.clear();
+          injectedJavaScript={INJECT_AUTH_LOGOUT_IOS}
+          onMessage={handleWebViewMessage}
+          onNavigationStateChange={(event: any) => {
+            if (event.url === URL_AUTH) {
+              handleWebViewMessage();
+            }
           }}
         />
       </Modal>
