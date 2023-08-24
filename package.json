@@ -20,7 +20,7 @@
     "@tanstack/react-query": "^4.32.0",
     "axios": "^1.4.0",
     "date-fns": "^2.30.0",
-    "expo": "~49.0.5",
+    "expo": "^49.0.8",
     "expo-font": "~11.4.0",
     "expo-linking": "~5.0.2",
     "expo-router": "2.0.0",

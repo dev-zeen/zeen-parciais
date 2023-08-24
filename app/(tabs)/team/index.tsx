@@ -60,7 +60,7 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(!!allowRequests);
 
-  const { mutate } = useSaveTeam();
+  const { mutate, isSuccess } = useSaveTeam();
 
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
@@ -153,13 +153,15 @@ export default () => {
       tacticalFormation,
     });
 
-    mutate(payload, {
-      onSuccess: () => {
-        onSuccessSavedTeam();
-        setShowSaveLineupButton(false);
-      },
-    });
-  }, [lineup, capitain, tacticalFormation, mutate, onSuccessSavedTeam]);
+    mutate(payload);
+  }, [lineup, capitain, tacticalFormation, mutate]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      onSuccessSavedTeam();
+      setShowSaveLineupButton(false);
+    }
+  }, [isSuccess, onSuccessSavedTeam]);
 
   const isReservesCompleted = useCallback((reserves: LineupPosition[]) => {
     return reserves.every((item) => item.player);
