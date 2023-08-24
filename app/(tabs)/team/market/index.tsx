@@ -146,7 +146,7 @@ export default ({
       emptyPositions,
       handleAddPlayerToLineup,
       handleRemovePlayerFromLineup,
-      lineup,
+      lineup?.starting,
       playerIndex,
       playerLowestPrice,
       remainingValue,

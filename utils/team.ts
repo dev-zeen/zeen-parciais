@@ -125,10 +125,12 @@ export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: 
 export function onGetPayloadSaveTeam({ lineup, capitain, tacticalFormation }: SaveTeamProps) {
   const atletas = lineup.starting.map((position) => position.player?.atleta_id);
 
-  const reservas = lineup.reserves.reduce((obj, reserve, index) => {
+  const reservas = lineup.reserves.reduce((obj, reserve) => {
+    const index = String(reserve.position);
+
     const { player } = reserve;
     if (player) {
-      (obj as any)[index + 1] = player.atleta_id;
+      (obj as any)[index] = player.atleta_id;
     }
     return obj;
   }, {});
