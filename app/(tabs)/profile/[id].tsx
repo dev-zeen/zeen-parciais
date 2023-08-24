@@ -1,10 +1,9 @@
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { LogoutModal } from '@/components/contexts/auth/LogoutModal';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
@@ -18,6 +17,7 @@ import { TeamHistoryRound } from '@/models/Club';
 import { useGetHistoricMyClub, useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
 import { useGetMarketStatus } from '@/queries/market.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
 import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
@@ -25,7 +25,11 @@ import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/u
 export default () => {
   const colorTheme = useColorScheme();
 
-  const router = useRouter();
+  const { handleUnautenticated } = useContext(AuthContext);
+
+  const queryClient = useQueryClient();
+
+  const resetStore = useTeamLineupStore((state) => state.reset);
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -56,16 +60,15 @@ export default () => {
 
   const [partialScore, setPartialScore] = useState(0);
 
-  const [showModalLogout, setShowModalLogout] = useState(false);
-
   const totalScore = numberToString(
     (club?.pontos_campeonato as number) + (isMarketClose ? partialScore : 0)
   );
 
-  const handleLogout = () => {
-    setShowModalLogout(false);
-    // router.push('/(tabs)/');
-  };
+  const handleLogout = useCallback(() => {
+    resetStore();
+    queryClient.clear();
+    handleUnautenticated();
+  }, [handleUnautenticated, queryClient, resetStore]);
 
   const totalPatrimony = club && numberToString(club?.patrimonio);
 
@@ -187,16 +190,10 @@ export default () => {
         style={{
           gap: 8,
         }}
-        onPress={() => {
-          setShowModalLogout(true);
-        }}>
+        onPress={handleLogout}>
         <Text className="text-white">Sair</Text>
         <Feather name="log-out" size={24} color={tintColorDark} />
       </TouchableOpacity>
-
-      {showModalLogout && (
-        <LogoutModal isVisible={showModalLogout} handleLogoutSuccess={handleLogout} />
-      )}
     </SafeAreaViewContainer>
   );
 };

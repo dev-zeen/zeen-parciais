@@ -30,6 +30,7 @@ import { normalizeQuery } from '@/utils/format';
 export default () => {
   const colorTheme = useColorScheme();
 
+  const [mainDataMarket, setMainDataMarket] = useState<Player[]>();
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
   const [currentAppreciations, setCurrentAppreciations] = useState<Appreciations>();
 
@@ -60,23 +61,24 @@ export default () => {
 
   const onSearchFilter = useCallback(
     async (text: string) => {
-      if (text.length > 2) {
-        const newData = onGetPlayersPlayedMatch(currentStats as PlayerStats)?.filter(
-          (item: Player) => {
-            const itemData = normalizeQuery(item.apelido);
-            const textData = normalizeQuery(text);
-            return itemData.includes(textData);
-          }
-        );
-        setFilteredDataSource(newData);
-        setSearchQuery(text);
-      } else {
-        const playersPlayedMatch = onGetPlayersPlayedMatch(currentStats as PlayerStats);
-        setFilteredDataSource(playersPlayedMatch);
-        setSearchQuery(text);
-      }
+      const getFilteredData = (players: Player[], query: string) => {
+        return players.filter((item: Player) => {
+          const itemData = normalizeQuery(item.apelido);
+          const textData = normalizeQuery(query);
+          return itemData.includes(textData);
+        });
+      };
+
+      const playersToFilter = isMarketClose
+        ? onGetPlayersPlayedMatch(currentStats as PlayerStats)
+        : (mainDataMarket as Player[]);
+
+      const newData = getFilteredData(playersToFilter, text);
+
+      setFilteredDataSource(newData);
+      setSearchQuery(text);
     },
-    [currentStats]
+    [currentStats, isMarketClose, mainDataMarket]
   );
 
   const onRefetch = useCallback(async () => {
@@ -85,38 +87,40 @@ export default () => {
   }, [allowRequest, onRefetchAppreciations, onRefetchPlayersStats]);
 
   useEffect(() => {
-    onGetFromStorage<string>(CURRENT_STATS).then((res) => {
+    onGetFromStorage<string>(CURRENT_STATS).then((res: string) => {
+      console.log('RES', res);
+
       if (res) {
-        const statsFormated = JSON.parse(res);
+        const statsFormated: PlayerStats = JSON.parse(res);
         setCurrentStats(statsFormated);
 
-        if (isMarketClose && !market) {
+        if (isMarketClose) {
           const data = onGetPlayersPlayedMatch(statsFormated);
           setFilteredDataSource(data);
-        } else {
-          const statsMarketNotClosed = market?.atletas
-            .filter((item) => item.entrou_em_campo)
-            .map((item) => {
-              if (item.entrou_em_campo) {
-                return {
-                  id: item.atleta_id,
-                  apelido: item.apelido_abreviado,
-                  foto: item.foto,
-                  pontuacao: item.pontos_num,
-                  posicao_id: item.posicao_id,
-                  clube_id: item.clube_id,
-                  entrou_em_campo: item.entrou_em_campo,
-                  scout: {},
-                };
-              }
-            })
-            .sort((a, b) => (b?.pontuacao as number) - (a?.pontuacao as number));
-
-          setFilteredDataSource(statsMarketNotClosed as any);
         }
       }
+      if (market && !isMarketClose) {
+        const statsMarket: Player[] = market.atletas
+          .filter((item) => item.entrou_em_campo)
+          .map((item) => {
+            return {
+              id: String(item.atleta_id),
+              apelido: item.apelido_abreviado,
+              foto: item.foto,
+              pontuacao: item.pontos_num,
+              posicao_id: item.posicao_id,
+              clube_id: item.clube_id,
+              entrou_em_campo: item.entrou_em_campo,
+              scout: {},
+            };
+          })
+          .sort((a, b) => (b?.pontuacao as number) - (a?.pontuacao as number));
+
+        setMainDataMarket(statsMarket);
+        setFilteredDataSource(statsMarket);
+      }
     });
-  }, [playerStats, isMarketClose, market]);
+  }, [isMarketClose, market, playerStats]);
 
   useEffect(() => {
     if (
@@ -124,10 +128,8 @@ export default () => {
       marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_ATUALIZACAO
     ) {
       onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-        if (isMarketClose && !market) {
-          if (res) {
-            setCurrentAppreciations(res);
-          }
+        if (isMarketClose && res) {
+          setCurrentAppreciations(res);
         } else {
           const newAppreciations = market?.atletas.reduce(
             (acc, current) => {
@@ -164,16 +166,14 @@ export default () => {
   const keyExtractor = useCallback((item: Player) => `${item?.foto} + ${item.id}`, []);
 
   const renderItem = useCallback(
-    ({ item: player }: ListRenderItemInfo<Player>) => {
-      return (
-        <PlayerCard
-          player={player}
-          club={(currentStats as PlayerStats)?.clubes[String(player.clube_id)]}
-          position={(currentStats as PlayerStats)?.posicoes[player.posicao_id]}
-          appreciation={(currentAppreciations as Appreciations)?.atletas?.[player.id]?.variacao_num}
-        />
-      );
-    },
+    ({ item: player }: ListRenderItemInfo<Player>) => (
+      <PlayerCard
+        player={player}
+        club={(currentStats as PlayerStats)?.clubes[String(player.clube_id)]}
+        position={(currentStats as PlayerStats)?.posicoes[player.posicao_id]}
+        appreciation={(currentAppreciations as Appreciations)?.atletas?.[player.id]?.variacao_num}
+      />
+    ),
     [currentAppreciations, currentStats]
   );
 

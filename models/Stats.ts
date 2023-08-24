@@ -49,7 +49,7 @@ export interface FullPlayer {
   scout?: IScout;
   apelido: string;
   apelido_abreviado: string;
-  entrou_em_campo?: boolean;
+  entrou_em_campo: boolean;
   nome: string;
   foto: string;
   posicao_id: number;
