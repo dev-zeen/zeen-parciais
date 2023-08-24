@@ -62,10 +62,10 @@ export default ({
     (player: FullPlayer, targetIndex?: number) => {
       addPlayerToLineup({
         player,
-        index: targetIndex,
+        index: undefined,
         isReservePlayer: !!playerLowestPrice,
       });
-      if (handleCloseMarketModal) handleCloseMarketModal();
+      if (!!playerLowestPrice && handleCloseMarketModal) handleCloseMarketModal();
     },
     [addPlayerToLineup, handleCloseMarketModal, playerLowestPrice]
   );
@@ -130,27 +130,23 @@ export default ({
   }, [lineup]);
 
   const renderItem = useCallback(
-    ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
-      return (
-        <MarketPlayerCard
-          player={player}
-          onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
-          onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
-          isButtonDisabled={
-            (!playerLowestPrice && player.preco_num > remainingValue) ||
-            (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
-          }
-          isSellPlayer={lineup?.starting.some(
-            (item) => item.player?.atleta_id === player.atleta_id
-          )}
-        />
-      );
-    },
+    ({ item: player }: ListRenderItemInfo<FullPlayer>) => (
+      <MarketPlayerCard
+        player={player}
+        onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
+        onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
+        isButtonDisabled={
+          (!playerLowestPrice && player.preco_num > remainingValue) ||
+          (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
+        }
+        isSellPlayer={lineup?.starting.some((item) => item.player?.atleta_id === player.atleta_id)}
+      />
+    ),
     [
       emptyPositions,
       handleAddPlayerToLineup,
       handleRemovePlayerFromLineup,
-      lineup?.starting,
+      lineup,
       playerIndex,
       playerLowestPrice,
       remainingValue,

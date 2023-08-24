@@ -228,9 +228,10 @@ export default () => {
       };
 
       updateLineup(lineupWithoutPlayers);
+      updateCapitain(0);
       updatePrice(newPrice);
     },
-    [updateLineup, updatePrice]
+    [updateCapitain, updateLineup, updatePrice]
   );
 
   useEffect(() => {

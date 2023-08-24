@@ -180,7 +180,12 @@ export function MarketPlayerCard({
           onPress={() => onPressAddPlayerToLineup(player)}
           activeOpacity={0.6}>
           {isButtonDisabled || isMarketClose ? (
-            <Text className="text-white text-sm font-semibold">Indisp.</Text>
+            <>
+              <Text className="text-white text-sm font-semibold">Indisp.</Text>
+              <Text className="text-white text-sm font-semibold">
+                C$ {numberToString(player.preco_num)}
+              </Text>
+            </>
           ) : (
             <>
               <Text className="text-white text-sm font-semibold">Comprar</Text>
@@ -200,7 +205,12 @@ export function MarketPlayerCard({
           onPress={() => onPressRemovePlayerFromLineup(player)}
           activeOpacity={0.6}>
           {isMarketClose ? (
-            <Text className="text-white text-sm font-semibold">Indisp.</Text>
+            <>
+              <Text className="text-white text-sm font-semibold">Indisp.</Text>
+              <Text className="text-white text-sm font-semibold">
+                C$ {numberToString(player.preco_num)}
+              </Text>
+            </>
           ) : (
             <>
               <Text className="text-white text-sm font-semibold">Vender</Text>

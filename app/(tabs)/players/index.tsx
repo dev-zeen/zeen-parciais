@@ -88,8 +88,6 @@ export default () => {
 
   useEffect(() => {
     onGetFromStorage<string>(CURRENT_STATS).then((res: string) => {
-      console.log('RES', res);
-
       if (res) {
         const statsFormated: PlayerStats = JSON.parse(res);
         setCurrentStats(statsFormated);
