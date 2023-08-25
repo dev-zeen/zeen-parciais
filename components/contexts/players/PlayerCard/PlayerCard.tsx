@@ -62,14 +62,9 @@ export function PlayerCard({
       : 'bg-blue-200'
     : '';
 
-  // const onPressHandler = useCallback(() => {
-  //   router.push(`/(tabs)/players/${player.id}`);
-  // }, []);
-
   return (
     <TouchableOpacity
       activeOpacity={0.6}
-      // onPress={onPressHandler}
       className={`flex-row justify-between items-center rounded-lg px-4 py-2 ${stylePlayerInMyLineup}`}>
       <View className={`flex-row items-center gap-1 rounded-lg ${stylePlayerInMyLineup}`}>
         <Image

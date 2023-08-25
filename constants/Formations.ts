@@ -13,64 +13,61 @@ export const FORMATIONS: TacticalFormations = {
   '3-4-3': {
     starting: [
       {
-        top: '82%',
+        top: '73%',
         left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
         abbr: 'GOL',
       }, // Goleiro
-
       {
-        top: '59%',
+        top: '52%',
         left: '5%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '39.5%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '74%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
-
       {
-        top: '32%',
+        top: '29%',
         left: '5%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '28%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '51%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '74%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
-
       {
         top: '5%',
         left: '10%',
@@ -92,9 +89,8 @@ export const FORMATIONS: TacticalFormations = {
         player: undefined,
         abbr: 'ATA',
       }, // Atacante
-
       {
-        top: '79%',
+        top: '73%',
         left: '5%',
         position: Positions.TECNICO,
         player: undefined,
@@ -111,65 +107,63 @@ export const FORMATIONS: TacticalFormations = {
   '3-5-2': {
     starting: [
       {
-        top: '80%',
+        top: '73%',
         left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
         abbr: 'GOL',
       }, // Goleiro
-
       {
-        top: '59%',
-        left: '10%',
+        top: '52%',
+        left: '5%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '39.5%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
-        left: '69%',
+        top: '52%',
+        left: '74%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
-
       {
-        top: '32%',
+        top: '29%',
         left: '0%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '19.75%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '39.50%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '59.25%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '79%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -192,7 +186,7 @@ export const FORMATIONS: TacticalFormations = {
       }, // Atacante
 
       {
-        top: '79%',
+        top: '73%',
         left: '5%',
         position: Positions.TECNICO,
         player: undefined,
@@ -209,36 +203,36 @@ export const FORMATIONS: TacticalFormations = {
   '4-3-3': {
     starting: [
       {
-        top: '71%',
-        left: '41.5%',
+        top: '73%',
+        left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
         abbr: 'GOL',
       }, // Goleiro
 
       {
-        top: '48%',
+        top: '52%',
         left: '5%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '48%',
+        top: '52%',
         left: '74%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '48%',
+        top: '52%',
         left: '28%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '48%',
+        top: '52%',
         left: '51%',
         position: Positions.ZAGUEIRO,
         player: undefined,
@@ -246,21 +240,21 @@ export const FORMATIONS: TacticalFormations = {
       }, // Zagueiro
 
       {
-        top: '24%',
+        top: '29%',
         left: '15%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '24%',
+        top: '29%',
         left: '39.5%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       },
       {
-        top: '24%',
+        top: '29%',
         left: '64%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -268,21 +262,21 @@ export const FORMATIONS: TacticalFormations = {
       }, // Meio-campo
 
       {
-        top: '1%',
+        top: '5%',
         left: '15%',
         position: Positions.ATACANTE,
         player: undefined,
         abbr: 'ATA',
       }, // Atacante
       {
-        top: '1%',
+        top: '5%',
         left: '39.5%',
         position: Positions.ATACANTE,
         player: undefined,
         abbr: 'ATA',
       }, // Atacante
       {
-        top: '1%',
+        top: '5%',
         left: '64%',
         position: Positions.ATACANTE,
         player: undefined,
@@ -290,7 +284,7 @@ export const FORMATIONS: TacticalFormations = {
       }, // Atacante
 
       {
-        top: '71%',
+        top: '73%',
         left: '5%',
         position: Positions.TECNICO,
         player: undefined,
@@ -308,7 +302,7 @@ export const FORMATIONS: TacticalFormations = {
   '4-4-2': {
     starting: [
       {
-        top: '80%',
+        top: '73%',
         left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
@@ -316,28 +310,28 @@ export const FORMATIONS: TacticalFormations = {
       }, // Goleiro
 
       {
-        top: '59%',
+        top: '52%',
         left: '5%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '74%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '28%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '51%',
         position: Positions.ZAGUEIRO,
         player: undefined,
@@ -345,28 +339,28 @@ export const FORMATIONS: TacticalFormations = {
       }, // Zagueiro
 
       {
-        top: '32%',
+        top: '29%',
         left: '5%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '28%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '51%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '74%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -407,7 +401,7 @@ export const FORMATIONS: TacticalFormations = {
   '4-5-1': {
     starting: [
       {
-        top: '80%',
+        top: '73%',
         left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
@@ -415,28 +409,28 @@ export const FORMATIONS: TacticalFormations = {
       }, // Goleiro
 
       {
-        top: '59%',
+        top: '52%',
         left: '5%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '74%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '28%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '51%',
         position: Positions.ZAGUEIRO,
         player: undefined,
@@ -444,35 +438,35 @@ export const FORMATIONS: TacticalFormations = {
       }, // Zagueiro
 
       {
-        top: '32%',
+        top: '29%',
         left: '0%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '19.75%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '39.50%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '59.25%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '79%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -506,7 +500,7 @@ export const FORMATIONS: TacticalFormations = {
   '5-3-2': {
     starting: [
       {
-        top: '80%',
+        top: '73%',
         left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
@@ -514,35 +508,35 @@ export const FORMATIONS: TacticalFormations = {
       }, // Goleiro
 
       {
-        top: '59%',
+        top: '52%',
         left: '0%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '79%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '19.75%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '39.5%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '59.25%',
         position: Positions.ZAGUEIRO,
         player: undefined,
@@ -550,21 +544,21 @@ export const FORMATIONS: TacticalFormations = {
       }, // Zagueiro
 
       {
-        top: '32%',
+        top: '29%',
         left: '10%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '39.5%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       },
       {
-        top: '32%',
+        top: '29%',
         left: '69%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -605,7 +599,7 @@ export const FORMATIONS: TacticalFormations = {
   '5-4-1': {
     starting: [
       {
-        top: '80%',
+        top: '73%',
         left: '39.5%',
         position: Positions.GOLEIRO,
         player: undefined,
@@ -613,35 +607,35 @@ export const FORMATIONS: TacticalFormations = {
       }, // Goleiro
 
       {
-        top: '59%',
+        top: '52%',
         left: '0%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '79%',
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
       }, // Lateral
       {
-        top: '59%',
+        top: '52%',
         left: '19.75%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '39.5%',
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
       }, // Zagueiro
       {
-        top: '59%',
+        top: '52%',
         left: '59.25%',
         position: Positions.ZAGUEIRO,
         player: undefined,
@@ -649,28 +643,28 @@ export const FORMATIONS: TacticalFormations = {
       }, // Zagueiro
 
       {
-        top: '32%',
+        top: '29%',
         left: '5%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '28%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '51%',
         position: Positions.MEIO_CAMPO,
         player: undefined,
         abbr: 'MEI',
       }, // Meio-campo
       {
-        top: '32%',
+        top: '29%',
         left: '74%',
         position: Positions.MEIO_CAMPO,
         player: undefined,

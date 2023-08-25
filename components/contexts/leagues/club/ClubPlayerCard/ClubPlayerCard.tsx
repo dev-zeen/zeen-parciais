@@ -59,10 +59,6 @@ export function ClubPlayerCard({
     [currentRound, isCapitain, isMarketClose, marketStatus?.rodada_atual, playerStats]
   );
 
-  // const onPressHandler = useCallback(() => {
-  //   router.push(`/leagues/player/${player.atleta_id}`);
-  // }, []);
-
   return (
     <View
       className={`rounded-lg p-2
@@ -70,11 +66,7 @@ export function ClubPlayerCard({
           ${(player.isReplaced || isReserve) && 'opacity-50'}
           ${player.isJoined && 'opacity-100'}
           `}>
-      <TouchableOpacity
-        className="justify-between flex-row"
-        activeOpacity={0.6}
-        // onPress={onPressHandler}
-      >
+      <TouchableOpacity className="justify-between flex-row" activeOpacity={0.6}>
         <View className="flex-row gap-x-2 items-center">
           <View className="justify-center items-center px-1 gap-y-1">
             <Image

@@ -2,7 +2,7 @@
   "expo": {
     "name": "meu-cartola",
     "slug": "meu-cartola",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -22,9 +22,11 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+        "versionCode": 1
       },
-      "package": "com.clizioguedes.meucartola"
+      "package": "com.clizioguedes.meucartola",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",

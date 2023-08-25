@@ -17,7 +17,7 @@ import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
 import { Match } from '@/models/Matches';
 import { Appreciations } from '@/models/Player';
-import { FullPlayer, Player, PlayerStats } from '@/models/Stats';
+import { FullPlayer, IScout, PlayerStats } from '@/models/Stats';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
 import { useGetAppreciations } from '@/queries/players.query';
@@ -29,7 +29,16 @@ interface IMatch extends Match {
   away?: number;
 }
 
-interface FullPlayerPartials extends Player, FullPlayer {}
+interface FullPlayerPartials extends FullPlayer {
+  id: string;
+  scout?: IScout;
+  apelido: string;
+  foto: string;
+  pontuacao: number;
+  posicao_id: number;
+  clube_id: number;
+  entrou_em_campo: boolean;
+}
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -205,9 +214,12 @@ export default () => {
     ],
     [
       isMarketClose,
-      playerStats,
-      match,
-      market,
+      playerStats?.clubes,
+      match?.home,
+      match?.clube_casa_id,
+      match?.away,
+      match?.clube_visitante_id,
+      market?.clubes,
       onRefetch,
       isRefetchingStats,
       isRefetchingAppreciations,

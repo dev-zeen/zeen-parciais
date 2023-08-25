@@ -47,9 +47,11 @@ export function fillPlayersInLineup({
   arrayFillTarget.forEach((itemFormation) => {
     if (!itemFormation.player) {
       const posicao_id = itemFormation.position;
-      const player = players.find(
-        (item) => item.posicao_id === posicao_id && !usedPlayers[item.atleta_id]
-      );
+      const player = players.find((item) => {
+        if (item) {
+          return item?.posicao_id === posicao_id && !usedPlayers[item.atleta_id];
+        }
+      });
 
       if (player) {
         usedPlayers[player.atleta_id] = true;
@@ -70,7 +72,9 @@ export function fillPlayersInLineup({
 
 function onGetPlayerPositions(starting: LineupPosition[]): number[] {
   const positions = new Set<number>();
-  starting?.forEach((player) => positions?.add(player.position));
+  starting?.forEach((player) => {
+    if (player.player) positions?.add(player.position);
+  });
   return Array.from(positions);
 }
 
@@ -86,7 +90,9 @@ export function onGetPlayersOnChangePositionSell(
 
   const currentPlayerMap: Record<string, LineupPosition[]> = currentPlayerPositions.reduce(
     (map, position) => {
-      (map as any)[position] = currentPlayers.filter((player) => player.position === position);
+      (map as any)[position] = currentPlayers.filter(
+        (player) => player.player && player.position === position
+      );
       return map;
     },
     {}

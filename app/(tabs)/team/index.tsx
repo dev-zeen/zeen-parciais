@@ -9,7 +9,9 @@ import {
   clearLineup,
   fillLineupOnChangeTacticalFormation,
   fillLineupWithPlayers,
+  fillPlayersInLineup,
   listDefaultLineups,
+  onClearLineup,
   onGetDefaultLineupTeam,
   onGetEqualLineups,
   onGetPlayersOnChangePositionSell,
@@ -25,12 +27,12 @@ import { Button } from '@/components/structure/Button';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
+import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayers, LineupPosition } from '@/models/Formations';
-import { PlayerStats } from '@/models/Stats';
+import { FullPlayer, PlayerStats } from '@/models/Stats';
 import { useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetMarketStatus } from '@/queries/market.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
@@ -120,20 +122,42 @@ export default () => {
 
   const handleChangeFormation = useCallback(
     (lineup: LineupPlayers, value: number) => {
+      const isExistsPlayerOnLineup = lineup.starting.some((item) => item.player);
+
       const newFormation = onGetDefaultLineupTeam(value);
 
       setTacticalFormation(newFormation);
 
       if ((LINEUPS_DEFAULT_OBJECT as any)[value] === tacticalFormation) return;
 
+      if (!isExistsPlayerOnLineup) {
+        const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[newFormation]);
+        updateLineup(lineupUpdated);
+        return;
+      }
+
       const playersToSell = onGetPlayersOnChangePositionSell(lineup as LineupPlayers, newFormation);
 
-      if (Object.keys(playersToSell).length) {
+      if (!playersToSell.length) {
+        const lineupUpdated = FORMATIONS[newFormation];
+
+        fillPlayersInLineup({
+          players: lineup.starting.map((item) => item.player) as FullPlayer[],
+          arrayFillTarget: lineupUpdated.starting,
+          playerStats,
+          isMarketClose,
+        });
+
+        updateLineup(lineupUpdated);
+        return;
+      }
+
+      if (Object.keys(playersToSell).length && isExistsPlayerOnLineup) {
         setPlayersToSell(playersToSell);
         setShowModalPlayersToSell(true);
       }
     },
-    [tacticalFormation]
+    [isMarketClose, playerStats, tacticalFormation, updateLineup]
   );
 
   const onRefetch = useCallback(async () => {

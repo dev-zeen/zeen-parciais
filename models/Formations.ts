@@ -1,6 +1,15 @@
-import { FullPlayer, Player } from '@/models/Stats';
+import { FullPlayer, IScout } from '@/models/Stats';
 
-export interface LineupPlayer extends Player, FullPlayer {}
+export interface LineupPlayer extends FullPlayer {
+  id: string;
+  scout?: IScout;
+  apelido: string;
+  foto: string;
+  pontuacao: number;
+  posicao_id: number;
+  clube_id: number;
+  entrou_em_campo: boolean;
+}
 
 export type LineupPosition = {
   position: number;
