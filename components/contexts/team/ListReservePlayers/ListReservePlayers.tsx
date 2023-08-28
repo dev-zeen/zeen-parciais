@@ -5,6 +5,7 @@ import Market from '@/app/(tabs)/team/market';
 import { Text, View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetPlayerLowestPrice } from '@/utils/team';
@@ -12,9 +13,14 @@ import { onGetPlayerLowestPrice } from '@/utils/team';
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
   isMarketClose: boolean;
+  substitutions?: Substitutions[];
 };
 
-export function ListReservePlayers({ lineup, isMarketClose }: ListReservePlayersProps) {
+export function ListReservePlayers({
+  lineup,
+  isMarketClose,
+  substitutions,
+}: ListReservePlayersProps) {
   const alertToStartingsPlayerPositionNotFilled = () =>
     Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
       { text: 'OK' },
@@ -73,6 +79,9 @@ export function ListReservePlayers({ lineup, isMarketClose }: ListReservePlayers
                   player={position.player as LineupPlayer}
                   isReservePlayer
                   isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
+                  isEnteredInMatch={substitutions?.some(
+                    (item) => item.entrou.atleta_id === position.player?.atleta_id
+                  )}
                 />
               ) : (
                 <AddPlayerButton

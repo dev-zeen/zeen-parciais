@@ -163,7 +163,7 @@ export default () => {
                 paddingHorizontal: 8,
               }}
               contentContainerStyle={{
-                gap: 8,
+                gap: 4,
                 paddingVertical: 8,
               }}
               refreshControl={
@@ -199,7 +199,7 @@ export default () => {
                 />
               }
               contentContainerStyle={{
-                gap: 8,
+                gap: 4,
                 paddingVertical: 8,
               }}
               data={awayTeamPlayers}

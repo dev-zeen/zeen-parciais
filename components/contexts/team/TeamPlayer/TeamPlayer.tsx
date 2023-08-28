@@ -18,6 +18,8 @@ type TeamPlayerProps = {
   hasCaptain?: boolean;
   handleCapitain?: (id: number) => void;
   isPlayed?: boolean;
+  isReplaced?: boolean;
+  isEnteredInMatch?: boolean;
   isReservePlayer?: boolean;
 };
 
@@ -25,6 +27,8 @@ export function TeamPlayer({
   player,
   hasCaptain,
   isPlayed,
+  isReplaced,
+  isEnteredInMatch,
   isReservePlayer = false,
 }: TeamPlayerProps) {
   const { data: marketStatus } = useGetMarketStatus();
@@ -61,7 +65,9 @@ export function TeamPlayer({
 
   return (
     <View
-      className="items-center justify-center"
+      className={`items-center justify-center ${
+        isReplaced || (isReservePlayer && !isEnteredInMatch) ? 'opacity-50' : ''
+      }`}
       style={{
         gap: 2,
         maxWidth: 90,

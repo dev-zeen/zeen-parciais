@@ -6,15 +6,17 @@ import footballField from '@/assets/images/field.png';
 import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 type SoccerFieldProps = {
   isMarketClose: boolean;
+  substitutions?: Substitutions[];
 };
 
-export function SoccerField({ isMarketClose }: SoccerFieldProps) {
+export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) {
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -75,6 +77,9 @@ export function SoccerField({ isMarketClose }: SoccerFieldProps) {
                 hasCaptain={capitain === position.player?.atleta_id}
                 handleCapitain={updateCapitain}
                 isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
+                isReplaced={substitutions?.some(
+                  (item) => item.saiu.atleta_id === position.player?.atleta_id
+                )}
               />
             ) : (
               <AddPlayerButton

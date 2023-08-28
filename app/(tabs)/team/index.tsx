@@ -33,7 +33,7 @@ import { AuthContext } from '@/contexts/Auth.context';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayers, LineupPosition } from '@/models/Formations';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
-import { useGetMyClub, useSaveTeam } from '@/queries/club.query';
+import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetMarketStatus } from '@/queries/market.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
@@ -65,6 +65,10 @@ export default () => {
   const { mutate, isSuccess } = useSaveTeam();
 
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
+
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: club?.time.time_id,
+  });
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -420,9 +424,13 @@ export default () => {
             )}
           </View>
 
-          <SoccerField isMarketClose={isMarketClose} />
+          <SoccerField isMarketClose={isMarketClose} substitutions={substitutions} />
 
-          <ListReservePlayers lineup={lineup} isMarketClose={isMarketClose} />
+          <ListReservePlayers
+            lineup={lineup}
+            isMarketClose={isMarketClose}
+            substitutions={substitutions}
+          />
 
           {showModalPlayersToSell && (
             <Modal animationType="fade" transparent visible={showModalPlayersToSell}>

@@ -108,7 +108,7 @@ export default () => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onGetClubsByLeagueFromStorage, clubsByLeague, isMarketClose, league, playerStats, marketStatus]
+    [clubsByLeague, isMarketClose, league, playerStats, marketStatus]
   );
 
   const handleOnPressOrderBy = useCallback(
@@ -126,12 +126,15 @@ export default () => {
   );
 
   useEffect(() => {
-    if (league && orderBy === OrderByOptions.PATRIMONIO) {
-      handleOrderByPatrimony();
-      return;
+    if (!clubs) {
+      if (league && orderBy === OrderByOptions.PATRIMONIO) {
+        handleOrderByPatrimony();
+        return;
+      }
+      handleSortClubs(orderBy);
     }
-    handleSortClubs(orderBy);
-  }, [handleOrderByPatrimony, handleSortClubs, league, orderBy]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clubs, league, orderBy]);
 
   useEffect(() => {
     if (league && !league?.liga.time_dono_id) {
@@ -187,7 +190,7 @@ export default () => {
         },
       },
     ],
-    [handleOnPressOrderBy, orderBy]
+    [orderBy, handleOnPressOrderBy]
   );
 
   const renderItem = useCallback(
