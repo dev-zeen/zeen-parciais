@@ -217,6 +217,19 @@ export default () => {
         },
       ]);
 
+    const emptyLineupFormation = () =>
+      Alert.alert('Atenção', 'Selecione uma formação', [
+        {
+          text: 'Ok',
+          style: 'cancel',
+        },
+      ]);
+
+    if (!tacticalFormation) {
+      emptyLineupFormation();
+      return;
+    }
+
     if (!capitain) {
       emptyCapitain();
       return;
@@ -227,7 +240,7 @@ export default () => {
       return;
     }
     onSaveTeam();
-  }, [capitain, isReservesCompleted, lineup?.reserves, onSaveTeam]);
+  }, [capitain, isReservesCompleted, lineup?.reserves, onSaveTeam, tacticalFormation]);
 
   const handlePressShowMarketModal = useCallback(() => {
     router.push('/team/market/');
@@ -373,6 +386,7 @@ export default () => {
                 return <Feather name="chevron-down" size={18} color={'#374151'} />;
               }}
               defaultValue={tacticalFormation}
+              defaultButtonText="Selecione"
               data={listDefaultLineups()}
               onSelect={(_selectedItem, index) => {
                 handleChangeFormation(lineup, index + 1);

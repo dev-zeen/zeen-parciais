@@ -55,6 +55,7 @@ export default ({
   }, [club, price]);
 
   const [isLoading, setIsLoading] = useState(false);
+
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
 
@@ -100,8 +101,6 @@ export default ({
     [handleCloseMarketModal]
   );
 
-  const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
-
   useEffect(() => {
     if (marketData && isFirstRender.current) {
       if (position) {
@@ -128,6 +127,8 @@ export default ({
       setEmptyPositions(emptyPositionsUpdated);
     }
   }, [lineup]);
+
+  const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => (
@@ -199,11 +200,11 @@ export default ({
         {playerLowestPrice && <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />}
 
         <FlatList
-          contentContainerStyle={{
-            gap: 8,
-            paddingVertical: 8,
-          }}
           data={marketPlayers}
+          contentContainerStyle={{
+            paddingVertical: 8,
+            gap: 8,
+          }}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           maxToRenderPerBatch={6}

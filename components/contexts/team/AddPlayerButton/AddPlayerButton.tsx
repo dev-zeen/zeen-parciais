@@ -24,7 +24,7 @@ export function AddPlayerButton({
       <TouchableOpacity
         activeOpacity={0.6}
         onPress={() => onPurchasePlayerOnMarket(positionLineup)}
-        className="justify-center items-center border-2 w-12 h-12 rounded-full border-neutral-200 bg-white">
+        className="justify-center items-center border-2 w-11 h-11 rounded-full border-neutral-200 bg-white">
         <Feather name="plus" size={20} />
       </TouchableOpacity>
 

@@ -57,7 +57,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     return (
       <View
         key={club?.time_id}
-        className={`rounded-lg p-3 justify-center ${
+        className={`rounded-lg py-3 pl-1 pr-3 justify-center ${
           myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
         }`}>
         <TouchableOpacity
@@ -75,7 +75,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                 myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
               }`}>
               <View
-                className={`items-center justify-center gap-x-0.5 w-7 ${
+                className={`items-center justify-center gap-x-0.5 w-12 ${
                   myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
                 }`}>
                 <Text className="text-sm font-semibold">{position}</Text>

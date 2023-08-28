@@ -1,7 +1,14 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ListRenderItemInfo,
+  RefreshControl,
+  useColorScheme,
+} from 'react-native';
 
 import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from './leagues.helper';
 
@@ -42,6 +49,8 @@ export default () => {
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
+
+  const [isSortingClubs, setIsSortingClubs] = useState(false);
 
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
 
@@ -117,10 +126,12 @@ export default () => {
       if (sortProp === OrderByOptions.PATRIMONIO) {
         const newOrderByPatrimony = handleOrderByPatrimony();
         setClubs(newOrderByPatrimony);
-        return;
+        setIsSortingClubs(false);
+      } else {
+        await handleSortClubs(sortProp);
       }
 
-      await handleSortClubs(sortProp);
+      setIsSortingClubs(false);
     },
     [handleOrderByPatrimony, handleSortClubs]
   );
@@ -150,6 +161,7 @@ export default () => {
         onPress() {
           const sortProp = OrderByOptions.RODADA;
           if (sortProp === orderBy) return;
+          setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -159,6 +171,7 @@ export default () => {
         onPress() {
           const sortProp = OrderByOptions.CAMPEONATO;
           if (sortProp === orderBy) return;
+          setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -168,6 +181,7 @@ export default () => {
         onPress() {
           const sortProp = OrderByOptions.TURNO;
           if (sortProp === orderBy) return;
+          setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -177,6 +191,7 @@ export default () => {
         onPress() {
           const sortProp = OrderByOptions.MES;
           if (sortProp === orderBy) return;
+          setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -186,6 +201,7 @@ export default () => {
         onPress() {
           const sortProp = OrderByOptions.PATRIMONIO;
           if (sortProp === orderBy) return;
+          setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -199,8 +215,8 @@ export default () => {
         <ClubCard
           club={item}
           league={league as League}
-          position={index + 1}
           orderBy={orderBy}
+          position={index + 1}
           firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
           marketStatus={marketStatus as MarketStatus}
           isMarketClose={isMarketClose}
@@ -253,21 +269,27 @@ export default () => {
         <Tabs tabs={tabs} />
       </View>
 
-      <FlatList
-        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-        data={clubs}
-        renderItem={(data) => renderItem(data)}
-        keyExtractor={keyExtractor}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        contentContainerStyle={{
-          marginTop: 4,
-          paddingVertical: 8,
-          marginHorizontal: 8,
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
-          gap: 6,
-        }}
-      />
+      {isSortingClubs ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <FlatList
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+          data={clubs}
+          renderItem={(data) => renderItem(data)}
+          keyExtractor={keyExtractor}
+          initialNumToRender={10}
+          maxToRenderPerBatch={5}
+          contentContainerStyle={{
+            marginTop: 4,
+            paddingVertical: 8,
+            marginHorizontal: 8,
+            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+            gap: 6,
+          }}
+        />
+      )}
 
       {showModalPublicLeague && (
         <DialogComponent

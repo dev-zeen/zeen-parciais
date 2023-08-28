@@ -1,12 +1,7 @@
 import { Feather } from '@expo/vector-icons';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import {
-  FlatList,
-  ListRenderItemInfo,
-  RefreshControl,
-  TextInput,
-  useColorScheme,
-} from 'react-native';
+import { RefreshControl, TextInput, useColorScheme } from 'react-native';
 
 import { onGetPlayersPlayedMatch } from '@/app/(tabs)/players/players.helper';
 import { Text, View } from '@/components/Themed';
@@ -222,17 +217,18 @@ export default () => {
           autoCorrect={false}
         />
 
-        <FlatList
+        <FlashList
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
           data={filteredDataSource}
           keyExtractor={keyExtractor}
+          ItemSeparatorComponent={() => (
+            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+          )}
           renderItem={renderItem}
-          initialNumToRender={12}
-          maxToRenderPerBatch={25}
+          estimatedItemSize={300}
           contentContainerStyle={{
             paddingVertical: 4,
             backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
-            gap: 4,
           }}
         />
       </View>
