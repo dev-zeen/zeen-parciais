@@ -8,6 +8,7 @@ const cartolaApi = axios.create({
 
 cartolaApi.interceptors.request.use(async (instance: InternalAxiosRequestConfig) => {
   const token = await getTokenFromStorage();
+  console.log(instance.url);
   if (token) {
     instance.headers.Authorization = `Bearer ${token}`;
     instance.timeout = 10000;

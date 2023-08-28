@@ -1,11 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useState } from 'react';
-import { Image, Modal, useColorScheme } from 'react-native';
+import { Image, Modal, Platform, useColorScheme } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import enterImage from '@/assets/images/enter.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { AuthContext } from '@/contexts/Auth.context';
@@ -15,9 +16,10 @@ const URL_AUTH = 'https://cartola.globo.com/#!/login';
 const INJECT_AUTH_LOGIN = `
   function getToken() {
     var token = window.localStorage.getItem('at');
-    if (token) { 
+    if (token) {
       window.postMessage(token)
       window.ReactNativeWebView.postMessage(token)
+      window.localStorage.clear()
     }
   } 
   getToken() 
@@ -78,48 +80,49 @@ export function Login({ title }: LoginProps) {
       </View>
 
       {showModalAuth && (
-        <View className="items-center justify-center m-32">
-          <Modal
-            animationType="slide"
-            transparent
-            visible={showModalAuth}
-            style={{
-              flex: 1,
-            }}>
-            <TouchableOpacity
-              className="rounded-full p-1"
-              onPress={() => {
-                setShowModalAuth(false);
-              }}
+        <SafeAreaViewContainer>
+          <View className="items-center justify-center m-32">
+            <Modal
+              animationType="slide"
+              transparent
+              visible={showModalAuth}
               style={{
-                position: 'absolute',
-                top: 30,
-                left: 10,
-                zIndex: 9999,
-                backgroundColor: colorTheme === 'dark' ? Colors.light.tint : Colors.dark.tint,
+                flex: 1,
               }}>
-              <Feather
-                name="x"
-                size={30}
-                color={colorTheme === 'dark' ? Colors.dark.tint : Colors.light.tint}
-              />
-            </TouchableOpacity>
+              <TouchableOpacity
+                className="rounded-full p-1"
+                onPress={() => {
+                  setShowModalAuth(false);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: Platform.OS === 'ios' ? 75 : 30,
+                  left: 10,
+                  zIndex: 9999,
+                  backgroundColor: colorTheme === 'dark' ? Colors.light.tint : Colors.dark.tint,
+                }}>
+                <Feather name="x" size={48} />
+              </TouchableOpacity>
 
-            <WebView
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-              source={{
-                uri: URL_AUTH,
-              }}
-              incognito
-              className="rounded-lg"
-              injectedJavaScript={INJECT_AUTH_LOGIN}
-              onMessage={(e) => handleWebViewMessage(e)}
-            />
-          </Modal>
-        </View>
+              <WebView
+                style={
+                  Platform.OS === 'ios'
+                    ? {
+                        marginTop: 60,
+                      }
+                    : {}
+                }
+                source={{
+                  uri: URL_AUTH,
+                }}
+                incognito
+                className="rounded-lg"
+                injectedJavaScript={INJECT_AUTH_LOGIN}
+                onMessage={(e) => handleWebViewMessage(e)}
+              />
+            </Modal>
+          </View>
+        </SafeAreaViewContainer>
       )}
     </>
   );

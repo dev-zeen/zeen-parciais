@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ImageBackground, Modal } from 'react-native';
+import { Dimensions, ImageBackground, Modal } from 'react-native';
 
 import Market from '@/app/(tabs)/team/market';
 import footballField from '@/assets/images/field.png';
@@ -49,17 +49,14 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
 
   return (
     <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2">
-      <View className="w-full flex-1 rounded-lg items-center justify-center">
-        <ImageBackground
-          source={footballField}
-          className="flex-1 rounded-lg items-center justify-center"
-          style={{
-            height: 450,
-            width: 372,
-          }}
-          alt="Campinho"
-        />
-      </View>
+      <ImageBackground
+        source={footballField}
+        style={{
+          height: Dimensions.get('window').height * 0.55,
+          width: Dimensions.get('window').width - 16,
+        }}
+        alt="Campinho"
+      />
 
       {lineup?.starting.map((position, index) => {
         return (

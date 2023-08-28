@@ -195,7 +195,11 @@ export default () => {
     );
   }
 
-  const isLoading = isMarketClose ? !playerStats || !marketStatus : !currentStats || !market;
+  const isLoading = isMarketClose
+    ? marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
+      ? !playerStats
+      : false || !marketStatus
+    : !currentStats || !market;
 
   if (isLoading) {
     return <Loading />;
