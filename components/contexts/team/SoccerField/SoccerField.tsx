@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Dimensions, ImageBackground, Modal } from 'react-native';
+import { Dimensions, ImageBackground, Modal, Platform } from 'react-native';
 
 import Market from '@/app/(tabs)/team/market';
 import footballField from '@/assets/images/field.png';
@@ -16,7 +16,11 @@ type SoccerFieldProps = {
   substitutions?: Substitutions[];
 };
 
+const screenWidth = Dimensions.get('window').width;
+
 export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) {
+  const fieldWidth = screenWidth - 16;
+
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -52,8 +56,8 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <ImageBackground
         source={footballField}
         style={{
-          height: Dimensions.get('window').height * 0.55,
-          width: Dimensions.get('window').width - 16,
+          height: 500,
+          width: fieldWidth,
         }}
         alt="Campinho"
       />
@@ -61,11 +65,11 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       {lineup?.starting.map((position, index) => {
         return (
           <View
-            key={`${position.left} + ${position.position} + ${position.top}`}
+            key={`${position.left} + ${position.position} + ${position.top + position.abbr}`}
             className="absolute"
             style={{
-              top: position.top as any,
-              left: position.left as any,
+              top: position.top,
+              left: Platform.OS === 'ios' ? position.left : position.left - 9,
               backgroundColor: 'transparent',
             }}>
             {position.player ? (

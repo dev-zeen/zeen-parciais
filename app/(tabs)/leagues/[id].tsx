@@ -131,7 +131,9 @@ export default () => {
         await handleSortClubs(sortProp);
       }
 
-      setIsSortingClubs(false);
+      setTimeout(() => {
+        setIsSortingClubs(false);
+      }, 500);
     },
     [handleOrderByPatrimony, handleSortClubs]
   );

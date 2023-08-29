@@ -15,8 +15,8 @@ export type LineupPosition = {
   position: number;
   abbr: string;
   player?: LineupPlayer | FullPlayer | undefined;
-  top?: string;
-  left?: string;
+  top: number;
+  left: number;
 };
 
 export interface LineupPlayers {
