@@ -85,7 +85,7 @@ export function ListReservePlayers({
                 />
               ) : (
                 <AddPlayerButton
-                  key={position.left}
+                  key={position.abbr}
                   onPurchasePlayerOnMarket={() => handlePurchasePlayerOnMarket(position, index)}
                   positionLineup={position}
                 />

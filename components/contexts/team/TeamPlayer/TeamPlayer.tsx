@@ -70,8 +70,8 @@ export function TeamPlayer({
       }`}
       style={{
         gap: 2,
-        maxWidth: 90,
-        minWidth: 90,
+        maxWidth: 75,
+        minWidth: 75,
         backgroundColor: 'transparent',
       }}>
       {isMarketClose ? (
@@ -137,11 +137,14 @@ export function TeamPlayer({
           />
         </View>
       </TouchableOpacity>
-      <View className="border border-neutral-200 bg-neutral-50 items-center justify-center rounded-lg px-1">
+      <View className="bg-neutral-50 items-center justify-center rounded px-1 py-0.5">
         <Text
           numberOfLines={1}
           ellipsizeMode="tail"
-          className="font-semibold text-gray-800 text-center text-xs">
+          className="font-semibold text-center text-gray-600"
+          style={{
+            fontSize: 11,
+          }}>
           {player?.apelido_abreviado}
         </Text>
       </View>

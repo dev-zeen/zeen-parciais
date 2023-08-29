@@ -1,12 +1,15 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Alert, Modal, RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import { Modal, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 
 import {
   PlayersToSell,
   clearLineup,
+  emptyCapitain,
+  emptyLineupFormation,
+  emptyReservePlayers,
   fillLineupOnChangeTacticalFormation,
   fillLineupWithPlayers,
   fillPlayersInLineup,
@@ -15,6 +18,7 @@ import {
   onGetDefaultLineupTeam,
   onGetEqualLineups,
   onGetPlayersOnChangePositionSell,
+  onSuccessSavedTeam,
 } from './team.helpers';
 
 import { Text, View } from '@/components/Themed';
@@ -83,7 +87,7 @@ export default () => {
   );
 
   const [tacticalFormation, setTacticalFormation] = useState(defaultLineupTeam);
-  const [showSaveLineupButton, setShowSaveLineupButton] = useState(false);
+  const [isActiveLineupConfirmButton, setIsActiveLineupConfirmButton] = useState(false);
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
 
@@ -169,11 +173,6 @@ export default () => {
     await handleResetClub();
   }, [handleResetClub, onRefetchStats]);
 
-  const onSuccessSavedTeam = useCallback(
-    () => Alert.alert('Boa cartoleiro!', 'Time escalado com sucesso.', [{ text: 'OK' }]),
-    []
-  );
-
   const onSaveTeam = useCallback(() => {
     const payload = onGetPayloadSaveTeam({
       lineup: lineup as LineupPlayers,
@@ -187,44 +186,15 @@ export default () => {
   useEffect(() => {
     if (isSuccess) {
       onSuccessSavedTeam();
-      setShowSaveLineupButton(false);
+      setIsActiveLineupConfirmButton(false);
     }
-  }, [isSuccess, onSuccessSavedTeam]);
+  }, [isSuccess]);
 
   const isReservesCompleted = useCallback((reserves: LineupPosition[]) => {
     return reserves.every((item) => item.player);
   }, []);
 
   const handleSaveTeam = useCallback(() => {
-    const emptyReservePlayers = () =>
-      Alert.alert(
-        'Atenção',
-        'Seu time ainda não possui todos os reservas selecionados, deseja escalar mesmo assim',
-        [
-          {
-            text: 'Não',
-            style: 'cancel',
-          },
-          { text: 'Sim', onPress: () => onSaveTeam() },
-        ]
-      );
-
-    const emptyCapitain = () =>
-      Alert.alert('Atenção', 'Selecione um capitão', [
-        {
-          text: 'Ok',
-          style: 'cancel',
-        },
-      ]);
-
-    const emptyLineupFormation = () =>
-      Alert.alert('Atenção', 'Selecione uma formação', [
-        {
-          text: 'Ok',
-          style: 'cancel',
-        },
-      ]);
-
     if (!tacticalFormation) {
       emptyLineupFormation();
       return;
@@ -236,7 +206,7 @@ export default () => {
     }
 
     if (!isReservesCompleted(lineup?.reserves as LineupPosition[])) {
-      emptyReservePlayers();
+      emptyReservePlayers(onSaveTeam);
       return;
     }
     onSaveTeam();
@@ -252,8 +222,8 @@ export default () => {
         const isEqualLineups = onGetEqualLineups(lineup, club);
         const isSameCapitain = club.capitao_id === capitain;
 
-        if (!isSameCapitain || !isEqualLineups) setShowSaveLineupButton(true);
-        if (isSameCapitain && isEqualLineups) setShowSaveLineupButton(false);
+        if (!isSameCapitain || !isEqualLineups) setIsActiveLineupConfirmButton(true);
+        if (isSameCapitain && isEqualLineups) setIsActiveLineupConfirmButton(false);
       }
     },
     []
@@ -298,7 +268,7 @@ export default () => {
       if (isFilledLineup) {
         onShowSaveLineupButton(lineup as LineupPlayers, capitain, club as FullClubInfo);
       } else {
-        setShowSaveLineupButton(false);
+        setIsActiveLineupConfirmButton(false);
       }
     }
   }, [capitain, club, lineup, onShowSaveLineupButton]);
@@ -339,17 +309,19 @@ export default () => {
           <View className="w-full flex-1 flex-row items-center rounded-lg px-2 py-3 justify-around">
             <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Patrim.</Text>
-              <Text className="font-bold text-base">{numberToString(club?.patrimonio)}</Text>
+              <Text className="font-semibold text-base">{numberToString(club?.patrimonio)}</Text>
             </View>
 
             <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Preço</Text>
-              <Text className="font-bold text-base text-green-500">{numberToString(price)}</Text>
+              <Text className="font-semibold text-base text-green-500">
+                {numberToString(price)}
+              </Text>
             </View>
 
             <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Rest.</Text>
-              <Text className="font-bold text-base text-green-500">
+              <Text className="font-semibold text-base text-green-500">
                 {numberToString(club?.patrimonio - (price as number))}
               </Text>
             </View>
@@ -427,15 +399,21 @@ export default () => {
               }}
             />
 
-            {showSaveLineupButton && (
-              <Button
-                variant="success"
-                title="Confirmar"
-                onPress={handleSaveTeam}
-                iconName="check"
-                hasIcon
-              />
-            )}
+            <View className="w-16 justify-center items-center">
+              <Text className="font-light text-sm">Reservas.</Text>
+              <Text className="font-semibold text-base">
+                {lineup.reserves.filter((item) => item.player).length} / 5
+              </Text>
+            </View>
+
+            <Button
+              variant="success"
+              title="Confirmar"
+              onPress={handleSaveTeam}
+              iconName="check"
+              hasIcon
+              disabled={!isActiveLineupConfirmButton}
+            />
           </View>
 
           <SoccerField isMarketClose={isMarketClose} substitutions={substitutions} />

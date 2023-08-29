@@ -30,14 +30,18 @@ export function Button({
     secondary: 'bg-violet-500',
     warning: 'bg-orange-500',
     error: 'bg-red-500',
-    success: 'bg-green-500',
+    success: 'bg-green-600',
     disabled: colorTheme === 'dark' ? 'bg-gray-400' : 'bg-gray-300',
   };
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`flex-row px-2 py-3 items-center justify-center rounded-lg ${variants[variant]}`}
+      className={`flex-row px-2 ${
+        hasIcon && !onlyIcon && 'pr-4'
+      } py-3 items-center justify-center rounded-lg ${
+        disabled ? variants.disabled : variants[variant]
+      }`}
       activeOpacity={0.6}
       disabled={disabled}>
       {hasIcon && (
@@ -50,7 +54,7 @@ export function Button({
           }}
         />
       )}
-      {!onlyIcon && <Text className="text-sm font-semibold text-white">{title}</Text>}
+      {!onlyIcon && <Text className="text-sm font-bold text-white">{title}</Text>}
     </TouchableOpacity>
   );
 }

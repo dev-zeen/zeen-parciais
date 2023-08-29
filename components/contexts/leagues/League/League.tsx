@@ -5,11 +5,11 @@ import {
   FlatList,
   ListRenderItemInfo,
   RefreshControl,
-  View,
   useColorScheme,
 } from 'react-native';
 
 import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
+import { View } from '@/components/Themed';
 import {
   OrderByOptions,
   mergeSort,
@@ -67,7 +67,7 @@ export function League({
     const newOrderBy =
       league &&
       league.times.sort((a: TeamLeague, b: TeamLeague) => {
-        return b.patrimonio - a.patrimonio;
+        return (b.patrimonio as number) - (a.patrimonio as number);
       });
 
     return newOrderBy;
@@ -105,14 +105,13 @@ export function League({
       if (sortProp === OrderByOptions.PATRIMONIO) {
         const newOrderByPatrimony = handleOrderByPatrimony();
         setClubs(newOrderByPatrimony);
-        setIsSortingClubs(false);
       } else {
         await handleSortClubs(sortProp);
       }
 
       setTimeout(() => {
         setIsSortingClubs(false);
-      }, 500);
+      }, 1);
     },
     [handleOrderByPatrimony, handleSortClubs]
   );
@@ -207,9 +206,8 @@ export function League({
   return (
     <>
       <Tabs tabs={tabs} />
-
       {isSortingClubs ? (
-        <View className="flex-1 items-center justify-center mx-2 p-2 mt-3 rounded-lg mb-2">
+        <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
           <ActivityIndicator />
         </View>
       ) : (
@@ -221,11 +219,11 @@ export function League({
           initialNumToRender={10}
           maxToRenderPerBatch={5}
           contentContainerStyle={{
-            marginTop: 4,
+            paddingTop: 8,
             paddingVertical: 8,
             marginHorizontal: 8,
             backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
-            gap: 6,
+            gap: 4,
           }}
         />
       )}

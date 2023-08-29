@@ -9,6 +9,14 @@ export const enum Positions {
   TECNICO = 6,
 }
 
+export const enum Zone {
+  GOLEIRO = 1,
+  DEFESA = 2,
+  MEIO_CAMPO = 3,
+  ATACANTE = 4,
+  TECNICO = 5,
+}
+
 export const FORMATIONS: TacticalFormations = {
   '3-4-3': {
     starting: [
@@ -21,16 +29,22 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
       }, // Zagueiro
       {
         position: Positions.MEIO_CAMPO,
@@ -107,16 +121,22 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
       }, // Zagueiro
       {
         position: Positions.MEIO_CAMPO,
@@ -189,28 +209,34 @@ export const FORMATIONS: TacticalFormations = {
         player: undefined,
         abbr: 'GOL',
       }, // Goleiro
-
       {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Lateral
       {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 4,
       }, // Lateral
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
       }, // Zagueiro
-
       {
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -288,22 +314,30 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Lateral
       {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 4,
       }, // Lateral
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
-      }, // Zagueiro
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
+      },
 
       {
         position: Positions.MEIO_CAMPO,
@@ -382,23 +416,30 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Lateral
       {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 4,
       }, // Lateral
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
-      }, // Zagueiro
-
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
+      },
       {
         position: Positions.MEIO_CAMPO,
         player: undefined,
@@ -476,26 +517,36 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Lateral
       {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 5,
       }, // Lateral
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 4,
       }, // Zagueiro
 
       {
@@ -568,26 +619,36 @@ export const FORMATIONS: TacticalFormations = {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 1,
       }, // Lateral
       {
         position: Positions.LATERAL,
         player: undefined,
         abbr: 'LAT',
+        zone: Zone.DEFESA,
+        sequencePosition: 5,
       }, // Lateral
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 2,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 3,
       }, // Zagueiro
       {
         position: Positions.ZAGUEIRO,
         player: undefined,
         abbr: 'ZAG',
+        zone: Zone.DEFESA,
+        sequencePosition: 4,
       }, // Zagueiro
 
       {

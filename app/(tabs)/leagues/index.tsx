@@ -1,20 +1,26 @@
-import { Feather } from '@expo/vector-icons';
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { FlatList, Image, ListRenderItemInfo, RefreshControl } from 'react-native';
+import { ListRenderItemInfo, RefreshControl, SectionList } from 'react-native';
 
-import emptyLeaguesImage from '@/assets/images/no-leagues.png';
 import { Text, View } from '@/components/Themed';
+import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
 import { LeagueCard } from '@/components/contexts/leagues/LeagueCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
+import { MyClubDetails } from '@/models/Club';
 import { LeagueUserDetails } from '@/models/Leagues';
+import { MarketStatus } from '@/models/Market';
+import { useGetMyClub } from '@/queries/club.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 import { useGetMarketStatus } from '@/queries/market.query';
+
+type SectionLeagueProps = {
+  title: string;
+  data: LeagueUserDetails[];
+};
 
 export default function () {
   const { isAutheticated } = useContext(AuthContext);
@@ -27,21 +33,65 @@ export default function () {
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
   const {
+    data: club,
+    refetch: onRefetchClub,
+    isRefetching: isRefetchingClub,
+  } = useGetMyClub(!!allowRequests);
+
+  const {
     data: dataLeagues,
     isLoading: isLoadingLeagues,
     refetch: onRefetchLeagues,
-    isRefetching,
+    isRefetching: isRefetchingLeagues,
   } = useGetLeagues(!!allowRequests);
 
   const [leagues, setLeagues] = useState<LeagueUserDetails[]>();
 
+  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>();
+
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
+  useEffect(() => {
+    if (!dataLeagues) {
+      return;
+    }
+
+    const { ligas } = dataLeagues;
+    const { assinante } = club?.time as MyClubDetails;
+    const { max_ligas_pro, max_ligas_free, max_ligas_matamata_pro, max_ligas_matamata_free } =
+      marketStatus as MarketStatus;
+
+    const privateLeagues = ligas.filter((item) => item.time_dono_id && !item.mata_mata);
+    const cartolaLeagues = ligas.filter((item) => !item.time_dono_id);
+    const cups = ligas.filter((item) => item.mata_mata);
+
+    const sectionLeagues = [
+      {
+        title: `Ligas Clássicas - ${privateLeagues.length} / ${
+          assinante ? max_ligas_pro : max_ligas_free
+        }`,
+        data: privateLeagues,
+      },
+      {
+        title: `Mata Mata - ${cups.length} / ${
+          assinante ? max_ligas_matamata_pro : max_ligas_matamata_free
+        }`,
+        data: cups,
+      },
+      {
+        title: 'Ligas do Cartola',
+        data: cartolaLeagues,
+      },
+    ].filter((item) => item.data.length > 0);
+
+    setSectionLeaguesList(sectionLeagues);
+  }, [club?.time, club?.time.assinante, dataLeagues, marketStatus]);
 
   useEffect(() => {
     if (isMarketClose) {
       const privateLeagues = dataLeagues?.ligas
         .filter((item) => item.time_dono_id)
-        .sort((a, b) => b.time_dono_id - a.time_dono_id);
+        .sort((a, b) => a.time_dono_id - b.time_dono_id);
       setLeagues(privateLeagues);
       return;
     }
@@ -56,6 +106,13 @@ export default function () {
     return <LeagueCard key={league.liga_id} league={league} />;
   }, []);
 
+  const onRefetch = useCallback(async () => {
+    await onRefetchClub();
+    await onRefetchLeagues();
+  }, [onRefetchClub, onRefetchLeagues]);
+
+  const isRefetching = isRefetchingClub || isRefetchingLeagues;
+
   if (!isAutheticated) {
     return <Login title="Para acessar suas ligas, é necessário efetuar o login no Cartola FC." />;
   }
@@ -68,52 +125,22 @@ export default function () {
     return <Loading />;
   }
 
-  if (leagues.length === 0) {
-    return (
-      <SafeAreaViewContainer>
-        <View className="rounded-lg py-2 mx-2 items-center justify-center flex-1">
-          <Image
-            source={emptyLeaguesImage}
-            className="w-96 h-96 rounded-full"
-            alt={`Imagem de erro na aplicação`}
-          />
-          <View
-            className="flex-row py-4 px-8 rounded-lg items-center justify-center"
-            style={{
-              gap: 8,
-            }}>
-            <Feather name="alert-triangle" color="#eab308" size={16} />
-            <Text className="text-sm font-semibold text-center">
-              Você não está em nenhuma liga privada
-            </Text>
-          </View>
-          <View
-            className="flex-row py-4 px-8 rounded-lg justify-center"
-            style={{
-              gap: 8,
-            }}>
-            <Feather name="info" size={16} color={Colors.light.tint} />
-            <Text className="text-xs text-center">
-              As ligas públicas serão exibidas após a abertura do mercado
-            </Text>
-          </View>
-        </View>
-      </SafeAreaViewContainer>
-    );
-  }
-
   return (
     <SafeAreaViewContainer>
-      <View className="rounded-lg py-2 mx-2">
-        <View className="border-b border-gray-200 items-center justify-center m-2 pb-4 pt-2">
-          <Text className="text-base font-semibold"> Minhas Ligas </Text>
-        </View>
-
-        <FlatList
-          refreshControl={<RefreshControl onRefresh={onRefetchLeagues} refreshing={isRefetching} />}
-          data={leagues}
-          renderItem={renderItem}
+      <View className="flex-1 rounded-lg py-2 mx-2">
+        <SectionList
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+          sections={sectionLeaguesList ?? []}
           keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          stickyHeaderHiddenOnScroll
+          renderSectionHeader={({ section: { title } }) => (
+            <View className="p-4">
+              <Text className="font-bold text-base text-center items-center">{title}</Text>
+            </View>
+          )}
+          ListEmptyComponent={<EmptyLeagueList />}
         />
       </View>
     </SafeAreaViewContainer>

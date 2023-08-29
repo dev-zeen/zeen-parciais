@@ -143,15 +143,8 @@ export default ({
         isSellPlayer={lineup?.starting.some((item) => item.player?.atleta_id === player.atleta_id)}
       />
     ),
-    [
-      emptyPositions,
-      handleAddPlayerToLineup,
-      handleRemovePlayerFromLineup,
-      lineup?.starting,
-      playerIndex,
-      playerLowestPrice,
-      remainingValue,
-    ]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [emptyPositions, lineup?.starting, playerIndex, playerLowestPrice, remainingValue]
   );
 
   if (!isAutheticated) return <Redirect href="/(tabs)/team" />;

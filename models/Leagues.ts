@@ -40,6 +40,8 @@ export interface LeagueUserDetails {
   total_times_liga: number;
   vagas_restantes?: number;
   total_amigos_na_liga: number;
+  data_inicio?: string;
+  data_fim?: string;
 }
 
 export interface Friend {
@@ -68,8 +70,8 @@ export interface TeamLeague {
   assinante: false;
   lgpd_removido: false;
   lgpd_quarentena: false;
-  patrimonio: number;
-  ranking: {
+  patrimonio?: number;
+  ranking?: {
     rodada: number;
     mes: number;
     turno: number;
@@ -77,14 +79,14 @@ export interface TeamLeague {
     patrimonio: number;
     capitao?: number;
   };
-  pontos: {
+  pontos?: {
     rodada: number;
     mes: number;
     turno: number;
     campeonato: number;
-    capitao: number;
+    capitao?: number;
   };
-  variacao: {
+  variacao?: {
     mes: number;
     turno: number;
     campeonato: number;
@@ -103,9 +105,14 @@ export interface League {
   liga: LeagueUserDetails;
   membro: boolean;
   pagina: number;
-  time_dono: Partial<MyClubDetails>;
-  time_usuario: Partial<MyClubDetails>;
+
+  time_dono: TeamLeague;
+  time_usuario?: Partial<MyClubDetails>;
+  time_usuario_mata_mata?: TeamLeague;
+
   times: TeamLeague[];
+  convites_enviados?: CupInvites[];
+  pedidos?: CupInvites[];
 }
 
 export interface ClubsByLeague {
@@ -115,4 +122,10 @@ export interface ClubsByLeague {
 export interface IClubsByLeague {
   atletas: number[];
   capitao: number;
+}
+
+export interface CupInvites {
+  data: string;
+  mesangemId: number;
+  time: TeamLeague;
 }

@@ -1,3 +1,5 @@
+import { Alert } from 'react-native';
+
 import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
@@ -227,3 +229,35 @@ export function onGetEqualLineups(lineup: LineupPlayers, club: FullClubInfo): bo
 export function listDefaultLineups() {
   return Object.entries(LINEUPS_DEFAULT_OBJECT).map(([_key, value]) => value);
 }
+
+export const emptyReservePlayers = (onSuccess: () => void) =>
+  Alert.alert(
+    'Atenção',
+    'Seu time ainda não possui todos os reservas selecionados, deseja escalar mesmo assim',
+    [
+      {
+        text: 'Não',
+        style: 'cancel',
+      },
+      { text: 'Sim', onPress: () => onSuccess() },
+    ]
+  );
+
+export const emptyCapitain = () =>
+  Alert.alert('Atenção', 'Selecione um capitão', [
+    {
+      text: 'Ok',
+      style: 'cancel',
+    },
+  ]);
+
+export const emptyLineupFormation = () =>
+  Alert.alert('Atenção', 'Selecione uma formação', [
+    {
+      text: 'Ok',
+      style: 'cancel',
+    },
+  ]);
+
+export const onSuccessSavedTeam = () =>
+  Alert.alert('Boa cartoleiro!', 'Time escalado com sucesso.', [{ text: 'OK' }]);

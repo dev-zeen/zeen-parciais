@@ -203,7 +203,7 @@ export default () => {
 
       setTimeout(() => {
         setIsRendering(false);
-      }, 200);
+      }, 1);
     },
     [isMarketClose, market, playerStats]
   );
@@ -257,7 +257,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className="mx-2 rounded-lg mb-2"
+        className="mx-2 rounded-lg"
         style={{
           gap: 8,
           backgroundColor:

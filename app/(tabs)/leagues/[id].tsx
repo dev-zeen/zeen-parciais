@@ -2,7 +2,9 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { Image, useColorScheme } from 'react-native';
 
+import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
+import { Cup } from '@/components/contexts/leagues/Cup';
 import { League as LeagueComponent } from '@/components/contexts/leagues/League';
 import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
@@ -69,7 +71,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
+        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'} mb-2`}
         style={{
           gap: 8,
         }}>
@@ -92,11 +94,22 @@ export default () => {
             }}>
             {league?.liga.nome}
           </Text>
+          {!league.liga.sem_capitao && (
+            <Image
+              source={captainIcon}
+              style={{
+                width: 24,
+                height: 24,
+                margin: 4,
+              }}
+              alt={`Liga com Capitão`}
+            />
+          )}
         </View>
       </View>
 
       {league.liga.mata_mata ? (
-        <></>
+        <Cup cup={league} onRefetch={onRefetch} isRefetching={isRefetching} />
       ) : (
         <LeagueComponent
           league={league}

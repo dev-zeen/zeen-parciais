@@ -6,7 +6,7 @@ import footballField from '@/assets/images/field.png';
 import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
-import { Positions } from '@/constants/Formations';
+import { Positions, Zone } from '@/constants/Formations';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { useGetScoredPlayers } from '@/queries/stats.query';
@@ -84,7 +84,7 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <ImageBackground
         source={footballField}
         style={{
-          height: 410,
+          height: 480,
           width: fieldWidth,
         }}
         alt="Campinho"
@@ -93,7 +93,7 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <View
         style={{
           position: 'absolute',
-          top: 10,
+          top: 15,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -105,7 +105,7 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <View
         style={{
           position: 'absolute',
-          top: 110,
+          top: 130,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -117,32 +117,23 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <View
         style={{
           position: 'absolute',
-          top: 205,
+          top: 250,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: 'transparent',
+          gap: 10,
         }}>
-        {lineup?.starting.filter((item) => item.position === Positions.ZAGUEIRO).map(renderItem)}
+        {lineup?.starting
+          .filter((item) => item.zone === Zone.DEFESA)
+          .sort((a, b) => (a?.sequencePosition as number) - (b?.sequencePosition as number))
+          .map(renderItem)}
       </View>
 
       <View
         style={{
           position: 'absolute',
-          top: 205,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'transparent',
-          gap: 160,
-        }}>
-        {lineup?.starting.filter((item) => item.position === Positions.LATERAL).map(renderItem)}
-      </View>
-
-      <View
-        style={{
-          position: 'absolute',
-          top: 300,
+          top: 350,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -154,7 +145,7 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <View
         style={{
           position: 'absolute',
-          top: 300,
+          top: 350,
           left: 20,
           flexDirection: 'row',
           justifyContent: 'flex-start',
