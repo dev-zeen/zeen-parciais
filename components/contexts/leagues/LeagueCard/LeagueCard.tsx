@@ -30,7 +30,7 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
         <View className="flex-row py-2 gap-x-2">
           <Image
             source={{
-              uri: league.url_flamula_png,
+              uri: league.mata_mata ? league.url_trofeu_png : league.url_flamula_png,
             }}
             className="w-12 h-12 rounded-full"
             alt={`Imagem da Liga ${league.nome}`}
@@ -41,7 +41,8 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
               <View>
                 <Text className="text-sm font-bold">{league.nome}</Text>
                 <Text className="text-xs font-light">
-                  {typeLeague[league.tipo]} | {totalClubs} Cartoleiros
+                  {league.mata_mata ? 'Mata-Mata' : 'Clássica'} | {typeLeague[league.tipo]} |{' '}
+                  {totalClubs} Cartoleiros
                 </Text>
               </View>
             </View>
