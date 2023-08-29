@@ -162,7 +162,6 @@ export default () => {
         title: 'Rodada',
         onPress() {
           const sortProp = OrderByOptions.RODADA;
-          if (sortProp === orderBy) return;
           setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
@@ -172,7 +171,6 @@ export default () => {
         title: 'Total',
         onPress() {
           const sortProp = OrderByOptions.CAMPEONATO;
-          if (sortProp === orderBy) return;
           setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
@@ -182,7 +180,6 @@ export default () => {
         title: 'Turno',
         onPress() {
           const sortProp = OrderByOptions.TURNO;
-          if (sortProp === orderBy) return;
           setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
@@ -192,7 +189,6 @@ export default () => {
         title: 'Mês',
         onPress() {
           const sortProp = OrderByOptions.MES;
-          if (sortProp === orderBy) return;
           setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
@@ -202,13 +198,12 @@ export default () => {
         title: 'C$',
         onPress() {
           const sortProp = OrderByOptions.PATRIMONIO;
-          if (sortProp === orderBy) return;
           setIsSortingClubs(true);
           handleOnPressOrderBy(sortProp);
         },
       },
     ],
-    [orderBy, handleOnPressOrderBy]
+    [handleOnPressOrderBy]
   );
 
   const renderItem = useCallback(
@@ -272,7 +267,7 @@ export default () => {
       </View>
 
       {isSortingClubs ? (
-        <View className="flex-1 items-center justify-center">
+        <View className="flex-1 items-center justify-center mx-2 p-2 mt-3 rounded-lg mb-2">
           <ActivityIndicator />
         </View>
       ) : (

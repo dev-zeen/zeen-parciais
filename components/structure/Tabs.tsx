@@ -42,7 +42,7 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
             }`}
             onPress={() => {
               handlePress(index);
-              tab?.onPress && tab?.onPress();
+              activeTab !== index && tab?.onPress && tab?.onPress();
             }}>
             <Text className="font-semibold text-xs">{tab.title}</Text>
           </TouchableOpacity>

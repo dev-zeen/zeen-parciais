@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Dimensions, ImageBackground, Modal, Platform } from 'react-native';
+import { Dimensions, ImageBackground, Modal } from 'react-native';
 
 import Market from '@/app/(tabs)/team/market';
 import footballField from '@/assets/images/field.png';
 import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { Positions } from '@/constants/Formations';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { useGetScoredPlayers } from '@/queries/stats.query';
@@ -33,6 +34,33 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
 
   const [showMarketModal, setShowMarketModal] = useState(false);
 
+  const renderItem = (position: LineupPosition, index: number) => {
+    return (
+      <View
+        key={position.player ? position.player.atleta_id : position.abbr + index}
+        style={{
+          backgroundColor: 'transparent',
+        }}>
+        {position.player ? (
+          <TeamPlayer
+            player={position.player as LineupPlayer}
+            hasCaptain={capitain === position.player?.atleta_id}
+            handleCapitain={updateCapitain}
+            isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
+            isReplaced={substitutions?.some(
+              (item) => item.saiu.atleta_id === position.player?.atleta_id
+            )}
+          />
+        ) : (
+          <AddPlayerButton
+            onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
+            positionLineup={position}
+          />
+        )}
+      </View>
+    );
+  };
+
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
       setPositionMarketSearch(player);
@@ -56,41 +84,85 @@ export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) 
       <ImageBackground
         source={footballField}
         style={{
-          height: 500,
+          height: 410,
           width: fieldWidth,
         }}
         alt="Campinho"
       />
 
-      {lineup?.starting.map((position, index) => {
-        return (
-          <View
-            key={`${position.left} + ${position.position} + ${position.top + position.abbr}`}
-            className="absolute"
-            style={{
-              top: position.top,
-              left: Platform.OS === 'ios' ? position.left : position.left - 9,
-              backgroundColor: 'transparent',
-            }}>
-            {position.player ? (
-              <TeamPlayer
-                player={position.player as LineupPlayer}
-                hasCaptain={capitain === position.player?.atleta_id}
-                handleCapitain={updateCapitain}
-                isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
-                isReplaced={substitutions?.some(
-                  (item) => item.saiu.atleta_id === position.player?.atleta_id
-                )}
-              />
-            ) : (
-              <AddPlayerButton
-                onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
-                positionLineup={position}
-              />
-            )}
-          </View>
-        );
-      })}
+      <View
+        style={{
+          position: 'absolute',
+          top: 10,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'transparent',
+        }}>
+        {lineup?.starting.filter((item) => item.position === Positions.ATACANTE).map(renderItem)}
+      </View>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 110,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'transparent',
+        }}>
+        {lineup?.starting.filter((item) => item.position === Positions.MEIO_CAMPO).map(renderItem)}
+      </View>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 205,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'transparent',
+        }}>
+        {lineup?.starting.filter((item) => item.position === Positions.ZAGUEIRO).map(renderItem)}
+      </View>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 205,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'transparent',
+          gap: 160,
+        }}>
+        {lineup?.starting.filter((item) => item.position === Positions.LATERAL).map(renderItem)}
+      </View>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 300,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'transparent',
+        }}>
+        {lineup?.starting.filter((item) => item.position === Positions.GOLEIRO).map(renderItem)}
+      </View>
+
+      <View
+        style={{
+          position: 'absolute',
+          top: 300,
+          left: 20,
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start',
+          backgroundColor: 'transparent',
+        }}>
+        {lineup?.starting.filter((item) => item.position === Positions.TECNICO).map(renderItem)}
+      </View>
 
       {showMarketModal && (
         <Modal

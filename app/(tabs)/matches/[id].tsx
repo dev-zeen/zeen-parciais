@@ -1,6 +1,12 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  ListRenderItemInfo,
+  RefreshControl,
+  useColorScheme,
+} from 'react-native';
 
 import { fillLineupWithPlayers } from '@/app/(tabs)/team/team.helpers';
 import { View } from '@/components/Themed';
@@ -66,6 +72,8 @@ export default () => {
   const [match, setMatch] = useState<IMatch>();
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
 
+  const [isRendering, setIsRendering] = useState(false);
+
   const {
     data: appreciations,
     refetch: onRefetchAppreciations,
@@ -78,9 +86,7 @@ export default () => {
     refetch: onRefetchStats,
   } = useGetScoredPlayers();
 
-  const [homeTeamPlayers, setHomeTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
-
-  const [awayTeamPlayers, setAwayTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
+  const [teamPlayers, setTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer) => {
@@ -149,88 +155,6 @@ export default () => {
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.foto} + ${item.apelido}`, []);
 
-  const tabs: ITabs[] = useMemo(
-    () => [
-      {
-        id: 1,
-        title: isMarketClose
-          ? (playerStats?.clubes[match?.home as number]?.nome as string)
-          : (market?.clubes[match?.clube_casa_id as number]?.nome as string),
-        content: () => {
-          return (
-            <FlatList
-              style={{
-                paddingHorizontal: 8,
-              }}
-              contentContainerStyle={{
-                gap: 4,
-                paddingVertical: 8,
-              }}
-              refreshControl={
-                <RefreshControl
-                  onRefresh={onRefetch}
-                  refreshing={isRefetchingStats && isRefetchingAppreciations}
-                />
-              }
-              data={homeTeamPlayers}
-              renderItem={isMarketClose ? renderItemWithPartials : renderItem}
-              keyExtractor={keyExtractor}
-              maxToRenderPerBatch={10}
-              initialNumToRender={10}
-            />
-          );
-        },
-      },
-      {
-        id: 2,
-        title: isMarketClose
-          ? (playerStats?.clubes[match?.away as number]?.nome as string)
-          : (market?.clubes[match?.clube_visitante_id as number]?.nome as string),
-        content: () => {
-          return (
-            <FlatList
-              style={{
-                paddingHorizontal: 8,
-              }}
-              refreshControl={
-                <RefreshControl
-                  onRefresh={onRefetch}
-                  refreshing={isRefetchingStats && isRefetchingAppreciations}
-                />
-              }
-              contentContainerStyle={{
-                gap: 4,
-                paddingVertical: 8,
-              }}
-              data={awayTeamPlayers}
-              renderItem={isMarketClose ? renderItemWithPartials : renderItem}
-              keyExtractor={keyExtractor}
-              maxToRenderPerBatch={10}
-              initialNumToRender={10}
-            />
-          );
-        },
-      },
-    ],
-    [
-      isMarketClose,
-      playerStats?.clubes,
-      match?.home,
-      match?.clube_casa_id,
-      match?.away,
-      match?.clube_visitante_id,
-      market?.clubes,
-      onRefetch,
-      isRefetchingStats,
-      isRefetchingAppreciations,
-      homeTeamPlayers,
-      renderItemWithPartials,
-      renderItem,
-      keyExtractor,
-      awayTeamPlayers,
-    ]
-  );
-
   useEffect(() => {
     if (id) {
       const match = JSON.parse(id as string);
@@ -250,44 +174,62 @@ export default () => {
     }
   }, [club, isMarketClose, lineup, updateCapitain, updateLineup]);
 
-  useEffect(() => {
-    if (market && match && !isMarketClose) {
-      const filterPlayers = (teamId: number) =>
-        market?.atletas
-          .filter(
-            (item) =>
-              item.clube_id === Number(market.clubes[teamId].id) &&
-              item.status_id === ENUM_STATUS_MARKET_PLAYER.PROVAVEL
-          )
-          .sort((a, b) => a.posicao_id - b.posicao_id) as FullPlayerPartials[];
+  const onGetTabPlayers = useCallback(
+    (teamId: number) => {
+      const isProvavel = (item: any) => item.status_id === ENUM_STATUS_MARKET_PLAYER.PROVAVEL;
 
-      const homeTeamPlayersUpdated = filterPlayers(match.clube_casa_id);
-      const awayTeamPlayersUpdated = filterPlayers(match.clube_visitante_id);
+      const getFilteredPlayers = (teamId: number, filterFunction: (item: any) => boolean) => {
+        if (market) {
+          return market?.atletas
+            .filter((item) => item.clube_id === Number(market?.clubes[teamId]?.id))
+            .filter(filterFunction)
+            .sort((a, b) => a.posicao_id - b.posicao_id);
+        }
+      };
 
-      setHomeTeamPlayers(homeTeamPlayersUpdated);
-      setAwayTeamPlayers(awayTeamPlayersUpdated);
-    }
-  }, [match, market, lineup, isMarketClose]);
+      const getPlayerStatsForTeam = (teamId: number) => {
+        if (playerStats) {
+          return Object.values(playerStats?.atletas)
+            .filter((item) => item.clube_id === teamId)
+            .sort((a, b) => a.posicao_id - b.posicao_id);
+        }
+      };
 
-  useEffect(() => {
-    if (playerStats && match && isMarketClose) {
-      const filterPlayersWithPartials = (teamId: number) =>
-        Object.entries(playerStats?.atletas)
-          .map(([key, value]) => {
-            return {
-              ...value,
-            };
-          })
-          .filter((item) => item.clube_id === teamId)
-          .sort((a, b) => a.posicao_id - b.posicao_id);
+      const newTeamPlayers = isMarketClose
+        ? getPlayerStatsForTeam(teamId)
+        : getFilteredPlayers(teamId, isProvavel);
 
-      const homeTeamPlayersUpdated = filterPlayersWithPartials(match?.home as number);
-      const awayTeamPlayersUpdated = filterPlayersWithPartials(match?.away as number);
+      setTeamPlayers(newTeamPlayers as FullPlayerPartials[]);
 
-      setHomeTeamPlayers(homeTeamPlayersUpdated as FullPlayerPartials[]);
-      setAwayTeamPlayers(awayTeamPlayersUpdated as FullPlayerPartials[]);
-    }
-  }, [match, market, appreciations, playerStats, isMarketClose]);
+      setTimeout(() => {
+        setIsRendering(false);
+      }, 200);
+    },
+    [isMarketClose, market, playerStats]
+  );
+
+  const tabs: ITabs[] = [
+    {
+      id: 1,
+      title: isMarketClose
+        ? (playerStats?.clubes[match?.home as number]?.nome as string)
+        : (market?.clubes[match?.clube_casa_id as number]?.nome as string),
+      onPress: () => {
+        setIsRendering(true);
+        onGetTabPlayers(match?.clube_casa_id as number);
+      },
+    },
+    {
+      id: 2,
+      title: isMarketClose
+        ? (playerStats?.clubes[match?.away as number]?.nome as string)
+        : (market?.clubes[match?.clube_visitante_id as number]?.nome as string),
+      onPress: () => {
+        setIsRendering(true);
+        onGetTabPlayers(match?.clube_visitante_id as number);
+      },
+    },
+  ];
 
   useEffect(() => {
     if (lineup) {
@@ -298,9 +240,13 @@ export default () => {
     }
   }, [lineup]);
 
+  useEffect(() => {
+    onGetTabPlayers(match?.clube_casa_id as number);
+  }, [match, onGetTabPlayers]);
+
   const isLoading = isMarketClose
     ? !market || !match || !appreciations || !playerStats
-    : !market || !match || !homeTeamPlayers || !awayTeamPlayers;
+    : !market || !match;
 
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
 
@@ -332,6 +278,34 @@ export default () => {
         />
       </View>
       <Tabs tabs={tabs} />
+      <View className={`flex-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
+        {isRendering ? (
+          <View className="flex-1 mx-2 items-center justify-center mt-2 rounded-lg">
+            <ActivityIndicator />
+          </View>
+        ) : (
+          <FlatList
+            style={{
+              paddingHorizontal: 8,
+            }}
+            refreshControl={
+              <RefreshControl
+                onRefresh={onRefetch}
+                refreshing={isRefetchingStats && isRefetchingAppreciations}
+              />
+            }
+            contentContainerStyle={{
+              gap: 4,
+              paddingVertical: 8,
+            }}
+            data={teamPlayers}
+            renderItem={isMarketClose ? renderItemWithPartials : renderItem}
+            keyExtractor={keyExtractor}
+            maxToRenderPerBatch={10}
+            initialNumToRender={10}
+          />
+        )}
+      </View>
     </SafeAreaViewContainer>
   );
 };
