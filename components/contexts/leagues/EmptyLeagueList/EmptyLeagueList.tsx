@@ -19,7 +19,7 @@ export function EmptyLeagueList() {
         style={{
           gap: 16,
         }}>
-        <Feather name="alert-triangle" size={24} color={Colors.light.tint} />
+        <Feather name="alert-circle" size={24} color={Colors.light.tint} />
 
         <Text className="text-center font-semibold text-base">
           Cartoleiro, você ainda não está participando de nenhuma liga

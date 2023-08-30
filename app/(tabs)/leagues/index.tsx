@@ -10,7 +10,6 @@ import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
-import { MyClubDetails } from '@/models/Club';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { useGetMyClub } from '@/queries/club.query';
@@ -57,7 +56,6 @@ export default function () {
     }
 
     const { ligas } = dataLeagues;
-    const { assinante } = club?.time as MyClubDetails;
     const { max_ligas_pro, max_ligas_free, max_ligas_matamata_pro, max_ligas_matamata_free } =
       marketStatus as MarketStatus;
 
@@ -68,13 +66,13 @@ export default function () {
     const sectionLeagues = [
       {
         title: `Ligas Clássicas - ${privateLeagues.length} / ${
-          assinante ? max_ligas_pro : max_ligas_free
+          club?.time.assinante ? max_ligas_pro : max_ligas_free
         }`,
         data: privateLeagues,
       },
       {
         title: `Mata Mata - ${cups.length} / ${
-          assinante ? max_ligas_matamata_pro : max_ligas_matamata_free
+          club?.time.assinante ? max_ligas_matamata_pro : max_ligas_matamata_free
         }`,
         data: cups,
       },

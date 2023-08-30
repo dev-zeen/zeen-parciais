@@ -16,51 +16,34 @@ type SaveTeamProps = {
   tacticalFormation: string;
 };
 
-function onRemovePlayer(lineupPlayers: LineupPosition[], playerId: number) {
-  const updatedPlayers = lineupPlayers.map((item) => {
-    if (item.player?.atleta_id === playerId) {
-      return { ...item, player: undefined };
-    }
-    return item;
-  });
-
-  return updatedPlayers;
-}
-
 export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPlayer | FullPlayer) {
-  const { atleta_id: playerId } = player;
+  const { starting, reserves } = lineup;
+  const { atleta_id: playerId, posicao_id: playerPositionId } = player;
 
-  const isTeamPlayer = lineup?.starting.some((item) => item.player?.atleta_id === playerId);
-
-  if (isTeamPlayer) {
-    const playersUpdated = onRemovePlayer(lineup.starting, playerId);
-    const reservesUpdated = lineup.reserves.map((item) => {
-      if (item.player?.posicao_id === player.posicao_id) {
-        return {
-          ...item,
-          player: undefined,
-        };
-      }
-      return item;
-    });
-    const lineupUpdated = {
-      ...lineup,
-      starting: playersUpdated,
-      reserves: reservesUpdated,
-    };
-    return lineupUpdated;
+  function onRemovePlayer(lineupPlayers: LineupPosition[], playerId: number) {
+    return lineupPlayers.map((item) =>
+      item.player?.atleta_id === playerId ? { ...item, player: undefined } : item
+    );
   }
-  const reservesPlayersUpdated = onRemovePlayer(lineup.reserves, playerId);
-  const lineupUpdated = { ...lineup, reserves: reservesPlayersUpdated };
+
+  const updatedStarting = onRemovePlayer(starting, playerId);
+  const updatedReserves = onRemovePlayer(reserves, playerId);
+
+  const reservesUpdated = updatedReserves.map((item) =>
+    item.player?.posicao_id === playerPositionId ? { ...item, player: undefined } : item
+  );
+
+  const lineupUpdated = {
+    ...lineup,
+    starting: updatedStarting,
+    reserves: reservesUpdated,
+  };
+
   return lineupUpdated;
 }
 
-export function onGetTeamPrice(players: LineupPosition[]) {
-  return players.reduce((acc, { player }) => {
-    const playerPrice = player?.preco_num ?? 0;
-    return acc + playerPrice;
-  }, 0);
-}
+export const onGetTeamPrice = (players: LineupPosition[]) =>
+  players.reduce((acc, { player }) => acc + (player?.preco_num || 0), 0);
 
 export function isLineupComplete(lineup: LineupPlayers) {
   return lineup.starting.every((item) => item.player);
@@ -69,57 +52,63 @@ export function isLineupComplete(lineup: LineupPlayers) {
 export function onGetPlayerLowestPrice(lineup: LineupPlayers, player: LineupPosition) {
   const playersPosition = lineup.starting.filter((item) => item.position === player.position);
 
-  return playersPosition.reduce((acc, current) => {
+  let lowestPricePlayer = playersPosition[0];
+
+  for (const current of playersPosition) {
     const currentPrice = current.player?.preco_num;
 
-    if (!acc.player?.preco_num || (currentPrice && currentPrice < acc.player.preco_num)) {
-      return current;
-    }
-
-    return acc;
-  }, {} as LineupPosition);
-}
-
-export function onRemovePlayerFromSellPlayers(playersSell: PlayersToSell[], id: number) {
-  const updatedPlayerSell = playersSell
-    ?.map((position) => {
-      const updatedPlayers = position.players.filter((player) => player.player?.atleta_id !== id);
-
-      return { ...position, players: updatedPlayers };
-    })
-    .filter((position) => position.players.length > position.quantityToNewFormation);
-
-  return updatedPlayerSell;
-}
-
-export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: AddPlayerProps) {
-  const { starting = [], reserves = [] } = lineup;
-  const playersUpdated = isReservePlayer ? [...reserves] : [...starting];
-
-  const addPlayerToIndex = (index: number) => {
-    if (!playersUpdated[index]?.player) {
-      playersUpdated[index].player = player;
-    }
-  };
-
-  if (typeof index !== 'undefined' && index >= 0 && index < playersUpdated.length) {
-    addPlayerToIndex(index);
-  } else {
-    const emptyIndex = playersUpdated.findIndex(
-      (item) => item.position === player.posicao_id && !item.player
-    );
-    if (emptyIndex !== -1) {
-      addPlayerToIndex(emptyIndex);
+    if (
+      currentPrice &&
+      (!lowestPricePlayer.player?.preco_num || currentPrice < lowestPricePlayer.player.preco_num)
+    ) {
+      lowestPricePlayer = current;
     }
   }
 
-  const updatedField = isReservePlayer ? 'reserves' : 'starting';
-  const lineupUpdated = {
-    ...lineup,
-    [updatedField]: playersUpdated,
+  return lowestPricePlayer;
+}
+
+export function onRemovePlayerFromSellPlayers(playersSell: PlayersToSell[], id: number) {
+  return playersSell.flatMap(({ players, quantityToNewFormation, ...position }) => {
+    const updatedPlayers = players.filter((player) => player.player?.atleta_id !== id);
+
+    if (updatedPlayers.length > quantityToNewFormation) {
+      return { ...position, players: updatedPlayers };
+    }
+
+    return [];
+  });
+}
+
+export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: AddPlayerProps) {
+  const { starting, reserves } = lineup;
+  const playersUpdated = isReservePlayer ? [...reserves] : [...starting];
+
+  const addPlayerToIndex = (index: number) => {
+    return playersUpdated.map((item, i) =>
+      i === index && !item.player ? { ...item, player } : item
+    );
   };
 
-  return lineupUpdated;
+  if (typeof index !== 'undefined' && index >= 0 && index < playersUpdated.length) {
+    return {
+      ...lineup,
+      [isReservePlayer ? 'reserves' : 'starting']: addPlayerToIndex(index),
+    };
+  }
+
+  const emptyIndex = playersUpdated.findIndex(
+    (item) => item.position === player.posicao_id && !item.player
+  );
+
+  if (emptyIndex !== -1) {
+    return {
+      ...lineup,
+      [isReservePlayer ? 'reserves' : 'starting']: addPlayerToIndex(emptyIndex),
+    };
+  }
+
+  return lineup;
 }
 
 export function onGetPayloadSaveTeam({ lineup, capitain, tacticalFormation }: SaveTeamProps) {

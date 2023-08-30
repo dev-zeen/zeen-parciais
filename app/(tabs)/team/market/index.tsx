@@ -68,7 +68,8 @@ export default ({
       });
       if (!!playerLowestPrice && handleCloseMarketModal) handleCloseMarketModal();
     },
-    [addPlayerToLineup, handleCloseMarketModal, playerLowestPrice]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const handleRemovePlayerFromLineup = useCallback(
