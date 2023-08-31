@@ -31,7 +31,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
   const pedingInviteBackground = colorTheme === 'dark' ? '#ca8a04' : '#fef08a';
 
   const screenWidth = useMemo(() => Dimensions.get('window').width, []);
-  const barWidth = useMemo(() => screenWidth - 100, [screenWidth]);
+  const barWidth = useMemo(() => screenWidth - 84, [screenWidth]);
 
   const totalTeamCup = useMemo(() => cup.liga.quantidade_times, [cup.liga.quantidade_times]);
   const currentTeamsCup = useMemo(() => cup.liga.total_times_liga, [cup.liga.total_times_liga]);
@@ -78,7 +78,14 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
             />
           </View>
 
-          <Text className="font-semibold text-sm">{item.nome}</Text>
+          <Text
+            className="font-semibold"
+            style={{
+              fontSize: 14,
+              lineHeight: 18,
+            }}>
+            {item.nome}
+          </Text>
           <Text className="font-light capitalize">{item.nome_cartola}</Text>
         </View>
       );
@@ -139,7 +146,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
           <View className="items-center justify-center">
             <Text className="text-base font-semibold">Participantes</Text>
             <View
-              className="justify-center items-center flex-row px-4 pb-5 pt-2"
+              className="justify-center items-center flex-row px-4 pb-5"
               style={{
                 gap: 4,
               }}>
@@ -149,8 +156,8 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
                   style={{
                     zIndex: 9999,
                     position: 'absolute',
-                    top: 32,
-                    left: barWidth * progress + 2,
+                    top: 23,
+                    left: barWidth * progress + 4,
                   }}>
                   <Text className="font-semibold text-neutral-200 text-xs">{currentTeamsCup}</Text>
                 </View>

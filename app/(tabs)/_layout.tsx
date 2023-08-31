@@ -1,8 +1,14 @@
 import { Feather } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { Link, Tabs } from 'expo-router';
+import { useContext } from 'react';
+import { Pressable, View, useColorScheme } from 'react-native';
 
+import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { AuthContext } from '@/contexts/Auth.context';
+import { useGetInvites } from '@/queries/leagues.query';
+import { useGetMarketStatus } from '@/queries/market.query';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -13,6 +19,19 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name'];
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+
+  const { isAutheticated } = useContext(AuthContext);
+
+  const { data: marketStatus } = useGetMarketStatus();
+
+  const allowRequests =
+    isAutheticated &&
+    marketStatus &&
+    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+
+  const { data: invites } = useGetInvites(allowRequests);
+
+  console.log('invites', invites);
 
   return (
     <Tabs
@@ -55,8 +74,34 @@ export default function TabLayout() {
         options={{
           tabBarLabel: 'Ligas',
           headerTitle: 'Ligas',
-          headerShown: false,
+          // headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
+          headerRight: () => (
+            <Link href="/leagues/invites" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <View
+                    className="flex-row items-center justify-center"
+                    style={{
+                      gap: 4,
+                    }}>
+                    {invites && invites?.convites?.length > 0 && (
+                      <View className="w-6 h-6 bg-violet-600 items-center justify-center rounded-full">
+                        <Text className="text-neutral-100">{invites?.convites?.length}</Text>
+                      </View>
+                    )}
+
+                    <Feather
+                      name="inbox"
+                      size={24}
+                      color={Colors[colorScheme ?? 'light'].text}
+                      style={{ marginRight: 15, opacity: pressed ? 0.6 : 1 }}
+                    />
+                  </View>
+                )}
+              </Pressable>
+            </Link>
+          ),
         }}
       />
       <Tabs.Screen

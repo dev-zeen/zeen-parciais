@@ -73,7 +73,7 @@ export default () => {
       <View
         className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'} mb-2`}
         style={{
-          gap: 8,
+          gap: 12,
         }}>
         <View className="flex-row justify-center items-center py-2 rounded-lg mx-2 mt-2">
           <Image

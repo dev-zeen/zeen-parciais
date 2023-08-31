@@ -9,14 +9,14 @@ interface CardLeagueStatsProps {
   league: LeagueUserDetails;
 }
 
+export const typeLeague = {
+  A: 'Aberta',
+  M: 'Moderada',
+  F: 'Fechada',
+};
+
 export function LeagueCard({ league }: CardLeagueStatsProps) {
   const router = useRouter();
-
-  const typeLeague = {
-    A: 'Aberta',
-    M: 'Moderada',
-    F: 'Fechada',
-  };
 
   const totalClubs = new Intl.NumberFormat('pt-BR').format(league.total_times_liga);
 

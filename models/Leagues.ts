@@ -111,8 +111,8 @@ export interface League {
   time_usuario_mata_mata?: TeamLeague;
 
   times: TeamLeague[];
-  convites_enviados?: CupInvites[];
-  pedidos?: CupInvites[];
+  convites_enviados?: Invite[];
+  pedidos?: Invite[];
 }
 
 export interface ClubsByLeague {
@@ -124,8 +124,10 @@ export interface IClubsByLeague {
   capitao: number;
 }
 
-export interface CupInvites {
+export interface Invite {
   data: string;
-  mesangemId: number;
+  mensagem_id: number;
   time: TeamLeague;
+  liga?: Partial<LeagueUserDetails>;
+  nome_cartola?: string;
 }

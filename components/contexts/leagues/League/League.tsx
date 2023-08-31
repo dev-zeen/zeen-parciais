@@ -10,11 +10,6 @@ import {
 
 import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
 import { View } from '@/components/Themed';
-import {
-  OrderByOptions,
-  mergeSort,
-  onGetLeagueWithPartials,
-} from '@/components/contexts/leagues/League/leagues.helper';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
@@ -25,6 +20,7 @@ import { League as LeagueEntity, TeamLeague } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { PlayerStats } from '@/models/Stats';
 import { useGetClubsByLeagueId } from '@/queries/leagues.query';
+import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 
 type LeagueProps = {
