@@ -138,11 +138,14 @@ export default () => {
   if (isLoadingInvites) return <Loading />;
 
   return (
-    <>
+    <View
+      className="flex-1"
+      style={{
+        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+      }}>
       <View
         className="items-center py-2"
         style={{
-          marginTop: 8,
           backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
         }}>
         <Text className="text-lg font-semibold"> Convites </Text>
@@ -163,6 +166,6 @@ export default () => {
           gap: 8,
         }}
       />
-    </>
+    </View>
   );
 };

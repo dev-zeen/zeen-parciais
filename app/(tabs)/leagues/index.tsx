@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { ListRenderItemInfo, RefreshControl, SectionList } from 'react-native';
+import { ListRenderItemInfo, RefreshControl, SectionList, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
@@ -7,7 +7,7 @@ import { LeagueCard } from '@/components/contexts/leagues/LeagueCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import { LeagueUserDetails } from '@/models/Leagues';
@@ -22,6 +22,8 @@ type SectionLeagueProps = {
 };
 
 export default function () {
+  const colorTheme = useColorScheme();
+
   const { isAutheticated } = useContext(AuthContext);
 
   const { data: marketStatus } = useGetMarketStatus();
@@ -44,11 +46,7 @@ export default function () {
     isRefetching: isRefetchingLeagues,
   } = useGetLeagues(!!allowRequests);
 
-  const [leagues, setLeagues] = useState<LeagueUserDetails[]>();
-
   const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>();
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   useEffect(() => {
     if (!dataLeagues) {
@@ -85,19 +83,6 @@ export default function () {
     setSectionLeaguesList(sectionLeagues);
   }, [club?.time, club?.time.assinante, dataLeagues, marketStatus]);
 
-  useEffect(() => {
-    if (isMarketClose) {
-      const privateLeagues = dataLeagues?.ligas
-        .filter((item) => item.time_dono_id)
-        .sort((a, b) => a.time_dono_id - b.time_dono_id);
-      setLeagues(privateLeagues);
-      return;
-    }
-
-    const leaguesSorted = dataLeagues?.ligas.sort((a, b) => b.time_dono_id - a.time_dono_id);
-    setLeagues(leaguesSorted);
-  }, [dataLeagues, isMarketClose]);
-
   const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
 
   const renderItem = useCallback(({ item: league }: ListRenderItemInfo<LeagueUserDetails>) => {
@@ -119,28 +104,32 @@ export default function () {
     return <MaintenanceMarket />;
   }
 
-  if (!dataLeagues || !leagues || isLoadingLeagues) {
+  if (!dataLeagues || isLoadingLeagues) {
     return <Loading />;
   }
 
   return (
-    <SafeAreaViewContainer>
-      <View className="flex-1 rounded-lg py-2 mx-2">
-        <SectionList
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          sections={sectionLeaguesList ?? []}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          showsVerticalScrollIndicator={false}
-          stickyHeaderHiddenOnScroll
-          renderSectionHeader={({ section: { title } }) => (
-            <View className="p-4">
-              <Text className="font-bold text-base text-center items-center">{title}</Text>
-            </View>
-          )}
-          ListEmptyComponent={<EmptyLeagueList />}
-        />
-      </View>
-    </SafeAreaViewContainer>
+    <SectionList
+      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+      sections={sectionLeaguesList ?? []}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
+      stickyHeaderHiddenOnScroll
+      contentContainerStyle={{
+        gap: 8,
+        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+      }}
+      renderSectionHeader={({ section: { title } }) => (
+        <View
+          className="p-2 mx-2 rounded"
+          style={{
+            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          }}>
+          <Text className="font-bold text-base text-center items-center">{title}</Text>
+        </View>
+      )}
+      ListEmptyComponent={<EmptyLeagueList />}
+    />
   );
 }

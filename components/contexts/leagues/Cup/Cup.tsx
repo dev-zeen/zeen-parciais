@@ -1,19 +1,14 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCallback, useMemo } from 'react';
-import {
-  Dimensions,
-  FlatList,
-  Image,
-  ListRenderItemInfo,
-  RefreshControl,
-  useColorScheme,
-} from 'react-native';
-import * as Progress from 'react-native-progress';
+import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { League, TeamLeague } from '@/models/Leagues';
+import { useGetMarketStatus } from '@/queries/market.query';
 
 interface TeamCup extends TeamLeague {
   isPending?: boolean;
@@ -30,18 +25,12 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
   const teamDefaultBackground = colorTheme === 'dark' ? '#047857' : '#dbeafe';
   const pedingInviteBackground = colorTheme === 'dark' ? '#ca8a04' : '#fef08a';
 
-  const screenWidth = useMemo(() => Dimensions.get('window').width, []);
-  const barWidth = useMemo(() => screenWidth - 84, [screenWidth]);
+  const { data: marketStatus, isLoading: isLoadingMarketStatus } = useGetMarketStatus();
+
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const totalTeamCup = useMemo(() => cup.liga.quantidade_times, [cup.liga.quantidade_times]);
   const currentTeamsCup = useMemo(() => cup.liga.total_times_liga, [cup.liga.total_times_liga]);
-
-  const percentageTeamsByTotal = useMemo(
-    () => ((currentTeamsCup as number) / (totalTeamCup as number)) * 100,
-    [currentTeamsCup, totalTeamCup]
-  );
-
-  const progress = useMemo(() => percentageTeamsByTotal / 100, [percentageTeamsByTotal]);
 
   const teamsAwatingAcceptInvite: TeamCup[] | undefined = useMemo(
     () => cup.convites_enviados?.map((item) => ({ ...item.time, isPending: true })),
@@ -58,7 +47,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
     ({ item }: ListRenderItemInfo<TeamCup>) => {
       return (
         <View
-          className="flex-1 rounded-lg items-center justify-center p-3"
+          className="flex-1 rounded-lg items-center justify-center p-2"
           style={{
             backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
             gap: 4,
@@ -73,7 +62,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
               source={{
                 uri: item.url_escudo_png,
               }}
-              className="w-12 h-12"
+              className="w-10 h-10"
               alt={`Imagem do time do ${item.nome_cartola}`}
             />
           </View>
@@ -82,7 +71,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
             className="font-semibold"
             style={{
               fontSize: 14,
-              lineHeight: 18,
+              lineHeight: 14,
             }}>
             {item.nome}
           </Text>
@@ -93,8 +82,14 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
     [pedingInviteBackground, teamDefaultBackground]
   );
 
+  if (isLoadingMarketStatus) return <Loading />;
+
   return (
-    <>
+    <View
+      className="flex-1"
+      style={{
+        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+      }}>
       <View
         className="mx-2"
         style={{
@@ -113,12 +108,13 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
             style={{
               gap: 4,
             }}>
-            <Text>Início</Text>
-            <Text className="font-semibold text-sm">
-              {format(new Date(cup.liga.data_inicio as string), "EEEEEE',' dd/MM/y", {
+            <Text>
+              Início |{' '}
+              {format(new Date(cup.liga.data_inicio as string), 'dd/MM', {
                 locale: ptBR,
               })}
             </Text>
+
             <Text className="font-semibold text-sm">{cup.liga.inicio_rodada}º Radada </Text>
           </View>
 
@@ -127,51 +123,34 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
             style={{
               gap: 4,
             }}>
-            <Text>Final</Text>
-            <Text className="font-semibold text-sm">
-              {format(new Date(cup.liga.data_fim as string), "EEEEEE',' dd/MM/y", {
+            <Text>
+              Final | {''}
+              {format(new Date(cup.liga.data_fim as string), 'dd/MM', {
                 locale: ptBR,
               })}
             </Text>
+
             <Text className="font-semibold text-sm">{cup.liga.fim_rodada}º Radada</Text>
           </View>
-        </View>
 
-        <View
-          className="rounded-lg justify-center items-center p-2"
-          style={{
-            gap: 8,
-            paddingVertical: 8,
-          }}>
-          <View className="items-center justify-center">
-            <Text className="text-base font-semibold">Participantes</Text>
-            <View
-              className="justify-center items-center flex-row px-4 pb-5"
-              style={{
-                gap: 4,
-              }}>
-              {totalTeamCup !== currentTeamsCup && (
-                <View
-                  className="bg-blue-500 items-center justify-center rounded-full p-1 w-6 h-6"
-                  style={{
-                    zIndex: 9999,
-                    position: 'absolute',
-                    top: 23,
-                    left: barWidth * progress + 4,
-                  }}>
-                  <Text className="font-semibold text-neutral-200 text-xs">{currentTeamsCup}</Text>
-                </View>
-              )}
-
-              <Progress.Bar
-                progress={progress}
-                width={barWidth}
-                height={14}
-                useNativeDriver
-                color={progress === 1 ? '#22c55e' : '#3b82f6'}
-              />
-              <Text className="text-base font-semibold">{totalTeamCup}</Text>
-            </View>
+          <View
+            className="justify-center items-center"
+            style={{
+              gap: 4,
+            }}>
+            {!isMarketClose ? (
+              <>
+                <Text>Cartoleiros</Text>
+                <Text className="text-base font-semibold">
+                  {currentTeamsCup} / {totalTeamCup}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text>Cartoleiros</Text>
+                <Text className="text-base font-semibold">{totalTeamCup}</Text>
+              </>
+            )}
           </View>
         </View>
       </View>
@@ -194,8 +173,9 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
           marginHorizontal: 8,
           paddingVertical: 8,
           borderRadius: 4,
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
         }}
       />
-    </>
+    </View>
   );
 }

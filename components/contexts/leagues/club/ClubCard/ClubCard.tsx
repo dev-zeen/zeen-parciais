@@ -29,6 +29,8 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     const isOrderByPatrimonio = orderBy === 'patrimonio';
     const patrimony = numberToString(club.patrimonio);
 
+    const isMarketOpen = marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO;
+
     const score = isOrderByPatrimonio ? patrimony : numberToString((club.pontos as any)[orderBy]);
 
     const diffScore =
@@ -37,8 +39,8 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
         : 0;
 
     const renderVariationIcon = useCallback((variation: number) => {
-      const iconName = variation > 0 ? 'arrow-up' : 'arrow-down';
-      const iconColor = variation > 0 ? '#4ade80' : '#f87171';
+      const iconName = variation >= 1 ? 'arrow-up' : 'arrow-down';
+      const iconColor = variation >= 1 ? '#4ade80' : '#f87171';
       return (
         <MaterialCommunityIcons
           name={variation !== 0 ? iconName : 'equal'}
@@ -52,7 +54,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       router.push(`/leagues/club/${club.time_id}`);
     }, [club.time_id, router]);
 
-    const myTeam = league?.time_usuario.time_id === club.time_id;
+    const myTeam = league?.time_usuario && league?.time_usuario.time_id === club.time_id;
 
     return (
       <View
@@ -80,18 +82,19 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                 }`}>
                 <Text className="text-sm font-semibold">{position}</Text>
 
-                {marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO &&
-                  orderBy !== 'rodada' && (
-                    <View
-                      className={`flex-row items-center ${
-                        myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                      }`}>
-                      {renderVariationIcon((club.variacao as any)[orderBy])}
-                      <Text className="text-xs">
-                        {(club.variacao as any)[orderBy] ? (club.variacao as any)[orderBy] : ''}
-                      </Text>
-                    </View>
-                  )}
+                {isMarketOpen && orderBy !== 'rodada' ? (
+                  <View
+                    className={`flex-row items-center ${
+                      myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
+                    }`}>
+                    {renderVariationIcon((club.variacao as any)[orderBy])}
+                    <Text className="text-xs">
+                      {(club.variacao as any)[orderBy] ? (club.variacao as any)[orderBy] : ''}
+                    </Text>
+                  </View>
+                ) : (
+                  <></>
+                )}
               </View>
               <Image
                 source={{

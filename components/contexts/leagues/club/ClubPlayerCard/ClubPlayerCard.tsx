@@ -109,46 +109,55 @@ export function ClubPlayerCard({
         </View>
 
         <View className="flex-row items-center">
-          {isMarketClose ? (
-            <Text
-              className={`text-xs font-semibold ${
-                appreciation && appreciation < 0 ? 'text-folly' : 'text-green-400'
-              }`}>
-              {appreciation ? numberToString(appreciation) : null}
-              <Feather
-                name={appreciation && appreciation < 0 ? 'arrow-down' : 'arrow-up'}
-                color={appreciation && appreciation < 0 ? '#ef4444' : '#4ade80'}
-              />
-            </Text>
-          ) : (
+          {player.entrou_em_campo ? (
             <>
-              {currentRound === marketStatus.rodada_atual - 1 && (
+              {isMarketClose ? (
                 <Text
                   className={`text-xs font-semibold ${
-                    player.variacao_num && player.variacao_num < 0 ? 'text-folly' : 'text-green-400'
+                    appreciation && appreciation < 0 ? 'text-folly' : 'text-green-400'
                   }`}>
-                  {player.variacao_num ? numberToString(player.variacao_num) : null}
+                  {appreciation ? numberToString(appreciation) : null}
                   <Feather
-                    name={
-                      player.variacao_num && player.variacao_num < 0 ? 'arrow-down' : 'arrow-up'
-                    }
-                    color={player.variacao_num && player.variacao_num < 0 ? '#ef4444' : '#4ade80'}
+                    name={appreciation && appreciation < 0 ? 'arrow-down' : 'arrow-up'}
+                    color={appreciation && appreciation < 0 ? '#ef4444' : '#4ade80'}
                   />
                 </Text>
+              ) : (
+                <>
+                  {currentRound === marketStatus.rodada_atual - 1 && (
+                    <Text
+                      className={`text-xs font-semibold ${
+                        player.variacao_num && player.variacao_num < 0
+                          ? 'text-folly'
+                          : 'text-green-400'
+                      }`}>
+                      {player.variacao_num ? numberToString(player.variacao_num) : null}
+                      <Feather
+                        name={
+                          player.variacao_num && player.variacao_num < 0 ? 'arrow-down' : 'arrow-up'
+                        }
+                        color={
+                          player.variacao_num && player.variacao_num < 0 ? '#ef4444' : '#4ade80'
+                        }
+                      />
+                    </Text>
+                  )}
+                </>
               )}
+              <Text
+                className={`w-10 font-semibold text-sm text-right ${
+                  scorePlayer(player) > 0
+                    ? 'text-green-500'
+                    : scorePlayer(player) <= -30
+                    ? ''
+                    : 'text-red-500'
+                }`}>
+                {scorePlayer(player) < -30 ? '-' : numberToString(scorePlayer(player))}
+              </Text>
             </>
+          ) : (
+            <Text> - </Text>
           )}
-
-          <Text
-            className={`w-10 font-semibold text-sm text-right ${
-              scorePlayer(player) > 0
-                ? 'text-green-500'
-                : scorePlayer(player) <= -30
-                ? ''
-                : 'text-red-500'
-            }`}>
-            {scorePlayer(player) < -30 ? '-' : numberToString(scorePlayer(player))}
-          </Text>
         </View>
       </TouchableOpacity>
     </View>

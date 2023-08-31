@@ -8,7 +8,6 @@ import { Cup } from '@/components/contexts/leagues/Cup';
 import { League as LeagueComponent } from '@/components/contexts/leagues/League';
 import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import { TeamLeague } from '@/models/Leagues';
@@ -69,9 +68,9 @@ export default () => {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <>
       <View
-        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'} mb-2`}
+        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'} pb-2`}
         style={{
           gap: 12,
         }}>
@@ -127,6 +126,6 @@ export default () => {
           subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
         />
       )}
-    </SafeAreaViewContainer>
+    </>
   );
 };

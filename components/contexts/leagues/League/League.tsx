@@ -200,8 +200,18 @@ export function League({
   }
 
   return (
-    <>
-      <Tabs tabs={tabs} />
+    <View
+      className="flex-1"
+      style={{
+        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+      }}>
+      <View
+        style={{
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        }}>
+        <Tabs tabs={tabs} />
+      </View>
+
       {isSortingClubs ? (
         <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
           <ActivityIndicator />
@@ -217,12 +227,12 @@ export function League({
           contentContainerStyle={{
             paddingTop: 8,
             paddingVertical: 8,
-            marginHorizontal: 8,
+            paddingHorizontal: 8,
             backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
             gap: 4,
           }}
         />
       )}
-    </>
+    </View>
   );
 }
