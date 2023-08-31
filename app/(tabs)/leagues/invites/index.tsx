@@ -48,37 +48,29 @@ export default () => {
   const onRefetch = useCallback(() => {
     onRefecthLeagues();
     onRefetchInvites();
+  }, [onRefecthLeagues, onRefetchInvites]);
+
+  const handleAcceptInvite = useCallback(async (messageId: number) => {
+    await onAcceptInvite(String(messageId)).then((response) => {
+      Alert.alert('Tudo certo Cartoleiro!', response.data.mensagem, [
+        {
+          text: 'Ok',
+          style: 'cancel',
+        },
+      ]);
+    });
   }, []);
 
-  const handleAcceptInvite = useCallback(
-    async (messageId: number) => {
-      await onAcceptInvite(String(messageId)).then((response) => {
-        Alert.alert('Tudo certo Cartoleiro!', response.data.mensagem, [
-          {
-            text: 'Ok',
-            style: 'cancel',
-          },
-        ]);
-      });
-      onRefetch();
-    },
-    [onRefetch]
-  );
-
-  const handleDeclineInvitation = useCallback(
-    async (messageId: number) => {
-      await onDeclineInvitation(String(messageId)).then((response) => {
-        Alert.alert('Tudo certo Cartoleiro!', response.data.mensagem, [
-          {
-            text: 'Ok',
-            style: 'cancel',
-          },
-        ]);
-      });
-      onRefetch();
-    },
-    [onRefetch]
-  );
+  const handleDeclineInvitation = useCallback(async (messageId: number) => {
+    await onDeclineInvitation(String(messageId)).then((response) => {
+      Alert.alert('Tudo certo Cartoleiro!', response.data.mensagem, [
+        {
+          text: 'Ok',
+          style: 'cancel',
+        },
+      ]);
+    });
+  }, []);
 
   const keyExtractor = useCallback((item: Invite) => `${item.liga?.liga_id}`, []);
 

@@ -31,8 +31,6 @@ export default function TabLayout() {
 
   const { data: invites } = useGetInvites(allowRequests);
 
-  console.log('invites', invites);
-
   return (
     <Tabs
       screenOptions={{

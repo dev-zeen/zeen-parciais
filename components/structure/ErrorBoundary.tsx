@@ -28,14 +28,14 @@ export function ErrorBoundaryComponent({ error, resetError }: CustomErrorBoundar
         className="w-48 h-48 rounded-full"
         alt={`Imagem de erro na aplicação`}
       />
-      <Text className="font-semibold text-base text-center">{errorData.message}</Text>
+      <Text className="font-semibold text-base text-center">{errorData?.message}</Text>
 
       <TouchableOpacity
         onPress={resetError}
         className={`px-4 py-3 rounded  ${
           colorTheme === 'dark' ? 'bg-red-500 border-red-500' : 'border bg-red-200 border-red-500'
         }`}>
-        <Text className="font-semibold">{errorData.buttonText}</Text>
+        <Text className="font-semibold">{errorData?.buttonText}</Text>
       </TouchableOpacity>
     </View>
   );

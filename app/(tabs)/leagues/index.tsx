@@ -46,7 +46,7 @@ export default function () {
     isRefetching: isRefetchingLeagues,
   } = useGetLeagues(!!allowRequests);
 
-  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>();
+  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>([]);
 
   useEffect(() => {
     if (!dataLeagues) {
@@ -111,7 +111,7 @@ export default function () {
   return (
     <SectionList
       refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-      sections={sectionLeaguesList ?? []}
+      sections={sectionLeaguesList}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       showsVerticalScrollIndicator={false}

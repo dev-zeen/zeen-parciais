@@ -7,7 +7,7 @@ import {
 } from '@tanstack/react-query';
 import { AxiosError, AxiosResponse } from 'axios';
 
-import { api } from './api';
+import api from '@/services/api';
 
 export interface GetInfinitePagesInterface<T> {
   nextId?: number;
@@ -29,6 +29,7 @@ export const fetcher = async <T>({
   const res = await api.get<T>(url, {
     params: { ...params, pageParam },
   });
+
   return res.data;
 };
 

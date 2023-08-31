@@ -9,7 +9,7 @@ import {
 } from '@/constants/Endpoits';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
 import { Invite, League, LeagueUserDetails } from '@/models/Leagues';
-import cartolaApi from '@/services/cartolaApi';
+import api from '@/services/api';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 import { useFetch } from '@/utils/reactQuery';
 
@@ -65,7 +65,7 @@ export const useGetInvites = (allowRequest?: boolean) =>
   });
 
 export const onAcceptInvite = async (id: string) =>
-  await cartolaApi.post(RESPONSE_INVITE.replace(':messageId', id), {});
+  await api.post(RESPONSE_INVITE.replace(':messageId', id), {});
 
 export const onDeclineInvitation = async (id: string) =>
-  await cartolaApi.delete(RESPONSE_INVITE.replace(':messageId', id), {});
+  await api.delete(RESPONSE_INVITE.replace(':messageId', id), {});
