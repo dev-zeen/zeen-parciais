@@ -5,6 +5,7 @@ import { Image, ScrollView, useColorScheme } from 'react-native';
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
+import { Positions } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { LineupPlayer } from '@/models/Formations';
 import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
@@ -141,7 +142,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
           {!isMarketClose && (
             <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
-              {!isCapitain && !isReservePlayer && (
+              {!isCapitain && !isReservePlayer && player.posicao_id !== Positions.TECNICO && (
                 <TouchableOpacity
                   onPress={handleSelectCapitain}
                   disabled={isCapitain}

@@ -196,8 +196,10 @@ export default () => {
   useEffect(() => {
     if (isSuccess) {
       onSuccessSavedTeam();
+      onRefetchClub();
       setIsActiveLineupConfirmButton(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccess]);
 
   const isReservesCompleted = useCallback((reserves: LineupPosition[]) => {
