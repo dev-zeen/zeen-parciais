@@ -72,12 +72,10 @@ export default ({
     []
   );
 
-  const handleRemovePlayerFromLineup = useCallback(
-    (player: FullPlayer) => {
-      removePlayerFromLineup(player);
-    },
-    [removePlayerFromLineup]
-  );
+  const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {
+    removePlayerFromLineup(player);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleIsLoading = useCallback(() => {
     setIsLoading((previous) => !previous);
@@ -94,12 +92,14 @@ export default ({
         handleIsLoading();
       }
     },
-    [handleIsLoading, position]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [position]
   );
 
   const handleCloseMarket = useCallback(
     () => (handleCloseMarketModal ? handleCloseMarketModal() : router.push('/team/')),
-    [handleCloseMarketModal]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   useEffect(() => {
@@ -118,7 +118,8 @@ export default ({
 
       isFirstRender.current = false;
     }
-  }, [marketData, playerLowestPrice, position]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [marketData]);
 
   useEffect(() => {
     if (lineup) {
@@ -145,7 +146,7 @@ export default ({
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [emptyPositions, lineup?.starting, playerIndex, playerLowestPrice, remainingValue]
+    [emptyPositions]
   );
 
   if (!isAutheticated) return <Redirect href="/(tabs)/team" />;

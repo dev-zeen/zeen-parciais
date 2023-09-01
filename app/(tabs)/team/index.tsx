@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 
@@ -45,6 +45,8 @@ import { numberToString } from '@/utils/parseTo';
 import { isLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
 
 export default () => {
+  const isFirstRender = useRef(true);
+
   const router = useRouter();
 
   const colorTheme = useColorScheme();
@@ -66,13 +68,13 @@ export default () => {
     isRefetching: isRefetchingClub,
   } = useGetMyClub(!!allowRequests);
 
-  const { mutate, isSuccess } = useSaveTeam();
-
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const { data: substitutions } = useGetMatchSubstitutions({
     id: club?.time.time_id,
   });
+
+  const { mutate, isSuccess } = useSaveTeam();
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -102,15 +104,20 @@ export default () => {
         playerStats as PlayerStats,
         isMarketClose
       );
+      const defaultPrice = onGetTeamPrice(defaultLineupFilled.starting);
+      updatePrice(defaultPrice);
+
       updateLineup(defaultLineupFilled);
       updateCapitain(res.data?.capitao_id as number);
     });
-  }, [isMarketClose, onRefetchClub, playerStats, updateCapitain, updateLineup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMarketClose, playerStats]);
 
   const onCloseModalSell = useCallback(() => {
     setShowModalPlayersToSell(false);
     setTacticalFormation(defaultLineupTeam);
     handleResetClub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultLineupTeam, handleResetClub]);
 
   const handleCloseSuccessSellPlayers = useCallback(
@@ -125,7 +132,8 @@ export default () => {
 
       updateLineup(lineupUpdated);
     },
-    [isMarketClose, playerStats, updateLineup]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMarketClose, playerStats]
   );
 
   const handleChangeFormation = useCallback(
@@ -165,7 +173,8 @@ export default () => {
         setShowModalPlayersToSell(true);
       }
     },
-    [isMarketClose, playerStats, tacticalFormation, updateLineup]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isMarketClose, playerStats, tacticalFormation]
   );
 
   const onRefetch = useCallback(async () => {
@@ -181,7 +190,8 @@ export default () => {
     });
 
     mutate(payload);
-  }, [lineup, capitain, tacticalFormation, mutate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineup, capitain, tacticalFormation]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -229,23 +239,21 @@ export default () => {
     []
   );
 
-  const handleSellAllPlayers = useCallback(
-    (lineup: LineupPlayers) => {
-      const emptyLineup = clearLineup(lineup?.starting as LineupPosition[]);
-      const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
-      const newPrice = 0;
+  const handleSellAllPlayers = useCallback((lineup: LineupPlayers) => {
+    const emptyLineup = clearLineup(lineup?.starting as LineupPosition[]);
+    const emptyReserves = clearLineup(lineup?.reserves as LineupPosition[]);
+    const newPrice = 0;
 
-      const lineupWithoutPlayers: LineupPlayers = {
-        starting: [...(emptyLineup as LineupPosition[])],
-        reserves: [...(emptyReserves as LineupPosition[])],
-      };
+    const lineupWithoutPlayers: LineupPlayers = {
+      starting: [...(emptyLineup as LineupPosition[])],
+      reserves: [...(emptyReserves as LineupPosition[])],
+    };
 
-      updateLineup(lineupWithoutPlayers);
-      updateCapitain(0);
-      updatePrice(newPrice);
-    },
-    [updateCapitain, updateLineup, updatePrice]
-  );
+    updateLineup(lineupWithoutPlayers);
+    updateCapitain(0);
+    updatePrice(newPrice);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!lineup && club) {
@@ -259,7 +267,8 @@ export default () => {
       updateLineup(defaultLineup);
       updateCapitain(club.capitao_id);
     }
-  }, [club, isMarketClose, lineup, playerStats, updateCapitain, updateLineup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [club, isMarketClose, lineup, playerStats]);
 
   useEffect(() => {
     if (lineup && club) {
@@ -271,15 +280,20 @@ export default () => {
         setIsActiveLineupConfirmButton(false);
       }
     }
-  }, [capitain, club, lineup, onShowSaveLineupButton]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [capitain, club, lineup]);
 
   useEffect(() => {
-    if (lineup) {
+    if (lineup && isFirstRender) {
       const priceUpdated = onGetTeamPrice(lineup?.starting as LineupPosition[]);
       updatePrice(priceUpdated);
-    }
-  }, [lineup, updatePrice]);
 
+      isFirstRender.current = false;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineup]);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
 
   if (!isAutheticated) {
