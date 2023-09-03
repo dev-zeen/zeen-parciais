@@ -10,6 +10,7 @@ import { MarketStatus } from '@/models/Market';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
 
 type ClubPlayerCardProps = {
@@ -24,7 +25,6 @@ type ClubPlayerCardProps = {
 
 export function ClubPlayerCard({
   player,
-  playerStats,
   currentRound,
   marketStatus,
   appreciation,
@@ -37,6 +37,8 @@ export function ClubPlayerCard({
   const { data: positions } = useGetPositions();
 
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const scorePlayer = useCallback(
     (player: FullPlayer) => {
@@ -81,7 +83,7 @@ export function ClubPlayerCard({
           <View className="justify-center items-center">
             <Image
               source={{
-                uri: player.foto.replace('FORMATO', '220x220'),
+                uri: player.foto?.replace('FORMATO', '220x220'),
               }}
               className="w-14 h-14"
               alt={`Imagem do ${player.nome}`}
@@ -109,7 +111,7 @@ export function ClubPlayerCard({
         </View>
 
         <View className="flex-row items-center">
-          {player.entrou_em_campo ? (
+          {scorePlayer(player) > -20 ? (
             <>
               {isMarketClose ? (
                 <Text
@@ -152,7 +154,7 @@ export function ClubPlayerCard({
                     ? ''
                     : 'text-red-500'
                 }`}>
-                {scorePlayer(player) < -30 ? '-' : numberToString(scorePlayer(player))}
+                {numberToString(scorePlayer(player))}
               </Text>
             </>
           ) : (

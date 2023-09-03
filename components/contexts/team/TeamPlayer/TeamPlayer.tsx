@@ -100,7 +100,7 @@ export function TeamPlayer({
         key={player?.foto}>
         <Image
           source={{
-            uri: player?.foto.replace('FORMATO', '220x220'),
+            uri: player?.foto?.replace('FORMATO', '220x220'),
           }}
           className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}

@@ -273,7 +273,7 @@ export default () => {
                 <View className="flex-row py-2 gap-x-1">
                   <Image
                     source={{
-                      uri: teamCapitain?.foto.replace('FORMATO', '220x220'),
+                      uri: teamCapitain?.foto?.replace('FORMATO', '220x220'),
                     }}
                     className="w-14 h-14 rounded-full"
                     alt={`Foto do ${teamCapitain?.apelido}`}

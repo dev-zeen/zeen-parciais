@@ -44,7 +44,7 @@ export function ListPlayersSale({
         player?.atleta_id
       );
 
-      setPlayersSell(positionSellUpdated);
+      setPlayersSell(positionSellUpdated as PlayersToSell[]);
 
       const lineUpdated = onRemovePlayerFromLineup(lineupState as LineupPlayers, player);
       setLineupState(lineUpdated);
@@ -127,7 +127,7 @@ export function ListPlayersSale({
                               }}>
                               <Image
                                 source={{
-                                  uri: player?.foto.replace('FORMATO', '220x220'),
+                                  uri: player?.foto?.replace('FORMATO', '220x220'),
                                 }}
                                 className="w-16 h-16 rounded-3xl"
                                 alt={`Imagem do ${player?.nome}`}

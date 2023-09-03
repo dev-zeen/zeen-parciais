@@ -99,7 +99,7 @@ export default () => {
             return {
               id: String(item.atleta_id),
               apelido: item.apelido_abreviado,
-              foto: item.foto,
+              foto: item?.foto,
               pontuacao: item.pontos_num,
               posicao_id: item.posicao_id,
               clube_id: item.clube_id,

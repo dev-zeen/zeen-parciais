@@ -70,7 +70,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
           <View className="flex-1 flex-row items-center justify-between px-8">
             <Image
               source={{
-                uri: player.foto.replace('FORMATO', '220x220'),
+                uri: player.foto?.replace('FORMATO', '220x220'),
               }}
               className="w-32 h-32 rounded-full mr-2"
               style={{

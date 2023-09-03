@@ -51,6 +51,8 @@ export default () => {
 
   const { isAutheticated } = useContext(AuthContext);
 
+  const { data: myTeam, isLoading: isLoadingMyClub } = useGetMyClub(isAutheticated);
+
   const { id } = useLocalSearchParams();
 
   const allowRequest = isAutheticated;
@@ -123,13 +125,11 @@ export default () => {
           club={(playerStats as PlayerStats)?.clubes[String(player.clube_id)]}
           position={(playerStats as PlayerStats)?.posicoes[player.posicao_id]}
           appreciation={(appreciations as Appreciations)?.atletas?.[player.id]?.variacao_num}
-          isPlayerOnMyLineup={lineup?.starting.some(
-            (item) => String(item.player?.atleta_id) === player.id
-          )}
+          isPlayerOnMyLineup={myTeam?.atletas.some((item) => String(item.atleta_id) === player.id)}
         />
       );
     },
-    [appreciations, lineup, playerStats]
+    [appreciations, myTeam?.atletas, playerStats]
   );
 
   const renderItem = useCallback(
@@ -245,7 +245,7 @@ export default () => {
   }, [match, onGetTabPlayers]);
 
   const isLoading = isMarketClose
-    ? !market || !match || !appreciations || !playerStats
+    ? !market || !match || !appreciations || !playerStats || isLoadingMyClub
     : !market || !match;
 
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;

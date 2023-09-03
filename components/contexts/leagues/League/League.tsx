@@ -187,6 +187,7 @@ export function League({
           firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
           marketStatus={marketStatus as MarketStatus}
           isMarketClose={isMarketClose}
+          isLeagueAcceptCapitain={!league.liga.sem_capitao}
         />
       );
     },

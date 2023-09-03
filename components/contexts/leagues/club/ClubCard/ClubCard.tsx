@@ -4,10 +4,12 @@ import { memo, useCallback } from 'react';
 import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
+import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { League } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
+import { useGetClub } from '@/queries/club.query';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
 
@@ -19,12 +21,26 @@ interface ClubCardProps {
   firstPlaceScore: number;
   marketStatus: MarketStatus;
   isMarketClose: boolean;
+  isLeagueAcceptCapitain: boolean;
 }
 
 export const ClubCard: React.FC<ClubCardProps> = memo(
-  ({ league, club, orderBy, position, firstPlaceScore, marketStatus, isMarketClose }) => {
+  ({
+    league,
+    club,
+    orderBy,
+    position,
+    firstPlaceScore,
+    marketStatus,
+    isMarketClose,
+    isLeagueAcceptCapitain,
+  }) => {
     const router = useRouter();
     const colorTheme = useColorScheme();
+
+    const { data: team } = useGetClub(String(club.time_id));
+
+    const capitainPlayer = team?.atletas.find((item) => item.atleta_id === team.capitao_id);
 
     const isOrderByPatrimonio = orderBy === 'patrimonio';
     const patrimony = numberToString(club.patrimonio);
@@ -113,12 +129,31 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                   {club.nome}
                 </Text>
                 <View
-                  className={`flex-row items-center gap-x-1 ${
+                  className={`flex-row items-center justify-center gap-x-1 ${
                     myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
                   }`}>
                   <Text className="text-xs capitalize">{club.nome_cartola}</Text>
                   <View className="rounded-full h-1 w-1 bg-gray-300" />
-                  <Text className="text-xs">C$ {patrimony}</Text>
+                  {isLeagueAcceptCapitain ? (
+                    <View
+                      className={`flex-row items-center justify-center ${
+                        myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
+                      }`}>
+                      <Image
+                        source={captainIcon}
+                        style={{
+                          width: 12,
+                          height: 12,
+                          marginRight: 4,
+                          marginLeft: 1,
+                        }}
+                        alt={`Liga com Capitão`}
+                      />
+                      <Text className="text-xs">{capitainPlayer?.apelido}</Text>
+                    </View>
+                  ) : (
+                    <Text className="text-xs">C$ {patrimony}</Text>
+                  )}
                 </View>
               </View>
             </View>

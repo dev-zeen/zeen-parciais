@@ -69,7 +69,7 @@ export function PlayerCard({
       <View className={`flex-row items-center gap-1 rounded-lg ${stylePlayerInMyLineup}`}>
         <Image
           source={{
-            uri: player.foto.replace('FORMATO', '220x220'),
+            uri: player?.foto?.replace('FORMATO', '220x220'),
           }}
           className="w-12 h-12"
           alt={player.apelido}

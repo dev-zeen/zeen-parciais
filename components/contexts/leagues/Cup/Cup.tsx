@@ -1,13 +1,18 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { CupMatch } from '@/components/contexts/leagues/Cup/CupMatch';
 import { Loading } from '@/components/structure/Loading';
+import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { FullClubInfo } from '@/models/Club';
 import { League, TeamLeague } from '@/models/Leagues';
+import { MarketStatus } from '@/models/Market';
+import { useGetMyClub } from '@/queries/club.query';
 import { useGetMarketStatus } from '@/queries/market.query';
 
 interface TeamCup extends TeamLeague {
@@ -27,7 +32,18 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
 
   const { data: marketStatus, isLoading: isLoadingMarketStatus } = useGetMarketStatus();
 
+  const allowRequest =
+    marketStatus && marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+
+  const { data: team } = useGetMyClub(allowRequest);
+
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
+  const isCupInProgress = useMemo(() => {
+    if (cup && cup?.chaves_mata_mata) {
+      return Object.keys(cup?.chaves_mata_mata).length > 0;
+    }
+  }, [cup]);
 
   const totalTeamCup = useMemo(() => cup.liga.quantidade_times, [cup.liga.quantidade_times]);
   const currentTeamsCup = useMemo(() => cup.liga.total_times_liga, [cup.liga.total_times_liga]);
@@ -43,46 +59,94 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
 
   const keyExtractor = useCallback((item: TeamCup) => `${item.time_id}`, []);
 
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<TeamCup>) => {
-      return (
-        <View
-          className="flex-1 rounded-lg items-center justify-center p-2"
-          style={{
-            backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
-            gap: 4,
-          }}>
-          <View
-            className="flex-row items-center justify-center"
-            style={{
-              gap: 4,
-              backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
-            }}>
-            <Image
-              source={{
-                uri: item.url_escudo_png,
-              }}
-              className="w-10 h-10"
-              alt={`Imagem do time do ${item.nome_cartola}`}
-            />
-          </View>
+  const [roundTabs, setRoundTabs] = useState<ITabs[]>([]);
 
-          <Text
-            className="font-semibold"
-            style={{
-              fontSize: 14,
-              lineHeight: 14,
-            }}>
-            {item.nome}
-          </Text>
-          <Text className="font-light capitalize">{item.nome_cartola}</Text>
-        </View>
-      );
+  const renderMatchItem = useCallback(
+    (round: string) => {
+      if (cup && cup.chaves_mata_mata && marketStatus && team) {
+        return (
+          <FlatList
+            contentContainerStyle={{
+              marginHorizontal: 8,
+              marginTop: 8,
+            }}
+            data={cup.chaves_mata_mata[round]}
+            keyExtractor={(item) => `${item.chave_id}`}
+            renderItem={({ item }) => {
+              return (
+                <CupMatch
+                  key={item.chave_id}
+                  match={item}
+                  teams={cup.times}
+                  myTeam={team as FullClubInfo}
+                  marketStatus={marketStatus as MarketStatus}
+                />
+              );
+            }}
+          />
+        );
+      }
     },
-    [pedingInviteBackground, teamDefaultBackground]
+    [cup, marketStatus, team]
   );
 
-  if (isLoadingMarketStatus) return <Loading />;
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<TeamCup>) => {
+      if (!isCupInProgress) {
+        return (
+          <View
+            className="flex-1 rounded-lg items-center justify-center p-2"
+            style={{
+              backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
+              gap: 4,
+            }}>
+            <View
+              className="flex-row items-center justify-center"
+              style={{
+                gap: 4,
+                backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
+              }}>
+              <Image
+                source={{
+                  uri: item.url_escudo_png,
+                }}
+                className="w-10 h-10"
+                alt={`Imagem do time do ${item.nome_cartola}`}
+              />
+            </View>
+
+            <Text
+              className="font-semibold"
+              style={{
+                fontSize: 14,
+                lineHeight: 14,
+              }}>
+              {item.nome}
+            </Text>
+            <Text className="font-light capitalize">{item.nome_cartola}</Text>
+          </View>
+        );
+      }
+      return <></>;
+    },
+    [isCupInProgress, pedingInviteBackground, teamDefaultBackground]
+  );
+
+  useEffect(() => {
+    if (isCupInProgress && cup && cup.chaves_mata_mata) {
+      const tabs = Object.keys(cup.chaves_mata_mata).map((round, index) => {
+        return {
+          id: index + 1,
+          title: round,
+          content: () => renderMatchItem(round),
+        };
+      });
+
+      setRoundTabs(tabs);
+    }
+  }, [cup, isCupInProgress, renderMatchItem]);
+
+  if (isLoadingMarketStatus || roundTabs.length < 1) return <Loading />;
 
   return (
     <View
@@ -91,7 +155,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
         backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
       }}>
       <View
-        className="mx-2"
+        className="mx-2 mb-2"
         style={{
           gap: 8,
           backgroundColor:
@@ -155,27 +219,31 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
         </View>
       </View>
 
-      <FlatList
-        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-        data={
-          teamsAwatingAcceptInvite && teamsAwatingAcceptInvite?.length > 0
-            ? [...teamsByCup].concat(teamsAwatingAcceptInvite)
-            : [...teamsByCup]
-        }
-        renderItem={renderItem}
-        keyExtractor={keyExtractor}
-        numColumns={2}
-        columnWrapperStyle={{
-          gap: 8,
-        }}
-        contentContainerStyle={{
-          gap: 8,
-          marginHorizontal: 8,
-          paddingVertical: 8,
-          borderRadius: 4,
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
-        }}
-      />
+      {!isCupInProgress ? (
+        <FlatList
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+          data={
+            teamsAwatingAcceptInvite && teamsAwatingAcceptInvite?.length > 0
+              ? [...teamsByCup].concat(teamsAwatingAcceptInvite)
+              : [...teamsByCup]
+          }
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          numColumns={2}
+          columnWrapperStyle={{
+            gap: 8,
+          }}
+          contentContainerStyle={{
+            gap: 8,
+            marginHorizontal: 8,
+            paddingVertical: 8,
+            borderRadius: 4,
+            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          }}
+        />
+      ) : (
+        <Tabs tabs={roundTabs} />
+      )}
     </View>
   );
 }

@@ -105,12 +105,13 @@ export interface League {
   liga: LeagueUserDetails;
   membro: boolean;
   pagina: number;
-
+  times: TeamLeague[];
   time_dono: TeamLeague;
   time_usuario?: Partial<MyClubDetails>;
   time_usuario_mata_mata?: TeamLeague;
-
-  times: TeamLeague[];
+  chaves_mata_mata?: {
+    [key: string]: CupMatch[];
+  };
   convites_enviados?: Invite[];
   pedidos?: Invite[];
 }
@@ -130,4 +131,19 @@ export interface Invite {
   time: TeamLeague;
   liga?: Partial<LeagueUserDetails>;
   nome_cartola?: string;
+}
+
+export type StageType = 'P' | 'O' | 'Q' | 'S' | 'F' | 'T';
+
+export interface CupMatch {
+  rodada_id: number;
+  chave_id: number;
+  liga_id: number;
+  tipo_fase: StageType;
+  time_mandante_id?: number;
+  time_visitante_id?: number;
+  vencedor_id?: number;
+  chave_subsequente_id?: number;
+  time_mandante_pontuacao?: number;
+  time_visitante_pontuacao?: number;
 }

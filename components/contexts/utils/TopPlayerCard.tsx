@@ -18,7 +18,7 @@ export function TopPlayerCard({ player }: TopPlayerCardProps) {
       <View className="flex-row py-2 gap-x-2">
         <Image
           source={{
-            uri: player.Atleta.foto.replace('FORMATO', '220x220'),
+            uri: player.Atleta?.foto?.replace('FORMATO', '220x220'),
           }}
           className="w-14 h-14 rounded-full"
           alt={`Foto do ${player.Atleta.apelido}`}

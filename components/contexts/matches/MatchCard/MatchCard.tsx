@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -10,6 +10,9 @@ import Colors from '@/constants/Colors';
 import { Club } from '@/models/Club';
 import { Match } from '@/models/Matches';
 import { FullPlayer } from '@/models/Stats';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import { onGetPartialScoreTeamByMatch } from '@/utils/match';
+import { numberToString } from '@/utils/parseTo';
 
 interface MatchCardProps {
   match: Match;
@@ -28,6 +31,24 @@ export function MatchCard({
 }: MatchCardProps) {
   const router = useRouter();
   const colorTheme = useColorScheme();
+
+  const { data: playerStats } = useGetScoredPlayers();
+
+  const homeTeamPartials = useMemo(() => {
+    if (homeClub && homeClub?.id && playerStats) {
+      const teamId = Number(homeClub?.id);
+      return onGetPartialScoreTeamByMatch(teamId, playerStats);
+    }
+  }, [homeClub, playerStats]);
+
+  const awayTeamPartials = useMemo(() => {
+    if (awayClub && awayClub?.id && playerStats) {
+      const teamId = Number(awayClub?.id);
+      return onGetPartialScoreTeamByMatch(teamId, playerStats);
+    }
+  }, [awayClub, playerStats]);
+
+  const showTeamScore = playerStats && match.status_transmissao_tr !== 'CRIADA';
 
   const amountPlayersMyClubHomeTeam = useCallback(() => {
     if (players) {
@@ -70,6 +91,12 @@ export function MatchCard({
             gap: 24,
           }}>
           <View className="items-center justify-center" style={{ gap: 4 }}>
+            {showTeamScore ? (
+              <Text className="font-semibold">{numberToString(homeTeamPartials)}</Text>
+            ) : (
+              <></>
+            )}
+
             <Image
               source={{
                 uri: homeClub?.escudos['60x60'],
@@ -91,7 +118,7 @@ export function MatchCard({
                   position: 'absolute',
                   width: 20,
                   height: 20,
-                  top: 15,
+                  top: showTeamScore ? 39 : 15,
                   left: 55,
                   backgroundColor: '#22c55e',
                 }}>
@@ -131,6 +158,12 @@ export function MatchCard({
           </View>
 
           <View className="justify-center items-center" style={{ gap: 4 }}>
+            {showTeamScore ? (
+              <Text className="font-semibold">{numberToString(awayTeamPartials)}</Text>
+            ) : (
+              <></>
+            )}
+
             <Image
               source={{
                 uri: awayClub?.escudos['60x60'],
@@ -138,7 +171,6 @@ export function MatchCard({
               className="w-12 h-12"
               alt={`Escudo do ${awayClub?.nome}`}
             />
-
             <Text className="font-semibold">
               {awayClub?.abreviacao} {`${match.clube_visitante_posicao}º`}
             </Text>
@@ -152,7 +184,7 @@ export function MatchCard({
                   position: 'absolute',
                   width: 20,
                   height: 20,
-                  top: 15,
+                  top: showTeamScore ? 39 : 15,
                   left: -22,
                   backgroundColor: '#22c55e',
                 }}>

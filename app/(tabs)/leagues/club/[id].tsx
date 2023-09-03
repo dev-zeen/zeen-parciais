@@ -7,7 +7,6 @@ import { Text, View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { APPRECIATIONS } from '@/constants/Keys';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
@@ -159,156 +158,152 @@ export default () => {
 
   const isLoading = isMarketClose ? !playerStats || !marketStatus : !marketStatus;
 
-  if (isLoading || !club) {
+  if (isLoading || !club || !startingPlayers) {
     return <Loading />;
   }
 
   return (
-    <SafeAreaViewContainer>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
-        <View
-          className={`p-2 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
-          style={{
-            gap: 8,
-          }}>
-          <TeamBanner team={club as FullClubInfo} />
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      showsHorizontalScrollIndicator={false}
+      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
+      <View
+        className={`p-2 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
+        style={{
+          gap: 8,
+        }}>
+        <TeamBanner team={club as FullClubInfo} />
 
-          <View className="flex-row justify-between items-center rounded-lg p-3">
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Patrim.</Text>
-              <View className="flex-row">
-                <Text className="font-semibold text-sm">
-                  {isMarketClose && currentRound === marketStatus?.rodada_atual
-                    ? numberToString(club?.patrimonio + clubAppreciation)
-                    : numberToString(club?.patrimonio)}
-                </Text>
-                {isMarketClose && currentRound === marketStatus?.rodada_atual && (
-                  <View className="flex-row pl-2 justify-center items-center">
-                    <Text className="font-semibold text-sm">
-                      {numberToString(clubAppreciation)}
-                    </Text>
-
-                    <Feather
-                      size={16}
-                      name={clubAppreciation && clubAppreciation < 0 ? 'arrow-down' : 'arrow-up'}
-                      color={clubAppreciation && clubAppreciation < 0 ? '#ef4444' : '#4ade80'}
-                    />
-                  </View>
-                )}
-              </View>
-            </View>
-
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Pontuação</Text>
-
-              <Text
-                className={`font-semibold text-sm ${
-                  currentRound === marketStatus?.rodada_atual && 'text-green-500'
-                }`}>
-                {currentRound === marketStatus?.rodada_atual
-                  ? scoreCurrentRound
-                  : numberToString(club.pontos)}
+        <View className="flex-row justify-between items-center rounded-lg p-3">
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Patrim.</Text>
+            <View className="flex-row">
+              <Text className="font-semibold text-sm">
+                {isMarketClose && currentRound === marketStatus?.rodada_atual
+                  ? numberToString(club?.patrimonio + clubAppreciation)
+                  : numberToString(club?.patrimonio)}
               </Text>
-            </View>
+              {isMarketClose && currentRound === marketStatus?.rodada_atual && (
+                <View className="flex-row pl-2 justify-center items-center">
+                  <Text className="font-semibold text-sm">{numberToString(clubAppreciation)}</Text>
 
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Total</Text>
-              <Text
-                className={`font-semibold text-sm ${
-                  currentRound === marketStatus?.rodada_atual && 'text-green-500'
-                }`}>
-                {' '}
-                {currentRound === marketStatus?.rodada_atual
-                  ? onCalculatePartialScore(
-                      startingPlayers as FullPlayer[],
-                      club.capitao_id,
-                      playerStats
-                    )
-                    ? numberToString(
-                        (onCalculatePartialScore(
-                          startingPlayers as FullPlayer[],
-                          club.capitao_id,
-                          playerStats
-                        ) as number) + club.pontos_campeonato
-                      )
-                    : 0
-                  : numberToString(club.pontos_campeonato)}
-              </Text>
+                  <Feather
+                    size={16}
+                    name={clubAppreciation && clubAppreciation < 0 ? 'arrow-down' : 'arrow-up'}
+                    color={clubAppreciation && clubAppreciation < 0 ? '#ef4444' : '#4ade80'}
+                  />
+                </View>
+              )}
             </View>
           </View>
 
-          <View
-            className="rounded-lg p-2 flex-row items-center justify-center"
-            style={{
-              gap: 8,
-            }}>
-            <TouchableOpacity
-              className={`p-2 items-center justify-center mx-1 rounded-full ${
-                currentRound === 1 ? 'bg-gray-100' : 'bg-blue-50'
-              }`}
-              disabled={currentRound === 1}
-              onPress={() => setCurrentRound((previous) => previous - 1)}>
-              <Feather
-                name="chevron-left"
-                size={24}
-                color={currentRound === 1 ? '#d1d5db' : '#3b82f6'}
-              />
-            </TouchableOpacity>
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Pontuação</Text>
 
-            <Text className="font-semibold">Rodada {currentRound}</Text>
+            <Text
+              className={`font-semibold text-sm ${
+                currentRound === marketStatus?.rodada_atual && 'text-green-500'
+              }`}>
+              {currentRound === marketStatus?.rodada_atual
+                ? scoreCurrentRound
+                : numberToString(club.pontos)}
+            </Text>
+          </View>
 
-            <TouchableOpacity
-              className={`p-2 items-center justify-center mx-1 rounded-full ${
-                currentRound === marketStatus?.rodada_atual ? 'bg-gray-100' : 'bg-blue-50'
-              }`}
-              disabled={
-                isMarketClose
-                  ? currentRound === marketStatus?.rodada_atual
-                  : currentRound === (marketStatus?.rodada_atual as number) - 1
-              }
-              onPress={() => setCurrentRound((previous) => previous + 1)}>
-              <Feather
-                name="chevron-right"
-                size={24}
-                color={
-                  isMarketClose
-                    ? currentRound === marketStatus?.rodada_atual
-                      ? '#d1d5db'
-                      : '#3b82f6'
-                    : currentRound === (marketStatus?.rodada_atual as number) - 1
-                    ? '#d1d5db'
-                    : '#3b82f6'
-                }
-              />
-            </TouchableOpacity>
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Total</Text>
+            <Text
+              className={`font-semibold text-sm ${
+                currentRound === marketStatus?.rodada_atual && 'text-green-500'
+              }`}>
+              {' '}
+              {currentRound === marketStatus?.rodada_atual
+                ? onCalculatePartialScore(
+                    startingPlayers as FullPlayer[],
+                    club.capitao_id,
+                    playerStats
+                  )
+                  ? numberToString(
+                      (onCalculatePartialScore(
+                        startingPlayers as FullPlayer[],
+                        club.capitao_id,
+                        playerStats
+                      ) as number) + club.pontos_campeonato
+                    )
+                  : 0
+                : numberToString(club.pontos_campeonato)}
+            </Text>
           </View>
         </View>
 
-        {typeViewDefault === TYPE_VIEW.CAMPO && <View></View>}
-
-        {typeViewDefault === TYPE_VIEW.LISTA && (
-          <View
-            className={`justify-center rounded-lg mx-2 ${
-              colorTheme === 'dark' ? `bg-dark` : 'bg-light'
+        <View
+          className="rounded-lg p-2 flex-row items-center justify-center"
+          style={{
+            gap: 8,
+          }}>
+          <TouchableOpacity
+            className={`p-2 items-center justify-center mx-1 rounded-full ${
+              currentRound === 1 ? 'bg-gray-100' : 'bg-blue-50'
             }`}
-            style={{
-              gap: 8,
-            }}>
-            <View className="rounded-lg py-2">
-              <Text className="font-semibold text-center text-lg">Titulares</Text>
-              {startingPlayers?.map((player) => renderItem(player))}
-            </View>
+            disabled={currentRound === 1}
+            onPress={() => setCurrentRound((previous) => previous - 1)}>
+            <Feather
+              name="chevron-left"
+              size={24}
+              color={currentRound === 1 ? '#d1d5db' : '#3b82f6'}
+            />
+          </TouchableOpacity>
 
-            <View className="rounded-lg py-2 mb-2">
-              <Text className="font-semibold text-center text-lg">Reservas</Text>
-              {reservePlayers?.map((player) => renderItem(player, true))}
-            </View>
+          <Text className="font-semibold">Rodada {currentRound}</Text>
+
+          <TouchableOpacity
+            className={`p-2 items-center justify-center mx-1 rounded-full ${
+              currentRound === marketStatus?.rodada_atual ? 'bg-gray-100' : 'bg-blue-50'
+            }`}
+            disabled={
+              isMarketClose
+                ? currentRound === marketStatus?.rodada_atual
+                : currentRound === (marketStatus?.rodada_atual as number) - 1
+            }
+            onPress={() => setCurrentRound((previous) => previous + 1)}>
+            <Feather
+              name="chevron-right"
+              size={24}
+              color={
+                isMarketClose
+                  ? currentRound === marketStatus?.rodada_atual
+                    ? '#d1d5db'
+                    : '#3b82f6'
+                  : currentRound === (marketStatus?.rodada_atual as number) - 1
+                  ? '#d1d5db'
+                  : '#3b82f6'
+              }
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {typeViewDefault === TYPE_VIEW.CAMPO && <View></View>}
+
+      {typeViewDefault === TYPE_VIEW.LISTA && (
+        <View
+          className={`justify-center rounded-lg mx-2 ${
+            colorTheme === 'dark' ? `bg-dark` : 'bg-light'
+          }`}
+          style={{
+            gap: 8,
+          }}>
+          <View className="rounded-lg py-2">
+            <Text className="font-semibold text-center text-lg">Titulares</Text>
+            {startingPlayers?.map((player) => renderItem(player))}
           </View>
-        )}
-      </ScrollView>
-    </SafeAreaViewContainer>
+
+          <View className="rounded-lg py-2 mb-2">
+            <Text className="font-semibold text-center text-lg">Reservas</Text>
+            {reservePlayers?.map((player) => renderItem(player, true))}
+          </View>
+        </View>
+      )}
+    </ScrollView>
   );
 };

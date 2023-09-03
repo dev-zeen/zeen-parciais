@@ -93,3 +93,14 @@ export function onUpdateTeamWithSubstitutedPlayers(club: FullClubInfo, replaces?
     reservesUpdated,
   };
 }
+
+export const onGetCurrentCountPlayerIsPlayedByTeam = (
+  players: FullPlayer[],
+  playerStats: PlayerStats
+) => {
+  const playersPlayed = players
+    .map((player) => playerStats.atletas[player.atleta_id])
+    .filter((item) => item?.entrou_em_campo ?? false);
+
+  return playersPlayed.length;
+};

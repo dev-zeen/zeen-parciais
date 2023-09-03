@@ -1,5 +1,3 @@
-import { QueryObserverOptions } from '@tanstack/react-query';
-
 import {
   GET_CLUB_BY_ID,
   GET_CLUB_BY_ID_AND_ROUND,
@@ -22,7 +20,7 @@ export const usePrefetchMyClub = (allowRequest?: boolean) =>
     enabled: !!allowRequest,
   });
 
-export const useGetClub = (id?: number | string, round?: number, config?: QueryObserverOptions) => {
+export const useGetClub = (id?: number | string, round?: number) => {
   const url = GET_CLUB_BY_ID.replace(':id', String(id));
 
   const urlWithRound = GET_CLUB_BY_ID_AND_ROUND.replace(':id', String(id)).replace(

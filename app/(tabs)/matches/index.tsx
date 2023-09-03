@@ -32,7 +32,7 @@ export default () => {
           players={club?.atletas}
           homeClub={matches?.clubes[item.clube_casa_id]}
           awayClub={matches?.clubes[item.clube_visitante_id]}
-          isDisabled={!isAutheticated}
+          isDisabled={!isAutheticated || !item.valida}
         />
       );
     },
