@@ -28,6 +28,8 @@ export default function () {
 
   const { data: marketStatus } = useGetMarketStatus();
 
+  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+
   const allowRequests =
     isAutheticated &&
     marketStatus &&
@@ -74,14 +76,19 @@ export default function () {
         }`,
         data: cups,
       },
-      {
+    ];
+
+    if (!isMarketClose) {
+      sectionLeagues.push({
         title: 'Ligas do Cartola',
         data: cartolaLeagues,
-      },
-    ].filter((item) => item.data.length > 0);
+      });
+    }
 
-    setSectionLeaguesList(sectionLeagues);
-  }, [club?.time, club?.time.assinante, dataLeagues, marketStatus]);
+    const filteredSectionLeagues = sectionLeagues.filter((item) => item.data.length > 0);
+
+    setSectionLeaguesList(filteredSectionLeagues);
+  }, [club?.time, club?.time.assinante, dataLeagues, isMarketClose, marketStatus]);
 
   const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
 
@@ -117,6 +124,7 @@ export default function () {
       showsVerticalScrollIndicator={false}
       stickyHeaderHiddenOnScroll
       contentContainerStyle={{
+        flex: 1,
         gap: 8,
         backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
       }}

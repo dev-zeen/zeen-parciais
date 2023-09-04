@@ -168,7 +168,7 @@ export default () => {
       showsHorizontalScrollIndicator={false}
       refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
       <View
-        className={`p-2 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
+        className={`p-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
         style={{
           gap: 8,
         }}>
@@ -287,9 +287,7 @@ export default () => {
 
       {typeViewDefault === TYPE_VIEW.LISTA && (
         <View
-          className={`justify-center rounded-lg mx-2 ${
-            colorTheme === 'dark' ? `bg-dark` : 'bg-light'
-          }`}
+          className={`justify-center px-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
           style={{
             gap: 8,
           }}>

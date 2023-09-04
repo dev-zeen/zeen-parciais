@@ -1,0 +1,1 @@
+export { CupMatchCard } from './CupMatchCard';

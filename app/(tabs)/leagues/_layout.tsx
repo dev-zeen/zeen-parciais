@@ -28,6 +28,12 @@ export default function StackLayout() {
         }}
       />
       <Stack.Screen
+        name="cup-match/index"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="invites/index"
         options={{
           headerShown: false,

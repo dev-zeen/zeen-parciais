@@ -1,5 +1,4 @@
 import { Link } from 'expo-router';
-import { useMemo } from 'react';
 import { Image, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -16,11 +15,6 @@ export const typeLeague = {
 };
 
 export function LeagueCard({ league }: CardLeagueStatsProps) {
-  const totalClubs = useMemo(
-    () => new Intl.NumberFormat('pt-BR').format(league.total_times_liga),
-    [league.total_times_liga]
-  );
-
   return (
     <View className="mx-2 px-2 rounded-lg">
       <Link

@@ -4,14 +4,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { CupMatch } from '@/components/contexts/leagues/Cup/CupMatch';
+import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { FullClubInfo } from '@/models/Club';
 import { League, TeamLeague } from '@/models/Leagues';
-import { MarketStatus } from '@/models/Market';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetMarketStatus } from '@/queries/market.query';
 
@@ -35,9 +34,9 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
   const allowRequest =
     marketStatus && marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
-  const { data: team } = useGetMyClub(allowRequest);
+  const { data: team, isLoading: isLoadingTeam } = useGetMyClub(allowRequest);
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = false;
 
   const isCupInProgress = useMemo(() => {
     if (cup && cup?.chaves_mata_mata) {
@@ -66,6 +65,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
       if (cup && cup.chaves_mata_mata && marketStatus && team) {
         return (
           <FlatList
+            refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
             contentContainerStyle={{
               marginHorizontal: 8,
               marginTop: 8,
@@ -74,23 +74,17 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
             keyExtractor={(item) => `${item.chave_id}`}
             renderItem={({ item }) => {
               return (
-                <CupMatch
-                  key={item.chave_id}
-                  match={item}
-                  teams={cup.times}
-                  myTeam={team as FullClubInfo}
-                  marketStatus={marketStatus as MarketStatus}
-                />
+                <CupMatchCard key={item.chave_id} match={item} myTeam={team as FullClubInfo} />
               );
             }}
           />
         );
       }
     },
-    [cup, marketStatus, team]
+    [cup, isRefetching, marketStatus, onRefetch, team]
   );
 
-  const renderItem = useCallback(
+  const renderTeamItem = useCallback(
     ({ item }: ListRenderItemInfo<TeamCup>) => {
       if (!isCupInProgress) {
         return (
@@ -136,7 +130,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
     if (isCupInProgress && cup && cup.chaves_mata_mata) {
       const tabs = Object.keys(cup.chaves_mata_mata).map((round, index) => {
         return {
-          id: index + 1,
+          id: Number(round),
           title: round,
           content: () => renderMatchItem(round),
         };
@@ -146,7 +140,11 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
     }
   }, [cup, isCupInProgress, renderMatchItem]);
 
-  if (isLoadingMarketStatus || roundTabs.length < 1) return <Loading />;
+  const isLoading = isCupInProgress
+    ? isLoadingTeam || isLoadingMarketStatus || roundTabs.length < 1
+    : isLoadingTeam || isLoadingMarketStatus;
+
+  if (isLoading) return <Loading />;
 
   return (
     <View
@@ -227,7 +225,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
               ? [...teamsByCup].concat(teamsAwatingAcceptInvite)
               : [...teamsByCup]
           }
-          renderItem={renderItem}
+          renderItem={renderTeamItem}
           keyExtractor={keyExtractor}
           numColumns={2}
           columnWrapperStyle={{

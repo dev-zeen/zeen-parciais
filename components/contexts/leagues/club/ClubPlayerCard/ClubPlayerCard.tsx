@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback } from 'react';
-import { Image, useColorScheme } from 'react-native';
+import { Image } from 'react-native';
 
 import { PlayerClub } from '@/app/(tabs)/leagues/club/[id]';
 import captainImage from '@/assets/images/letter-c.png';
@@ -31,8 +31,6 @@ export function ClubPlayerCard({
   isReserve,
   isCapitain,
 }: ClubPlayerCardProps) {
-  const colorTheme = useColorScheme();
-
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
 
@@ -64,7 +62,6 @@ export function ClubPlayerCard({
   return (
     <View
       className={`rounded-lg p-2
-          border-b ${colorTheme === 'dark' ? 'border-blue-500' : 'border-gray-200'}
           ${(player.isReplaced || isReserve) && 'opacity-50'}
           ${player.isJoined && 'opacity-100'}
           `}>
@@ -113,7 +110,7 @@ export function ClubPlayerCard({
         <View className="flex-row items-center">
           {scorePlayer(player) > -20 ? (
             <>
-              {isMarketClose ? (
+              {isMarketClose && appreciation ? (
                 <Text
                   className={`text-xs font-semibold ${
                     appreciation && appreciation < 0 ? 'text-folly' : 'text-green-400'

@@ -75,7 +75,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     return (
       <View
         key={club?.time_id}
-        className={`rounded-lg py-3 pl-1 pr-3 justify-center ${
+        className={`rounded-lg py-2 pl-1 pr-3 justify-center ${
           myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
         }`}>
         <TouchableOpacity
@@ -89,9 +89,12 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
             }`}>
             <View
-              className={`flex-row items-center gap-x-1 ${
+              className={`flex-row items-center ${
                 myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-              }`}>
+              }`}
+              style={{
+                gap: 4,
+              }}>
               <View
                 className={`items-center justify-center gap-x-0.5 w-12 ${
                   myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
@@ -116,7 +119,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                 source={{
                   uri: club.url_escudo_png,
                 }}
-                className="w-8 h-8"
+                className="w-10 h-10"
                 alt={`Imagem do time do ${club.nome_cartola}`}
               />
 
@@ -129,32 +132,36 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                   {club.nome}
                 </Text>
                 <View
-                  className={`flex-row items-center justify-center gap-x-1 ${
+                  className={`flex-row items-center justify-start ${
                     myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                  }`}>
+                  }`}
+                  style={{
+                    gap: 4,
+                  }}>
                   <Text className="text-xs capitalize">{club.nome_cartola}</Text>
-                  <View className="rounded-full h-1 w-1 bg-gray-300" />
-                  {isLeagueAcceptCapitain ? (
-                    <View
-                      className={`flex-row items-center justify-center ${
-                        myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                      }`}>
-                      <Image
-                        source={captainIcon}
-                        style={{
-                          width: 12,
-                          height: 12,
-                          marginRight: 4,
-                          marginLeft: 1,
-                        }}
-                        alt={`Liga com Capitão`}
-                      />
-                      <Text className="text-xs">{capitainPlayer?.apelido}</Text>
-                    </View>
-                  ) : (
-                    <Text className="text-xs">C$ {patrimony}</Text>
-                  )}
                 </View>
+
+                {isLeagueAcceptCapitain ? (
+                  <View
+                    className={`flex-row items-center ${
+                      myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
+                    }`}>
+                    <Text className="text-xs">{capitainPlayer?.apelido}</Text>
+
+                    <Image
+                      source={captainIcon}
+                      style={{
+                        width: 12,
+                        height: 12,
+                        marginRight: 1,
+                        marginLeft: 4,
+                      }}
+                      alt={`Liga com Capitão`}
+                    />
+                  </View>
+                ) : (
+                  <></>
+                )}
               </View>
             </View>
 
