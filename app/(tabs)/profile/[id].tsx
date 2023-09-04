@@ -144,7 +144,6 @@ export default () => {
           style={{
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
-            flex: 1,
           }}>
           <MarketStatusCard />
           <TeamBanner team={club} />

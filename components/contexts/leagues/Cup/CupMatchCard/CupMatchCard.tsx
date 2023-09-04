@@ -20,9 +20,9 @@ interface CupMatchProps {
 }
 
 const STAGE_TYPE_NAMED = {
-  P: '16-avos',
-  O: 'Oitavas de Final',
-  Q: 'Quartas de Final',
+  P: 'Primeira Fase',
+  O: 'Oitavas',
+  Q: 'Quartas',
   S: 'Semi-final',
   F: 'Final',
   T: 'Terceiro Lugar',
@@ -36,8 +36,10 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
 
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
-  const { data: homeTeam } = useGetClub(match.time_mandante_id);
-  const { data: awayTeam } = useGetClub(match.time_visitante_id);
+  const { data: homeTeam } = useGetClub(match.time_mandante_id, 20);
+  const { data: awayTeam } = useGetClub(match.time_visitante_id, 20);
+
+  console.log(awayTeam?.time.nome_cartola, awayTeam);
 
   const homePartial = useMemo(() => {
     if (homeTeam) {
@@ -111,23 +113,23 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
       <TouchableOpacity
         activeOpacity={0.6}
         key={match.time_mandante_id}
-        disabled={!match.time_mandante_id}>
+        disabled={!match.time_mandante_id || !showScore}>
         <View
-          className="rounded-lg justify-center items-center mb-2 pb-4 px-2 pt-2"
+          className="rounded-lg justify-center items-center mb-2 py-2"
           style={{
             borderColor: customBorder,
             borderWidth: 2,
             gap: 8,
           }}>
-          <Text className="text-sm font-medium">{STAGE_TYPE_NAMED[match.tipo_fase]}</Text>
           <View
             className="flex-row justify-between"
             style={{
               gap: 4,
             }}>
             <View
-              className="justify-center items-center w-1/3 h-14"
+              className="justify-center items-center bg-transparent"
               style={{
+                width: '32%',
                 gap: 4,
                 opacity: teamOpacity(match.time_mandante_pontuacao, match.time_visitante_pontuacao),
               }}>
@@ -152,53 +154,56 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
               )}
             </View>
 
-            <View
-              className={`flex-row justify-center items-center w-1/3 border rounded ${
-                colorTheme === 'dark' ? 'border-gray-400' : 'border-gray-300'
-              }`}
-              style={{
-                gap: 8,
-              }}>
-              <View className="items-center justify-center">
-                <Text
-                  className="font-semibold text-sm"
-                  style={{
-                    color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
-                  }}>
-                  {showScore ? numberToString(scoreHomeTeam) : '-'}
-                </Text>
-                {showScore && currentRound === match.rodada_id ? (
-                  <Text className="font-semibold text-xs">{homePlayersPlayed ?? 0}/12</Text>
-                ) : (
-                  <></>
-                )}
-              </View>
+            <View className="justify-center items-center rounded z-40 mb-3" style={{}}>
+              <Text className="text-sm">{STAGE_TYPE_NAMED[match.tipo_fase]}</Text>
+              <View
+                className="flex-row justify-center items-center"
+                style={{
+                  gap: 8,
+                  width: '40%',
+                }}>
+                <View className="items-center justify-center">
+                  <Text
+                    className="font-semibold text-sm"
+                    style={{
+                      color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
+                    }}>
+                    {showScore ? numberToString(scoreHomeTeam) : '-'}
+                  </Text>
+                  {showScore && currentRound === match.rodada_id ? (
+                    <Text className="font-semibold text-xs">{homePlayersPlayed ?? 0}/12</Text>
+                  ) : (
+                    <></>
+                  )}
+                </View>
 
-              <Feather
-                name="x"
-                size={10}
-                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
-              />
+                <Feather
+                  name="x"
+                  size={10}
+                  color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+                />
 
-              <View className="items-center justify-center">
-                <Text
-                  className="font-semibold text-sm"
-                  style={{
-                    color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
-                  }}>
-                  {showScore ? numberToString(scoreAwayTeam) : '-'}
-                </Text>
-                {showScore && currentRound === match.rodada_id ? (
-                  <Text className="font-semibold text-xs">{awayPlayersPlayed ?? 0}/12</Text>
-                ) : (
-                  <></>
-                )}
+                <View className="items-center justify-center">
+                  <Text
+                    className="font-semibold text-sm"
+                    style={{
+                      color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
+                    }}>
+                    {showScore ? numberToString(scoreAwayTeam) : '-'}
+                  </Text>
+                  {showScore && currentRound === match.rodada_id ? (
+                    <Text className="font-semibold text-xs">{awayPlayersPlayed ?? 0}/12</Text>
+                  ) : (
+                    <></>
+                  )}
+                </View>
               </View>
             </View>
 
             <View
-              className="justify-center items-center w-1/3 h-14"
+              className="justify-center items-center"
               style={{
+                width: '32%',
                 gap: 4,
                 opacity: teamOpacity(match.time_visitante_pontuacao, match.time_mandante_pontuacao),
               }}>

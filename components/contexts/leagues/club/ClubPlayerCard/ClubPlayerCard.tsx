@@ -67,28 +67,16 @@ export function ClubPlayerCard({
           `}>
       <TouchableOpacity className="justify-between flex-row" activeOpacity={0.6}>
         <View className="flex-row gap-x-2 items-center">
-          <View className="justify-center items-center px-1 gap-y-1">
-            <Image
-              source={{
-                uri: market?.clubes[player.clube_id]?.escudos?.['45x45'],
-              }}
-              className="w-8 h-8"
-              alt={`Imagem do time do escudo do ${market?.clubes[player.clube_id]?.nome}`}
-            />
-          </View>
-
-          <View className="justify-center items-center">
-            <Image
-              source={{
-                uri: player.foto?.replace('FORMATO', '220x220'),
-              }}
-              className="w-14 h-14"
-              alt={`Imagem do ${player.nome}`}
-            />
-          </View>
+          <Image
+            source={{
+              uri: player.foto?.replace('FORMATO', '220x220'),
+            }}
+            className="w-14 h-14"
+            alt={`Imagem do ${player.nome}`}
+          />
 
           <View>
-            <View className="flex-row items-center justify-center gap-x-1">
+            <View className="flex-row items-center gap-x-1">
               <Text className="text-sm font-semibold">{player.apelido_abreviado}</Text>
               {isCapitain && (
                 <Image
@@ -102,6 +90,10 @@ export function ClubPlayerCard({
             <View className="flex-row items-center gap-x-1">
               <Text className="text-xs font-light capitalize">
                 {positions?.[player.posicao_id].nome}
+              </Text>
+              <View className="rounded-full bg-gray-300 h-1 w-1" />
+              <Text className="text-xs font-light capitalize">
+                {market?.clubes[player.clube_id].nome}
               </Text>
             </View>
           </View>

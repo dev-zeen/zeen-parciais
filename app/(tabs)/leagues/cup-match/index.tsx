@@ -6,7 +6,6 @@ import { Text, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
 import { Loading } from '@/components/structure/Loading';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
@@ -129,10 +128,17 @@ export default () => {
     return <Loading />;
 
   return (
-    <SafeAreaViewContainer>
-      <CupMatchCard match={cupMatch} />
-      <Tabs tabs={tabs} />
-      <View className={`flex-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
+    <>
+      <View
+        className="px-2"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        }}>
+        <CupMatchCard match={cupMatch} />
+
+        <Tabs tabs={tabs} />
+      </View>
+      <>
         {isLoading ? (
           <Loading />
         ) : (
@@ -150,6 +156,7 @@ export default () => {
             showsVerticalScrollIndicator={false}
             stickyHeaderHiddenOnScroll
             contentContainerStyle={{
+              paddingHorizontal: 8,
               gap: 8,
               backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
             }}
@@ -164,7 +171,7 @@ export default () => {
             )}
           />
         )}
-      </View>
-    </SafeAreaViewContainer>
+      </>
+    </>
   );
 };
