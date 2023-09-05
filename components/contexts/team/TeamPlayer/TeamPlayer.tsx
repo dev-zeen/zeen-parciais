@@ -137,13 +137,13 @@ export function TeamPlayer({
           />
         </View>
       </TouchableOpacity>
-      <View className="bg-neutral-50 items-center justify-center rounded px-1 py-0.5">
+      <View className="bg-neutral-50 items-center justify-center rounded py-0.5">
         <Text
           numberOfLines={1}
-          ellipsizeMode="tail"
           className="font-semibold text-center text-gray-600"
           style={{
             fontSize: 11,
+            paddingHorizontal: 3,
           }}>
           {player?.apelido_abreviado}
         </Text>

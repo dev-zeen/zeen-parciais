@@ -416,9 +416,9 @@ export default () => {
             />
 
             <View className="w-16 justify-center items-center">
-              <Text className="font-light text-sm">Reservas.</Text>
-              <Text className="font-semibold text-base">
-                {lineup.reserves.filter((item) => item.player).length} / 5
+              <Text className="font-medium text-xs">Reservas</Text>
+              <Text className="font-semibold text-sm">
+                {lineup.reserves.filter((item) => item.player).length}/{lineup.reserves.length}
               </Text>
             </View>
 

@@ -39,8 +39,6 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
   const { data: homeTeam } = useGetClub(match.time_mandante_id, 20);
   const { data: awayTeam } = useGetClub(match.time_visitante_id, 20);
 
-  console.log(awayTeam?.time.nome_cartola, awayTeam);
-
   const homePartial = useMemo(() => {
     if (homeTeam) {
       return onCalculatePartialScore(homeTeam?.atletas, homeTeam?.capitao_id, playerStats);
@@ -129,7 +127,7 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
             <View
               className="justify-center items-center bg-transparent"
               style={{
-                width: '32%',
+                width: '30%',
                 gap: 4,
                 opacity: teamOpacity(match.time_mandante_pontuacao, match.time_visitante_pontuacao),
               }}>
@@ -203,7 +201,7 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
             <View
               className="justify-center items-center"
               style={{
-                width: '32%',
+                width: '30%',
                 gap: 4,
                 opacity: teamOpacity(match.time_visitante_pontuacao, match.time_mandante_pontuacao),
               }}>
