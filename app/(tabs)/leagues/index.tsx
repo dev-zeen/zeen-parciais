@@ -30,7 +30,7 @@ export default function () {
 
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
-  const allowRequests =
+  const allowRequest =
     isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
@@ -39,14 +39,14 @@ export default function () {
     data: club,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(!!allowRequests);
+  } = useGetMyClub(!!allowRequest);
 
   const {
     data: dataLeagues,
     isLoading: isLoadingLeagues,
     refetch: onRefetchLeagues,
     isRefetching: isRefetchingLeagues,
-  } = useGetLeagues(!!allowRequests);
+  } = useGetLeagues(!!allowRequest);
 
   const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>([]);
 

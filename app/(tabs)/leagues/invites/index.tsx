@@ -31,7 +31,7 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const allowRequests =
+  const allowRequest =
     isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
@@ -41,9 +41,9 @@ export default () => {
     isLoading: isLoadingInvites,
     refetch: onRefetchInvites,
     isRefetching: isRefetchingInvites,
-  } = useGetInvites(allowRequests);
+  } = useGetInvites(allowRequest);
 
-  const { refetch: onRefecthLeagues } = useGetLeagues(allowRequests);
+  const { refetch: onRefecthLeagues } = useGetLeagues(allowRequest);
 
   const onRefetch = useCallback(() => {
     onRefecthLeagues();

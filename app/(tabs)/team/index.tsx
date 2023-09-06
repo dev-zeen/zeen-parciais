@@ -55,7 +55,7 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const allowRequests =
+  const allowRequest =
     isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
@@ -66,7 +66,7 @@ export default () => {
     data: club,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(!!allowRequests);
+  } = useGetMyClub(!!allowRequest);
 
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 

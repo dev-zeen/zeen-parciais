@@ -1,12 +1,15 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { ReactNode, createContext, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { ReactNode, createContext, useCallback, useEffect, useState } from 'react';
 
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 type AuthContextProps = {
   isAutheticated: boolean;
   handleSuccessAuth: () => void;
   handleUnautenticated: () => void;
+  handleLogout: () => void;
 };
 
 export const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
@@ -16,14 +19,24 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
 
   const [isAutheticated, setIsAutheticated] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  const resetStore = useTeamLineupStore((state) => state.reset);
+
   async function handleSuccessAuth() {
     setIsAutheticated(true);
   }
 
-  async function handleUnautenticated() {
+  const handleUnautenticated = useCallback(async () => {
     await removeItem();
     setIsAutheticated(false);
-  }
+  }, [removeItem]);
+
+  const handleLogout = useCallback(() => {
+    resetStore();
+    queryClient.clear();
+    handleUnautenticated();
+  }, [handleUnautenticated, queryClient, resetStore]);
 
   useEffect(() => {
     function handleGetToken() {
@@ -46,6 +59,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
         isAutheticated,
         handleSuccessAuth,
         handleUnautenticated,
+        handleLogout,
       }}>
       {children}
     </AuthContext.Provider>

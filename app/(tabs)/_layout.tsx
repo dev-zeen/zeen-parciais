@@ -24,12 +24,12 @@ export default function TabLayout() {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const allowRequests =
+  const allowRequest =
     isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
 
-  const { data: invites } = useGetInvites(allowRequests);
+  const { data: invites } = useGetInvites(allowRequest);
 
   return (
     <Tabs
@@ -120,7 +120,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile/[id]"
+        name="profile/index"
         options={{
           tabBarLabel: 'Perfil',
           headerShown: false,
