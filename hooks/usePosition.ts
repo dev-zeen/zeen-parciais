@@ -1,6 +1,6 @@
 import { useGetPositions } from '@/queries/players.query';
 
-const usePositions = () => {
+const usePosition = () => {
   const {
     data: positions,
     isLoading: isLoadingPositions,
@@ -16,4 +16,4 @@ const usePositions = () => {
   };
 };
 
-export default usePositions;
+export default usePosition;

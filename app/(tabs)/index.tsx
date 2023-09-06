@@ -15,8 +15,8 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
 import usePlayerStats from '@/hooks/usePlayerStats';
-import usePositions from '@/hooks/usePositions';
-import useTopPlayers from '@/hooks/useTopPlayers';
+import usePosition from '@/hooks/usePosition';
+import useTopPlayer from '@/hooks/useTopPlayer';
 import { IPositions } from '@/models/Stats';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
@@ -34,9 +34,9 @@ export default () => {
 
   const { playerStats, onRefetchStats } = usePlayerStats();
 
-  const { topPlayers, onRefetchTopPlayers, onRefetchBestPlayers } = useTopPlayers();
+  const { topPlayers, onRefetchTopPlayers, onRefetchBestPlayers } = useTopPlayer();
 
-  const { positions, isLoadingPositions, onRefetchPositions } = usePositions();
+  const { positions, isLoadingPositions, onRefetchPositions } = usePosition();
 
   const { partialScore, playersHaveAlreadyPlayed } = usePartialScore({
     teamId: myClub?.time.time_id as number,

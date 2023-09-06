@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
-import useSubstituitions from '@/hooks/useSubstituitions';
+import useSubstituition from '@/hooks/useSubstituition';
 import useTeam from '@/hooks/useTeam';
 import {
   onCalculatePartialScore,
@@ -22,7 +22,7 @@ const usePartialScore = ({ teamId }: PartialScoreProps) => {
 
   const { playerStats } = usePlayerStats();
 
-  const { substitutions } = useSubstituitions({ teamId });
+  const { substitutions } = useSubstituition({ teamId });
 
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 

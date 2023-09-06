@@ -3,10 +3,10 @@ import React, { memo, useMemo } from 'react';
 import { Text, View } from '@/components/Themed';
 import { TopPlayerCard } from '@/components/contexts/utils/TopPlayerCard';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
-import useTopPlayers from '@/hooks/useTopPlayers';
+import useTopPlayer from '@/hooks/useTopPlayer';
 
 export const TopPlayerList = memo(() => {
-  const { topPlayers, bestPlayers } = useTopPlayers();
+  const { topPlayers, bestPlayers } = useTopPlayer();
 
   const playersTabs: ITabs[] = useMemo(
     () => [

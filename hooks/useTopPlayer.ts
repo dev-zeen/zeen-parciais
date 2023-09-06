@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useGetBestCaptainPlayers, useGetTopPlayers } from '@/queries/players.query';
 
-const useTopPlayers = () => {
+const useTopPlayer = () => {
   const [hasHighlights, setHighlights] = useState(false);
 
   const { data: topPlayers, refetch: onRefetchTopPlayers } = useGetTopPlayers();
@@ -22,4 +22,4 @@ const useTopPlayers = () => {
   };
 };
 
-export default useTopPlayers;
+export default useTopPlayer;

@@ -4,7 +4,7 @@ type SubstituitionsProps = {
   teamId?: number;
 };
 
-const useSubstituitions = ({ teamId }: SubstituitionsProps) => {
+const useSubstituition = ({ teamId }: SubstituitionsProps) => {
   const {
     data: substitutions,
     isLoading: isLoadingSubstitutions,
@@ -22,4 +22,4 @@ const useSubstituitions = ({ teamId }: SubstituitionsProps) => {
   };
 };
 
-export default useSubstituitions;
+export default useSubstituition;
