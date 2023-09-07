@@ -1,5 +1,5 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -21,13 +21,15 @@ import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
+import useLineup from '@/hooks/useLineup';
+import useMarket from '@/hooks/useMarket';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import useMyClub from '@/hooks/useMyClub';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import useValorization from '@/hooks/useValorization';
 import { Match } from '@/models/Matches';
 import { Appreciations } from '@/models/Player';
 import { FullPlayer, IScout, PlayerStats } from '@/models/Stats';
-import { useGetMyClub } from '@/queries/club.query';
-import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
-import { useGetAppreciations } from '@/queries/players.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 interface IMatch extends Match {
@@ -51,43 +53,26 @@ export default () => {
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const { data: myTeam, isLoading: isLoadingMyClub } = useGetMyClub(isAutheticated);
-
   const { id } = useLocalSearchParams();
 
-  const allowRequest = isAutheticated;
-
-  const { data: marketStatus } = useGetMarketStatus();
-  const { data: market } = useGetMarket();
-  const { data: club } = useGetMyClub(!!allowRequest);
-
-  const lineup = useTeamLineupStore((state) => state.lineup);
-  const updateLineup = useTeamLineupStore((state) => state.updateLineup);
-  const price = useTeamLineupStore((state) => state.price);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const { myClub, isLoadingMyClub } = useMyClub();
+  const { market } = useMarket();
+  const { marketStatus } = useMarketStatus();
+  const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
+  const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
+  const { balancePriceValue } = useLineup();
 
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
+  const lineup = useTeamLineupStore((state) => state.lineup);
+  const updateLineup = useTeamLineupStore((state) => state.updateLineup);
+  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
   const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const [match, setMatch] = useState<IMatch>();
   const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
-
   const [isRendering, setIsRendering] = useState(false);
-
-  const {
-    data: appreciations,
-    refetch: onRefetchAppreciations,
-    isRefetching: isRefetchingAppreciations,
-  } = useGetAppreciations(!!allowRequest);
-
-  const {
-    data: playerStats,
-    isRefetching: isRefetchingStats,
-    refetch: onRefetchStats,
-  } = useGetScoredPlayers();
-
   const [teamPlayers, setTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
 
   const handleAddPlayerToLineup = useCallback(
@@ -106,16 +91,9 @@ export default () => {
     [removePlayerFromLineup]
   );
 
-  const remainingValue = useMemo(() => {
-    if (club && price) {
-      return club.patrimonio - price;
-    }
-    return club?.patrimonio as number;
-  }, [club, price]);
-
-  const onRefetch = useCallback(() => {
-    Promise.all([onRefetchAppreciations(), onRefetchStats()]);
-  }, [onRefetchAppreciations, onRefetchStats]);
+  const onRefetch = useCallback(async () => {
+    await Promise.all([onRefetchValorizations(), onRefetchStats()]);
+  }, [onRefetchStats, onRefetchValorizations]);
 
   const renderItemWithPartials = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayerPartials>) => {
@@ -124,12 +102,12 @@ export default () => {
           player={player}
           club={(playerStats as PlayerStats)?.clubes[String(player.clube_id)]}
           position={(playerStats as PlayerStats)?.posicoes[player.posicao_id]}
-          appreciation={(appreciations as Appreciations)?.atletas?.[player.id]?.variacao_num}
-          isPlayerOnMyLineup={myTeam?.atletas.some((item) => String(item.atleta_id) === player.id)}
+          appreciation={(valorizations as Appreciations)?.atletas?.[player.id]?.variacao_num}
+          isPlayerOnMyLineup={myClub?.atletas.some((item) => String(item.atleta_id) === player.id)}
         />
       );
     },
-    [appreciations, myTeam?.atletas, playerStats]
+    [valorizations, myClub?.atletas, playerStats]
   );
 
   const renderItem = useCallback(
@@ -141,7 +119,7 @@ export default () => {
             onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
             onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
             isButtonDisabled={
-              player.preco_num > remainingValue || !emptyPositions?.has(player.posicao_id)
+              player.preco_num > balancePriceValue || !emptyPositions?.has(player.posicao_id)
             }
             isSellPlayer={lineup?.starting.some(
               (item) => item.player?.atleta_id === player.atleta_id
@@ -150,7 +128,13 @@ export default () => {
         </View>
       );
     },
-    [emptyPositions, handleAddPlayerToLineup, handleRemovePlayerFromLineup, lineup, remainingValue]
+    [
+      emptyPositions,
+      handleAddPlayerToLineup,
+      handleRemovePlayerFromLineup,
+      lineup,
+      balancePriceValue,
+    ]
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.foto} + ${item.apelido}`, []);
@@ -162,23 +146,37 @@ export default () => {
     }
   }, [id]);
 
+  // TODO AJUSTAR ESSES DOIS USEEFFECTS QUANDO O HOOK USELINEUP FOR CRIADO PQ TERÁ UM VALOR JÁ VINDO DO HOOK COM ESSA LOGICA
   useEffect(() => {
-    if (!lineup && club && !isMarketClose) {
+    if (!lineup && myClub && !isMarketClose) {
       const defaultLineup = fillLineupWithPlayers(
-        club,
-        (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number]
+        myClub,
+        (LINEUPS_DEFAULT_OBJECT as any)[myClub?.time.esquema_id as number]
       );
 
       updateLineup(defaultLineup);
-      updateCapitain(club.capitao_id);
+      updateCapitain(myClub.capitao_id);
     }
-  }, [club, isMarketClose, lineup, updateCapitain, updateLineup]);
+  }, [isMarketClose, lineup, myClub, updateCapitain, updateLineup]);
+
+  useEffect(() => {
+    if (lineup) {
+      const emptyPositionsUpdated = new Set(
+        (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)
+      );
+      setEmptyPositions(emptyPositionsUpdated);
+    }
+  }, [lineup]);
 
   const onGetTabPlayers = useCallback(
     (teamId: number) => {
-      const isProvavel = (item: any) => item.status_id === ENUM_STATUS_MARKET_PLAYER.PROVAVEL;
+      const isProvavel = (item: FullPlayer) =>
+        item.status_id === ENUM_STATUS_MARKET_PLAYER.PROVAVEL;
 
-      const getFilteredPlayers = (teamId: number, filterFunction: (item: any) => boolean) => {
+      const getFilteredPlayers = (
+        teamId: number,
+        filterFunction: (item: FullPlayer) => boolean
+      ) => {
         if (market) {
           return market?.atletas
             .filter((item) => item.clube_id === Number(market?.clubes[teamId]?.id))
@@ -232,20 +230,11 @@ export default () => {
   ];
 
   useEffect(() => {
-    if (lineup) {
-      const emptyPositionsUpdated = new Set(
-        (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)
-      );
-      setEmptyPositions(emptyPositionsUpdated);
-    }
-  }, [lineup]);
-
-  useEffect(() => {
     onGetTabPlayers(match?.clube_casa_id as number);
   }, [match, onGetTabPlayers]);
 
   const isLoading = isMarketClose
-    ? !market || !match || !appreciations || !playerStats || isLoadingMyClub
+    ? !market || !match || !valorizations || !playerStats || isLoadingMyClub
     : !market || !match;
 
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
@@ -291,7 +280,7 @@ export default () => {
             refreshControl={
               <RefreshControl
                 onRefresh={onRefetch}
-                refreshing={isRefetchingStats && isRefetchingAppreciations}
+                refreshing={isRefetchingPlayerStats && isRefetchingValorizations}
               />
             }
             contentContainerStyle={{

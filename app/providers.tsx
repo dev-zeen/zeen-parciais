@@ -29,9 +29,9 @@ export function Providers({ children }: ProvidersProps): ReactNode {
           resetError={props.resetError}
         />
       )}>
-      <AuthContextProvider>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </AuthContextProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthContextProvider>{children}</AuthContextProvider>
+      </QueryClientProvider>
     </ErrorBoundary>
   );
 }

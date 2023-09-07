@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext } from 'react';
 import { ListRenderItemInfo, RefreshControl, SectionList, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -10,85 +10,21 @@ import { Login } from '@/components/structure/Login';
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
+import useLeagues from '@/hooks/useLeagues';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import useMyClub from '@/hooks/useMyClub';
 import { LeagueUserDetails } from '@/models/Leagues';
-import { MarketStatus } from '@/models/Market';
-import { useGetMyClub } from '@/queries/club.query';
-import { useGetLeagues } from '@/queries/leagues.query';
-import { useGetMarketStatus } from '@/queries/market.query';
-
-type SectionLeagueProps = {
-  title: string;
-  data: LeagueUserDetails[];
-};
 
 export default function () {
   const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const { data: marketStatus } = useGetMarketStatus();
+  const { marketStatus } = useMarketStatus();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { isRefetchingMyClub, onRefetchMyClub } = useMyClub();
 
-  const allowRequests =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
-
-  const {
-    data: club,
-    refetch: onRefetchClub,
-    isRefetching: isRefetchingClub,
-  } = useGetMyClub(!!allowRequests);
-
-  const {
-    data: dataLeagues,
-    isLoading: isLoadingLeagues,
-    refetch: onRefetchLeagues,
-    isRefetching: isRefetchingLeagues,
-  } = useGetLeagues(!!allowRequests);
-
-  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>([]);
-
-  useEffect(() => {
-    if (!dataLeagues) {
-      return;
-    }
-
-    const { ligas } = dataLeagues;
-    const { max_ligas_pro, max_ligas_free, max_ligas_matamata_pro, max_ligas_matamata_free } =
-      marketStatus as MarketStatus;
-
-    const privateLeagues = ligas.filter((item) => item.time_dono_id && !item.mata_mata);
-    const cartolaLeagues = ligas.filter((item) => !item.time_dono_id);
-    const cups = ligas.filter((item) => item.mata_mata);
-
-    const sectionLeagues = [
-      {
-        title: `Ligas Clássicas - ${privateLeagues.length} / ${
-          club?.time.assinante ? max_ligas_pro : max_ligas_free
-        }`,
-        data: privateLeagues,
-      },
-      {
-        title: `Mata Mata - ${cups.length} / ${
-          club?.time.assinante ? max_ligas_matamata_pro : max_ligas_matamata_free
-        }`,
-        data: cups,
-      },
-    ];
-
-    if (!isMarketClose) {
-      sectionLeagues.push({
-        title: 'Ligas do Cartola',
-        data: cartolaLeagues,
-      });
-    }
-
-    const filteredSectionLeagues = sectionLeagues.filter((item) => item.data.length > 0);
-
-    setSectionLeaguesList(filteredSectionLeagues);
-  }, [club?.time, club?.time.assinante, dataLeagues, isMarketClose, marketStatus]);
+  const { leagues, onRefetchLeagues, isRefetchingLeagues } = useLeagues();
 
   const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
 
@@ -97,28 +33,27 @@ export default function () {
   }, []);
 
   const onRefetch = useCallback(async () => {
-    await onRefetchClub();
-    await onRefetchLeagues();
-  }, [onRefetchClub, onRefetchLeagues]);
+    await Promise.all([onRefetchMyClub(), onRefetchLeagues()]);
+  }, [onRefetchLeagues, onRefetchMyClub]);
 
-  const isRefetching = isRefetchingClub || isRefetchingLeagues;
+  const isRefetching = isRefetchingMyClub || isRefetchingLeagues;
 
   if (!isAutheticated) {
-    return <Login title="Para acessar suas ligas, é necessário efetuar o login no Cartola FC." />;
+    return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
     return <MaintenanceMarket />;
   }
 
-  if (!dataLeagues || isLoadingLeagues) {
+  if (!leagues) {
     return <Loading />;
   }
 
   return (
     <SectionList
       refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-      sections={sectionLeaguesList}
+      sections={leagues}
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       showsVerticalScrollIndicator={false}

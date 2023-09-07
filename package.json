@@ -1,5 +1,5 @@
 {
-  "name": "meu-cartola",
+  "name": "afc-parciais",
   "main": "expo-router/entry",
   "version": "0.0.3",
   "scripts": {
@@ -16,6 +16,7 @@
   "dependencies": {
     "@expo/vector-icons": "^13.0.0",
     "@react-native-async-storage/async-storage": "~1.18.2",
+    "@react-native-community/netinfo": "9.3.10",
     "@react-navigation/native": "^6.0.2",
     "@shopify/flash-list": "1.4.3",
     "@tanstack/react-query": "^4.32.0",

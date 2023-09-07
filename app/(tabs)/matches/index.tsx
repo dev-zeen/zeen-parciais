@@ -7,20 +7,18 @@ import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { AuthContext } from '@/contexts/Auth.context';
+import useMatch from '@/hooks/useMatch';
+import useMyClub from '@/hooks/useMyClub';
 import { Match } from '@/models/Matches';
-import { useGetMyClub } from '@/queries/club.query';
-import { useGetMatchs } from '@/queries/matches.query';
 
 export default () => {
   const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const allowRequest = isAutheticated;
+  const { matches, isLoadingMatches, onRefetchMatches, isRefetchingMatches } = useMatch();
 
-  const { data: matches, isLoading, refetch: onRefetch, isRefetching } = useGetMatchs();
-
-  const { data: club } = useGetMyClub(!!allowRequest);
+  const { myClub } = useMyClub();
 
   const keyExtractor = useCallback((item: Match) => `${item.clube_casa_id}`, []);
 
@@ -29,17 +27,17 @@ export default () => {
       return (
         <MatchCard
           match={item}
-          players={club?.atletas}
+          players={myClub?.atletas}
           homeClub={matches?.clubes[item.clube_casa_id]}
           awayClub={matches?.clubes[item.clube_visitante_id]}
           isDisabled={!isAutheticated || !item.valida}
         />
       );
     },
-    [matches, isAutheticated, club]
+    [myClub?.atletas, matches?.clubes, isAutheticated]
   );
 
-  if (isLoading || !matches) {
+  if (isLoadingMatches || !matches) {
     return <Loading />;
   }
 
@@ -57,7 +55,9 @@ export default () => {
             gap: 8,
             paddingBottom: 8,
           }}
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+          refreshControl={
+            <RefreshControl onRefresh={onRefetchMatches} refreshing={isRefetchingMatches} />
+          }
           initialNumToRender={10}
           data={matches?.partidas}
           keyExtractor={keyExtractor}

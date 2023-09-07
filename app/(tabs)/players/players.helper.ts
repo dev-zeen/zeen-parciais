@@ -1,6 +1,6 @@
 import { IPlayerStats, Player, PlayerStats } from '@/models/Stats';
 
-export function onGetPlayersPlayedMatch(playerStats: PlayerStats): Player[] {
+export function onGetPlayersPlayed(playerStats: PlayerStats): Player[] {
   const allPlayers =
     playerStats &&
     Object.keys(playerStats.atletas).map(

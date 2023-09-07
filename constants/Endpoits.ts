@@ -20,7 +20,6 @@ export const MATCHES_ACTUAL_ROUND = '/partidas';
 export const MATCHES_BY_ROUND = '/partidas/:round';
 
 // Auth
-export const IS_MEMBER_CARTOLA_EXPRESS = '/auth/express';
 export const GET_APPRECIATIONS = '/auth/atletas/valorizacao';
 export const GET_MY_CLUB = '/auth/time';
 export const GET_CLUB_HISTORY = '/auth/stats/historico';

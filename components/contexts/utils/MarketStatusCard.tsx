@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { Text, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { useGetMarketStatus } from '@/queries/market.query';
+import useMarketStatus from '@/hooks/useMarketStatus';
 
 export function MarketStatusCard() {
-  const { data: marketStatus } = useGetMarketStatus();
+  const { marketStatus } = useMarketStatus();
 
   const MARKET_STATUS_COLOR_NAMED = {
     1: 'bg-green-500',

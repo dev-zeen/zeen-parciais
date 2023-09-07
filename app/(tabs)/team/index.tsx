@@ -55,7 +55,7 @@ export default () => {
 
   const { data: marketStatus } = useGetMarketStatus();
 
-  const allowRequests =
+  const allowRequest =
     isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
@@ -66,7 +66,7 @@ export default () => {
     data: club,
     refetch: onRefetchClub,
     isRefetching: isRefetchingClub,
-  } = useGetMyClub(!!allowRequests);
+  } = useGetMyClub(!!allowRequest);
 
   const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
@@ -178,8 +178,7 @@ export default () => {
   );
 
   const onRefetch = useCallback(async () => {
-    await onRefetchStats();
-    await handleResetClub();
+    await Promise.all([onRefetchStats(), handleResetClub()]);
   }, [handleResetClub, onRefetchStats]);
 
   const onSaveTeam = useCallback(() => {
@@ -299,7 +298,7 @@ export default () => {
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
 
   if (!isAutheticated) {
-    return <Login title="Para acessar o seu time, é necessário efetuar o login no Cartola FC." />;
+    return <Login title="Para acessar o seu time, é necessário efetuar o login." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {

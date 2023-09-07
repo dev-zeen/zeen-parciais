@@ -8,56 +8,36 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
+import { ClubByLeague, LeagueProps } from '@/app/(tabs)/leagues/[id]';
 import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { League as LeagueEntity, TeamLeague } from '@/models/Leagues';
+import useLeague from '@/hooks/useLeague';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import { TeamLeague } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { PlayerStats } from '@/models/Stats';
-import { useGetClubsByLeagueId } from '@/queries/leagues.query';
 import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 
-type LeagueProps = {
-  league: LeagueEntity;
-  playerStats: PlayerStats;
-  marketStatus: MarketStatus;
-  isRefetching: boolean;
-  onRefetch: () => void;
-};
-
-export function League({
-  league,
-  marketStatus,
-  playerStats,
-  isRefetching,
-  onRefetch,
-}: LeagueProps) {
+export function League({ league, isRefetching, onRefetch }: LeagueProps) {
   const colorTheme = useColorScheme();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { marketStatus, isMarketClose } = useMarketStatus();
+
+  const { playerStats } = usePlayerStats();
 
   const [isSortingClubs, setIsSortingClubs] = useState(false);
-
-  const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
-
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
-
-  const { data: clubsByLeague, isInitialLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
-    league?.liga.liga_id
-  );
+  const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
 
   const { getItem } = useAsyncStorage(CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`));
 
-  const onGetClubsByLeagueFromStorage = useCallback(async () => {
-    const data = await getItem();
-    return data;
-  }, [getItem]);
+  const { clubsByLeague } = useLeague({ slug: league.liga.slug });
 
   const handleOrderByPatrimony = useCallback(() => {
     const newOrderBy =
@@ -69,7 +49,12 @@ export function League({
     return newOrderBy;
   }, [league]);
 
-  const handleSortClubs = useCallback(
+  const onGetClubsByLeagueFromStorage = useCallback(async () => {
+    const data = await getItem();
+    return data;
+  }, [getItem]);
+
+  const sortClubs = useCallback(
     async (sortBy: string) => {
       const clubsByLeague: ClubsByLeagueUtils | undefined =
         await onGetClubsByLeagueFromStorage().then((data) => (data ? JSON.parse(data) : ''));
@@ -77,18 +62,18 @@ export function League({
       const compareFn = (a: ClubByLeague, b: ClubByLeague) =>
         ((b.pontos as any)[sortBy] as number) - ((a.pontos as any)[sortBy] as number);
 
-      if (isMarketClose && clubsByLeague) {
+      if (isMarketClose && clubsByLeague && league) {
         const leagueWithPartials = onGetLeagueWithPartials(
           league,
           clubsByLeague,
-          playerStats,
-          marketStatus
+          playerStats as PlayerStats,
+          marketStatus as MarketStatus
         );
         const sortedClubs = mergeSort(leagueWithPartials, compareFn);
         setClubs(sortedClubs);
       } else {
-        const clubByLeagues = league?.times?.sort((a, b) => compareFn(a, b));
-        setClubs(clubByLeagues);
+        const sortedClubs = league?.times?.sort((a, b) => compareFn(a, b));
+        setClubs(sortedClubs);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,14 +87,14 @@ export function League({
         const newOrderByPatrimony = handleOrderByPatrimony();
         setClubs(newOrderByPatrimony);
       } else {
-        await handleSortClubs(sortProp);
+        await sortClubs(sortProp);
       }
 
       setTimeout(() => {
         setIsSortingClubs(false);
       }, 1);
     },
-    [handleOrderByPatrimony, handleSortClubs]
+    [handleOrderByPatrimony, sortClubs]
   );
 
   useEffect(() => {
@@ -118,7 +103,7 @@ export function League({
         handleOrderByPatrimony();
         return;
       }
-      handleSortClubs(orderBy);
+      sortClubs(orderBy);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clubs, league, orderBy]);
@@ -185,16 +170,14 @@ export function League({
           orderBy={orderBy}
           position={index + 1}
           firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
-          marketStatus={marketStatus as MarketStatus}
-          isMarketClose={isMarketClose}
           isLeagueAcceptCapitain={!league.liga.sem_capitao}
         />
       );
     },
-    [clubs, isMarketClose, league, marketStatus, orderBy]
+    [clubs, league, orderBy]
   );
 
-  const isLoading = !clubs || isLoadingClubsByLeague;
+  const isLoading = !clubs;
 
   if (isLoading) {
     return <Loading />;

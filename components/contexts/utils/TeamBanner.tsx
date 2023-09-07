@@ -1,6 +1,7 @@
-import { Image } from 'react-native';
+import { Link } from 'expo-router';
+import { Image, Pressable } from 'react-native';
 
-import cartolaProImage from '@/assets/images/pro.png';
+import proImage from '@/assets/images/pro.png';
 import { Text, View } from '@/components/Themed';
 import { FullClubInfo } from '@/models/Club';
 
@@ -10,28 +11,32 @@ type TeamBannerProps = {
 
 export function TeamBanner({ team }: TeamBannerProps) {
   return (
-    <View className="flex-row items-center rounded-lg p-4">
-      <Image
-        source={{
-          uri: team.time.url_escudo_png,
-        }}
-        className="w-16 h-16"
-        alt={`Escudo do ${team.time.nome}`}
-      />
-      <View className="gap-1 pl-4">
-        {team.time.assinante ? (
+    <Link href="/(tabs)/profile" asChild>
+      <Pressable>
+        <View className="flex-row items-center rounded-lg p-4">
           <Image
-            source={cartolaProImage}
-            className="w-10 h-5"
-            alt={`Selo PRO do cartola para quem é assinante`}
+            source={{
+              uri: team.time.url_escudo_png,
+            }}
+            className="w-16 h-16"
+            alt={`Escudo do ${team.time.nome}`}
           />
-        ) : (
-          <View />
-        )}
+          <View className="gap-1 pl-4">
+            {team.time.assinante ? (
+              <Image
+                source={proImage}
+                className="w-10 h-5"
+                alt={`Selo PRO para quem é assinante`}
+              />
+            ) : (
+              <View />
+            )}
 
-        <Text className="font-semibold text-sm">{team.time.nome}</Text>
-        <Text className="font-light text-xs capitalize">{team.time.nome_cartola}</Text>
-      </View>
-    </View>
+            <Text className="font-semibold text-sm">{team.time.nome}</Text>
+            <Text className="font-light text-xs capitalize">{team.time.nome_cartola}</Text>
+          </View>
+        </View>
+      </Pressable>
+    </Link>
   );
 }
