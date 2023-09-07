@@ -45,7 +45,7 @@ const useLeagues = () => {
       marketStatus as MarketStatus;
 
     const privateLeagues = ligas.filter((item) => item.time_dono_id && !item.mata_mata);
-    const cartolaLeagues = ligas.filter((item) => !item.time_dono_id);
+    const defaultLeagues = ligas.filter((item) => !item.time_dono_id);
     const cups = ligas.filter((item) => item.mata_mata);
 
     const sectionLeagues = [
@@ -65,8 +65,8 @@ const useLeagues = () => {
 
     if (!isMarketClose) {
       sectionLeagues.push({
-        title: 'Ligas do Cartola',
-        data: cartolaLeagues,
+        title: 'Ligas Padrão',
+        data: defaultLeagues,
       });
     }
 

@@ -39,7 +39,7 @@ export default function () {
   const isRefetching = isRefetchingMyClub || isRefetchingLeagues;
 
   if (!isAutheticated) {
-    return <Login title="Para acessar suas ligas, é necessário efetuar o login no Cartola FC." />;
+    return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {

@@ -75,7 +75,7 @@ export function Login({ title }: LoginProps) {
             gap: 8,
           }}>
           <Feather name="log-in" size={24} color={Colors.light.background} />
-          <Text className="text-white"> Entrar no Cartola </Text>
+          <Text className="text-white"> Entrar </Text>
         </TouchableOpacity>
       </View>
 

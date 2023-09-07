@@ -18,7 +18,7 @@ export const StatusErrorMessages: StatusErrorMessagesProps = {
     buttonText: 'Tente Novamente',
   },
   500: {
-    message: 'Servidor do cartola está instavél, tente novamente mais tarde.',
+    message: 'O Servidor está com instabilidade, tente novamente mais tarde.',
     code: 503,
     buttonText: 'Tente Novamente',
   },

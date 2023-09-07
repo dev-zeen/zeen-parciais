@@ -298,7 +298,7 @@ export default () => {
   const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
 
   if (!isAutheticated) {
-    return <Login title="Para acessar o seu time, é necessário efetuar o login no Cartola FC." />;
+    return <Login title="Para acessar o seu time, é necessário efetuar o login." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {

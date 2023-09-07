@@ -1,6 +1,6 @@
-# Meu Cartola
+# AFC Parciais
 
-![Logo](assets/images/meu-cartola-readme.png)
+![Logo](assets/images/afc.png)
 
 ## 🚀 Funcionalidades
 
@@ -9,4 +9,3 @@
 - Acompanhar e gerenciar ligas
 - Acompanhar partidas
 - Gerenciar seu perfil
-- [Trello](https://trello.com/b/wJZMzuli/meu-cartola)

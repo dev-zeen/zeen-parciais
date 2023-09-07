@@ -85,7 +85,7 @@ export default () => {
 
   if (!isAutheticated) {
     return (
-      <Login title="Para acessar as informações do seu perfil é necessário efetuar o login no Cartola FC." />
+      <Login title="Para acessar as informações do seu perfil é necessário efetuar o login." />
     );
   }
 

@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { Image, Pressable } from 'react-native';
 
-import cartolaProImage from '@/assets/images/pro.png';
+import proImage from '@/assets/images/pro.png';
 import { Text, View } from '@/components/Themed';
 import { FullClubInfo } from '@/models/Club';
 
@@ -24,9 +24,9 @@ export function TeamBanner({ team }: TeamBannerProps) {
           <View className="gap-1 pl-4">
             {team.time.assinante ? (
               <Image
-                source={cartolaProImage}
+                source={proImage}
                 className="w-10 h-5"
-                alt={`Selo PRO do cartola para quem é assinante`}
+                alt={`Selo PRO para quem é assinante`}
               />
             ) : (
               <View />
