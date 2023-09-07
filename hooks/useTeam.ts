@@ -11,7 +11,7 @@ const useTeam = ({ teamId, round }: ClubProps) => {
     isLoading: isLoadingTeam,
     refetch: onRefetchTeam,
     isRefetching: isRefetchingTeam,
-  } = useGetClub(String(teamId), round);
+  } = useGetClub(teamId, round);
 
   return {
     team,

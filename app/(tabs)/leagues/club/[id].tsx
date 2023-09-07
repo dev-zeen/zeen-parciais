@@ -7,18 +7,17 @@ import { Text, View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
-import { APPRECIATIONS } from '@/constants/Keys';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePartialScore from '@/hooks/usePartialScore';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import useSubstituition from '@/hooks/useSubstituition';
+import useTeam from '@/hooks/useTeam';
+import useValorization from '@/hooks/useValorization';
 import { FullClubInfo } from '@/models/Club';
 import { MarketStatus } from '@/models/Market';
-import { Appreciations } from '@/models/Player';
 import { FullPlayer } from '@/models/Stats';
-import { useGetClub, useGetMatchSubstitutions } from '@/queries/club.query';
-import { useGetMarketStatus } from '@/queries/market.query';
-import { useGetAppreciations } from '@/queries/players.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
-import { onGetFromStorage } from '@/utils/asyncStorage';
+import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
 import { numberToString } from '@/utils/parseTo';
 import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
 
@@ -39,102 +38,72 @@ export default () => {
 
   const { id } = useLocalSearchParams();
 
-  const { data: marketStatus } = useGetMarketStatus();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
   const typeViewDefault = TYPE_VIEW.LISTA;
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { playerStats, isRefetchingPlayerStats, onRefetchStats } = usePlayerStats();
 
-  const {
-    data: playerStats,
-    isRefetching: isRefetchingPlayerStats,
-    refetch: onRefetchStats,
-  } = useGetScoredPlayers(isMarketClose);
+  const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
-  const {
-    data: appreciations,
-    refetch: onRefetchAppreciations,
-    isRefetching: isRefetchingAppreciations,
-  } = useGetAppreciations(isAutheticated);
-
-  const [currentAppreciations, setCurrentAppreciations] = useState<Appreciations>();
   const [currentRound, setCurrentRound] = useState(0);
+  const [clubAppreciation, setClubAppreciation] = useState(0);
   const [reservePlayers, setReservePlayers] = useState<FullPlayer[] | PlayerClub[]>();
   const [startingPlayers, setStartingPlayers] = useState<FullPlayer[] | PlayerClub[]>();
 
-  const [clubAppreciation, setClubAppreciation] = useState(0);
-
-  const { data: club } = useGetClub(id as string, currentRound);
-
-  const { data: substitutions } = useGetMatchSubstitutions({
-    id: club?.time.time_id,
+  const { team } = useTeam({
+    teamId: Number(id),
     round: currentRound,
-    requestWithRound: true,
   });
 
-  const scoreCurrentRound = onCalculatePartialScore(
-    startingPlayers as FullPlayer[],
-    club?.capitao_id as number,
-    playerStats
-  )
-    ? numberToString(
-        onCalculatePartialScore(
-          startingPlayers as FullPlayer[],
-          club?.capitao_id as number,
-          playerStats
-        )
-      )
-    : 0;
+  const { substitutions } = useSubstituition({
+    teamId: Number(id),
+    round: currentRound,
+  });
+
+  const { partialScore } = usePartialScore({
+    teamId: team?.time?.time_id ?? 0,
+  });
 
   useEffect(() => {
-    if (currentRound === marketStatus?.rodada_atual && isMarketClose) {
-      const currentSum = club?.atletas.reduce((acc, current) => {
-        if (appreciations?.atletas[current.atleta_id]?.variacao_num) {
-          return (acc += appreciations?.atletas[current.atleta_id]?.variacao_num);
+    if (currentRound === marketStatus?.rodada_atual && isMarketClose && team) {
+      const currentSum = team.atletas.reduce((acc, current) => {
+        if (valorizations?.atletas[current.atleta_id]?.variacao_num) {
+          return (acc += valorizations?.atletas[current.atleta_id]?.variacao_num);
         }
         return acc;
       }, 0);
 
       setClubAppreciation(currentSum as number);
     }
-  }, [appreciations, marketStatus, currentRound, club, isMarketClose]);
+  }, [valorizations, marketStatus, currentRound, team, isMarketClose]);
 
   useEffect(() => {
-    onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-      if (res) {
-        setCurrentAppreciations(res);
-      }
-    });
-
-    return () => {
-      setCurrentAppreciations(undefined);
-    };
-  }, [appreciations]);
+    if (marketStatus) {
+      const round = isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1;
+      setCurrentRound(round);
+    }
+  }, [isMarketClose, marketStatus]);
 
   useEffect(() => {
-    if (club && substitutions && substitutions?.length > 0) {
+    if (team && substitutions && substitutions?.length > 0) {
       const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
-        club,
+        team,
         substitutions
       );
       setStartingPlayers(playersUpdated);
       setReservePlayers(reservesUpdated);
     } else {
-      if (club?.atletas) setStartingPlayers(club.atletas);
-      if (club?.reservas) setReservePlayers(club.reservas);
+      if (team?.atletas) setStartingPlayers(team.atletas);
+      if (team?.reservas) setReservePlayers(team.reservas);
     }
-  }, [club, substitutions]);
-
-  useEffect(() => {
-    if (marketStatus)
-      setCurrentRound(isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1);
-  }, [isMarketClose, marketStatus]);
+  }, [team, substitutions]);
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchStats(), onRefetchAppreciations()]);
-  }, [onRefetchAppreciations, onRefetchStats]);
+    await Promise.all([onRefetchStats(), onRefetchValorizations()]);
+  }, [onRefetchStats, onRefetchValorizations]);
 
-  const isRefetching = isRefetchingPlayerStats || isRefetchingAppreciations;
+  const isRefetching = isRefetchingPlayerStats || isRefetchingValorizations;
 
   const renderItem = useCallback(
     (player: PlayerClub, isReserve?: boolean) => {
@@ -142,23 +111,23 @@ export default () => {
         <ClubPlayerCard
           key={player.atleta_id}
           player={player}
-          isCapitain={club?.capitao_id === player.atleta_id}
+          isCapitain={team?.capitao_id === player.atleta_id}
           currentRound={currentRound}
           marketStatus={marketStatus as MarketStatus}
           playerStats={playerStats}
           isReserve={isReserve}
-          appreciation={currentAppreciations?.atletas[player.atleta_id]?.variacao_num}
+          appreciation={valorizations?.atletas[player.atleta_id]?.variacao_num}
         />
       );
     },
-    [currentRound, playerStats, marketStatus, club, currentAppreciations]
+    [currentRound, marketStatus, playerStats, team?.capitao_id, valorizations?.atletas]
   );
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
   const isLoading = isMarketClose ? !playerStats || !marketStatus : !marketStatus;
 
-  if (isLoading || !club || !startingPlayers) {
+  if (isLoading || !team || startingPlayers?.length === 0) {
     return <Loading />;
   }
 
@@ -168,11 +137,13 @@ export default () => {
       showsHorizontalScrollIndicator={false}
       refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
       <View
-        className={`p-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
+        className="p-2"
         style={{
           gap: 8,
+          backgroundColor:
+            colorTheme === 'dark' ? BACKGROUND_DEFAULT_DARK : BACKGROUND_DEFAULT_LIGHT,
         }}>
-        <TeamBanner team={club as FullClubInfo} />
+        <TeamBanner team={team as FullClubInfo} />
 
         <View className="flex-row justify-between items-center rounded-lg p-3">
           <View className="justify-center items-center gap-1">
@@ -180,8 +151,8 @@ export default () => {
             <View className="flex-row">
               <Text className="font-semibold text-sm">
                 {isMarketClose && currentRound === marketStatus?.rodada_atual
-                  ? numberToString(club?.patrimonio + clubAppreciation)
-                  : numberToString(club?.patrimonio)}
+                  ? numberToString((team?.patrimonio as number) + clubAppreciation)
+                  : numberToString(team?.patrimonio)}
               </Text>
               {isMarketClose && currentRound === marketStatus?.rodada_atual && (
                 <View className="flex-row pl-2 justify-center items-center">
@@ -205,8 +176,8 @@ export default () => {
                 currentRound === marketStatus?.rodada_atual && 'text-green-500'
               }`}>
               {currentRound === marketStatus?.rodada_atual
-                ? scoreCurrentRound
-                : numberToString(club.pontos)}
+                ? partialScore
+                : numberToString(team?.pontos)}
             </Text>
           </View>
 
@@ -219,19 +190,19 @@ export default () => {
               {' '}
               {currentRound === marketStatus?.rodada_atual
                 ? onCalculatePartialScore(
-                    startingPlayers as FullPlayer[],
-                    club.capitao_id,
+                    team.atletas as FullPlayer[],
+                    team?.capitao_id as number,
                     playerStats
                   )
                   ? numberToString(
                       (onCalculatePartialScore(
-                        startingPlayers as FullPlayer[],
-                        club.capitao_id,
+                        team.atletas as FullPlayer[],
+                        team?.capitao_id as number,
                         playerStats
-                      ) as number) + club.pontos_campeonato
+                      ) as number) + (team?.pontos_campeonato as number)
                     )
                   : 0
-                : numberToString(club.pontos_campeonato)}
+                : numberToString(team?.pontos_campeonato)}
             </Text>
           </View>
         </View>

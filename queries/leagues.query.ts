@@ -1,21 +1,10 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
-import {
-  GET_ALL_LEAGUES,
-  GET_CLUBS_BY_LEAGUE_ID,
-  GET_LEAGUE_BY_SLUG,
-  INVITES,
-  RESPONSE_INVITE,
-} from '@/constants/Endpoits';
+import { GET_ALL_LEAGUES, GET_CLUBS_BY_LEAGUE_ID, GET_LEAGUE_BY_SLUG } from '@/constants/Endpoits';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
-import { Invite, League, LeagueUserDetails } from '@/models/Leagues';
-import api from '@/services/api';
+import { League, LeagueUserDetails } from '@/models/Leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 import { useFetch } from '@/utils/reactQuery';
-
-type InviteProps = {
-  convites: Invite[];
-};
 
 export interface Filter {
   [key: string]: string;
@@ -58,14 +47,3 @@ export const useGetClubsByLeagueId = (id?: number) => {
     }
   );
 };
-
-export const useGetInvites = (allowRequest?: boolean) =>
-  useFetch<InviteProps>(INVITES, undefined, {
-    enabled: !!allowRequest,
-  });
-
-export const onAcceptInvite = async (id: string) =>
-  await api.post(RESPONSE_INVITE.replace(':messageId', id), {});
-
-export const onDeclineInvitation = async (id: string) =>
-  await api.delete(RESPONSE_INVITE.replace(':messageId', id), {});

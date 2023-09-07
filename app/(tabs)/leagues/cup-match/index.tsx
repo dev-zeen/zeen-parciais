@@ -8,14 +8,14 @@ import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCar
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import useSubstituition from '@/hooks/useSubstituition';
+import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { FullPlayer } from '@/models/Stats';
-import { useGetClub, useGetMatchSubstitutions } from '@/queries/club.query';
-import { useGetMarketStatus } from '@/queries/market.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
 
 type SectionPlayersProps = {
@@ -28,32 +28,29 @@ export default () => {
 
   const { match } = useLocalSearchParams();
 
+  const { marketStatus, isLoadingMarketStatus } = useMarketStatus();
+
   const cupMatch: CupMatch = useMemo(() => JSON.parse(match as string), [match]);
 
-  const { data: homeTeam } = useGetClub(cupMatch.time_mandante_id);
-
-  const { data: awayTeam } = useGetClub(cupMatch.time_visitante_id);
-
-  const [teamSelected, setTeamSelected] = useState<FullClubInfo>(homeTeam as FullClubInfo);
-
-  const { data: marketStatus, isLoading: isLoadingMarketStatus } = useGetMarketStatus();
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { data: substitutions } = useGetMatchSubstitutions({
-    id: teamSelected?.time.time_id,
+  const { team: homeTeam } = useTeam({
+    teamId: cupMatch.time_mandante_id ?? 0,
   });
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
-
-  const {
-    data: playerStats,
-    isLoading: isLoadingPlayerStats,
-    refetch: onRefechPlayerStats,
-    isRefetching: isRefetchingPlayerStats,
-  } = useGetScoredPlayers(isMarketClose);
+  const { team: awayTeam } = useTeam({
+    teamId: cupMatch.time_mandante_id ?? 0,
+  });
 
   const [currentDataList, setCurrentDataList] = useState<SectionPlayersProps[]>();
+  const [teamSelected, setTeamSelected] = useState<FullClubInfo>(homeTeam as FullClubInfo);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { substitutions } = useSubstituition({
+    teamId: teamSelected?.time.time_id,
+    round: cupMatch.rodada_id,
+  });
+
+  const { playerStats, isLoadingPlayerStats, onRefetchStats, isRefetchingPlayerStats } =
+    usePlayerStats();
 
   useEffect(() => {
     if (teamSelected) {
@@ -144,10 +141,7 @@ export default () => {
         ) : (
           <SectionList
             refreshControl={
-              <RefreshControl
-                onRefresh={onRefechPlayerStats}
-                refreshing={isRefetchingPlayerStats}
-              />
+              <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
             }
             sections={currentDataList ?? []}
             ListEmptyComponent={() => <Text>Sem dados para mostrar</Text>}

@@ -72,7 +72,7 @@ export function ClubPlayerCard({
               uri: player.foto?.replace('FORMATO', '220x220'),
             }}
             className="w-14 h-14"
-            alt={`Imagem do ${player.nome}`}
+            alt={`Imagem do ${player?.nome}`}
           />
 
           <View>
@@ -89,11 +89,11 @@ export function ClubPlayerCard({
 
             <View className="flex-row items-center gap-x-1">
               <Text className="text-xs font-light capitalize">
-                {positions?.[player.posicao_id].nome}
+                {positions?.[player.posicao_id]?.nome}
               </Text>
               <View className="rounded-full bg-gray-300 h-1 w-1" />
               <Text className="text-xs font-light capitalize">
-                {market?.clubes[player.clube_id].nome}
+                {market?.clubes[player.clube_id]?.nome}
               </Text>
             </View>
           </View>

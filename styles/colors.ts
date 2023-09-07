@@ -5,3 +5,5 @@ export const TRUE_BLUE = '#4062BB';
 export const PRIMARY_DODGER_BLUE = '#479AFF';
 export const GRAY_OPACITY = '#D6D6D6';
 export const LIGHT_GREEN = '#93FF96';
+export const BACKGROUND_DEFAULT_LIGHT = '#F5F5F5';
+export const BACKGROUND_DEFAULT_DARK = '#12294D';

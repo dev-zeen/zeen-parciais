@@ -1,14 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { Link, Tabs } from 'expo-router';
-import { useContext } from 'react';
 import { Pressable, View, useColorScheme } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { AuthContext } from '@/contexts/Auth.context';
-import { useGetInvites } from '@/queries/leagues.query';
-import { useGetMarketStatus } from '@/queries/market.query';
+import useInvites from '@/hooks/useInvites';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -20,16 +16,7 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name'];
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
-  const { isAutheticated } = useContext(AuthContext);
-
-  const { data: marketStatus } = useGetMarketStatus();
-
-  const allowRequest =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
-
-  const { data: invites } = useGetInvites(allowRequest);
+  const { invites } = useInvites();
 
   return (
     <Tabs

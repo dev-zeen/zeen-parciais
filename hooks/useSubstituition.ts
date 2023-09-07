@@ -2,9 +2,10 @@ import { useGetMatchSubstitutions } from '@/queries/club.query';
 
 type SubstituitionsProps = {
   teamId?: number;
+  round?: number;
 };
 
-const useSubstituition = ({ teamId }: SubstituitionsProps) => {
+const useSubstituition = ({ teamId, round }: SubstituitionsProps) => {
   const {
     data: substitutions,
     isLoading: isLoadingSubstitutions,
@@ -12,6 +13,7 @@ const useSubstituition = ({ teamId }: SubstituitionsProps) => {
     isRefetching: isRefetchingSubstitutions,
   } = useGetMatchSubstitutions({
     id: teamId,
+    round,
   });
 
   return {

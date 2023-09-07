@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import {
   Alert,
   FlatList,
@@ -13,41 +13,21 @@ import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
 import { Button } from '@/components/structure/Button';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { AuthContext } from '@/contexts/Auth.context';
+import useInvites from '@/hooks/useInvites';
+import useLeagues from '@/hooks/useLeagues';
 import { Invite } from '@/models/Leagues';
-import {
-  onAcceptInvite,
-  onDeclineInvitation,
-  useGetInvites,
-  useGetLeagues,
-} from '@/queries/leagues.query';
-import { useGetMarketStatus } from '@/queries/market.query';
+import { onAcceptInvite, onDeclineInvitation } from '@/queries/invites.query';
 
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { isAutheticated } = useContext(AuthContext);
+  const { invites, isLoadingInvites, onRefetchInvites, isRefetchingInvites } = useInvites();
 
-  const { data: marketStatus } = useGetMarketStatus();
-
-  const allowRequest =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
-
-  const {
-    data: invites,
-    isLoading: isLoadingInvites,
-    refetch: onRefetchInvites,
-    isRefetching: isRefetchingInvites,
-  } = useGetInvites(allowRequest);
-
-  const { refetch: onRefecthLeagues } = useGetLeagues(allowRequest);
+  const { onRefetchLeagues } = useLeagues();
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefecthLeagues(), onRefetchInvites()]);
-  }, [onRefecthLeagues, onRefetchInvites]);
+    await Promise.all([onRefetchLeagues(), onRefetchInvites()]);
+  }, [onRefetchInvites, onRefetchLeagues]);
 
   const handleAcceptInvite = useCallback(async (messageId: number) => {
     await onAcceptInvite(String(messageId)).then((response) => {

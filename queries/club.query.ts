@@ -10,6 +10,12 @@ import {
 import { FullClubInfo, Substitutions, TeamHistoryRound } from '@/models/Club';
 import { useFetch, usePost, usePrefetch } from '@/utils/reactQuery';
 
+interface SubstitutionsParams {
+  id?: number | string;
+  round?: number;
+  requestWithRound?: boolean;
+}
+
 export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
     enabled: !!allowRequest,
@@ -20,7 +26,7 @@ export const usePrefetchMyClub = (allowRequest?: boolean) =>
     enabled: !!allowRequest,
   });
 
-export const useGetClub = (id: number | string, round?: number) => {
+export const useGetClub = (id?: number | string, round?: number) => {
   const url = GET_CLUB_BY_ID.replace(':id', String(id));
 
   const urlWithRound = GET_CLUB_BY_ID_AND_ROUND.replace(':id', String(id)).replace(
@@ -50,12 +56,7 @@ export const useGetHistoricMyClub = (allowRequest: boolean) =>
     enabled: !!allowRequest,
   });
 
-interface SubstitutionsParams {
-  id?: number | string;
-  round?: number;
-  requestWithRound?: boolean;
-}
-export const useGetMatchSubstitutions = ({ id, round, requestWithRound }: SubstitutionsParams) => {
+export const useGetMatchSubstitutions = ({ id, round }: SubstitutionsParams) => {
   const url = GET_MATCH_SUBSTITUTIONS.replace(':clubId', String(id));
 
   const urlWithRound = GET_MATCH_SUBSTITUTIONS_BY_ROUND.replace(':clubId', String(id)).replace(
@@ -64,7 +65,7 @@ export const useGetMatchSubstitutions = ({ id, round, requestWithRound }: Substi
   );
 
   return useFetch<Substitutions[]>(round ? urlWithRound : url, undefined, {
-    enabled: requestWithRound ? !!id && !!round : !!id,
+    enabled: round ? !!id && !!round : !!id,
   });
 };
 
