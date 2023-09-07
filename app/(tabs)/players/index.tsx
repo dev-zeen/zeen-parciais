@@ -86,8 +86,7 @@ export default () => {
   }, [isMarketClose, market, playerStats]);
 
   const onRefetch = useCallback(async () => {
-    await onRefetchValorizations();
-    await onRefetchStats();
+    await Promise.all([onRefetchValorizations(), onRefetchStats()]);
   }, [onRefetchValorizations, onRefetchStats]);
 
   const isRefetching = isRefetchingPlayerStats;

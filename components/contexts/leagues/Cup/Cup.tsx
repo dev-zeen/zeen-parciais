@@ -1,60 +1,33 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
+import { LeagueProps } from '@/app/(tabs)/leagues/[id]';
 import { Text, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
+import useLeague, { TeamCup } from '@/hooks/useLeague';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import useMyClub from '@/hooks/useMyClub';
 import { FullClubInfo } from '@/models/Club';
-import { League, TeamLeague } from '@/models/Leagues';
-import { useGetMyClub } from '@/queries/club.query';
-import { useGetMarketStatus } from '@/queries/market.query';
 
-interface TeamCup extends TeamLeague {
-  isPending?: boolean;
-}
-
-type CupProps = {
-  cup: League;
-  isRefetching: boolean;
-  onRefetch: () => void;
-};
-
-export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
+export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
   const colorTheme = useColorScheme();
+
   const teamDefaultBackground = colorTheme === 'dark' ? '#047857' : '#dbeafe';
   const pedingInviteBackground = colorTheme === 'dark' ? '#ca8a04' : '#fef08a';
 
-  const { data: marketStatus, isLoading: isLoadingMarketStatus } = useGetMarketStatus();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const allowRequest =
-    marketStatus && marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+  const { myClub, isLoadingMyClub } = useMyClub();
 
-  const { data: team, isLoading: isLoadingTeam } = useGetMyClub(allowRequest);
-
-  const isMarketClose = false;
-
-  const isCupInProgress = useMemo(() => {
-    if (cup && cup?.chaves_mata_mata) {
-      return Object.keys(cup?.chaves_mata_mata).length > 0;
-    }
-  }, [cup]);
-
-  const totalTeamCup = useMemo(() => cup.liga.quantidade_times, [cup.liga.quantidade_times]);
-  const currentTeamsCup = useMemo(() => cup.liga.total_times_liga, [cup.liga.total_times_liga]);
-
-  const teamsAwatingAcceptInvite: TeamCup[] | undefined = useMemo(
-    () => cup.convites_enviados?.map((item) => ({ ...item.time, isPending: true })),
-    [cup.convites_enviados]
-  );
-
-  const teamsByCup: TeamCup[] = useMemo(() => cup.times?.map((item) => item), [cup]).sort(
-    (a, b) => a.time_id - b.time_id
-  );
+  const { isCupInProgress, totalTeamCup, currentTeamsCup, teamsAwatingAcceptInvite, teamsByCup } =
+    useLeague({
+      slug: cup.liga.slug,
+    });
 
   const keyExtractor = useCallback((item: TeamCup) => `${item.time_id}`, []);
 
@@ -62,7 +35,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
 
   const renderMatchItem = useCallback(
     (round: string) => {
-      if (cup && cup.chaves_mata_mata && marketStatus && team) {
+      if (cup && cup.chaves_mata_mata && marketStatus && myClub) {
         return (
           <FlatList
             refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
@@ -74,14 +47,14 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
             keyExtractor={(item) => `${item.chave_id}`}
             renderItem={({ item }) => {
               return (
-                <CupMatchCard key={item.chave_id} match={item} myTeam={team as FullClubInfo} />
+                <CupMatchCard key={item.chave_id} match={item} myTeam={myClub as FullClubInfo} />
               );
             }}
           />
         );
       }
     },
-    [cup, isRefetching, marketStatus, onRefetch, team]
+    [cup, isRefetching, marketStatus, onRefetch, myClub]
   );
 
   const renderTeamItem = useCallback(
@@ -128,7 +101,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
 
   useEffect(() => {
     if (isCupInProgress && cup && cup.chaves_mata_mata) {
-      const tabs = Object.keys(cup.chaves_mata_mata).map((round, index) => {
+      const tabs = Object.keys(cup.chaves_mata_mata).map((round) => {
         return {
           id: Number(round),
           title: round,
@@ -140,9 +113,7 @@ export function Cup({ cup, isRefetching, onRefetch }: CupProps) {
     }
   }, [cup, isCupInProgress, renderMatchItem]);
 
-  const isLoading = isCupInProgress
-    ? isLoadingTeam || isLoadingMarketStatus || roundTabs.length < 1
-    : isLoadingTeam || isLoadingMarketStatus;
+  const isLoading = isCupInProgress ? isLoadingMyClub || roundTabs.length < 1 : isLoadingMyClub;
 
   if (isLoading) return <Loading />;
 

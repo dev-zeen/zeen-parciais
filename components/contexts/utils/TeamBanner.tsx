@@ -13,7 +13,7 @@ export function TeamBanner({ team }: TeamBannerProps) {
   return (
     <Link href="/(tabs)/profile" asChild>
       <Pressable>
-        <View className="flex-row items-center rounded-lg flex-1 p-4">
+        <View className="flex-row items-center rounded-lg p-4">
           <Image
             source={{
               uri: team.time.url_escudo_png,

@@ -1,14 +1,14 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { memo, useCallback } from 'react';
-import { Image, TouchableOpacity, useColorScheme } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { League } from '@/models/Leagues';
-import { MarketStatus } from '@/models/Market';
 import { useGetClub } from '@/queries/club.query';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
@@ -19,25 +19,15 @@ interface ClubCardProps {
   orderBy: string;
   position: number;
   firstPlaceScore: number;
-  marketStatus: MarketStatus;
-  isMarketClose: boolean;
   isLeagueAcceptCapitain: boolean;
 }
 
 export const ClubCard: React.FC<ClubCardProps> = memo(
-  ({
-    league,
-    club,
-    orderBy,
-    position,
-    firstPlaceScore,
-    marketStatus,
-    isMarketClose,
-    isLeagueAcceptCapitain,
-  }) => {
+  ({ league, club, orderBy, position, firstPlaceScore, isLeagueAcceptCapitain }) => {
     const router = useRouter();
     const colorTheme = useColorScheme();
 
+    const { marketStatus, isMarketClose } = useMarketStatus();
     const { data: team } = useGetClub(String(club.time_id));
 
     const capitainPlayer = team?.atletas.find((item) => item.atleta_id === team.capitao_id);
@@ -70,42 +60,35 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       router.push(`/leagues/club/${club.time_id}`);
     }, [club.time_id, router]);
 
-    const myTeam = league?.time_usuario && league?.time_usuario.time_id === club.time_id;
+    const isMyTeam = league?.time_usuario && league?.time_usuario.time_id === club.time_id;
+
+    const isDarkTheme = isMyTeam && colorTheme === 'dark';
+    const isLightTheme = isMyTeam && colorTheme === 'light';
+
+    const containerStyle = isDarkTheme
+      ? styles.darkContainer
+      : isLightTheme
+      ? styles.container
+      : null;
 
     return (
       <View
         key={club?.time_id}
-        className={`rounded-lg py-2 pr-3 justify-center ${
-          myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-        }`}>
-        <TouchableOpacity
-          activeOpacity={0.6}
-          onPress={onPressHandler}
-          className={`
-          ${myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''}
-        `}>
-          <View
-            className={`flex-row justify-between items-center ${
-              myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-            }`}>
+        className="rounded-lg py-2 pr-3 justify-center"
+        style={containerStyle}>
+        <TouchableOpacity activeOpacity={0.6} onPress={onPressHandler}>
+          <View className="flex-row justify-between items-center" style={containerStyle}>
             <View
-              className={`flex-row items-center ${
-                myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-              }`}
+              className="flex-row items-center"
               style={{
+                ...containerStyle,
                 gap: 2,
               }}>
-              <View
-                className={`items-center justify-center w-10 ${
-                  myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                }`}>
+              <View className="items-center justify-center w-10" style={containerStyle}>
                 <Text className="text-sm font-semibold">{position}</Text>
 
                 {isMarketOpen && orderBy !== 'rodada' ? (
-                  <View
-                    className={`flex-row items-center ${
-                      myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                    }`}>
+                  <View className="flex-row items-center" style={containerStyle}>
                     {renderVariationIcon((club.variacao as any)[orderBy])}
                     <Text className="text-xs">
                       {(club.variacao as any)[orderBy] ? (club.variacao as any)[orderBy] : ''}
@@ -124,28 +107,20 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               />
 
               <View>
-                <Text
-                  numberOfLines={1}
-                  className={`text-sm font-semibold ${
-                    myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                  }`}>
+                <Text numberOfLines={1} className="text-sm font-semibold" style={containerStyle}>
                   {club.nome}
                 </Text>
                 <View
-                  className={`flex-row items-center justify-start ${
-                    myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                  }`}
+                  className="flex-row items-center justify-start"
                   style={{
+                    ...containerStyle,
                     gap: 4,
                   }}>
                   <Text className="text-xs capitalize">{club.nome_cartola}</Text>
                 </View>
 
                 {isLeagueAcceptCapitain ? (
-                  <View
-                    className={`flex-row items-center ${
-                      myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                    }`}>
+                  <View className="flex-row items-center" style={containerStyle}>
                     <Text className="text-xs">{capitainPlayer?.apelido}</Text>
 
                     <Image
@@ -165,22 +140,13 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
               </View>
             </View>
 
-            <View
-              className={`items-end ${
-                myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-              }`}>
-              <View
-                className={`flex-row gap-x-1 ${
-                  myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                }`}>
+            <View className="items-end" style={containerStyle}>
+              <View className="flex-row gap-x-1" style={containerStyle}>
                 <Text className="text-xs font-semibold">{score}</Text>
               </View>
 
               {!isOrderByPatrimonio && (
-                <View
-                  className={`flex-row ${
-                    myTeam ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''
-                  }`}>
+                <View className="flex-row" style={containerStyle}>
                   <Text className="text-xs">
                     {isMarketClose && club.playersHavePlayed !== undefined
                       ? `${club.playersHavePlayed}/12`
@@ -195,3 +161,12 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     );
   }
 );
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#bfdbfe',
+  },
+  darkContainer: {
+    backgroundColor: '#2563eb',
+  },
+});

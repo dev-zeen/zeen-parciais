@@ -8,17 +8,21 @@ import { Cup } from '@/components/contexts/leagues/Cup';
 import { League as LeagueComponent } from '@/components/contexts/leagues/League';
 import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
-import { TeamLeague } from '@/models/Leagues';
-import { PlayerStats } from '@/models/Stats';
-import { useGetLeague } from '@/queries/leagues.query';
-import { useGetMarketStatus } from '@/queries/market.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
+import useLeague from '@/hooks/useLeague';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import { League, TeamLeague } from '@/models/Leagues';
 import theme from '@/styles/theme';
 
 export interface ClubByLeague extends TeamLeague {
   playersHavePlayed?: number;
+}
+
+export interface LeagueProps {
+  league: League;
+  isRefetching: boolean;
+  onRefetch: () => void;
 }
 
 export default () => {
@@ -28,23 +32,18 @@ export default () => {
 
   const { id: slug } = useLocalSearchParams();
 
-  const { data: marketStatus } = useGetMarketStatus();
+  const { marketStatus } = useMarketStatus();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
-
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
+  const { playerStats, onRefetchStats } = usePlayerStats();
 
   const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
 
-  const {
-    data: league,
-    refetch: onRefetchLeague,
-    isRefetching: isRefetchingLeague,
-  } = useGetLeague(slug as string);
+  const { league, onRefetchLeague, isRefetchingLeague } = useLeague({
+    slug: slug as string,
+  });
 
   const onRefetch = useCallback(async () => {
-    await onRefetchLeague();
-    await onRefetchStats();
+    await Promise.all([onRefetchLeague(), onRefetchStats()]);
   }, [onRefetchLeague, onRefetchStats]);
 
   const handleConfirmDialog = useCallback(() => {
@@ -57,13 +56,11 @@ export default () => {
     }
   }, [league]);
 
-  const isLoading = isMarketClose ? !playerStats : false;
-
   const isRefetching = isRefetchingLeague;
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (isLoading || !league || !marketStatus) {
+  if (!league || !marketStatus || !playerStats) {
     return <Loading />;
   }
 
@@ -108,15 +105,9 @@ export default () => {
       </View>
 
       {league.liga.mata_mata ? (
-        <Cup cup={league} onRefetch={onRefetch} isRefetching={isRefetching} />
+        <Cup league={league} onRefetch={onRefetch} isRefetching={isRefetching} />
       ) : (
-        <LeagueComponent
-          league={league}
-          onRefetch={onRefetch}
-          isRefetching={isRefetching}
-          playerStats={playerStats as PlayerStats}
-          marketStatus={marketStatus}
-        />
+        <LeagueComponent league={league} onRefetch={onRefetch} isRefetching={isRefetching} />
       )}
 
       {showModalPublicLeague && (

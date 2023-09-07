@@ -178,8 +178,7 @@ export default () => {
   );
 
   const onRefetch = useCallback(async () => {
-    await onRefetchStats();
-    await handleResetClub();
+    await Promise.all([onRefetchStats(), handleResetClub()]);
   }, [handleResetClub, onRefetchStats]);
 
   const onSaveTeam = useCallback(() => {

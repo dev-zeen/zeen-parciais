@@ -91,9 +91,7 @@ export const onGetLeagueWithPartials = (
   marketStatus: MarketStatus
 ): ClubByLeague[] => {
   const partialsByClub =
-    clubsByLeague &&
-    playerStats &&
-    onGetClubsLeagueWithPartial(clubsByLeague as ClubsByLeagueUtils, playerStats);
+    clubsByLeague && playerStats && onGetClubsLeagueWithPartial(clubsByLeague, playerStats);
 
   const isUsingCapitainScore = !league.liga.sem_capitao;
 
@@ -127,7 +125,7 @@ export const onGetLeagueWithPartials = (
             ? club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0)
             : 0),
         turno:
-          marketStatus.rodada_atual !== 20
+          marketStatus?.rodada_atual !== 20
             ? clubLeague.pontos?.turno +
               (club
                 ? club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0)

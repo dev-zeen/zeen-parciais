@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
 import { CURRENT_STATS } from '@/constants/Keys';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarket from '@/hooks/useMarket';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { PlayerStats } from '@/models/Stats';
@@ -10,9 +9,7 @@ import { onGetFromStorage } from '@/utils/asyncStorage';
 
 const usePlayerStats = () => {
   const { market } = useMarket();
-  const { marketStatus } = useMarketStatus();
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { isMarketClose } = useMarketStatus();
 
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
 

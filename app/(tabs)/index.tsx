@@ -43,21 +43,23 @@ export default () => {
   });
 
   const onRefetch = useCallback(async () => {
-    myClub && (await onRefetchMyClub());
-    topPlayers && topPlayers?.length > 0 && (await onRefetchBestPlayers());
-    await onRefetchMarketStatus();
-    await onRefetchTopPlayers();
-    await onRefetchPositions();
-    await onRefetchStats();
+    await Promise.all([
+      myClub && onRefetchMyClub(),
+      topPlayers && topPlayers?.length > 0 && onRefetchBestPlayers(),
+      onRefetchMarketStatus(),
+      onRefetchTopPlayers(),
+      onRefetchPositions(),
+      onRefetchStats(),
+    ]);
   }, [
     myClub,
-    onRefetchMyClub,
-    topPlayers,
     onRefetchBestPlayers,
     onRefetchMarketStatus,
-    onRefetchTopPlayers,
+    onRefetchMyClub,
     onRefetchPositions,
     onRefetchStats,
+    onRefetchTopPlayers,
+    topPlayers,
   ]);
 
   const isLoading = isAutheticated

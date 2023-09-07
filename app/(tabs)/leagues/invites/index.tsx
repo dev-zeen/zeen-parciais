@@ -45,9 +45,8 @@ export default () => {
 
   const { refetch: onRefecthLeagues } = useGetLeagues(allowRequest);
 
-  const onRefetch = useCallback(() => {
-    onRefecthLeagues();
-    onRefetchInvites();
+  const onRefetch = useCallback(async () => {
+    await Promise.all([onRefecthLeagues(), onRefetchInvites()]);
   }, [onRefecthLeagues, onRefetchInvites]);
 
   const handleAcceptInvite = useCallback(async (messageId: number) => {

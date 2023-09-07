@@ -130,8 +130,8 @@ export default () => {
       setCurrentRound(isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1);
   }, [isMarketClose, marketStatus]);
 
-  const onRefetch = useCallback(() => {
-    Promise.all([onRefetchStats(), onRefetchAppreciations()]);
+  const onRefetch = useCallback(async () => {
+    await Promise.all([onRefetchStats(), onRefetchAppreciations()]);
   }, [onRefetchAppreciations, onRefetchStats]);
 
   const isRefetching = isRefetchingPlayerStats || isRefetchingAppreciations;
