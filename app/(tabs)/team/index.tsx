@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Modal, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 
@@ -10,13 +10,12 @@ import {
   emptyCapitain,
   emptyLineupFormation,
   emptyReservePlayers,
-  fillLineupOnChangeTacticalFormation,
+  fillLineupOnChangeFormation,
   fillLineupWithPlayers,
   fillPlayersInLineup,
   listDefaultLineups,
   onClearLineup,
   onGetDefaultLineupTeam,
-  onGetEqualLineups,
   onGetPlayersOnChangePositionSell,
   onSuccessSavedTeam,
 } from './team.helpers';
@@ -34,98 +33,89 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
+import useLineup from '@/hooks/useLineup';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import useMyClub from '@/hooks/useMyClub';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayers, LineupPosition } from '@/models/Formations';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
-import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
-import { useGetMarketStatus } from '@/queries/market.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
-import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
-import { isLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
+import { onGetTeamPrice } from '@/utils/team';
 
 export default () => {
-  const isFirstRender = useRef(true);
-
   const router = useRouter();
 
   const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const { data: marketStatus } = useGetMarketStatus();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const allowRequest =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+  const { myClub, onRefetchMyClub, isRefetchingMyClub } = useMyClub();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { playerStats, onRefetchStats } = usePlayerStats();
 
   const {
-    data: club,
-    refetch: onRefetchClub,
-    isRefetching: isRefetchingClub,
-  } = useGetMyClub(!!allowRequest);
+    initialLineupTeamFormation,
+    isSuccessSaveTeam,
+    onSaveTeam,
+    isReservesCompleted,
+    isLineupComplete,
+    lineup,
+    updateLineup,
+    price,
+    updatePrice,
+    capitain,
+    updateCapitain,
+    formation,
+    updateFormation,
+  } = useLineup();
 
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
-
-  const { data: substitutions } = useGetMatchSubstitutions({
-    id: club?.time.time_id,
-  });
-
-  const { mutate, isSuccess } = useSaveTeam();
-
-  const updateLineup = useTeamLineupStore((state) => state.updateLineup);
-  const lineup = useTeamLineupStore((state) => state.lineup);
-  const price = useTeamLineupStore((state) => state.price);
-  const updatePrice = useTeamLineupStore((state) => state.updatePrice);
-  const capitain = useTeamLineupStore((state) => state.capitain);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
-
-  const defaultLineupTeam = useMemo(
-    () => onGetDefaultLineupTeam(club?.time.esquema_id as number),
-    [club]
-  );
-
-  const [tacticalFormation, setTacticalFormation] = useState(defaultLineupTeam);
-  const [isActiveLineupConfirmButton, setIsActiveLineupConfirmButton] = useState(false);
   const [playersToSell, setPlayersToSell] = useState<PlayersToSell[]>();
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
 
   const handleResetClub = useCallback(async () => {
-    await onRefetchClub().then((res) => {
-      const defaultFormation = onGetDefaultLineupTeam(res.data?.time.esquema_id as number);
-      setTacticalFormation(defaultFormation);
+    if (onRefetchMyClub)
+      await onRefetchMyClub().then((res) => {
+        updateFormation(initialLineupTeamFormation);
 
-      const defaultLineupFilled = fillLineupWithPlayers(
-        res.data as FullClubInfo,
-        defaultFormation,
-        playerStats as PlayerStats,
-        isMarketClose
-      );
-      const defaultPrice = onGetTeamPrice(defaultLineupFilled.starting);
-      updatePrice(defaultPrice);
+        const initialLineupMounted = fillLineupWithPlayers(
+          res.data as FullClubInfo,
+          initialLineupTeamFormation,
+          playerStats as PlayerStats,
+          isMarketClose
+        );
+        const defaultPrice = onGetTeamPrice(initialLineupMounted.starting);
+        updatePrice(defaultPrice);
 
-      updateLineup(defaultLineupFilled);
-      updateCapitain(res.data?.capitao_id as number);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMarketClose, playerStats]);
+        updateLineup(initialLineupMounted);
+        updateCapitain(res.data?.capitao_id as number);
+      });
+  }, [
+    onRefetchMyClub,
+    updateFormation,
+    initialLineupTeamFormation,
+    playerStats,
+    isMarketClose,
+    updatePrice,
+    updateLineup,
+    updateCapitain,
+  ]);
 
-  const onCloseModalSell = useCallback(() => {
+  const onCloseSellPlayersModal = useCallback(() => {
     setShowModalPlayersToSell(false);
-    setTacticalFormation(defaultLineupTeam);
+    updateFormation(initialLineupTeamFormation);
     handleResetClub();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultLineupTeam, handleResetClub]);
+  }, [initialLineupTeamFormation, handleResetClub]);
 
   const handleCloseSuccessSellPlayers = useCallback(
-    (lineup: LineupPlayers, tacticalFormation: string) => {
+    (lineup: LineupPlayers) => {
       setShowModalPlayersToSell(false);
-      const lineupUpdated = fillLineupOnChangeTacticalFormation(
+      const lineupUpdated = fillLineupOnChangeFormation(
         lineup,
-        tacticalFormation,
+        formation,
         playerStats,
         isMarketClose
       );
@@ -133,19 +123,17 @@ export default () => {
       updateLineup(lineupUpdated);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMarketClose, playerStats]
+    [formation, playerStats, isMarketClose]
   );
 
   const handleChangeFormation = useCallback(
-    (lineup: LineupPlayers, value: number) => {
+    (lineup: LineupPlayers, formation: number) => {
+      const newFormation = onGetDefaultLineupTeam(formation);
+      updateFormation(newFormation);
+
+      if ((LINEUPS_DEFAULT_OBJECT as any)[formation] === formation) return;
+
       const isExistsPlayerOnLineup = lineup.starting.some((item) => item.player);
-
-      const newFormation = onGetDefaultLineupTeam(value);
-
-      setTacticalFormation(newFormation);
-
-      if ((LINEUPS_DEFAULT_OBJECT as any)[value] === tacticalFormation) return;
-
       if (!isExistsPlayerOnLineup) {
         const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[newFormation]);
         updateLineup(lineupUpdated);
@@ -174,39 +162,11 @@ export default () => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isMarketClose, playerStats, tacticalFormation]
+    [isMarketClose, playerStats, formation]
   );
 
-  const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchStats(), handleResetClub()]);
-  }, [handleResetClub, onRefetchStats]);
-
-  const onSaveTeam = useCallback(() => {
-    const payload = onGetPayloadSaveTeam({
-      lineup: lineup as LineupPlayers,
-      capitain,
-      tacticalFormation,
-    });
-
-    mutate(payload);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineup, capitain, tacticalFormation]);
-
-  useEffect(() => {
-    if (isSuccess) {
-      onSuccessSavedTeam();
-      onRefetchClub();
-      setIsActiveLineupConfirmButton(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuccess]);
-
-  const isReservesCompleted = useCallback((reserves: LineupPosition[]) => {
-    return reserves.every((item) => item.player);
-  }, []);
-
   const handleSaveTeam = useCallback(() => {
-    if (!tacticalFormation) {
+    if (!formation) {
       emptyLineupFormation();
       return;
     }
@@ -221,24 +181,7 @@ export default () => {
       return;
     }
     onSaveTeam();
-  }, [capitain, isReservesCompleted, lineup?.reserves, onSaveTeam, tacticalFormation]);
-
-  const handlePressShowMarketModal = useCallback(() => {
-    router.push('/team/market/');
-  }, [router]);
-
-  const onShowSaveLineupButton = useCallback(
-    (lineup: LineupPlayers, capitain: number, club: FullClubInfo) => {
-      if (lineup && club) {
-        const isEqualLineups = onGetEqualLineups(lineup, club);
-        const isSameCapitain = club.capitao_id === capitain;
-
-        if (!isSameCapitain || !isEqualLineups) setIsActiveLineupConfirmButton(true);
-        if (isSameCapitain && isEqualLineups) setIsActiveLineupConfirmButton(false);
-      }
-    },
-    []
-  );
+  }, [capitain, isReservesCompleted, lineup?.reserves, onSaveTeam, formation]);
 
   const handleSellAllPlayers = useCallback((lineup: LineupPlayers) => {
     const emptyLineup = clearLineup(lineup?.starting as LineupPosition[]);
@@ -256,46 +199,24 @@ export default () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    if (!lineup && club) {
-      const defaultLineup = fillLineupWithPlayers(
-        club,
-        (LINEUPS_DEFAULT_OBJECT as any)[club?.time.esquema_id as number],
-        playerStats as PlayerStats,
-        isMarketClose
-      );
-
-      updateLineup(defaultLineup);
-      updateCapitain(club.capitao_id);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [club, isMarketClose, lineup, playerStats]);
+  const handlePressMarket = useCallback(() => {
+    router.push('/team/market/');
+  }, [router]);
 
   useEffect(() => {
-    if (lineup && club) {
-      const isFilledLineup = isLineupComplete(lineup);
-
-      if (isFilledLineup) {
-        onShowSaveLineupButton(lineup as LineupPlayers, capitain, club as FullClubInfo);
-      } else {
-        setIsActiveLineupConfirmButton(false);
-      }
+    if (isSuccessSaveTeam) {
+      onSuccessSavedTeam();
+      onRefetchMyClub && onRefetchMyClub();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [capitain, club, lineup]);
+  }, [isSuccessSaveTeam]);
 
-  useEffect(() => {
-    if (lineup && isFirstRender) {
-      const priceUpdated = onGetTeamPrice(lineup?.starting as LineupPosition[]);
-      updatePrice(priceUpdated);
-
-      isFirstRender.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineup]);
+  const onRefetch = useCallback(async () => {
+    await Promise.all([onRefetchStats(), handleResetClub()]);
+  }, [handleResetClub, onRefetchStats]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const isRefetching = useMemo(() => isRefetchingClub, [isRefetchingClub]);
+  const isRefetching = useMemo(() => isRefetchingMyClub, [isRefetchingMyClub]);
 
   if (!isAutheticated) {
     return <Login title="Para acessar o seu time, é necessário efetuar o login." />;
@@ -305,7 +226,7 @@ export default () => {
     return <MaintenanceMarket />;
   }
 
-  if (!club || !lineup) {
+  if (!myClub || !lineup) {
     return <Loading />;
   }
 
@@ -324,7 +245,7 @@ export default () => {
           <View className="w-full flex-1 flex-row items-center rounded-lg px-2 py-3 justify-around">
             <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Patrim.</Text>
-              <Text className="font-semibold text-base">{numberToString(club?.patrimonio)}</Text>
+              <Text className="font-semibold text-base">{numberToString(myClub?.patrimonio)}</Text>
             </View>
 
             <View className="w-16 justify-center items-center">
@@ -337,7 +258,7 @@ export default () => {
             <View className="w-16 justify-center items-center">
               <Text className="font-light text-sm">Rest.</Text>
               <Text className="font-semibold text-base text-green-500">
-                {numberToString(club?.patrimonio - (price as number))}
+                {numberToString(myClub?.patrimonio - (price as number))}
               </Text>
             </View>
 
@@ -356,9 +277,10 @@ export default () => {
               hasIcon
               iconName="refresh-cw"
             />
+
             <Button
+              onPress={handlePressMarket}
               variant="secondary"
-              onPress={handlePressShowMarketModal}
               onlyIcon
               hasIcon
               iconName="briefcase"
@@ -372,14 +294,14 @@ export default () => {
               renderDropdownIcon={() => {
                 return <Feather name="chevron-down" size={18} color={'#374151'} />;
               }}
-              defaultValue={tacticalFormation}
+              defaultValue={formation}
               defaultButtonText="Selecione"
               data={listDefaultLineups()}
               onSelect={(_selectedItem, index) => {
                 handleChangeFormation(lineup, index + 1);
               }}
               buttonTextAfterSelection={(_selectedItem, _index) => {
-                return tacticalFormation;
+                return formation;
               }}
               rowTextForSelection={(item, _index) => {
                 return item;
@@ -427,25 +349,20 @@ export default () => {
               onPress={handleSaveTeam}
               iconName="check"
               hasIcon
-              disabled={!isActiveLineupConfirmButton}
+              disabled={!isLineupComplete}
             />
           </View>
 
-          <SoccerField isMarketClose={isMarketClose} substitutions={substitutions} />
+          <SoccerField />
 
-          <ListReservePlayers
-            lineup={lineup}
-            isMarketClose={isMarketClose}
-            substitutions={substitutions}
-          />
+          <ListReservePlayers />
 
           {showModalPlayersToSell && (
             <Modal animationType="fade" transparent visible={showModalPlayersToSell}>
               <ListPlayersSale
                 players={playersToSell as PlayersToSell[]}
                 handleCloseSuccessSellPlayers={handleCloseSuccessSellPlayers}
-                handleClose={onCloseModalSell}
-                tacticalFormation={tacticalFormation}
+                handleClose={onCloseSellPlayersModal}
               />
             </Modal>
           )}

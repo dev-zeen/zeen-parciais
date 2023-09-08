@@ -27,7 +27,7 @@ const useMyClub = () => {
   return {
     myClub,
     isLoadingMyClub,
-    onRefetchMyClub: !allowRequest ? () => null : onRefetchMyClub,
+    onRefetchMyClub: !allowRequest ? null : onRefetchMyClub,
     isRefetchingMyClub,
     capitain,
   };

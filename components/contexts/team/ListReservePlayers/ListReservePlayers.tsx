@@ -5,28 +5,20 @@ import Market from '@/app/(tabs)/team/market';
 import { Text, View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
-import { Substitutions } from '@/models/Club';
+import useLineup from '@/hooks/useLineup';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetPlayerLowestPrice } from '@/utils/team';
 
-type ListReservePlayersProps = {
-  lineup: LineupPlayers;
-  isMarketClose: boolean;
-  substitutions?: Substitutions[];
-};
-
-export function ListReservePlayers({
-  lineup,
-  isMarketClose,
-  substitutions,
-}: ListReservePlayersProps) {
+export function ListReservePlayers() {
   const alertToStartingsPlayerPositionNotFilled = () =>
     Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
       { text: 'OK' },
     ]);
 
-  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { playerStats } = usePlayerStats();
+
+  const { lineup, substitutions } = useLineup();
 
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
   const [showMarketModal, setShowMarketModal] = useState(false);
@@ -35,11 +27,11 @@ export function ListReservePlayers({
 
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
-      const playersSamePositionFromLineupStarting = lineup.starting.filter(
+      const playersSamePositionFromLineupStarting = lineup?.starting.filter(
         (item) => item.position === player.position
       );
 
-      const isPlayersFilledInPosition = playersSamePositionFromLineupStarting.every(
+      const isPlayersFilledInPosition = playersSamePositionFromLineupStarting?.every(
         (item) => item.player
       );
 
@@ -48,7 +40,7 @@ export function ListReservePlayers({
         return;
       }
 
-      const lowestPlayer = onGetPlayerLowestPrice(lineup, player);
+      const lowestPlayer = onGetPlayerLowestPrice(lineup as LineupPlayers, player);
       setPlayerLowestPrice(lowestPlayer);
 
       setPositionMarketSearch(player);
@@ -71,7 +63,7 @@ export function ListReservePlayers({
     <View className="rounded-lg items-center justify-center">
       <Text className="font-semibold text-base text-center">Banco de Reservas</Text>
       <View className="flex-row rounded-lg py-2 mb-1 items-center justify-center">
-        {lineup.reserves?.map((position, index) => {
+        {lineup?.reserves?.map((position, index) => {
           return (
             <View key={position.position} className="flex-1 justify-center items-center">
               {position && position.player ? (

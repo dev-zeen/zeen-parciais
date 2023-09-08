@@ -16,14 +16,12 @@ import { onRemovePlayerFromLineup, onRemovePlayerFromSellPlayers } from '@/utils
 
 type ListPlayersSaleProps = {
   players: PlayersToSell[];
-  tacticalFormation: string;
   handleClose: () => void;
-  handleCloseSuccessSellPlayers: (lineup: LineupPlayers, tacticalFormation: string) => void;
+  handleCloseSuccessSellPlayers: (lineup: LineupPlayers) => void;
 };
 
 export function ListPlayersSale({
   players,
-  tacticalFormation,
   handleClose,
   handleCloseSuccessSellPlayers,
 }: ListPlayersSaleProps) {
@@ -50,10 +48,10 @@ export function ListPlayersSale({
       setLineupState(lineUpdated);
 
       if (positionSellUpdated?.length === 0) {
-        return handleCloseSuccessSellPlayers(lineUpdated, tacticalFormation);
+        return handleCloseSuccessSellPlayers(lineUpdated);
       }
     },
-    [handleCloseSuccessSellPlayers, lineupState, playersSell, tacticalFormation]
+    [handleCloseSuccessSellPlayers, lineupState, playersSell]
   );
 
   useEffect(() => {

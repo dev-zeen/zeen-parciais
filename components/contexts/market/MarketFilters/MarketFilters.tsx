@@ -11,8 +11,8 @@ import { sortedOptions, statusPlayerOptions } from './filters.helper';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { FilterMarketByTeam } from '@/components/contexts/market/MarketFilters/FilterMarketByTeam';
+import useMarket from '@/hooks/useMarket';
 import { FullPlayer } from '@/models/Stats';
-import { useGetMarket } from '@/queries/market.query';
 
 type MarketFilterProps = {
   applyFilter: (players: FullPlayer[]) => void;
@@ -21,7 +21,7 @@ type MarketFilterProps = {
 };
 
 export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: MarketFilterProps) {
-  const { data: market } = useGetMarket();
+  const { market } = useMarket();
 
   const [showOrderMarket, setShowOrderMarket] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderSelectedProps>(sortedOptions[0]);
@@ -78,7 +78,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
     const data = onGetPlayersFiltered(sortedOptions[0], statusPlayerOptions, []);
     applyFilter(data);
     setShowFilterMarketByTeam(false);
-  }, [applyFilter, handleIsLoading, onGetPlayersFiltered]);
+  }, [handleIsLoading, applyFilter, onGetPlayersFiltered]);
 
   const applyOrderMarket = useCallback(
     (option: OrderSelectedProps) => {
@@ -156,7 +156,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
 
   return (
     <>
-      <View className="flex-row rounded-lg items-center p-2">
+      <View className="flex-row rounded-lg items-center p-1">
         <TouchableOpacity
           onPress={() => setShowOrderMarket(true)}
           className="w-1/3 p-2 rounded-full flex-row items-center justify-center"

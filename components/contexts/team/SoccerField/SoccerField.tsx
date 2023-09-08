@@ -7,31 +7,21 @@ import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
 import { Positions, Zone } from '@/constants/Formations';
-import { Substitutions } from '@/models/Club';
+import useLineup from '@/hooks/useLineup';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
-import { useGetScoredPlayers } from '@/queries/stats.query';
-import useTeamLineupStore from '@/store/useTeamLineupStore';
-
-type SoccerFieldProps = {
-  isMarketClose: boolean;
-  substitutions?: Substitutions[];
-};
 
 const screenWidth = Dimensions.get('window').width;
 
-export function SoccerField({ isMarketClose, substitutions }: SoccerFieldProps) {
+export function SoccerField() {
   const fieldWidth = screenWidth - 16;
 
-  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { playerStats } = usePlayerStats();
 
-  const lineup = useTeamLineupStore((state) => state.lineup);
-  const capitain = useTeamLineupStore((state) => state.capitain);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const { lineup, capitain, updateCapitain, substitutions } = useLineup();
 
   const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
-
   const [playerIndex, setPlayerIndex] = useState(0);
-
   const [showMarketModal, setShowMarketModal] = useState(false);
 
   const renderItem = (position: LineupPosition, index: number) => {

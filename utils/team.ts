@@ -13,7 +13,7 @@ type AddPlayerProps = {
 type SaveTeamProps = {
   lineup: LineupPlayers;
   capitain: number;
-  tacticalFormation: string;
+  formation: string;
 };
 
 export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPlayer | FullPlayer) {
@@ -45,7 +45,7 @@ export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPl
 export const onGetTeamPrice = (players: LineupPosition[]) =>
   players.reduce((acc, { player }) => acc + (player?.preco_num || 0), 0);
 
-export function isLineupComplete(lineup: LineupPlayers) {
+export function onGetIsLineupComplete(lineup: LineupPlayers) {
   return lineup.starting.every((item) => item.player);
 }
 
@@ -111,7 +111,7 @@ export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: 
   return lineup;
 }
 
-export function onGetPayloadSaveTeam({ lineup, capitain, tacticalFormation }: SaveTeamProps) {
+export function onGetPayloadSaveTeam({ lineup, capitain, formation }: SaveTeamProps) {
   const atletas = lineup.starting.map((position) => position.player?.atleta_id);
 
   const reservas = lineup.reserves.reduce((obj, reserve) => {
@@ -124,7 +124,7 @@ export function onGetPayloadSaveTeam({ lineup, capitain, tacticalFormation }: Sa
     return obj;
   }, {});
 
-  const esquema = Number(getKeyFormationByValue(tacticalFormation));
+  const esquema = Number(getKeyFormationByValue(formation));
   const capitao = capitain;
 
   return {

@@ -136,13 +136,13 @@ export function onClearLineup(lineupPlayers: LineupPlayers): LineupPlayers {
   };
 }
 
-export function fillLineupOnChangeTacticalFormation(
+export function fillLineupOnChangeFormation(
   lineupPlayers: LineupPlayers,
-  tacticalFormation?: string,
+  formation?: string,
   playerStats?: PlayerStats,
   isMarketClose?: boolean
 ): LineupPlayers {
-  const newLineup: LineupPlayers = onClearLineup(FORMATIONS[tacticalFormation as string]);
+  const newLineup: LineupPlayers = onClearLineup(FORMATIONS[formation as string]);
 
   if (!lineupPlayers.starting || !newLineup.starting) {
     return newLineup;

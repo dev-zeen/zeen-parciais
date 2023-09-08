@@ -8,7 +8,6 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { fillLineupWithPlayers } from '@/app/(tabs)/team/team.helpers';
 import { View } from '@/components/Themed';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
@@ -17,7 +16,6 @@ import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
-import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
@@ -60,18 +58,15 @@ export default () => {
   const { marketStatus } = useMarketStatus();
   const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
-  const { balancePriceValue } = useLineup();
+
+  const { balancePrice, lineup, emptyPositions } = useLineup();
 
   const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
-  const lineup = useTeamLineupStore((state) => state.lineup);
-  const updateLineup = useTeamLineupStore((state) => state.updateLineup);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
   const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const [match, setMatch] = useState<IMatch>();
-  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
   const [isRendering, setIsRendering] = useState(false);
   const [teamPlayers, setTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
 
@@ -119,7 +114,7 @@ export default () => {
             onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
             onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
             isButtonDisabled={
-              player.preco_num > balancePriceValue || !emptyPositions?.has(player.posicao_id)
+              player.preco_num > balancePrice || !emptyPositions?.has(player.posicao_id)
             }
             isSellPlayer={lineup?.starting.some(
               (item) => item.player?.atleta_id === player.atleta_id
@@ -128,13 +123,7 @@ export default () => {
         </View>
       );
     },
-    [
-      emptyPositions,
-      handleAddPlayerToLineup,
-      handleRemovePlayerFromLineup,
-      lineup,
-      balancePriceValue,
-    ]
+    [emptyPositions, handleAddPlayerToLineup, handleRemovePlayerFromLineup, lineup, balancePrice]
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.foto} + ${item.apelido}`, []);
@@ -145,28 +134,6 @@ export default () => {
       setMatch(match);
     }
   }, [id]);
-
-  // TODO AJUSTAR ESSES DOIS USEEFFECTS QUANDO O HOOK USELINEUP FOR CRIADO PQ TERÁ UM VALOR JÁ VINDO DO HOOK COM ESSA LOGICA
-  useEffect(() => {
-    if (!lineup && myClub && !isMarketClose) {
-      const defaultLineup = fillLineupWithPlayers(
-        myClub,
-        (LINEUPS_DEFAULT_OBJECT as any)[myClub?.time.esquema_id as number]
-      );
-
-      updateLineup(defaultLineup);
-      updateCapitain(myClub.capitao_id);
-    }
-  }, [isMarketClose, lineup, myClub, updateCapitain, updateLineup]);
-
-  useEffect(() => {
-    if (lineup) {
-      const emptyPositionsUpdated = new Set(
-        (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)
-      );
-      setEmptyPositions(emptyPositionsUpdated);
-    }
-  }, [lineup]);
 
   const onGetTabPlayers = useCallback(
     (teamId: number) => {

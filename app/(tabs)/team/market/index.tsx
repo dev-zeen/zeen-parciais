@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, router } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { FlatList, ListRenderItemInfo, useColorScheme } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
@@ -10,10 +10,11 @@ import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.
 import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { AuthContext } from '@/contexts/Auth.context';
+import useLineup from '@/hooks/useLineup';
+import useMarket from '@/hooks/useMarket';
+import useMyClub from '@/hooks/useMyClub';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { useGetMyClub } from '@/queries/club.query';
-import { useGetMarket } from '@/queries/market.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { filterAndSortPlayersFromMarket } from '@/utils/market';
 import { numberToString } from '@/utils/parseTo';
@@ -31,32 +32,22 @@ export default ({
   playerIndex,
   playerLowestPrice,
 }: MarketProps) => {
-  const colorTheme = useColorScheme();
-
   const isFirstRender = useRef(true);
+
+  const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
 
-  const allowRequest = isAutheticated;
+  const { myClub } = useMyClub();
 
-  const { data: club } = useGetMyClub(!!allowRequest);
-  const { data: marketData } = useGetMarket();
+  const { market } = useMarket();
 
-  const lineup = useTeamLineupStore((state) => state.lineup);
-  const price = useTeamLineupStore((state) => state.price);
   const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  const remainingValue = useMemo(() => {
-    if (club && price) {
-      return club.patrimonio - price;
-    }
-    return club?.patrimonio as number;
-  }, [club, price]);
-
   const [isLoading, setIsLoading] = useState(false);
 
-  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
+  const { lineup, price, balancePrice, emptyPositions } = useLineup();
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
 
   const handleAddPlayerToLineup = useCallback(
@@ -103,32 +94,23 @@ export default ({
   );
 
   useEffect(() => {
-    if (marketData && isFirstRender.current) {
+    if (market && isFirstRender.current) {
       if (position) {
         const marketPlayersUpdated = filterAndSortPlayersFromMarket(
-          marketData,
+          market,
           position,
           playerLowestPrice
         );
         setMarketPlayers(marketPlayersUpdated);
       } else {
-        const marketPlayersLikely = filterAndSortPlayersFromMarket(marketData);
+        const marketPlayersLikely = filterAndSortPlayersFromMarket(market);
         setMarketPlayers(marketPlayersLikely);
       }
 
       isFirstRender.current = false;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [marketData]);
-
-  useEffect(() => {
-    if (lineup) {
-      const emptyPositionsUpdated = new Set(
-        (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)
-      );
-      setEmptyPositions(emptyPositionsUpdated);
-    }
-  }, [lineup]);
+  }, [market]);
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
@@ -139,7 +121,7 @@ export default ({
         onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
         onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
         isButtonDisabled={
-          (!playerLowestPrice && player.preco_num > remainingValue) ||
+          (!playerLowestPrice && player.preco_num > balancePrice) ||
           (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
         }
         isSellPlayer={lineup?.starting.some((item) => item.player?.atleta_id === player.atleta_id)}
@@ -151,12 +133,12 @@ export default ({
 
   if (!isAutheticated) return <Redirect href="/(tabs)/team" />;
 
-  if (!marketPlayers || !club || isLoading) return <Loading />;
+  if (!marketPlayers || !myClub || isLoading) return <Loading />;
 
   return (
     <SafeAreaViewContainer>
       <View className={`flex-1 mx-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-        <View className="justify-between items-center flex-row rounded-lg mb-2 p-2">
+        <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
           <View
             className="flex-row items-center"
             style={{
@@ -170,7 +152,7 @@ export default ({
             <View className="justify-center items-center gap-1">
               <Text className="font-light text-xs">Restante</Text>
               <Text className="font-bold text-xs text-green-500">
-                {numberToString(remainingValue)}
+                {numberToString(balancePrice)}
               </Text>
             </View>
           </View>

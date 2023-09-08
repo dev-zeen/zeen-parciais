@@ -4,7 +4,7 @@ import { TouchableOpacity, useColorScheme } from 'react-native';
 import { Text } from '@/components/Themed';
 
 interface ButtonProps {
-  onPress: () => void;
+  onPress?: () => void;
   variant?: 'primary' | 'secondary' | 'warning' | 'error' | 'success' | 'disabled';
   title?: string;
   iconName?: keyof typeof Feather.glyphMap;

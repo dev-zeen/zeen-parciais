@@ -44,9 +44,11 @@ export const MarketPlayerCard: React.FC<MarketPlayerCardProps> = memo(
     const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
     return (
-      <View className="rounded-lg flex-row items-center justify-between p-2" key={player.atleta_id}>
+      <View
+        className="rounded-lg flex-row items-center justify-between p-1.5"
+        key={player.atleta_id}>
         <View
-          className="flex-row"
+          className="flex-row items-center"
           style={{
             gap: 8,
           }}>
@@ -54,14 +56,14 @@ export const MarketPlayerCard: React.FC<MarketPlayerCardProps> = memo(
             source={{
               uri: player.foto?.replace('FORMATO', '220x220'),
             }}
-            className="w-20 h-20 rounded-3xl "
+            className="w-16 h-16 rounded-3xl "
             alt={`Imagem do ${player.nome}`}
           />
           <View
             className="flex-row absolute"
             style={{
               top: '65%',
-              left: '25%',
+              left: '20%',
               width: 20,
               height: 20,
               borderRadius: 10,
@@ -84,7 +86,7 @@ export const MarketPlayerCard: React.FC<MarketPlayerCardProps> = memo(
             style={{
               gap: 4,
             }}>
-            <Text className="flex-row text-lg font-bold">{player.apelido_abreviado}</Text>
+            <Text className="flex-row text-base font-bold">{player.apelido_abreviado}</Text>
 
             <View
               className="flex-row items-center justify-start"
@@ -112,7 +114,7 @@ export const MarketPlayerCard: React.FC<MarketPlayerCardProps> = memo(
                   source={{
                     uri: matches?.clubes[match?.clube_casa_id as number]?.escudos['60x60'],
                   }}
-                  className="w-6 h-6"
+                  className="w-4 h-4"
                   alt={`Escudo do ${matches?.clubes[match?.clube_casa_id as number]?.nome}`}
                 />
 
@@ -126,7 +128,7 @@ export const MarketPlayerCard: React.FC<MarketPlayerCardProps> = memo(
                   source={{
                     uri: matches?.clubes[match?.clube_visitante_id as number]?.escudos['60x60'],
                   }}
-                  className="w-6 h-6"
+                  className="w-4 h-4"
                   alt={`Escudo do ${matches?.clubes[match?.clube_visitante_id as number]?.nome}`}
                 />
               </View>
