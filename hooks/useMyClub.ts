@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useGetMyClub } from '@/queries/club.query';
+import { useGetHistoricMyClub, useGetMyClub } from '@/queries/club.query';
 
 const useMyClub = () => {
   const { isAutheticated } = useContext(AuthContext);
@@ -14,6 +14,13 @@ const useMyClub = () => {
     isAutheticated &&
     marketStatus &&
     marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+
+  const {
+    data: historyClub,
+    isLoading: isLoadingHistory,
+    refetch: onRefetchHistoricMyClub,
+    isRefetching: isRefetchingHistoricMyClub,
+  } = useGetHistoricMyClub(!!allowRequest);
 
   const {
     data: myClub,
@@ -30,6 +37,11 @@ const useMyClub = () => {
     onRefetchMyClub: !allowRequest ? null : onRefetchMyClub,
     isRefetchingMyClub,
     capitain,
+
+    historyClub,
+    isLoadingHistory,
+    onRefetchHistoricMyClub: !allowRequest ? null : onRefetchHistoricMyClub,
+    isRefetchingHistoricMyClub,
   };
 };
 

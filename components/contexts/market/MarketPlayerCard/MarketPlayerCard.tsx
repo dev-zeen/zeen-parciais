@@ -4,12 +4,12 @@ import { Image, StyleSheet, useColorScheme } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import useMarket from '@/hooks/useMarket';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import useMatch from '@/hooks/useMatch';
+import usePosition from '@/hooks/usePosition';
 import { FullPlayer } from '@/models/Stats';
-import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
-import { useGetMatchs } from '@/queries/matches.query';
-import { useGetPositions } from '@/queries/players.query';
 import { numberToString } from '@/utils/parseTo';
 
 type MarketPlayerCardProps = {
@@ -30,18 +30,16 @@ export const MarketPlayerCard: React.FC<MarketPlayerCardProps> = memo(
   }) => {
     const colorTheme = useColorScheme();
 
-    const { data: market } = useGetMarket();
-    const { data: positions } = useGetPositions();
-    const { data: matches } = useGetMatchs();
+    const { market } = useMarket();
+    const { positions } = usePosition();
+    const { matches } = useMatch();
 
-    const { data: marketStatus } = useGetMarketStatus();
+    const { isMarketClose } = useMarketStatus();
 
     const match = matches?.partidas.find(
       (match) =>
         match.clube_casa_id === player.clube_id || match.clube_visitante_id === player.clube_id
     );
-
-    const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
     return (
       <View

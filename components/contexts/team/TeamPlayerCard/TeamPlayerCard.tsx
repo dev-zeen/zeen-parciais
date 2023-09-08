@@ -6,10 +6,10 @@ import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
 import { Positions } from '@/constants/Formations';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
+import useMarket from '@/hooks/useMarket';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePosition from '@/hooks/usePosition';
 import { LineupPlayer } from '@/models/Formations';
-import { useGetMarket, useGetMarketStatus } from '@/queries/market.query';
-import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 
@@ -29,11 +29,9 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  const { data: positions } = useGetPositions();
-  const { data: market } = useGetMarket();
-  const { data: marketStatus } = useGetMarketStatus();
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { positions } = usePosition();
+  const { market } = useMarket();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
   const handleSelectCapitain = useCallback(() => {
     updateCapitain(player.atleta_id);

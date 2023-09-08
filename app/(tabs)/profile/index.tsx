@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -12,11 +12,10 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { tintColorDark } from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
 import { TeamHistoryRound } from '@/models/Club';
-import { useGetHistoricMyClub } from '@/queries/club.query';
-import { useGetMarketStatus } from '@/queries/market.query';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
 
@@ -25,17 +24,18 @@ export default () => {
 
   const { isAutheticated, handleLogout } = useContext(AuthContext);
 
-  const { data: marketStatus } = useGetMarketStatus();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
-
-  const allowRequest = marketStatus
-    ? isAutheticated && marketStatus.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO
-    : false;
-
-  const { myClub, isLoadingMyClub, onRefetchMyClub, isRefetchingMyClub } = useMyClub();
-
-  const { data: historyClub, isLoading: isLoadingHistory } = useGetHistoricMyClub(!!allowRequest);
+  const {
+    myClub,
+    isLoadingMyClub,
+    onRefetchMyClub,
+    isRefetchingMyClub,
+    historyClub,
+    isLoadingHistory,
+    onRefetchHistoricMyClub,
+    isRefetchingHistoricMyClub,
+  } = useMyClub();
 
   const { partialScore } = usePartialScore({
     teamId: myClub?.time.time_id as number,
@@ -83,6 +83,16 @@ export default () => {
     }
   }, [historyClub]);
 
+  const onRefetch = useCallback(async () => {
+    if (onRefetchMyClub && onRefetchHistoricMyClub)
+      await Promise.all([onRefetchMyClub(), onRefetchHistoricMyClub]);
+  }, [onRefetchHistoricMyClub, onRefetchMyClub]);
+
+  const isRefetching = useMemo(
+    () => isRefetchingMyClub || isRefetchingHistoricMyClub,
+    [isRefetchingHistoricMyClub, isRefetchingMyClub]
+  );
+
   if (!isAutheticated) {
     return (
       <Login title="Para acessar as informações do seu perfil é necessário efetuar o login." />
@@ -101,9 +111,7 @@ export default () => {
     <SafeAreaViewContainer>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl onRefresh={onRefetchMyClub} refreshing={isRefetchingMyClub} />
-        }
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
         className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}

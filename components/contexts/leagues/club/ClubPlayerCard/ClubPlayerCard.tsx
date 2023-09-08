@@ -5,12 +5,12 @@ import { Image } from 'react-native';
 import { PlayerClub } from '@/app/(tabs)/leagues/club/[id]';
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
+import useMarket from '@/hooks/useMarket';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import usePosition from '@/hooks/usePosition';
 import { MarketStatus } from '@/models/Market';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
-import { useGetMarket } from '@/queries/market.query';
-import { useGetPositions } from '@/queries/players.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
 
 type ClubPlayerCardProps = {
@@ -31,12 +31,12 @@ export function ClubPlayerCard({
   isReserve,
   isCapitain,
 }: ClubPlayerCardProps) {
-  const { data: market } = useGetMarket();
-  const { data: positions } = useGetPositions();
+  const { market } = useMarket();
+  const { positions } = usePosition();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { isMarketClose } = useMarketStatus();
 
-  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { playerStats } = usePlayerStats();
 
   const scorePlayer = useCallback(
     (player: FullPlayer) => {

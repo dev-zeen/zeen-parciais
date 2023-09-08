@@ -8,8 +8,8 @@ import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import useTeam from '@/hooks/useTeam';
 import { League } from '@/models/Leagues';
-import { useGetClub } from '@/queries/club.query';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
 
@@ -28,7 +28,9 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
     const colorTheme = useColorScheme();
 
     const { marketStatus, isMarketClose } = useMarketStatus();
-    const { data: team } = useGetClub(String(club.time_id));
+    const { team } = useTeam({
+      teamId: club.time_id,
+    });
 
     const capitainPlayer = team?.atletas.find((item) => item.atleta_id === team.capitao_id);
 

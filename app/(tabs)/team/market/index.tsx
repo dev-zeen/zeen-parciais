@@ -184,10 +184,9 @@ export default ({
           }}
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-          maxToRenderPerBatch={6}
-          initialNumToRender={6}
-          removeClippedSubviews={true}
-          windowSize={6}
+          maxToRenderPerBatch={7}
+          initialNumToRender={7}
+          windowSize={7}
         />
       </View>
     </SafeAreaViewContainer>

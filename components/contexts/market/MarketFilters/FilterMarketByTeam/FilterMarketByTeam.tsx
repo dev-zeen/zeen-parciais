@@ -7,10 +7,10 @@ import { MatchCardFilter } from './MatchCardFilter';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
+import useMarket from '@/hooks/useMarket';
+import useMatch from '@/hooks/useMatch';
 import { Market } from '@/models/Market';
 import { Match } from '@/models/Matches';
-import { useGetMarket } from '@/queries/market.query';
-import { useGetMatchs } from '@/queries/matches.query';
 
 type FilterMarketByTeamProps = {
   applyFilter: (teams: number[]) => void;
@@ -26,8 +26,8 @@ export function FilterMarketByTeam({
   selectedTeams,
 }: FilterMarketByTeamProps) {
   const colorTheme = useColorScheme();
-  const { data: market } = useGetMarket();
-  const { data: matches } = useGetMatchs();
+  const { market } = useMarket();
+  const { matches } = useMatch();
 
   const [selectedsTeams, setSelectedsTeams] = useState<number[]>(selectedTeams || []);
 

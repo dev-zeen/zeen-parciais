@@ -33,7 +33,7 @@ export default function () {
   }, []);
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchMyClub(), onRefetchLeagues()]);
+    await Promise.all([onRefetchMyClub && onRefetchMyClub(), onRefetchLeagues()]);
   }, [onRefetchLeagues, onRefetchMyClub]);
 
   const isRefetching = isRefetchingMyClub || isRefetchingLeagues;

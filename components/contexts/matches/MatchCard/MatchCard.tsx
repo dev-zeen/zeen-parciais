@@ -7,10 +7,10 @@ import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import { Club } from '@/models/Club';
 import { Match } from '@/models/Matches';
 import { FullPlayer } from '@/models/Stats';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetPartialScoreTeamByMatch } from '@/utils/match';
 import { numberToString } from '@/utils/parseTo';
 
@@ -32,7 +32,7 @@ export function MatchCard({
   const router = useRouter();
   const colorTheme = useColorScheme();
 
-  const { data: playerStats } = useGetScoredPlayers();
+  const { playerStats } = usePlayerStats();
 
   const homeTeamPartials = useMemo(() => {
     if (homeClub && homeClub?.id && playerStats) {

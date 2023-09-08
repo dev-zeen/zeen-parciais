@@ -5,12 +5,11 @@ import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePlayerStats from '@/hooks/usePlayerStats';
+import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
-import { useGetClub } from '@/queries/club.query';
-import { useGetMarketStatus } from '@/queries/market.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
 import { onCalculatePartialScore, onGetCurrentCountPlayerIsPlayedByTeam } from '@/utils/partials';
 
@@ -31,13 +30,18 @@ const STAGE_TYPE_NAMED = {
 export function CupMatchCard({ match, myTeam }: CupMatchProps) {
   const colorTheme = useColorScheme();
 
-  const { data: playerStats } = useGetScoredPlayers();
-  const { data: marketStatus } = useGetMarketStatus();
+  const { playerStats } = usePlayerStats();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { team: homeTeam } = useTeam({
+    teamId: match.time_mandante_id ?? 0,
+    round: match.rodada_id,
+  });
 
-  const { data: homeTeam } = useGetClub(match.time_mandante_id, 20);
-  const { data: awayTeam } = useGetClub(match.time_visitante_id, 20);
+  const { team: awayTeam } = useTeam({
+    teamId: match.time_visitante_id ?? 0,
+    round: match.rodada_id,
+  });
 
   const homePartial = useMemo(() => {
     if (homeTeam) {

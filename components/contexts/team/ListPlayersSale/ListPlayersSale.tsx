@@ -7,9 +7,9 @@ import { Text, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import usePosition from '@/hooks/usePosition';
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 import { onRemovePlayerFromLineup, onRemovePlayerFromSellPlayers } from '@/utils/team';
@@ -27,7 +27,7 @@ export function ListPlayersSale({
 }: ListPlayersSaleProps) {
   const colorTheme = useColorScheme();
 
-  const { data: positions } = useGetPositions();
+  const { positions } = usePosition();
 
   const lineup = useTeamLineupStore((state) => state.lineup);
 

@@ -5,11 +5,10 @@ import { Image, Modal, TouchableOpacity } from 'react-native';
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { TeamPlayerCard } from '@/components/contexts/team/TeamPlayerCard';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER, OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { LineupPlayer } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { useGetMarketStatus } from '@/queries/market.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 
@@ -31,11 +30,9 @@ export function TeamPlayer({
   isEnteredInMatch,
   isReservePlayer = false,
 }: TeamPlayerProps) {
-  const { data: marketStatus } = useGetMarketStatus();
+  const { isMarketClose } = useMarketStatus();
 
   const [activePlayerCard, setActivePlayerCard] = useState(false);
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
