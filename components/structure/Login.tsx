@@ -1,3 +1,4 @@
+import { URL_AUTH } from '@env';
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useState } from 'react';
@@ -10,8 +11,6 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { AuthContext } from '@/contexts/Auth.context';
-
-const URL_AUTH = 'https://cartola.globo.com/#!/login';
 
 const INJECT_AUTH_LOGIN = `
   function getToken() {
@@ -66,7 +65,7 @@ export function Login({ title }: LoginProps) {
           </View>
         )}
 
-        <Image source={enterImage} className="w-56 h-56" alt={`Imagem de Login`} />
+        <Image source={enterImage} className="w-56 h-56" alt="Imagem de Login" />
         <TouchableOpacity
           onPress={handleGetLoginPage}
           activeOpacity={0.6}

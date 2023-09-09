@@ -1,13 +1,12 @@
+import { API_BASE } from '@env';
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 import { getTokenFromStorage, updateTokenInStorage } from '@/lib/core/auth';
 
 let isRefreshing = false;
 
-const baseURL = 'https://api.cartola.globo.com';
-
 const api = axios.create({
-  baseURL,
+  baseURL: API_BASE,
 });
 
 api.interceptors.request.use(async (instance: InternalAxiosRequestConfig) => {
@@ -22,9 +21,7 @@ api.interceptors.request.use(async (instance: InternalAxiosRequestConfig) => {
 });
 
 api.interceptors.response.use(
-  async (response: AxiosResponse) => {
-    return response;
-  },
+  async (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalConfig = error.config;
 
@@ -35,7 +32,7 @@ api.interceptors.response.use(
 
         isRefreshing = false;
 
-        return api(originalConfig);
+        return await api(originalConfig);
       } catch (refreshError) {
         isRefreshing = false;
         return Promise.reject(refreshError);

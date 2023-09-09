@@ -44,7 +44,7 @@ export default () => {
 
   const onRefetch = useCallback(async () => {
     await Promise.all([
-      myClub && onRefetchMyClub(),
+      myClub && onRefetchMyClub && onRefetchMyClub(),
       topPlayers && topPlayers?.length > 0 && onRefetchBestPlayers(),
       onRefetchMarketStatus(),
       onRefetchTopPlayers(),
