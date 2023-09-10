@@ -207,13 +207,13 @@ export default () => {
                   </View>
                 </View>
               </View>
+              <View className="rounded-lg p-2">
+                <TopPlayerList />
+              </View>
             </>
           ) : (
             <Login />
           )}
-          <View className="rounded-lg p-2">
-            <TopPlayerList />
-          </View>
         </View>
       </ScrollView>
     </SafeAreaViewContainer>

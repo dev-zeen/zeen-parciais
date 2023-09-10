@@ -12,9 +12,6 @@ export const GET_SCORED_PLAYERS = '/atletas/pontuados';
 
 export const GET_MARKET_STATUS = '/mercado/status';
 export const GET_MARKET = '/atletas/mercado';
-export const GET_TOP_RANKED_PLAYERS = '/mercado/destaques';
-export const GET_TOP_RESERVE_PLAYERS = '/mercado/destaques/reservas';
-export const GET_TOP_PLAYERS = '/mercado/selecao';
 
 export const MATCHES_ACTUAL_ROUND = '/partidas';
 export const MATCHES_BY_ROUND = '/partidas/:round';
@@ -27,6 +24,9 @@ export const GET_LEAGUE_BY_SLUG = '/auth/liga/:slug';
 export const GET_ALL_LEAGUES = '/auth/ligas';
 export const SAVE_TEAM = '/auth/time/salvar';
 export const INVITES = '/auth/convites';
+export const GET_TOP_RANKED_PLAYERS = 'auth/mercado/destaques';
+export const GET_TOP_RESERVE_PLAYERS = 'auth/mercado/destaques/reservas';
+export const GET_TOP_PLAYERS = 'auth/mercado/selecao';
 
 export const RESPONSE_INVITE = '/auth/mensagem/:messageId';
 

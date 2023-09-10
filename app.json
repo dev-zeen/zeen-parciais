@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "AFC Parciais",
-    "slug": "afc-parciais",
+    "slug": "meu-cartola",
     "version": "0.3.6",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,26 +12,30 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.clizioguedes.afcparciais",
-      "buildNumber": "5"
+      "bundleIdentifier": "com.clizioguedes.meucartola",
+      "buildNumber": "8"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.clizioguedes.afcparciais",
-      "versionCode": 5
+      "package": "com.clizioguedes.meucartola",
+      "versionCode": 8
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "experiments": {
       "tsconfigPaths": true,
       "typedRoutes": true

@@ -20,27 +20,16 @@ interface BestPlayers {
   selecao: TopPlayer[];
 }
 
-export const useGetTopPlayers = (filters?: useGetTopPlayersProps) =>
-  useFetch<TopPlayer[]>(
-    GET_TOP_RANKED_PLAYERS,
-    {
-      ...filters,
-    },
-    {
-      select: (data) => data?.slice(0, 5),
-    }
-  );
+export const useGetTopPlayers = (allowRequest?: boolean) =>
+  useFetch<TopPlayer[]>(GET_TOP_RANKED_PLAYERS, undefined, {
+    enabled: !!allowRequest,
+    select: (data) => data?.slice(0, 5),
+  });
 
-export const useGetBestCaptainPlayers = (hasHighlights: boolean, filters?: useGetTopPlayersProps) =>
-  useFetch<BestPlayers>(
-    GET_TOP_PLAYERS,
-    {
-      ...filters,
-    },
-    {
-      enabled: !!hasHighlights,
-    }
-  );
+export const useGetBestCaptainPlayers = (hasHighlights: boolean, allowRequest?: boolean) =>
+  useFetch<BestPlayers>(GET_TOP_PLAYERS, undefined, {
+    enabled: !!hasHighlights && !!allowRequest,
+  });
 
 export const useGetPositions = () => useFetch<IPositions>(GET_POSITIONS);
 

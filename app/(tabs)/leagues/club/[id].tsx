@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
-import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
+import { RefreshControl } from 'react-native-gesture-handler';
 
 import { Text, View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
@@ -35,6 +36,8 @@ export default () => {
   const colorTheme = useColorScheme();
 
   const { isAutheticated } = useContext(AuthContext);
+
+  const isFirstRender = useRef(true);
 
   const { id } = useLocalSearchParams();
 
@@ -79,9 +82,11 @@ export default () => {
   }, [valorizations, marketStatus, currentRound, team, isMarketClose]);
 
   useEffect(() => {
-    if (marketStatus) {
+    if (marketStatus && isFirstRender.current) {
       const round = isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1;
       setCurrentRound(round);
+
+      isFirstRender.current = false;
     }
   }, [isMarketClose, marketStatus]);
 
