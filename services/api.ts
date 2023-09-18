@@ -1,4 +1,4 @@
-import { API_BASE } from '@env';
+import { EXPO_PUBLIC_API_URL } from '@env';
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 import { getTokenFromStorage, updateTokenInStorage } from '@/lib/core/auth';
@@ -6,7 +6,7 @@ import { getTokenFromStorage, updateTokenInStorage } from '@/lib/core/auth';
 let isRefreshing = false;
 
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: EXPO_PUBLIC_API_URL,
 });
 
 api.interceptors.request.use(async (instance: InternalAxiosRequestConfig) => {
@@ -24,9 +24,6 @@ api.interceptors.response.use(
   async (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalConfig = error.config;
-
-    console.log(originalConfig?.url);
-
     if (error.response && error.response.status === 401 && originalConfig && !isRefreshing) {
       isRefreshing = true;
       try {

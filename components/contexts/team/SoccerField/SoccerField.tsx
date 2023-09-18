@@ -7,49 +7,31 @@ import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
 import { Positions, Zone } from '@/constants/Formations';
-import useLineup from '@/hooks/useLineup';
-import usePlayerStats from '@/hooks/usePlayerStats';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
+import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 const screenWidth = Dimensions.get('window').width;
+const fieldWidth = screenWidth - 16;
 
 export function SoccerField() {
-  const fieldWidth = screenWidth - 16;
+  const { data: playerStats } = useGetScoredPlayers();
 
-  const { playerStats } = usePlayerStats();
+  const { data: myClub } = useGetMyClub();
 
-  const { lineup, capitain, updateCapitain, substitutions } = useLineup();
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: myClub?.time.time_id,
+  });
+
+  const lineup = useTeamLineupStore((state) => state.lineup);
+
+  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const capitain = useTeamLineupStore((state) => state.capitain);
 
   const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
   const [showMarketModal, setShowMarketModal] = useState(false);
-
-  const renderItem = (position: LineupPosition, index: number) => {
-    return (
-      <View
-        key={position.player ? position.player.atleta_id : position.abbr + index}
-        style={{
-          backgroundColor: 'transparent',
-        }}>
-        {position.player ? (
-          <TeamPlayer
-            player={position.player as LineupPlayer}
-            hasCaptain={capitain === position.player?.atleta_id}
-            handleCapitain={updateCapitain}
-            isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
-            isReplaced={substitutions?.some(
-              (item) => item.saiu.atleta_id === position.player?.atleta_id
-            )}
-          />
-        ) : (
-          <AddPlayerButton
-            onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
-            positionLineup={position}
-          />
-        )}
-      </View>
-    );
-  };
 
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
@@ -68,6 +50,33 @@ export function SoccerField() {
   useEffect(() => {
     if (positionMarketSearch) setShowMarketModal(true);
   }, [positionMarketSearch]);
+
+  const renderItem = (position: LineupPosition, index: number) => {
+    return (
+      <View
+        key={position.player ? position.player.atleta_id : position.abbr + index}
+        style={{
+          backgroundColor: 'transparent',
+        }}>
+        {position.player ? (
+          <TeamPlayer
+            player={position.player as LineupPlayer}
+            isCapitain={capitain === position.player?.atleta_id}
+            handleCapitain={updateCapitain}
+            isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
+            isReplaced={substitutions?.some(
+              (item) => item.saiu.atleta_id === position.player?.atleta_id
+            )}
+          />
+        ) : (
+          <AddPlayerButton
+            onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
+            positionLineup={position}
+          />
+        )}
+      </View>
+    );
+  };
 
   return (
     <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2">

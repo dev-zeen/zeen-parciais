@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { CURRENT_STATS } from '@/constants/Keys';
-import useMarket from '@/hooks/useMarket';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { PlayerStats } from '@/models/Stats';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetFromStorage } from '@/utils/asyncStorage';
 
 const usePlayerStats = () => {
-  const { market } = useMarket();
   const { isMarketClose } = useMarketStatus();
 
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
@@ -27,13 +25,16 @@ const usePlayerStats = () => {
         setCurrentStats(statsFormated);
       }
     });
-  }, [isMarketClose, market, playerStats, setCurrentStats]);
+  }, []);
 
   return {
-    playerStats: isMarketClose ? playerStats : currentStats,
-    isLoadingPlayerStats,
+    playerStats: useMemo(
+      () => (isMarketClose ? playerStats : currentStats),
+      [currentStats, isMarketClose, playerStats]
+    ),
+    isLoadingPlayerStats: useMemo(() => isLoadingPlayerStats, [isLoadingPlayerStats]),
     onRefetchStats,
-    isRefetchingPlayerStats,
+    isRefetchingPlayerStats: useMemo(() => isRefetchingPlayerStats, [isRefetchingPlayerStats]),
   };
 };
 

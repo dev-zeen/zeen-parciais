@@ -1,0 +1,100 @@
+import { useCallback } from 'react';
+import { ListRenderItemInfo, SectionList, useColorScheme } from 'react-native';
+import { RefreshControl } from 'react-native-gesture-handler';
+
+import { Text, View } from '@/components/Themed';
+import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
+import Colors from '@/constants/Colors';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import { FullClubInfo } from '@/models/Club';
+import { CupMatch } from '@/models/Leagues';
+import { MarketStatus } from '@/models/Market';
+import { FullPlayer } from '@/models/Stats';
+import { useGetMatchSubstitutions } from '@/queries/club.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
+
+type CupMatchTeamDetailsProps = {
+  match: CupMatch;
+  team: FullClubInfo;
+};
+
+export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
+  const colorTheme = useColorScheme();
+
+  const { marketStatus, isMarketClose } = useMarketStatus();
+
+  const { refetch: onRefetchStats, isRefetching: isRefetchingPlayerStats } =
+    useGetScoredPlayers(isMarketClose);
+
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: team?.time.time_id,
+    round: match.rodada_id,
+  });
+
+  const onGetPlayersTab = (team: FullClubInfo) => {
+    const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
+      team,
+      substitutions
+    );
+
+    return [
+      {
+        title: 'Titulares',
+        data: playersUpdated as FullPlayer[],
+      },
+      {
+        title: 'Reservas',
+        data: reservesUpdated as FullPlayer[],
+      },
+    ];
+  };
+
+  const renderItem = useCallback(
+    ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
+      return (
+        <ClubPlayerCard
+          key={player.atleta_id}
+          player={player}
+          isCapitain={team?.capitao_id === player.atleta_id}
+          currentRound={match.rodada_id}
+          marketStatus={marketStatus as MarketStatus}
+        />
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [team?.capitao_id]
+  );
+
+  const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
+
+  return (
+    <SectionList
+      refreshControl={
+        <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
+      }
+      sections={onGetPlayersTab(team as FullClubInfo)}
+      ListEmptyComponent={() => <Text>Sem dados para mostrar</Text>}
+      keyExtractor={keyExtractor}
+      renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
+      stickyHeaderHiddenOnScroll
+      contentContainerStyle={{
+        paddingHorizontal: 8,
+        gap: 8,
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+      }}
+      renderSectionHeader={({ section: { title } }) => (
+        <View
+          className="p-2 mx-2 rounded"
+          style={{
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          }}>
+          <Text className="font-bold text-base text-center items-center">{title}</Text>
+        </View>
+      )}
+    />
+  );
+}

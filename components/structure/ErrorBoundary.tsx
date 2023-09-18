@@ -31,6 +31,7 @@ export function ErrorBoundaryComponent({ error, resetError }: CustomErrorBoundar
       <Text className="font-semibold text-base text-center">{errorData?.message}</Text>
 
       <TouchableOpacity
+        activeOpacity={0.6}
         onPress={resetError}
         className={`px-4 py-3 rounded  ${
           colorTheme === 'dark' ? 'bg-red-500 border-red-500' : 'border bg-red-200 border-red-500'

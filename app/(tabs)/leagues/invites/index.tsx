@@ -13,17 +13,24 @@ import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
 import { Button } from '@/components/structure/Button';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
-import useInvites from '@/hooks/useInvites';
-import useLeagues from '@/hooks/useLeagues';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { Invite } from '@/models/Leagues';
-import { onAcceptInvite, onDeclineInvitation } from '@/queries/invites.query';
+import { onAcceptInvite, onDeclineInvitation, useGetInvites } from '@/queries/invites.query';
+import { useGetLeagues } from '@/queries/leagues.query';
 
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { invites, isLoadingInvites, onRefetchInvites, isRefetchingInvites } = useInvites();
+  const { allowRequest } = useMarketStatus();
 
-  const { onRefetchLeagues } = useLeagues();
+  const {
+    data: invites,
+    isLoading: isLoadingInvites,
+    refetch: onRefetchInvites,
+    isRefetching: isRefetchingInvites,
+  } = useGetInvites(allowRequest);
+
+  const { refetch: onRefetchLeagues } = useGetLeagues();
 
   const onRefetch = useCallback(async () => {
     await Promise.all([onRefetchLeagues(), onRefetchInvites()]);
@@ -112,12 +119,14 @@ export default () => {
     <View
       className="flex-1"
       style={{
-        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}>
       <View
         className="items-center py-2"
         style={{
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <Text className="text-lg font-semibold"> Convites </Text>
       </View>
@@ -133,7 +142,8 @@ export default () => {
           marginHorizontal: 8,
           paddingTop: 8,
           paddingVertical: 8,
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           gap: 8,
         }}
       />

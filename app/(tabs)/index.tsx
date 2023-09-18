@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import { Image, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -10,33 +10,37 @@ import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
-import usePlayerStats from '@/hooks/usePlayerStats';
-import usePosition from '@/hooks/usePosition';
-import useTopPlayer from '@/hooks/useTopPlayer';
 import { IPositions } from '@/models/Stats';
+import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
 
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { isAutheticated } = useContext(AuthContext);
-
-  const { marketStatus, isLoadingMarketStatus, onRefetchMarketStatus } = useMarketStatus();
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const {
+    marketStatus,
+    isLoadingMarketStatus,
+    onRefetchMarketStatus,
+    isMarketClose,
+    allowRequest,
+  } = useMarketStatus();
 
   const { myClub, isLoadingMyClub, onRefetchMyClub, isRefetchingMyClub, capitain } = useMyClub();
 
-  const { playerStats, onRefetchStats } = usePlayerStats();
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
-  const { topPlayers, onRefetchTopPlayers, onRefetchBestPlayers } = useTopPlayer();
+  const { refetch: onRefetchTopPlayers } = useGetTopPlayers();
 
-  const { positions, isLoadingPositions, onRefetchPositions } = usePosition();
+  const {
+    data: positions,
+    isLoading: isLoadingPositions,
+    refetch: onRefetchPositions,
+  } = useGetPositions();
 
   const { partialScore, playersHaveAlreadyPlayed } = usePartialScore({
     teamId: myClub?.time.time_id as number,
@@ -45,7 +49,6 @@ export default () => {
   const onRefetch = useCallback(async () => {
     await Promise.all([
       myClub && onRefetchMyClub && onRefetchMyClub(),
-      topPlayers && topPlayers?.length > 0 && onRefetchBestPlayers(),
       onRefetchMarketStatus(),
       onRefetchTopPlayers(),
       onRefetchPositions(),
@@ -53,16 +56,14 @@ export default () => {
     ]);
   }, [
     myClub,
-    onRefetchBestPlayers,
     onRefetchMarketStatus,
     onRefetchMyClub,
     onRefetchPositions,
     onRefetchStats,
     onRefetchTopPlayers,
-    topPlayers,
   ]);
 
-  const isLoading = isAutheticated
+  const isLoading = allowRequest
     ? isLoadingMarketStatus || isLoadingPositions || isLoadingMarketStatus || isLoadingMyClub
     : isLoadingMarketStatus || isLoadingPositions;
 
@@ -207,9 +208,8 @@ export default () => {
                   </View>
                 </View>
               </View>
-              <View className="rounded-lg p-2">
-                <TopPlayerList />
-              </View>
+
+              <TopPlayerList />
             </>
           ) : (
             <Login />

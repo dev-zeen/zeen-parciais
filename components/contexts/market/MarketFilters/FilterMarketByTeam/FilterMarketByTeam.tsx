@@ -5,12 +5,11 @@ import { FlatList, ListRenderItemInfo, useColorScheme } from 'react-native';
 import { MatchCardFilter } from './MatchCardFilter';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
-import useMarket from '@/hooks/useMarket';
-import useMatch from '@/hooks/useMatch';
 import { Market } from '@/models/Market';
 import { Match } from '@/models/Matches';
+import { useGetMarket } from '@/queries/market.query';
+import { useGetMatchs } from '@/queries/matches.query';
 
 type FilterMarketByTeamProps = {
   applyFilter: (teams: number[]) => void;
@@ -26,8 +25,9 @@ export function FilterMarketByTeam({
   selectedTeams,
 }: FilterMarketByTeamProps) {
   const colorTheme = useColorScheme();
-  const { market } = useMarket();
-  const { matches } = useMatch();
+  const { data: market } = useGetMarket();
+
+  const { data: matches } = useGetMatchs();
 
   const [selectedsTeams, setSelectedsTeams] = useState<number[]>(selectedTeams || []);
 
@@ -67,7 +67,7 @@ export function FilterMarketByTeam({
   const keyExtractor = useCallback((item: Match) => `${item.clube_casa_id}`, []);
 
   return (
-    <SafeAreaViewContainer>
+    <>
       <View
         className="mx-2"
         style={{
@@ -88,6 +88,7 @@ export function FilterMarketByTeam({
             <Text className="font-semibold text-lg">Filtrar Por Time</Text>
 
             <TouchableOpacity
+              activeOpacity={0.6}
               onPress={handleClose}
               className="p-2 rounded-full border border-red-400 bg-red-300">
               <Feather name="x" color="#525252" size={24} />
@@ -146,6 +147,6 @@ export function FilterMarketByTeam({
           <Text className="font-semibold text-sm text-white">Filtrar</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaViewContainer>
+    </>
   );
 }

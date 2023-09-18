@@ -11,8 +11,8 @@ import { Loading } from '@/components/structure/Loading';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import usePlayerStats from '@/hooks/usePlayerStats';
 import { League, TeamLeague } from '@/models/Leagues';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
 
 export interface ClubByLeague extends TeamLeague {
@@ -32,9 +32,9 @@ export default () => {
 
   const { id: slug } = useLocalSearchParams();
 
-  const { marketStatus } = useMarketStatus();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const { playerStats, onRefetchStats } = usePlayerStats();
+  const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
 
@@ -60,7 +60,7 @@ export default () => {
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (!league || !marketStatus || !playerStats) {
+  if (!league || !marketStatus) {
     return <Loading />;
   }
 

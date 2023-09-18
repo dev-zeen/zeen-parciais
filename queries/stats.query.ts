@@ -7,7 +7,7 @@ import { useFetch } from '@/utils/reactQuery';
 export const useGetScoredPlayers = (isMarketClose?: boolean) =>
   useFetch<PlayerStats>(GET_SCORED_PLAYERS, undefined, {
     refetchInterval: isMarketClose ? 1000 * 30 : Infinity,
-    refetchIntervalInBackground: !!isMarketClose,
+    refetchIntervalInBackground: isMarketClose,
     select: (data) => {
       if (data.atletas) {
         const playerFiltered: { [id: number]: Player } = {};

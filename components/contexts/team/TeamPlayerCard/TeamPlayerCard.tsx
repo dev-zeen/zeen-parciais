@@ -5,11 +5,12 @@ import { Image, ScrollView, useColorScheme } from 'react-native';
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
+import Colors from '@/constants/Colors';
 import { Positions } from '@/constants/Formations';
-import useMarket from '@/hooks/useMarket';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import usePosition from '@/hooks/usePosition';
 import { LineupPlayer } from '@/models/Formations';
+import { useGetMarket } from '@/queries/market.query';
+import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 
@@ -29,8 +30,9 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  const { positions } = usePosition();
-  const { market } = useMarket();
+  const { data: positions } = useGetPositions();
+  const { data: market } = useGetMarket();
+
   const { marketStatus, isMarketClose } = useMarketStatus();
 
   const handleSelectCapitain = useCallback(() => {
@@ -58,6 +60,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
             gap: 16,
           }}>
           <TouchableOpacity
+            activeOpacity={0.6}
             onPress={onClose}
             className="p-2 rounded-full border border-red-400 bg-red-300">
             <Feather name="x" color="#525252" size={24} />
@@ -73,7 +76,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               className="w-32 h-32 rounded-full mr-2"
               style={{
                 borderWidth: 2,
-                borderColor: '#F5F5F5',
+                borderColor: Colors.light.backgroundFull,
               }}
               alt={`Imagem do ${player.nome}`}
             />

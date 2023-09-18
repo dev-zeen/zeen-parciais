@@ -1,23 +1,28 @@
 import { Feather } from '@expo/vector-icons';
-import { Redirect, router } from 'expo-router';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { FlatList, ListRenderItemInfo, useColorScheme } from 'react-native';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+import { router } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useColorScheme } from 'react-native';
 
+import { onGetEmptyPositions } from '@/app/(tabs)/team/team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { Loading } from '@/components/structure/Loading';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { AuthContext } from '@/contexts/Auth.context';
-import useLineup from '@/hooks/useLineup';
-import useMarket from '@/hooks/useMarket';
-import useMyClub from '@/hooks/useMyClub';
-import { LineupPlayer, LineupPosition } from '@/models/Formations';
-import { FullPlayer } from '@/models/Stats';
+import Colors from '@/constants/Colors';
+import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { Market } from '@/models/Market';
+import { Matches } from '@/models/Matches';
+import { FullPlayer, IPositions } from '@/models/Stats';
+import { useGetMyClub } from '@/queries/club.query';
+import { useGetMarket } from '@/queries/market.query';
+import { useGetMatchs } from '@/queries/matches.query';
+import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { filterAndSortPlayersFromMarket } from '@/utils/market';
 import { numberToString } from '@/utils/parseTo';
+import { onBalancePrice } from '@/utils/team';
 
 type MarketProps = {
   position?: LineupPosition;
@@ -36,19 +41,28 @@ export default ({
 
   const colorTheme = useColorScheme();
 
-  const { isAutheticated } = useContext(AuthContext);
+  const { data: myClub } = useGetMyClub();
 
-  const { myClub } = useMyClub();
+  const { data: market } = useGetMarket();
 
-  const { market } = useMarket();
+  const { data: matches } = useGetMatchs();
+
+  const { data: positions } = useGetPositions();
 
   const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const lineup = useTeamLineupStore((state) => state.lineup);
+  const price = useTeamLineupStore((state) => state.price);
 
-  const { lineup, price, balancePrice, emptyPositions } = useLineup();
+  const [isLoading, setIsLoading] = useState(false);
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
+  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
+
+  const currentBalancePrice = useMemo(() => {
+    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
+    return 0;
+  }, [myClub, price]);
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer, targetIndex?: number) => {
@@ -57,7 +71,8 @@ export default ({
         index: undefined,
         isReservePlayer: !!playerLowestPrice,
       });
-      if (!!playerLowestPrice && handleCloseMarketModal) handleCloseMarketModal();
+      // if (!!playerLowestPrice && handleCloseMarketModal) handleCloseMarketModal();
+      handleCloseMarketModal && handleCloseMarketModal();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -84,7 +99,7 @@ export default ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [position]
+    []
   );
 
   const handleCloseMarket = useCallback(
@@ -112,83 +127,95 @@ export default ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [market]);
 
+  useEffect(() => {
+    const emptyPositionsUpdated = onGetEmptyPositions(lineup as LineupPlayers);
+    setEmptyPositions(emptyPositionsUpdated);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineup]);
+
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => (
       <MarketPlayerCard
         player={player}
+        positions={positions as IPositions}
+        market={market as Market}
+        matches={matches as Matches}
         onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
         onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
         isButtonDisabled={
-          (!playerLowestPrice && player.preco_num > balancePrice) ||
+          (!playerLowestPrice && player.preco_num > currentBalancePrice) ||
           (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
         }
         isSellPlayer={lineup?.starting.some((item) => item.player?.atleta_id === player.atleta_id)}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [emptyPositions]
+    [
+      currentBalancePrice,
+      emptyPositions,
+      lineup,
+      playerIndex,
+      playerLowestPrice,
+      positions,
+      market,
+      matches,
+    ]
   );
 
-  if (!isAutheticated) return <Redirect href="/(tabs)/team" />;
-
-  if (!marketPlayers || !myClub || isLoading) return <Loading />;
+  if (!marketPlayers || !myClub || !market || !matches || !lineup || isLoading) return <Loading />;
 
   return (
-    <SafeAreaViewContainer>
-      <View className={`flex-1 mx-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-        <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
-          <View
-            className="flex-row items-center"
-            style={{
-              gap: 16,
-            }}>
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Valor atual</Text>
-              <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
-            </View>
-
-            <View className="justify-center items-center gap-1">
-              <Text className="font-light text-xs">Restante</Text>
-              <Text className="font-bold text-xs text-green-500">
-                {numberToString(balancePrice)}
-              </Text>
-            </View>
+    <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
+      <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
+        <View
+          className="flex-row items-center"
+          style={{
+            gap: 16,
+          }}>
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Valor atual</Text>
+            <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
           </View>
 
-          <TouchableOpacity
-            onPress={handleCloseMarket}
-            className="p-2 rounded-full border border-red-400 bg-red-300">
-            <Feather name="x" color="#525252" size={24} />
-          </TouchableOpacity>
-
-          {/* <TouchableOpacity className="p-2 bg-white border-2 border-gray-300 rounded-full">
-            <Feather name="search" color="#525252" size={30} />
-          </TouchableOpacity> */}
+          <View className="justify-center items-center gap-1">
+            <Text className="font-light text-xs">Restante</Text>
+            <Text className="font-bold text-xs text-green-500">
+              {numberToString(currentBalancePrice)}
+            </Text>
+          </View>
         </View>
 
-        <MarketFilters
-          applyFilter={applyFilter}
-          handleIsLoading={handleIsLoading}
-          maximumPrice={playerLowestPrice?.preco_num}
-        />
-
-        {playerLowestPrice && <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />}
-
-        <FlatList
-          data={marketPlayers}
-          contentContainerStyle={{
-            paddingVertical: 8,
-            gap: 8,
-          }}
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          maxToRenderPerBatch={7}
-          initialNumToRender={7}
-          windowSize={7}
-        />
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={handleCloseMarket}
+          className="p-2 rounded-full border border-red-400 bg-red-300">
+          <Feather name="x" color="#525252" size={24} />
+        </TouchableOpacity>
       </View>
-    </SafeAreaViewContainer>
+
+      <MarketFilters
+        applyFilter={applyFilter}
+        handleIsLoading={handleIsLoading}
+        maximumPrice={playerLowestPrice?.preco_num}
+      />
+
+      {playerLowestPrice && <PlayerLowestCard player={playerLowestPrice as LineupPlayer} />}
+
+      <FlashList
+        data={marketPlayers}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        estimatedItemSize={50}
+        ItemSeparatorComponent={() => (
+          <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+        )}
+        contentContainerStyle={{
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        }}
+      />
+    </View>
   );
 };

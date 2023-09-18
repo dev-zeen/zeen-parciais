@@ -1,10 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import usePlayerStats from '@/hooks/usePlayerStats';
-import useSubstituition from '@/hooks/useSubstituition';
-import useTeam from '@/hooks/useTeam';
+import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import {
   onCalculatePartialScore,
   onGetPlayersHaveAlreadyPlayed,
@@ -16,15 +14,13 @@ type PartialScoreProps = {
 };
 
 const usePartialScore = ({ teamId }: PartialScoreProps) => {
-  const { team } = useTeam({ teamId: teamId ?? '' });
+  const { data: team } = useGetMyClub();
 
-  const { marketStatus } = useMarketStatus();
+  const { isMarketClose } = useMarketStatus();
 
-  const { playerStats } = usePlayerStats();
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
-  const { substitutions } = useSubstituition({ teamId });
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const { data: substitutions } = useGetMatchSubstitutions({ id: teamId });
 
   const [partialScore, setPartialScore] = useState(0);
   const [playersHaveAlreadyPlayed, setPlayersHaveAlreadyPlayed] = useState(0);
@@ -50,8 +46,8 @@ const usePartialScore = ({ teamId }: PartialScoreProps) => {
   }, [substitutions, playerStats, isMarketClose, team]);
 
   return {
-    partialScore,
-    playersHaveAlreadyPlayed,
+    partialScore: useMemo(() => partialScore, [partialScore]),
+    playersHaveAlreadyPlayed: useMemo(() => playersHaveAlreadyPlayed, [playersHaveAlreadyPlayed]),
   };
 };
 

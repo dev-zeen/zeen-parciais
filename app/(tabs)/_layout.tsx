@@ -4,7 +4,7 @@ import { Pressable, View, useColorScheme } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import useInvites from '@/hooks/useInvites';
+import { useGetInvites } from '@/queries/invites.query';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -16,7 +16,7 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name'];
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
-  const { invites } = useInvites();
+  const { data: invites } = useGetInvites();
 
   return (
     <Tabs

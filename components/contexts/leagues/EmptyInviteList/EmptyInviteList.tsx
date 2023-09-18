@@ -23,7 +23,8 @@ export function EmptyInviteList() {
         className="mx-8 items-center justify-center"
         style={{
           gap: 4,
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <Feather name="alert-circle" size={24} color={Colors.light.tint} />
 

@@ -14,7 +14,8 @@ export function MaintenanceMarket() {
         className="mx-2 rounded-lg"
         style={{
           gap: 8,
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <MarketStatusCard />
 

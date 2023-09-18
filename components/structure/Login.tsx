@@ -1,11 +1,11 @@
-import { URL_AUTH } from '@env';
+import { EXPO_PUBLIC_AUTH_URL } from '@env';
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useState } from 'react';
 import { Image, Modal, Platform, useColorScheme } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import enterImage from '@/assets/images/enter.png';
+import enterImage from '@/assets/images/auth.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
@@ -89,6 +89,7 @@ export function Login({ title }: LoginProps) {
                 flex: 1,
               }}>
               <TouchableOpacity
+                activeOpacity={0.6}
                 className="rounded-full p-1"
                 onPress={() => {
                   setShowModalAuth(false);
@@ -112,7 +113,7 @@ export function Login({ title }: LoginProps) {
                     : {}
                 }
                 source={{
-                  uri: URL_AUTH,
+                  uri: EXPO_PUBLIC_AUTH_URL,
                 }}
                 incognito
                 className="rounded-lg"

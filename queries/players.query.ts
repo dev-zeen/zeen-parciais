@@ -10,9 +10,9 @@ import { IPositions } from '@/models/Stats';
 import { onSaveStorage } from '@/utils/asyncStorage';
 import { useFetch } from '@/utils/reactQuery';
 
-interface useGetTopPlayersProps {
-  [key: string]: string;
-}
+// interface useGetTopPlayersProps {
+//   [key: string]: string;
+// }
 
 interface BestPlayers {
   capitaes: TopPlayer[];
@@ -26,7 +26,7 @@ export const useGetTopPlayers = (allowRequest?: boolean) =>
     select: (data) => data?.slice(0, 5),
   });
 
-export const useGetBestCaptainPlayers = (hasHighlights: boolean, allowRequest?: boolean) =>
+export const useGetBestCaptainPlayers = (hasHighlights?: boolean, allowRequest?: boolean) =>
   useFetch<BestPlayers>(GET_TOP_PLAYERS, undefined, {
     enabled: !!hasHighlights && !!allowRequest,
   });

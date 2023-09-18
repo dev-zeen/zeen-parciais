@@ -1,7 +1,4 @@
 declare module '@env' {
-  export const API_BASE: string;
-  export const URL_AUTH: string;
-  export const MAJOR_VERSION: string;
-  export const MINOR_VERSION: string;
-  export const PATCH_VERSION: string;
+  export const EXPO_PUBLIC_API_URL: string;
+  export const EXPO_PUBLIC_AUTH_URL: string;
 }

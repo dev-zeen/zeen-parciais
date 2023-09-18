@@ -1,7 +1,8 @@
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
+import { Image, RefreshControl, useColorScheme } from 'react-native';
 
 import { LeagueProps } from '@/app/(tabs)/leagues/[id]';
 import { Text, View } from '@/components/Themed';
@@ -11,8 +12,8 @@ import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useLeague, { TeamCup } from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import useMyClub from '@/hooks/useMyClub';
 import { FullClubInfo } from '@/models/Club';
+import { useGetMyClub } from '@/queries/club.query';
 
 export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
   const colorTheme = useColorScheme();
@@ -22,7 +23,7 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const { myClub, isLoadingMyClub } = useMyClub();
+  const { data: myClub, isLoading: isLoadingMyClub } = useGetMyClub();
 
   const { isCupInProgress, totalTeamCup, currentTeamsCup, teamsAwatingAcceptInvite, teamsByCup } =
     useLeague({
@@ -37,24 +38,26 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
     (round: string) => {
       if (cup && cup.chaves_mata_mata && marketStatus && myClub) {
         return (
-          <FlatList
+          <FlashList
             refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-            contentContainerStyle={{
-              marginHorizontal: 8,
-              marginTop: 8,
-            }}
             data={cup.chaves_mata_mata[round]}
             keyExtractor={(item) => `${item.chave_id}`}
+            ItemSeparatorComponent={() => (
+              <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+            )}
             renderItem={({ item }) => {
-              return (
-                <CupMatchCard key={item.chave_id} match={item} myTeam={myClub as FullClubInfo} />
-              );
+              return <CupMatchCard match={item} myTeam={myClub as FullClubInfo} />;
+            }}
+            estimatedItemSize={16}
+            contentContainerStyle={{
+              paddingTop: 8,
+              paddingHorizontal: 8,
             }}
           />
         );
       }
     },
-    [cup, isRefetching, marketStatus, onRefetch, myClub]
+    [cup, marketStatus, myClub, onRefetch, isRefetching, colorTheme]
   );
 
   const renderTeamItem = useCallback(
@@ -121,7 +124,8 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
     <View
       className="flex-1"
       style={{
-        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}>
       <View
         className="mx-2 mb-2"
@@ -189,25 +193,21 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
       </View>
 
       {!isCupInProgress ? (
-        <FlatList
+        <FlashList
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
           data={
             teamsAwatingAcceptInvite && teamsAwatingAcceptInvite?.length > 0
               ? [...teamsByCup].concat(teamsAwatingAcceptInvite)
               : [...teamsByCup]
           }
-          renderItem={renderTeamItem}
           keyExtractor={keyExtractor}
+          renderItem={renderTeamItem}
+          estimatedItemSize={32}
           numColumns={2}
-          columnWrapperStyle={{
-            gap: 8,
-          }}
           contentContainerStyle={{
-            gap: 8,
-            marginHorizontal: 8,
             paddingVertical: 8,
-            borderRadius: 4,
-            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           }}
         />
       ) : (

@@ -1,6 +1,6 @@
 # AFC Parciais
 
-![Logo](assets/images/afc.png)
+![Logo](assets/images/adaptive-icon.png)
 
 ## 🚀 Funcionalidades
 

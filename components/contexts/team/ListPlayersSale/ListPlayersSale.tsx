@@ -7,9 +7,9 @@ import { Text, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
-import usePosition from '@/hooks/usePosition';
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
+import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 import { onRemovePlayerFromLineup, onRemovePlayerFromSellPlayers } from '@/utils/team';
@@ -27,7 +27,7 @@ export function ListPlayersSale({
 }: ListPlayersSaleProps) {
   const colorTheme = useColorScheme();
 
-  const { positions } = usePosition();
+  const { data: positions } = useGetPositions();
 
   const lineup = useTeamLineupStore((state) => state.lineup);
 
@@ -42,6 +42,8 @@ export function ListPlayersSale({
         player?.atleta_id
       );
 
+      console.log('positionSellUpdated', positionSellUpdated);
+
       setPlayersSell(positionSellUpdated as PlayersToSell[]);
 
       const lineUpdated = onRemovePlayerFromLineup(lineupState as LineupPlayers, player);
@@ -51,7 +53,8 @@ export function ListPlayersSale({
         return handleCloseSuccessSellPlayers(lineUpdated);
       }
     },
-    [handleCloseSuccessSellPlayers, lineupState, playersSell]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lineupState, playersSell]
   );
 
   useEffect(() => {
@@ -78,6 +81,7 @@ export function ListPlayersSale({
             gap: 16,
           }}>
           <TouchableOpacity
+            activeOpacity={0.6}
             onPress={handleClose}
             className="p-2 rounded-full border border-red-400 bg-red-300">
             <Feather name="x" color="#525252" size={24} />

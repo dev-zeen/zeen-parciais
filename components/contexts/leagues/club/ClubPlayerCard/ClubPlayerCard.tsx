@@ -5,12 +5,12 @@ import { Image } from 'react-native';
 import { PlayerClub } from '@/app/(tabs)/leagues/club/[id]';
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
-import useMarket from '@/hooks/useMarket';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import usePlayerStats from '@/hooks/usePlayerStats';
-import usePosition from '@/hooks/usePosition';
 import { MarketStatus } from '@/models/Market';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
+import { useGetMarket } from '@/queries/market.query';
+import { useGetPositions } from '@/queries/players.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
 
 type ClubPlayerCardProps = {
@@ -31,12 +31,11 @@ export function ClubPlayerCard({
   isReserve,
   isCapitain,
 }: ClubPlayerCardProps) {
-  const { market } = useMarket();
-  const { positions } = usePosition();
-
+  const { data: market } = useGetMarket();
+  const { data: positions } = useGetPositions();
   const { isMarketClose } = useMarketStatus();
 
-  const { playerStats } = usePlayerStats();
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const scorePlayer = useCallback(
     (player: FullPlayer) => {
@@ -102,7 +101,7 @@ export function ClubPlayerCard({
         <View className="flex-row items-center">
           {scorePlayer(player) > -20 ? (
             <>
-              {isMarketClose && appreciation ? (
+              {isMarketClose && appreciation && currentRound === marketStatus.rodada_atual ? (
                 <Text
                   className={`text-xs font-semibold ${
                     appreciation && appreciation < 0 ? 'text-folly' : 'text-green-400'
@@ -115,7 +114,7 @@ export function ClubPlayerCard({
                 </Text>
               ) : (
                 <>
-                  {currentRound === marketStatus.rodada_atual - 1 && (
+                  {!isMarketClose && currentRound === marketStatus.rodada_atual - 1 ? (
                     <Text
                       className={`text-xs font-semibold ${
                         player.variacao_num && player.variacao_num < 0
@@ -132,6 +131,8 @@ export function ClubPlayerCard({
                         }
                       />
                     </Text>
+                  ) : (
+                    <></>
                   )}
                 </>
               )}

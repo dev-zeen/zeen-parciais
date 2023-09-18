@@ -14,7 +14,7 @@ import { numberToString } from '@/utils/parseTo';
 
 type TeamPlayerProps = {
   player?: LineupPlayer;
-  hasCaptain?: boolean;
+  isCapitain?: boolean;
   handleCapitain?: (id: number) => void;
   isPlayed?: boolean;
   isReplaced?: boolean;
@@ -24,7 +24,7 @@ type TeamPlayerProps = {
 
 export function TeamPlayer({
   player,
-  hasCaptain,
+  isCapitain,
   isPlayed,
   isReplaced,
   isEnteredInMatch,
@@ -49,10 +49,10 @@ export function TeamPlayer({
   );
 
   const scoreWithMarketStatus = isMarketClose
-    ? hasCaptain
+    ? isCapitain
       ? (player as LineupPlayer)?.pontuacao * 1.5 || 0
       : (player as LineupPlayer)?.pontuacao
-    : hasCaptain
+    : isCapitain
     ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
     : (player as LineupPlayer)?.pontos_num;
 
@@ -102,7 +102,7 @@ export function TeamPlayer({
           className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
-        {hasCaptain && (
+        {isCapitain && (
           <View
             className="relative w-0.5 h-0.5 justify-center items-center"
             style={{

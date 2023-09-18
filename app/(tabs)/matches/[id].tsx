@@ -1,5 +1,5 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,6 +8,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
+import { onGetEmptyPositions } from '@/app/(tabs)/team/team.helpers';
 import { View } from '@/components/Themed';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
@@ -16,19 +17,21 @@ import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
-import useLineup from '@/hooks/useLineup';
-import useMarket from '@/hooks/useMarket';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import useMyClub from '@/hooks/useMyClub';
 import usePlayerStats from '@/hooks/usePlayerStats';
 import useValorization from '@/hooks/useValorization';
-import { Match } from '@/models/Matches';
+import { Market } from '@/models/Market';
+import { Match, Matches } from '@/models/Matches';
 import { Appreciations } from '@/models/Player';
-import { FullPlayer, IScout, PlayerStats } from '@/models/Stats';
+import { FullPlayer, IPositions, IScout, PlayerStats } from '@/models/Stats';
+import { useGetMyClub } from '@/queries/club.query';
+import { useGetMarket } from '@/queries/market.query';
+import { useGetMatchs } from '@/queries/matches.query';
+import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
+import { onBalancePrice } from '@/utils/team';
 
 interface IMatch extends Match {
   home?: number;
@@ -53,15 +56,37 @@ export default () => {
 
   const { id } = useLocalSearchParams();
 
-  const { myClub, isLoadingMyClub } = useMyClub();
-  const { market } = useMarket();
-  const { marketStatus } = useMarketStatus();
+  const { isMarketClose, allowRequest } = useMarketStatus();
+
+  const { data: myClub, isLoading: isLoadingMyClub } = useGetMyClub(allowRequest);
+
+  const { data: market } = useGetMarket();
+
+  const { data: matches } = useGetMatchs();
+
+  const { data: positions } = useGetPositions();
+
+  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
+
+  const price = useTeamLineupStore((state) => state.price);
+  const lineup = useTeamLineupStore((state) => state.lineup);
+
   const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
-  const { balancePrice, lineup, emptyPositions } = useLineup();
+  useEffect(() => {
+    if (lineup) {
+      const positions = onGetEmptyPositions(lineup);
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+      setEmptyPositions(positions);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineup]);
+
+  const currentBalancePrice = useMemo(() => {
+    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
+    return 0;
+  }, [myClub, price]);
 
   const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
@@ -111,10 +136,13 @@ export default () => {
         <View className="rounded-lg">
           <MarketPlayerCard
             player={player}
+            positions={positions as IPositions}
+            market={market as Market}
+            matches={matches as Matches}
             onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
             onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
             isButtonDisabled={
-              player.preco_num > balancePrice || !emptyPositions?.has(player.posicao_id)
+              player.preco_num > currentBalancePrice || !emptyPositions?.has(player.posicao_id)
             }
             isSellPlayer={lineup?.starting.some(
               (item) => item.player?.atleta_id === player.atleta_id
@@ -123,7 +151,8 @@ export default () => {
         </View>
       );
     },
-    [emptyPositions, handleAddPlayerToLineup, handleRemovePlayerFromLineup, lineup, balancePrice]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentBalancePrice, emptyPositions, lineup, market, matches, positions]
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.foto} + ${item.apelido}`, []);

@@ -1,4 +1,4 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
 import { View } from '@/components/Themed';
@@ -6,19 +6,24 @@ import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { AuthContext } from '@/contexts/Auth.context';
-import useMatch from '@/hooks/useMatch';
-import useMyClub from '@/hooks/useMyClub';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { Match } from '@/models/Matches';
+import { useGetMyClub } from '@/queries/club.query';
+import { useGetMatchs } from '@/queries/matches.query';
 
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { isAutheticated } = useContext(AuthContext);
+  const { allowRequest } = useMarketStatus();
 
-  const { matches, isLoadingMatches, onRefetchMatches, isRefetchingMatches } = useMatch();
+  const {
+    data: matches,
+    isLoading: isLoadingMatches,
+    refetch: onRefetchMatches,
+    isRefetching: isRefetchingMatches,
+  } = useGetMatchs();
 
-  const { myClub } = useMyClub();
+  const { data: myClub } = useGetMyClub(allowRequest);
 
   const keyExtractor = useCallback((item: Match) => `${item.clube_casa_id}`, []);
 
@@ -30,14 +35,14 @@ export default () => {
           players={myClub?.atletas}
           homeClub={matches?.clubes[item.clube_casa_id]}
           awayClub={matches?.clubes[item.clube_visitante_id]}
-          isDisabled={!isAutheticated || !item.valida}
+          isDisabled={!allowRequest || !item.valida}
         />
       );
     },
-    [myClub?.atletas, matches?.clubes, isAutheticated]
+    [myClub?.atletas, matches?.clubes, allowRequest]
   );
 
-  if (isLoadingMatches || !matches) {
+  if (isLoadingMatches || !matches || !myClub) {
     return <Loading />;
   }
 

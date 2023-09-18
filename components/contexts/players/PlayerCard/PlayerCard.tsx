@@ -52,15 +52,19 @@ export function PlayerCard({
     };
   }, []);
 
-  const playerScore = new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: 2,
-  }).format(player.pontuacao);
+  const playerScore = useMemo(
+    () =>
+      new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+      }).format(player.pontuacao),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const stylePlayerInMyLineup = isPlayerOnMyLineup
-    ? colorTheme === 'dark'
-      ? 'bg-blue-600'
-      : 'bg-blue-200'
-    : '';
+  const stylePlayerInMyLineup = useMemo(
+    () => (isPlayerOnMyLineup ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''),
+    [colorTheme, isPlayerOnMyLineup]
+  );
 
   return (
     <TouchableOpacity

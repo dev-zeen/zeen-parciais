@@ -10,12 +10,11 @@ import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
-import { MARKET_STATUS_NAME } from '@/constants/Market';
-import useMarket from '@/hooks/useMarket';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
 import useValorization from '@/hooks/useValorization';
 import { Player, PlayerStats } from '@/models/Stats';
+import { useGetMarket } from '@/queries/market.query';
 import { GRAY_OPACITY } from '@/styles/colors';
 import { normalizeQuery } from '@/utils/format';
 
@@ -26,14 +25,14 @@ export default () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredDataSource, setFilteredDataSource] = useState<Player[] | undefined>();
 
-  const { marketStatus } = useMarketStatus();
-  const { market } = useMarket();
+  const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
+  const { data: market } = useGetMarket();
+
+  const { playerStats, onRefetchStats, isRefetchingPlayerStats, isLoadingPlayerStats } =
+    usePlayerStats();
 
   const { onRefetchValorizations, valorizations } = useValorization();
-
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
 
   const onSearchFilter = useCallback(
     async (text: string) => {
@@ -105,7 +104,7 @@ export default () => {
     [playerStats, valorizations]
   );
 
-  if (!playerStats) {
+  if (!playerStats && !isLoadingPlayerStats) {
     return (
       <SafeAreaViewContainer>
         <View className="mx-2 rounded-lg">
@@ -137,7 +136,8 @@ export default () => {
         className="flex-1 justify-center rounded-lg mx-2"
         style={{
           gap: 8,
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <TextInput
           onChangeText={onSearchFilter}
@@ -159,7 +159,8 @@ export default () => {
           estimatedItemSize={300}
           contentContainerStyle={{
             paddingVertical: 4,
-            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           }}
         />
       </View>

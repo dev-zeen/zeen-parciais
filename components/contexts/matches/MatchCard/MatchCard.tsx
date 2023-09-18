@@ -7,10 +7,10 @@ import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import usePlayerStats from '@/hooks/usePlayerStats';
 import { Club } from '@/models/Club';
 import { Match } from '@/models/Matches';
 import { FullPlayer } from '@/models/Stats';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetPartialScoreTeamByMatch } from '@/utils/match';
 import { numberToString } from '@/utils/parseTo';
 
@@ -32,7 +32,7 @@ export function MatchCard({
   const router = useRouter();
   const colorTheme = useColorScheme();
 
-  const { playerStats } = usePlayerStats();
+  const { data: playerStats } = useGetScoredPlayers();
 
   const homeTeamPartials = useMemo(() => {
     if (homeClub && homeClub?.id && playerStats) {
@@ -120,9 +120,11 @@ export function MatchCard({
                   height: 20,
                   top: showTeamScore ? 39 : 15,
                   left: 55,
-                  backgroundColor: '#22c55e',
+                  backgroundColor: '#10b981',
                 }}>
-                <Text className="font-semibold text-xs">{amountPlayersMyClubHomeTeam()}</Text>
+                <Text className="font-semibold text-xs text-white">
+                  {amountPlayersMyClubHomeTeam()}
+                </Text>
               </View>
             )}
           </View>
@@ -186,9 +188,11 @@ export function MatchCard({
                   height: 20,
                   top: showTeamScore ? 39 : 15,
                   left: -22,
-                  backgroundColor: '#22c55e',
+                  backgroundColor: '#10b981',
                 }}>
-                <Text className="font-semibold text-xs">{amountPlayersMyClubAwayTeam()}</Text>
+                <Text className="font-semibold text-xs text-white">
+                  {amountPlayersMyClubAwayTeam()}
+                </Text>
               </View>
             )}
           </View>

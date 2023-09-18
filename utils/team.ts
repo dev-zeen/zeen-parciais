@@ -69,15 +69,23 @@ export function onGetPlayerLowestPrice(lineup: LineupPlayers, player: LineupPosi
 }
 
 export function onRemovePlayerFromSellPlayers(playersSell: PlayersToSell[], id: number) {
-  return playersSell.flatMap(({ players, quantityToNewFormation, ...position }) => {
-    const updatedPlayers = players.filter((player) => player.player?.atleta_id !== id);
+  const newPlayersSellList = playersSell.flatMap(
+    ({ players, quantityToNewFormation, ...position }) => {
+      const updatedPlayers = players.filter((player) => player.player?.atleta_id !== id);
 
-    if (updatedPlayers.length > quantityToNewFormation) {
-      return { ...position, players: updatedPlayers };
+      if (updatedPlayers.length > quantityToNewFormation) {
+        return {
+          ...position,
+          quantityToNewFormation,
+          players: updatedPlayers,
+        };
+      }
+
+      return [];
     }
+  );
 
-    return [];
-  });
+  return newPlayersSellList;
 }
 
 export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: AddPlayerProps) {
@@ -139,4 +147,8 @@ export function getKeyFormationByValue(value: string) {
   return Object.keys(LINEUPS_DEFAULT_OBJECT).find(
     (key) => (LINEUPS_DEFAULT_OBJECT as any)[key as any] === value
   );
+}
+
+export function onBalancePrice(patrimony: number, price: number) {
+  return patrimony - price;
 }

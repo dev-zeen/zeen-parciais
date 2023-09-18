@@ -1,12 +1,7 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  ListRenderItemInfo,
-  RefreshControl,
-  useColorScheme,
-} from 'react-native';
+import { ActivityIndicator, RefreshControl, useColorScheme } from 'react-native';
 
 import { ClubByLeague, LeagueProps } from '@/app/(tabs)/leagues/[id]';
 import { View } from '@/components/Themed';
@@ -17,10 +12,10 @@ import Colors from '@/constants/Colors';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import usePlayerStats from '@/hooks/usePlayerStats';
 import { TeamLeague } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { PlayerStats } from '@/models/Stats';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 
@@ -29,7 +24,7 @@ export function League({ league, isRefetching, onRefetch }: LeagueProps) {
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const { playerStats } = usePlayerStats();
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const [isSortingClubs, setIsSortingClubs] = useState(false);
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
@@ -92,7 +87,7 @@ export function League({ league, isRefetching, onRefetch }: LeagueProps) {
 
       setTimeout(() => {
         setIsSortingClubs(false);
-      }, 1);
+      }, 50);
     },
     [handleOrderByPatrimony, sortClubs]
   );
@@ -187,11 +182,13 @@ export function League({ league, isRefetching, onRefetch }: LeagueProps) {
     <View
       className="flex-1"
       style={{
-        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}>
       <View
         style={{
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <Tabs tabs={tabs} />
       </View>
@@ -201,19 +198,21 @@ export function League({ league, isRefetching, onRefetch }: LeagueProps) {
           <ActivityIndicator />
         </View>
       ) : (
-        <FlatList
+        <FlashList
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
           data={clubs}
-          renderItem={(data) => renderItem(data)}
           keyExtractor={keyExtractor}
-          initialNumToRender={10}
-          maxToRenderPerBatch={5}
+          ItemSeparatorComponent={() => (
+            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+          )}
+          renderItem={renderItem}
+          estimatedItemSize={100}
           contentContainerStyle={{
             paddingTop: 8,
             paddingVertical: 8,
             paddingHorizontal: 8,
-            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : '#F5F5F5',
-            gap: 4,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           }}
         />
       )}

@@ -6,10 +6,10 @@ import { Image, TouchableOpacity, useColorScheme } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import usePlayerStats from '@/hooks/usePlayerStats';
 import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
 import { onCalculatePartialScore, onGetCurrentCountPlayerIsPlayedByTeam } from '@/utils/partials';
 
@@ -30,8 +30,9 @@ const STAGE_TYPE_NAMED = {
 export function CupMatchCard({ match, myTeam }: CupMatchProps) {
   const colorTheme = useColorScheme();
 
-  const { playerStats } = usePlayerStats();
   const { marketStatus, isMarketClose } = useMarketStatus();
+
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const { team: homeTeam } = useTeam({
     teamId: match.time_mandante_id ?? 0,
@@ -117,7 +118,7 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
         key={match.time_mandante_id}
         disabled={!match.time_mandante_id || !showScore}>
         <View
-          className="rounded-lg justify-center items-center mb-2 py-2"
+          className="rounded-lg justify-center items-center py-2"
           style={{
             borderColor: customBorder,
             borderWidth: 2,

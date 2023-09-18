@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { memo, useCallback } from 'react';
 import { Image, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
 
@@ -24,10 +24,10 @@ interface ClubCardProps {
 
 export const ClubCard: React.FC<ClubCardProps> = memo(
   ({ league, club, orderBy, position, firstPlaceScore, isLeagueAcceptCapitain }) => {
-    const router = useRouter();
     const colorTheme = useColorScheme();
 
     const { marketStatus, isMarketClose } = useMarketStatus();
+
     const { team } = useTeam({
       teamId: club.time_id,
     });
@@ -60,7 +60,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
 
     const onPressHandler = useCallback(() => {
       router.push(`/leagues/club/${club.time_id}`);
-    }, [club.time_id, router]);
+    }, [club.time_id]);
 
     const isMyTeam = league?.time_usuario && league?.time_usuario.time_id === club.time_id;
 
@@ -74,10 +74,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       : null;
 
     return (
-      <View
-        key={club?.time_id}
-        className="rounded-lg py-2 pr-3 justify-center"
-        style={containerStyle}>
+      <View className="rounded-lg py-2 pr-3 justify-center" style={containerStyle}>
         <TouchableOpacity activeOpacity={0.6} onPress={onPressHandler}>
           <View className="flex-row justify-between items-center" style={containerStyle}>
             <View

@@ -11,13 +11,13 @@ import { Loading } from '@/components/structure/Loading';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePartialScore from '@/hooks/usePartialScore';
-import usePlayerStats from '@/hooks/usePlayerStats';
-import useSubstituition from '@/hooks/useSubstituition';
 import useTeam from '@/hooks/useTeam';
 import useValorization from '@/hooks/useValorization';
 import { FullClubInfo } from '@/models/Club';
 import { MarketStatus } from '@/models/Market';
 import { FullPlayer } from '@/models/Stats';
+import { useGetMatchSubstitutions } from '@/queries/club.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
 import { numberToString } from '@/utils/parseTo';
 import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
@@ -45,7 +45,11 @@ export default () => {
 
   const typeViewDefault = TYPE_VIEW.LISTA;
 
-  const { playerStats, isRefetchingPlayerStats, onRefetchStats } = usePlayerStats();
+  const {
+    data: playerStats,
+    isRefetching: isRefetchingPlayerStats,
+    refetch: onRefetchStats,
+  } = useGetScoredPlayers(isMarketClose);
 
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
@@ -59,8 +63,8 @@ export default () => {
     round: currentRound,
   });
 
-  const { substitutions } = useSubstituition({
-    teamId: Number(id),
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: Number(id),
     round: currentRound,
   });
 
@@ -181,7 +185,7 @@ export default () => {
                 currentRound === marketStatus?.rodada_atual && 'text-green-500'
               }`}>
               {currentRound === marketStatus?.rodada_atual
-                ? partialScore
+                ? numberToString(partialScore)
                 : numberToString(team?.pontos)}
             </Text>
           </View>
@@ -218,6 +222,7 @@ export default () => {
             gap: 8,
           }}>
           <TouchableOpacity
+            activeOpacity={0.6}
             className={`p-2 items-center justify-center mx-1 rounded-full ${
               currentRound === 1 ? 'bg-gray-100' : 'bg-blue-50'
             }`}
@@ -233,6 +238,7 @@ export default () => {
           <Text className="font-semibold">Rodada {currentRound}</Text>
 
           <TouchableOpacity
+            activeOpacity={0.6}
             className={`p-2 items-center justify-center mx-1 rounded-full ${
               currentRound === marketStatus?.rodada_atual ? 'bg-gray-100' : 'bg-blue-50'
             }`}

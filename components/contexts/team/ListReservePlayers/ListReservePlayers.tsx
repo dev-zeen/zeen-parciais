@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, Modal } from 'react-native';
 
 import Market from '@/app/(tabs)/team/market';
-import { Text, View } from '@/components/Themed';
+import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
-import useLineup from '@/hooks/useLineup';
-import usePlayerStats from '@/hooks/usePlayerStats';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { onGetPlayerLowestPrice } from '@/utils/team';
 
 export function ListReservePlayers() {
@@ -16,14 +17,20 @@ export function ListReservePlayers() {
       { text: 'OK' },
     ]);
 
-  const { playerStats } = usePlayerStats();
+  const { data: playerStats } = useGetScoredPlayers();
 
-  const { lineup, substitutions } = useLineup();
+  const { data: myClub } = useGetMyClub();
 
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
   const [showMarketModal, setShowMarketModal] = useState(false);
   const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
+
+  const lineup = useTeamLineupStore((state) => state.lineup);
+
+  const { data: substitutions } = useGetMatchSubstitutions({
+    id: myClub?.time.time_id,
+  });
 
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
@@ -60,12 +67,11 @@ export function ListReservePlayers() {
   }, [positionMarketSearch, playerLowestPrice]);
 
   return (
-    <View className="rounded-lg items-center justify-center">
-      <Text className="font-semibold text-base text-center">Banco de Reservas</Text>
-      <View className="flex-row rounded-lg py-2 mb-1 items-center justify-center">
+    <>
+      <View className="flex-row rounded-lg py-2">
         {lineup?.reserves?.map((position, index) => {
           return (
-            <View key={position.position} className="flex-1 justify-center items-center">
+            <View key={position.position} className="flex-1 items-center">
               {position && position.player ? (
                 <TeamPlayer
                   player={position.player as LineupPlayer}
@@ -101,6 +107,6 @@ export function ListReservePlayers() {
           />
         </Modal>
       )}
-    </View>
+    </>
   );
 }

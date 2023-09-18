@@ -3,9 +3,9 @@ import { Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
-import useMarket from '@/hooks/useMarket';
-import usePosition from '@/hooks/usePosition';
 import { LineupPlayer } from '@/models/Formations';
+import { useGetMarket } from '@/queries/market.query';
+import { useGetPositions } from '@/queries/players.query';
 import { numberToString } from '@/utils/parseTo';
 
 type PlayerLowestCardProps = {
@@ -13,8 +13,8 @@ type PlayerLowestCardProps = {
 };
 
 export function PlayerLowestCard({ player }: PlayerLowestCardProps) {
-  const { positions } = usePosition();
-  const { market } = useMarket();
+  const { data: positions } = useGetPositions();
+  const { data: market } = useGetMarket();
 
   return (
     <View className="rounded-lg flex-row items-center justify-between p-2 border-2 border-orange-500 mb-1">

@@ -11,8 +11,8 @@ import { sortedOptions, statusPlayerOptions } from './filters.helper';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { FilterMarketByTeam } from '@/components/contexts/market/MarketFilters/FilterMarketByTeam';
-import useMarket from '@/hooks/useMarket';
 import { FullPlayer } from '@/models/Stats';
+import { useGetMarket } from '@/queries/market.query';
 
 type MarketFilterProps = {
   applyFilter: (players: FullPlayer[]) => void;
@@ -21,7 +21,7 @@ type MarketFilterProps = {
 };
 
 export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: MarketFilterProps) {
-  const { market } = useMarket();
+  const { data: market } = useGetMarket();
 
   const [showOrderMarket, setShowOrderMarket] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<OrderSelectedProps>(sortedOptions[0]);
@@ -156,8 +156,9 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
 
   return (
     <>
-      <View className="flex-row rounded-lg items-center p-1">
+      <View className="flex-row rounded-lg items-center p-2 mb-2">
         <TouchableOpacity
+          activeOpacity={0.6}
           onPress={() => setShowOrderMarket(true)}
           className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
           style={{
@@ -168,6 +169,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
         </TouchableOpacity>
 
         <TouchableOpacity
+          activeOpacity={0.6}
           className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
           style={{
             gap: 8,
@@ -180,6 +182,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
         </TouchableOpacity>
 
         <TouchableOpacity
+          activeOpacity={0.6}
           className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
           style={{
             gap: 8,
