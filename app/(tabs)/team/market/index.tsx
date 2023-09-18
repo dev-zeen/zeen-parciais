@@ -75,7 +75,7 @@ export default ({
       handleCloseMarketModal && handleCloseMarketModal();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [playerLowestPrice]
   );
 
   const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {
@@ -99,7 +99,7 @@ export default ({
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [position]
   );
 
   const handleCloseMarket = useCallback(
@@ -124,13 +124,11 @@ export default ({
 
       isFirstRender.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [market]);
+  }, [market, playerLowestPrice, position]);
 
   useEffect(() => {
     const emptyPositionsUpdated = onGetEmptyPositions(lineup as LineupPlayers);
     setEmptyPositions(emptyPositionsUpdated);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineup]);
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);

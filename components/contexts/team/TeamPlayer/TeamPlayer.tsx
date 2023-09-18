@@ -67,8 +67,8 @@ export function TeamPlayer({
       }`}
       style={{
         gap: 2,
-        maxWidth: 75,
-        minWidth: 75,
+        maxWidth: 78,
+        minWidth: 78,
         backgroundColor: 'transparent',
       }}>
       {isMarketClose ? (

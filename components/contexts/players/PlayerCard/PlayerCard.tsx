@@ -57,8 +57,7 @@ export function PlayerCard({
       new Intl.NumberFormat('pt-BR', {
         minimumFractionDigits: 2,
       }).format(player.pontuacao),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [player.pontuacao]
   );
 
   const stylePlayerInMyLineup = useMemo(

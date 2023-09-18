@@ -33,11 +33,7 @@ export default () => {
     isRefetching: isRefetchingPlayerStats,
   } = useGetScoredPlayers(isMarketClose);
 
-  const {
-    data: myClub,
-    refetch: onRefetchMyClub,
-    isRefetching: isRefetchingMyClub,
-  } = useGetMyClub(allowRequest);
+  const { data: myClub } = useGetMyClub(allowRequest);
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -59,13 +55,10 @@ export default () => {
   }, [myClub, playerStats]);
 
   const onRefresh = useCallback(async () => {
-    await Promise.all([onRefetchMyClub, onRefetchPlayerStats]);
-  }, [onRefetchMyClub, onRefetchPlayerStats]);
+    await Promise.all([onRefetchPlayerStats]);
+  }, [onRefetchPlayerStats]);
 
-  const isRefetching = useMemo(
-    () => isRefetchingMyClub || isRefetchingPlayerStats,
-    [isRefetchingMyClub, isRefetchingPlayerStats]
-  );
+  const isRefetching = useMemo(() => isRefetchingPlayerStats, [isRefetchingPlayerStats]);
 
   if (!isAutheticated) {
     return <Login title="Para acessar o seu time, é necessário efetuar o login." />;

@@ -80,7 +80,6 @@ export default () => {
 
       setEmptyPositions(positions);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineup]);
 
   const currentBalancePrice = useMemo(() => {

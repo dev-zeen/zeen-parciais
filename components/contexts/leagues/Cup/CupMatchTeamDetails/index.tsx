@@ -62,8 +62,7 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
         />
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [team?.capitao_id]
+    [marketStatus, match.rodada_id, team?.capitao_id]
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);

@@ -84,14 +84,14 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
       updateCapitain(res.data?.capitao_id as number);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [initialLineupTeamFormation, isMarketClose]);
 
   const onCloseSellPlayersModal = useCallback(() => {
     setShowModalPlayersToSell(false);
     updateFormation(initialLineupTeamFormation);
     handleResetClub();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [handleResetClub, initialLineupTeamFormation]);
 
   const handleCloseSuccessSellPlayers = useCallback(
     (lineup: LineupPlayers) => {
@@ -157,7 +157,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
     }
     onSaveTeam();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [capitain, lineup, formation]);
+  }, [capitain, formation, lineup]);
 
   const handleChangeFormation = useCallback(
     (lineup: LineupPlayers, formation: number) => {
