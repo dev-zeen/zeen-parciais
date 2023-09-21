@@ -3,36 +3,45 @@ import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, RefreshControl, useColorScheme } from 'react-native';
 
-import { ClubByLeague, LeagueProps } from '@/app/(tabs)/leagues/[id]';
 import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
+import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
-import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { TeamLeague } from '@/models/Leagues';
+import { ClubByLeague, League as LeagueModel, TeamLeague } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { PlayerStats } from '@/models/Stats';
+import { useGetLeague } from '@/queries/leagues.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 
-export function League({ league, isRefetching, onRefetch }: LeagueProps) {
+interface LeagueProps {
+  league: LeagueModel;
+  clubsByLeague: ClubsByLeagueUtils;
+}
+
+export function League({ league, clubsByLeague }: LeagueProps) {
   const colorTheme = useColorScheme();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
+  const { refetch: onRefetchLeague, isRefetching: isRefetchingLeague } = useGetLeague(
+    league.liga.slug
+  );
+
   const [isSortingClubs, setIsSortingClubs] = useState(false);
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
 
-  const { getItem } = useAsyncStorage(CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`));
+  const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
 
-  const { clubsByLeague } = useLeague({ slug: league.liga.slug });
+  const { getItem } = useAsyncStorage(CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`));
 
   const handleOrderByPatrimony = useCallback(() => {
     const newOrderBy =
@@ -103,6 +112,16 @@ export function League({ league, isRefetching, onRefetch }: LeagueProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clubs, league, orderBy]);
 
+  const handleConfirmDialog = useCallback(() => {
+    setShowModalPublicLeague(false);
+  }, []);
+
+  useEffect(() => {
+    if (league && !league?.liga.time_dono_id) {
+      setShowModalPublicLeague(true);
+    }
+  }, [league]);
+
   const tabs: ITabs[] = useMemo(
     () => [
       {
@@ -169,53 +188,71 @@ export function League({ league, isRefetching, onRefetch }: LeagueProps) {
         />
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [clubs, league, orderBy]
   );
 
   const isLoading = !clubs;
 
-  if (isLoading) {
+  const onRefetch = useCallback(async () => {
+    sortClubs(orderBy);
+    onRefetchLeague();
+  }, [onRefetchLeague, orderBy, sortClubs]);
+
+  if (isLoading || !renderItem) {
     return <Loading />;
   }
 
   return (
-    <View
-      className="flex-1"
-      style={{
-        backgroundColor:
-          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-      }}>
+    <>
       <View
+        className="flex-1"
         style={{
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
-        <Tabs tabs={tabs} />
-      </View>
-
-      {isSortingClubs ? (
-        <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
-          <ActivityIndicator />
-        </View>
-      ) : (
-        <FlashList
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          data={clubs}
-          keyExtractor={keyExtractor}
-          ItemSeparatorComponent={() => (
-            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
-          )}
-          renderItem={renderItem}
-          estimatedItemSize={100}
-          contentContainerStyle={{
-            paddingTop: 8,
-            paddingVertical: 8,
-            paddingHorizontal: 8,
+        <View
+          style={{
             backgroundColor:
               colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}
+          }}>
+          <Tabs tabs={tabs} />
+        </View>
+
+        {isSortingClubs ? (
+          <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
+            <ActivityIndicator />
+          </View>
+        ) : (
+          <FlashList
+            refreshControl={
+              <RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />
+            }
+            data={clubs}
+            keyExtractor={keyExtractor}
+            ItemSeparatorComponent={() => (
+              <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+            )}
+            renderItem={renderItem}
+            estimatedItemSize={100}
+            contentContainerStyle={{
+              paddingTop: 8,
+              paddingVertical: 8,
+              paddingHorizontal: 8,
+              backgroundColor:
+                colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+            }}
+          />
+        )}
+      </View>
+
+      {showModalPublicLeague && (
+        <DialogComponent
+          isVisible={showModalPublicLeague}
+          onPressConfirm={handleConfirmDialog}
+          subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
         />
       )}
-    </View>
+    </>
   );
 }

@@ -1,6 +1,6 @@
-import { EXPO_PUBLIC_API_URL } from '@env';
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
+import { EXPO_PUBLIC_API_URL } from '@/constants/Endpoits';
 import { getTokenFromStorage, updateTokenInStorage } from '@/lib/core/auth';
 
 let isRefreshing = false;

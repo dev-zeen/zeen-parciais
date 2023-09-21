@@ -9,7 +9,6 @@ import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayer
 import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { TeamActions } from '@/components/contexts/team/TeamActions';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
-import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
@@ -33,7 +32,11 @@ export default () => {
     isRefetching: isRefetchingPlayerStats,
   } = useGetScoredPlayers(isMarketClose);
 
-  const { data: myClub } = useGetMyClub(allowRequest);
+  const {
+    data: myClub,
+    isRefetching: isRefetchingMyClub,
+    refetch: onRefetchMyClub,
+  } = useGetMyClub(allowRequest);
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -45,7 +48,7 @@ export default () => {
   );
 
   useEffect(() => {
-    if (!lineup && myClub) {
+    if (!lineup && myClub && !isRefetching) {
       const defaultLineup = onGetFillLineupDefaultPlayers(myClub, playerStats, isMarketClose);
 
       updateLineup(defaultLineup);
@@ -55,10 +58,13 @@ export default () => {
   }, [myClub, playerStats]);
 
   const onRefresh = useCallback(async () => {
-    await Promise.all([onRefetchPlayerStats]);
-  }, [onRefetchPlayerStats]);
+    await Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]);
+  }, [onRefetchMyClub, onRefetchPlayerStats]);
 
-  const isRefetching = useMemo(() => isRefetchingPlayerStats, [isRefetchingPlayerStats]);
+  const isRefetching = useMemo(
+    () => isRefetchingPlayerStats || isRefetchingMyClub,
+    [isRefetchingMyClub, isRefetchingPlayerStats]
+  );
 
   if (!isAutheticated) {
     return <Login title="Para acessar o seu time, é necessário efetuar o login." />;
@@ -82,8 +88,6 @@ export default () => {
             colorTheme === 'dark' ? `bg-dark` : 'bg-light'
           }`}
           style={{ gap: 8 }}>
-          <MarketStatusCard />
-
           <TeamActions initialLineupTeamFormation={initialLineupTeamFormation} />
 
           <SoccerField />

@@ -1,0 +1,1 @@
+export { CupTeamsList } from './CupTeamsList';

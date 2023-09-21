@@ -13,7 +13,7 @@ import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 const screenWidth = Dimensions.get('window').width;
-const fieldWidth = screenWidth - 16;
+const fieldWidth = screenWidth;
 
 export function SoccerField() {
   const { data: playerStats } = useGetScoredPlayers();

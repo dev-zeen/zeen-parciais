@@ -1,4 +1,3 @@
-import { EXPO_PUBLIC_AUTH_URL } from '@env';
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useState } from 'react';
@@ -9,6 +8,7 @@ import enterImage from '@/assets/images/auth.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
+import { EXPO_PUBLIC_AUTH_URL } from '@/constants/Endpoits';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { AuthContext } from '@/contexts/Auth.context';
 

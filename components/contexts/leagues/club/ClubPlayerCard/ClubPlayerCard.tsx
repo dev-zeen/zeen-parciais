@@ -1,10 +1,11 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback } from 'react';
-import { Image } from 'react-native';
+import { Image, useColorScheme } from 'react-native';
 
 import { PlayerClub } from '@/app/(tabs)/leagues/club/[id]';
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { MarketStatus } from '@/models/Market';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
@@ -21,6 +22,7 @@ type ClubPlayerCardProps = {
   appreciation?: number;
   playerStats?: PlayerStats;
   isReserve?: boolean;
+  isReplacePlayer?: boolean;
 };
 
 export function ClubPlayerCard({
@@ -30,7 +32,10 @@ export function ClubPlayerCard({
   appreciation,
   isReserve,
   isCapitain,
+  isReplacePlayer,
 }: ClubPlayerCardProps) {
+  const colorTheme = useColorScheme();
+
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
   const { isMarketClose } = useMarketStatus();
@@ -59,18 +64,17 @@ export function ClubPlayerCard({
   );
 
   return (
-    <View
-      className={`rounded-lg p-2
-          ${(player.isReplaced || isReserve) && 'opacity-50'}
-          ${player.isJoined && 'opacity-100'}
-          `}>
+    <View className="rounded-lg p-2">
       <TouchableOpacity className="justify-between flex-row" activeOpacity={0.6}>
         <View className="flex-row gap-x-2 items-center">
           <Image
             source={{
               uri: player.foto?.replace('FORMATO', '220x220'),
             }}
-            className="w-14 h-14"
+            className={`w-14 h-14 rounded-full           ${
+              (player.isReplaced || isReserve) && 'opacity-30'
+            }
+            ${player.isJoined && 'opacity-100'}`}
             alt={`Imagem do ${player?.nome}`}
           />
 
@@ -81,7 +85,7 @@ export function ClubPlayerCard({
                 <Image
                   source={captainImage}
                   className="w-5 h-5 rounded-full overflow-hidden"
-                  alt={`Capitão do time`}
+                  alt={'Capitão do time'}
                 />
               )}
             </View>
@@ -96,6 +100,14 @@ export function ClubPlayerCard({
               </Text>
             </View>
           </View>
+
+          {isReplacePlayer && (
+            <Feather
+              name="shuffle"
+              size={20}
+              color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+            />
+          )}
         </View>
 
         <View className="flex-row items-center">

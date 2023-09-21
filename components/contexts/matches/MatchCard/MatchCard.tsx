@@ -48,7 +48,7 @@ export function MatchCard({
     }
   }, [awayClub, playerStats]);
 
-  const showTeamScore = playerStats && match.status_transmissao_tr !== 'CRIADA';
+  const showTeamScore = playerStats && match.status_transmissao_tr !== 'CRIADA' && match.valida;
 
   const amountPlayersMyClubHomeTeam = useCallback(() => {
     if (players) {
@@ -187,7 +187,7 @@ export function MatchCard({
                   width: 20,
                   height: 20,
                   top: showTeamScore ? 39 : 15,
-                  left: -22,
+                  left: -25,
                   backgroundColor: '#10b981',
                 }}>
                 <Text className="font-semibold text-xs text-white">

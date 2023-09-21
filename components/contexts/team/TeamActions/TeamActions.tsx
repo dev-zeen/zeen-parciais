@@ -49,7 +49,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
 
   const { data: myClub, refetch: onRefetchMyClub } = useGetMyClub();
 
-  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -83,6 +83,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
       updateLineup(initialLineupMounted);
       updateCapitain(res.data?.capitao_id as number);
     });
+    await onRefetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLineupTeamFormation, isMarketClose]);
 

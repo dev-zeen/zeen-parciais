@@ -1,3 +1,6 @@
+export const EXPO_PUBLIC_API_URL = 'https://api.cartola.globo.com';
+export const EXPO_PUBLIC_AUTH_URL = 'https://cartola.globo.com/#!/login';
+
 export const GET_POSITIONS = '/posicoes';
 
 export const GET_CLUB_BY_ID = '/time/id/:id';

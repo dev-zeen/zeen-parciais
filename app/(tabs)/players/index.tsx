@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+// import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, TextInput, useColorScheme } from 'react-native';
+import { ListRenderItemInfo, RefreshControl, TextInput, useColorScheme } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
 import { onGetPlayersPlayed } from '@/app/(tabs)/players/players.helper';
 import { Text, View } from '@/components/Themed';
@@ -124,7 +125,7 @@ export default () => {
     );
   }
 
-  const isLoading = !marketStatus || !playerStats || !valorizations;
+  const isLoading = !marketStatus || !playerStats;
 
   if (isLoading) {
     return <Loading />;
@@ -148,7 +149,7 @@ export default () => {
           autoCorrect={false}
         />
 
-        <FlashList
+        {/* <FlashList
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
           data={filteredDataSource}
           keyExtractor={keyExtractor}
@@ -162,6 +163,22 @@ export default () => {
             backgroundColor:
               colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           }}
+        /> */}
+        <FlatList
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+          data={filteredDataSource}
+          keyExtractor={keyExtractor}
+          ItemSeparatorComponent={() => (
+            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+          )}
+          renderItem={renderItem}
+          contentContainerStyle={{
+            paddingVertical: 4,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          }}
+          initialNumToRender={20}
+          maxToRenderPerBatch={20}
         />
       </View>
     </SafeAreaViewContainer>

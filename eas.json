@@ -11,11 +11,7 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.cartola.globo.com",
-        "EXPO_PUBLIC_AUTH_URL": "https://cartola.globo.com/#!/login"
-      }
+      "autoIncrement": true
     }
   },
   "submit": {

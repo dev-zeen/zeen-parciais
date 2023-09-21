@@ -2,39 +2,55 @@ import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCallback, useEffect, useState } from 'react';
-import { Image, RefreshControl, useColorScheme } from 'react-native';
+import { RefreshControl, useColorScheme } from 'react-native';
 
-import { LeagueProps } from '@/app/(tabs)/leagues/[id]';
 import { Text, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
+import { CupTeamsList } from '@/components/contexts/leagues/Cup/CupTeamsList';
 import { Loading } from '@/components/structure/Loading';
 import { ITabs, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
-import useLeague, { TeamCup } from '@/hooks/useLeague';
+import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullClubInfo } from '@/models/Club';
+import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
+import { useGetScoredPlayers } from '@/queries/stats.query';
 
-export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
+interface CupProps {
+  league: League;
+}
+
+export function Cup({ league: cup }: CupProps) {
   const colorTheme = useColorScheme();
-
-  const teamDefaultBackground = colorTheme === 'dark' ? '#047857' : '#dbeafe';
-  const pedingInviteBackground = colorTheme === 'dark' ? '#ca8a04' : '#fef08a';
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
   const { data: myClub, isLoading: isLoadingMyClub } = useGetMyClub();
 
-  const { isCupInProgress, totalTeamCup, currentTeamsCup, teamsAwatingAcceptInvite, teamsByCup } =
+  const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
+
+  const { isCupInProgress, totalTeamCup, currentTeamsCup, onRefetchLeague, isRefetchingLeague } =
     useLeague({
       slug: cup.liga.slug,
     });
 
-  const keyExtractor = useCallback((item: TeamCup) => `${item.time_id}`, []);
-
   const [roundTabs, setRoundTabs] = useState<ITabs[]>([]);
 
-  const renderMatchItem = useCallback(
+  const renderCupMatchCard = useCallback(
+    ({ item }: ListRenderItemInfo<CupMatch>) => {
+      return <CupMatchCard match={item} myTeam={myClub as FullClubInfo} />;
+    },
+    [myClub]
+  );
+
+  const onRefetch = useCallback(async () => {
+    await Promise.all([onRefetchLeague(), onRefetchStats()]);
+  }, [onRefetchLeague, onRefetchStats]);
+
+  const isRefetching = isRefetchingLeague;
+
+  const renderItem = useCallback(
     (round: string) => {
       if (cup && cup.chaves_mata_mata && marketStatus && myClub) {
         return (
@@ -45,61 +61,19 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
             ItemSeparatorComponent={() => (
               <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
             )}
-            renderItem={({ item }) => {
-              return <CupMatchCard match={item} myTeam={myClub as FullClubInfo} />;
-            }}
+            renderItem={renderCupMatchCard}
             estimatedItemSize={16}
             contentContainerStyle={{
               paddingTop: 8,
               paddingHorizontal: 8,
+              paddingBottom: 8,
             }}
           />
         );
       }
     },
-    [cup, marketStatus, myClub, onRefetch, isRefetching, colorTheme]
-  );
-
-  const renderTeamItem = useCallback(
-    ({ item }: ListRenderItemInfo<TeamCup>) => {
-      if (!isCupInProgress) {
-        return (
-          <View
-            className="flex-1 rounded-lg items-center justify-center p-2"
-            style={{
-              backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
-              gap: 4,
-            }}>
-            <View
-              className="flex-row items-center justify-center"
-              style={{
-                gap: 4,
-                backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
-              }}>
-              <Image
-                source={{
-                  uri: item.url_escudo_png,
-                }}
-                className="w-10 h-10"
-                alt={`Imagem do time do ${item.nome_cartola}`}
-              />
-            </View>
-
-            <Text
-              className="font-semibold"
-              style={{
-                fontSize: 14,
-                lineHeight: 14,
-              }}>
-              {item.nome}
-            </Text>
-            <Text className="font-light capitalize">{item.nome_cartola}</Text>
-          </View>
-        );
-      }
-      return <></>;
-    },
-    [isCupInProgress, pedingInviteBackground, teamDefaultBackground]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cup, marketStatus, myClub]
   );
 
   useEffect(() => {
@@ -108,17 +82,17 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
         return {
           id: Number(round),
           title: round,
-          content: () => renderMatchItem(round),
+          content: () => renderItem(round),
         };
       });
 
       setRoundTabs(tabs);
     }
-  }, [cup, isCupInProgress, renderMatchItem]);
+  }, [cup, isCupInProgress, renderItem]);
 
   const isLoading = isCupInProgress ? isLoadingMyClub || roundTabs.length < 1 : isLoadingMyClub;
 
-  if (isLoading) return <Loading />;
+  if (isLoading || !cup || !marketStatus || !renderItem) return <Loading />;
 
   return (
     <View
@@ -147,12 +121,12 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
             }}>
             <Text>
               Início |{' '}
-              {format(new Date(cup.liga.data_inicio as string), 'dd/MM', {
+              {format(new Date(cup?.liga.data_inicio as string), 'dd/MM', {
                 locale: ptBR,
               })}
             </Text>
 
-            <Text className="font-semibold text-sm">{cup.liga.inicio_rodada}º Radada </Text>
+            <Text className="font-semibold text-sm">{cup?.liga.inicio_rodada}º Radada </Text>
           </View>
 
           <View
@@ -162,12 +136,12 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
             }}>
             <Text>
               Final | {''}
-              {format(new Date(cup.liga.data_fim as string), 'dd/MM', {
+              {format(new Date(cup?.liga.data_fim as string), 'dd/MM', {
                 locale: ptBR,
               })}
             </Text>
 
-            <Text className="font-semibold text-sm">{cup.liga.fim_rodada}º Radada</Text>
+            <Text className="font-semibold text-sm">{cup?.liga.fim_rodada}º Radada</Text>
           </View>
 
           <View
@@ -192,27 +166,7 @@ export function Cup({ league: cup, isRefetching, onRefetch }: LeagueProps) {
         </View>
       </View>
 
-      {!isCupInProgress ? (
-        <FlashList
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          data={
-            teamsAwatingAcceptInvite && teamsAwatingAcceptInvite?.length > 0
-              ? [...teamsByCup].concat(teamsAwatingAcceptInvite)
-              : [...teamsByCup]
-          }
-          keyExtractor={keyExtractor}
-          renderItem={renderTeamItem}
-          estimatedItemSize={32}
-          numColumns={2}
-          contentContainerStyle={{
-            paddingVertical: 8,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}
-        />
-      ) : (
-        <Tabs tabs={roundTabs} />
-      )}
+      {!isCupInProgress ? <CupTeamsList cup={cup} /> : <Tabs tabs={roundTabs} />}
     </View>
   );
 }

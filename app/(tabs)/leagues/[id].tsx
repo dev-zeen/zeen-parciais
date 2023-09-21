@@ -1,29 +1,16 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { Image, useColorScheme } from 'react-native';
 
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { Cup } from '@/components/contexts/leagues/Cup';
 import { League as LeagueComponent } from '@/components/contexts/leagues/League';
-import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
-import useMarketStatus from '@/hooks/useMarketStatus';
-import { League, TeamLeague } from '@/models/Leagues';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
-
-export interface ClubByLeague extends TeamLeague {
-  playersHavePlayed?: number;
-}
-
-export interface LeagueProps {
-  league: League;
-  isRefetching: boolean;
-  onRefetch: () => void;
-}
+import { ClubsByLeagueUtils } from '@/utils/partials';
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -32,37 +19,13 @@ export default () => {
 
   const { id: slug } = useLocalSearchParams();
 
-  const { marketStatus, isMarketClose } = useMarketStatus();
-
-  const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
-
-  const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
-
-  const { league, onRefetchLeague, isRefetchingLeague } = useLeague({
+  const { league, clubsByLeague } = useLeague({
     slug: slug as string,
   });
 
-  const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchLeague(), onRefetchStats()]);
-  }, [onRefetchLeague, onRefetchStats]);
-
-  const handleConfirmDialog = useCallback(() => {
-    setShowModalPublicLeague(false);
-  }, []);
-
-  useEffect(() => {
-    if (league && !league?.liga.time_dono_id) {
-      setShowModalPublicLeague(true);
-    }
-  }, [league]);
-
-  const isRefetching = isRefetchingLeague;
-
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (!league || !marketStatus) {
-    return <Loading />;
-  }
+  if (!league || !clubsByLeague) return <Loading />;
 
   return (
     <>
@@ -98,24 +61,16 @@ export default () => {
                 height: 24,
                 margin: 4,
               }}
-              alt={`Liga com Capitão`}
+              alt="Liga com Capitão"
             />
           )}
         </View>
       </View>
 
       {league.liga.mata_mata ? (
-        <Cup league={league} onRefetch={onRefetch} isRefetching={isRefetching} />
+        <Cup league={league} />
       ) : (
-        <LeagueComponent league={league} onRefetch={onRefetch} isRefetching={isRefetching} />
-      )}
-
-      {showModalPublicLeague && (
-        <DialogComponent
-          isVisible={showModalPublicLeague}
-          onPressConfirm={handleConfirmDialog}
-          subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
-        />
+        <LeagueComponent clubsByLeague={clubsByLeague as ClubsByLeagueUtils} league={league} />
       )}
     </>
   );

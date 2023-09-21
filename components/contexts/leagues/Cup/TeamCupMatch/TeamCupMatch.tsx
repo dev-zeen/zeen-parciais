@@ -1,0 +1,59 @@
+import { useCallback } from 'react';
+import { Image } from 'react-native';
+
+import { Text, View } from '@/components/Themed';
+import useTeam from '@/hooks/useTeam';
+import { CupMatch as CupMatchModel } from '@/models/Leagues';
+
+type TeamCupMatchProps = {
+  match: CupMatchModel;
+  teamId: number;
+};
+
+export function TeamCupMatch({ match, teamId }: TeamCupMatchProps) {
+  const { team } = useTeam({
+    teamId: teamId ?? 0,
+    round: match.rodada_id,
+  });
+
+  const teamOpacity = useCallback((score?: number, compareScore?: number) => {
+    if (score && compareScore) {
+      return score > compareScore ? 1 : 0.3;
+    }
+    return 1;
+  }, []);
+
+  return (
+    <View
+      className="justify-center items-center bg-transparent"
+      style={{
+        width: '30%',
+        gap: 4,
+        opacity: teamOpacity(match.time_mandante_pontuacao, match.time_visitante_pontuacao),
+      }}>
+      {team ? (
+        <View
+          className="items-center"
+          style={{
+            gap: 8,
+          }}>
+          <Image
+            source={{
+              uri: team?.time.url_escudo_png,
+            }}
+            className="w-12 h-12"
+            alt={`Escudo do ${team?.time.nome}`}
+          />
+
+          <Text numberOfLines={1} className="text-xs font-semibold">
+            {team?.time.nome ?? '-'}
+          </Text>
+        </View>
+      ) : (
+        <Text numberOfLines={1} className="text-xs">
+          A definir
+        </Text>
+      )}
+    </View>
+  );
+}

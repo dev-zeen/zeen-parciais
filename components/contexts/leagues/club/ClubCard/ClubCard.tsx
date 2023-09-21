@@ -3,13 +3,12 @@ import { router } from 'expo-router';
 import { memo, useCallback } from 'react';
 import { Image, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
 
-import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useTeam from '@/hooks/useTeam';
-import { League } from '@/models/Leagues';
+import { ClubByLeague, League } from '@/models/Leagues';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
 
@@ -74,7 +73,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       : null;
 
     return (
-      <View className="rounded-lg py-2 pr-3 justify-center" style={containerStyle}>
+      <View className="rounded-lg py-4 pr-3 justify-center" style={containerStyle}>
         <TouchableOpacity activeOpacity={0.6} onPress={onPressHandler}>
           <View className="flex-row justify-between items-center" style={containerStyle}>
             <View
@@ -116,26 +115,28 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                     gap: 4,
                   }}>
                   <Text className="text-xs capitalize">{club.nome_cartola}</Text>
+                  {isLeagueAcceptCapitain ? (
+                    <>
+                      <View className="relative rounded-full h-1 w-1 bg-gray-400"></View>
+                      <View className="flex-row items-center" style={containerStyle}>
+                        <Text className="text-xs">{capitainPlayer?.apelido}</Text>
+
+                        <Image
+                          source={captainIcon}
+                          style={{
+                            width: 12,
+                            height: 12,
+                            marginRight: 1,
+                            marginLeft: 4,
+                          }}
+                          alt={'Liga com Capitão'}
+                        />
+                      </View>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                 </View>
-
-                {isLeagueAcceptCapitain ? (
-                  <View className="flex-row items-center" style={containerStyle}>
-                    <Text className="text-xs">{capitainPlayer?.apelido}</Text>
-
-                    <Image
-                      source={captainIcon}
-                      style={{
-                        width: 12,
-                        height: 12,
-                        marginRight: 1,
-                        marginLeft: 4,
-                      }}
-                      alt={`Liga com Capitão`}
-                    />
-                  </View>
-                ) : (
-                  <></>
-                )}
               </View>
             </View>
 

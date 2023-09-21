@@ -74,6 +74,8 @@ export default () => {
   const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
+  const { isRefetching: isRefetchingMatches, refetch: onRefetchMatches } = useGetMatchs();
+
   useEffect(() => {
     if (lineup) {
       const positions = onGetEmptyPositions(lineup);
@@ -111,8 +113,13 @@ export default () => {
   );
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchValorizations(), onRefetchStats()]);
-  }, [onRefetchStats, onRefetchValorizations]);
+    await Promise.all([onRefetchValorizations(), onRefetchStats(), onRefetchMatches()]);
+  }, [onRefetchMatches, onRefetchStats, onRefetchValorizations]);
+
+  const isRefetching = useMemo(
+    () => isRefetchingMatches || isRefetchingValorizations || isRefetchingPlayerStats,
+    [isRefetchingMatches, isRefetchingPlayerStats, isRefetchingValorizations]
+  );
 
   const renderItemWithPartials = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayerPartials>) => {
@@ -241,7 +248,7 @@ export default () => {
   return (
     <SafeAreaViewContainer>
       <View
-        className="mx-2 rounded-lg"
+        className="mx-2 rounded-lg mb-2"
         style={{
           gap: 8,
           backgroundColor:
@@ -272,12 +279,7 @@ export default () => {
             style={{
               paddingHorizontal: 8,
             }}
-            refreshControl={
-              <RefreshControl
-                onRefresh={onRefetch}
-                refreshing={isRefetchingPlayerStats && isRefetchingValorizations}
-              />
-            }
+            refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
             contentContainerStyle={{
               gap: 4,
               paddingVertical: 8,

@@ -42,7 +42,7 @@ export default () => {
     refetch: onRefetchPositions,
   } = useGetPositions();
 
-  const { partialScore, playersHaveAlreadyPlayed } = usePartialScore({
+  const { partialScore, playersHaveAlreadyPlayed, totalPartialScore } = usePartialScore({
     teamId: myClub?.time.time_id as number,
   });
 
@@ -80,9 +80,9 @@ export default () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingMyClub} />}
-        className={`rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
+        className={`rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View
-          className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
+          className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
           style={{
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
@@ -132,7 +132,7 @@ export default () => {
               ) : (
                 <View
                   className={`flex-row justify-between items-center gap-2 ${
-                    colorTheme === 'dark' ? `bg-dark` : 'bg-light'
+                    colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
                   }`}>
                   <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
                     <Text className="font-semibold text-xs">Parcial</Text>
@@ -144,7 +144,7 @@ export default () => {
                     <Text className="font-semibold text-xs">Total</Text>
 
                     <Text className="font-bold text-lg text-green-500">
-                      {numberToString(myClub?.pontos_campeonato + partialScore)}
+                      {numberToString(totalPartialScore)}
                     </Text>
                   </View>
                   <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">

@@ -62,10 +62,7 @@ const useValorization = () => {
   }, [marketStatus, isMarketClose, market]);
 
   return {
-    valorizations: useMemo(
-      () => (isMarketClose ? valorizations : currentValorizations),
-      [isMarketClose, valorizations, currentValorizations]
-    ),
+    valorizations: isMarketClose ? valorizations : currentValorizations,
     isLoadingValorizations: useMemo(() => isLoadingValorizations, [isLoadingValorizations]),
     onRefetchValorizations: !allowRequest ? () => null : onRefetchValorizations,
     isRefetchingValorizations: useMemo(

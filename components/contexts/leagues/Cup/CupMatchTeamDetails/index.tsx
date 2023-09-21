@@ -59,10 +59,14 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
           isCapitain={team?.capitao_id === player.atleta_id}
           currentRound={match.rodada_id}
           marketStatus={marketStatus as MarketStatus}
+          isReplacePlayer={substitutions?.some(
+            (item) =>
+              item.entrou.atleta_id === player.atleta_id || item.saiu.atleta_id === player.atleta_id
+          )}
         />
       );
     },
-    [marketStatus, match.rodada_id, team?.capitao_id]
+    [marketStatus, match.rodada_id, substitutions, team?.capitao_id]
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);

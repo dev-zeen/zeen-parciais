@@ -63,7 +63,7 @@ export function MarketPlayerCard({
           className="flex-row absolute"
           style={{
             top: '60%',
-            left: '20%',
+            left: '18%',
             width: 20,
             height: 20,
             borderRadius: 10,
@@ -83,9 +83,17 @@ export function MarketPlayerCard({
         <View
           className="items-start justify-center"
           style={{
-            gap: 4,
+            gap: 6,
           }}>
-          <Text className="flex-row text-base font-bold">{player.apelido_abreviado}</Text>
+          <View
+            className="flex-row items-center"
+            style={{
+              gap: 4,
+            }}>
+            <Text className="flex-row text-base font-bold">{player.apelido_abreviado}</Text>
+            <View className="rounded-full bg-gray-300 h-1 w-1" />
+            <Text className="flex-row text-xs font-medium">{player.jogos_num} Jogos</Text>
+          </View>
 
           <View
             className="flex-row items-center justify-start"

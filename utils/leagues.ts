@@ -1,5 +1,4 @@
-import { ClubByLeague } from '@/app/(tabs)/leagues/[id]';
-import { League, TeamLeague } from '@/models/Leagues';
+import { ClubByLeague, League, TeamLeague } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { PlayerStats } from '@/models/Stats';
 import { ClubsByLeagueUtils, onGetClubsLeagueWithPartial } from '@/utils/partials';

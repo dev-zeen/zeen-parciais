@@ -23,7 +23,7 @@ export function PlayerLowestCard({ player }: PlayerLowestCardProps) {
           source={{
             uri: player?.foto?.replace('FORMATO', '220x220'),
           }}
-          className="w-12 h-12 rounded-3xl mr-2"
+          className="w-12 h-12 rounded-full mr-2"
           alt={`Imagem do ${player?.nome}`}
         />
       </View>

@@ -42,14 +42,14 @@ export default () => {
     [myClub?.atletas, matches?.clubes, allowRequest]
   );
 
-  if (isLoadingMatches || !matches || !myClub) {
+  if (isLoadingMatches || !matches) {
     return <Loading />;
   }
 
   return (
     <SafeAreaViewContainer>
       <View
-        className={`mx-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
+        className={`mx-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
         style={{
           gap: 8,
           flex: 1,

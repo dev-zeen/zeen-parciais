@@ -1,17 +1,17 @@
 import { Feather } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { Image, TouchableOpacity, useColorScheme } from 'react-native';
+import { TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { TeamCupMatch } from '@/components/contexts/leagues/Cup/TeamCupMatch/TeamCupMatch';
+import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import useTeam from '@/hooks/useTeam';
+import usePartialScore from '@/hooks/usePartialScore';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
-import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
-import { onCalculatePartialScore, onGetCurrentCountPlayerIsPlayedByTeam } from '@/utils/partials';
 
 interface CupMatchProps {
   match: CupMatchModel;
@@ -32,57 +32,39 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { partialScore: homePartialScore, playersHaveAlreadyPlayed: homePlayersHaveAlreadyPlayed } =
+    usePartialScore({
+      teamId: match.time_mandante_id ?? 0,
+    });
 
-  const { team: homeTeam } = useTeam({
-    teamId: match.time_mandante_id ?? 0,
-    round: match.rodada_id,
-  });
-
-  const { team: awayTeam } = useTeam({
-    teamId: match.time_visitante_id ?? 0,
-    round: match.rodada_id,
-  });
-
-  const homePartial = useMemo(() => {
-    if (homeTeam) {
-      return onCalculatePartialScore(homeTeam?.atletas, homeTeam?.capitao_id, playerStats);
-    }
-  }, [homeTeam, playerStats]);
-
-  const homePlayersPlayed = useMemo(() => {
-    if (homeTeam && homeTeam.atletas && playerStats) {
-      return onGetCurrentCountPlayerIsPlayedByTeam(homeTeam.atletas, playerStats);
-    }
-  }, [homeTeam, playerStats]);
+  const { partialScore: awayPartialScore, playersHaveAlreadyPlayed: awayPlayersHaveAlreadyPlayed } =
+    usePartialScore({
+      teamId: match.time_visitante_id ?? 0,
+    });
 
   const scoreHomeTeam = useMemo(
     () =>
-      marketStatus?.rodada_atual === match.rodada_id ? homePartial : match?.time_mandante_pontuacao,
-    [homePartial, marketStatus?.rodada_atual, match.rodada_id, match?.time_mandante_pontuacao]
-  ) as number;
-
-  const awayPartialScore = useMemo(() => {
-    if (awayTeam) {
-      return onCalculatePartialScore(awayTeam?.atletas, awayTeam?.capitao_id, playerStats);
-    }
-  }, [awayTeam, playerStats]);
+      marketStatus?.rodada_atual === match.rodada_id
+        ? homePartialScore
+        : match?.time_mandante_pontuacao,
+    [homePartialScore, marketStatus?.rodada_atual, match.rodada_id, match?.time_mandante_pontuacao]
+  );
 
   const scoreAwayTeam = useMemo(
-    () => (match.vencedor_id ? match?.time_visitante_pontuacao : awayPartialScore),
-    [awayPartialScore, match?.time_visitante_pontuacao, match.vencedor_id]
-  ) as number;
-
-  const awayPlayersPlayed = useMemo(() => {
-    if (awayTeam && awayTeam.atletas && playerStats) {
-      return onGetCurrentCountPlayerIsPlayedByTeam(awayTeam.atletas, playerStats);
-    }
-  }, [awayTeam, playerStats]);
+    () =>
+      marketStatus?.rodada_atual === match.rodada_id
+        ? awayPartialScore
+        : match?.time_visitante_pontuacao,
+    [awayPartialScore, marketStatus?.rodada_atual, match.rodada_id, match?.time_visitante_pontuacao]
+  );
 
   const currentRound = marketStatus?.rodada_atual;
 
-  const showScore =
-    match.rodada_id < (currentRound ?? 0) || (match.rodada_id === currentRound && isMarketClose);
+  const showScore = useMemo(
+    () =>
+      match.rodada_id < (currentRound ?? 0) || (match.rodada_id === currentRound && isMarketClose),
+    [currentRound, isMarketClose, match.rodada_id]
+  );
 
   const colorScore = useCallback((team: number, compare: number) => {
     return team > compare ? '#22c55e' : '#ef4444';
@@ -97,12 +79,9 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
     [match.time_mandante_id, match.time_visitante_id, myTeam?.time?.time_id]
   );
 
-  const teamOpacity = useCallback((score?: number, compareScore?: number) => {
-    if (score && compareScore) {
-      return score > compareScore ? 1 : 0.3;
-    }
-    return 1;
-  }, []);
+  if (!currentRound) {
+    return <Loading />;
+  }
 
   return (
     <Link
@@ -118,119 +97,65 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
         key={match.time_mandante_id}
         disabled={!match.time_mandante_id || !showScore}>
         <View
-          className="rounded-lg justify-center items-center py-2"
+          className="flex-row rounded-lg justify-center items-center py-2"
           style={{
             borderColor: customBorder,
             borderWidth: 2,
-            gap: 8,
+            gap: 4,
           }}>
-          <View
-            className="flex-row justify-between"
-            style={{
-              gap: 4,
-            }}>
+          <TeamCupMatch match={match} teamId={match.time_mandante_id} />
+
+          <View className="justify-center items-center rounded z-40 mb-3" style={{}}>
+            <Text className="text-sm">{STAGE_TYPE_NAMED[match.tipo_fase]}</Text>
             <View
-              className="justify-center items-center bg-transparent"
+              className="flex-row justify-center items-center"
               style={{
-                width: '30%',
-                gap: 4,
-                opacity: teamOpacity(match.time_mandante_pontuacao, match.time_visitante_pontuacao),
+                gap: 8,
+                width: '40%',
               }}>
-              {homeTeam ? (
-                <>
-                  <Image
-                    source={{
-                      uri: homeTeam?.time.url_escudo_png,
-                    }}
-                    className="w-12 h-12"
-                    alt={`Escudo do ${homeTeam?.time.nome}`}
-                  />
-
-                  <Text numberOfLines={1} className="text-xs font-semibold">
-                    {homeTeam?.time.nome ?? '-'}
-                  </Text>
-                </>
-              ) : (
-                <Text numberOfLines={1} className="text-xs">
-                  A definir
+              <View className="items-center justify-center">
+                <Text
+                  className="font-semibold text-sm"
+                  style={{
+                    color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
+                  }}>
+                  {showScore ? numberToString(scoreHomeTeam) : '-'}
                 </Text>
-              )}
-            </View>
-
-            <View className="justify-center items-center rounded z-40 mb-3" style={{}}>
-              <Text className="text-sm">{STAGE_TYPE_NAMED[match.tipo_fase]}</Text>
-              <View
-                className="flex-row justify-center items-center"
-                style={{
-                  gap: 8,
-                  width: '40%',
-                }}>
-                <View className="items-center justify-center">
-                  <Text
-                    className="font-semibold text-sm"
-                    style={{
-                      color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
-                    }}>
-                    {showScore ? numberToString(scoreHomeTeam) : '-'}
+                {showScore && currentRound === match.rodada_id ? (
+                  <Text className="font-semibold text-xs">
+                    {homePlayersHaveAlreadyPlayed ?? 0}/12
                   </Text>
-                  {showScore && currentRound === match.rodada_id ? (
-                    <Text className="font-semibold text-xs">{homePlayersPlayed ?? 0}/12</Text>
-                  ) : (
-                    <></>
-                  )}
-                </View>
+                ) : (
+                  <></>
+                )}
+              </View>
 
-                <Feather
-                  name="x"
-                  size={10}
-                  color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
-                />
+              <Feather
+                name="x"
+                size={10}
+                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+              />
 
-                <View className="items-center justify-center">
-                  <Text
-                    className="font-semibold text-sm"
-                    style={{
-                      color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
-                    }}>
-                    {showScore ? numberToString(scoreAwayTeam) : '-'}
+              <View className="items-center justify-center">
+                <Text
+                  className="font-semibold text-sm"
+                  style={{
+                    color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
+                  }}>
+                  {showScore ? numberToString(scoreAwayTeam) : '-'}
+                </Text>
+                {showScore && currentRound === match.rodada_id ? (
+                  <Text className="font-semibold text-xs">
+                    {awayPlayersHaveAlreadyPlayed ?? 0}/12
                   </Text>
-                  {showScore && currentRound === match.rodada_id ? (
-                    <Text className="font-semibold text-xs">{awayPlayersPlayed ?? 0}/12</Text>
-                  ) : (
-                    <></>
-                  )}
-                </View>
+                ) : (
+                  <></>
+                )}
               </View>
             </View>
-
-            <View
-              className="justify-center items-center"
-              style={{
-                width: '30%',
-                gap: 4,
-                opacity: teamOpacity(match.time_visitante_pontuacao, match.time_mandante_pontuacao),
-              }}>
-              {awayTeam ? (
-                <>
-                  <Image
-                    source={{
-                      uri: awayTeam?.time.url_escudo_png,
-                    }}
-                    className="w-12 h-12"
-                    alt={`Escudo do ${awayTeam?.time.nome}`}
-                  />
-
-                  <Text numberOfLines={1} className="text-xs font-semibold">
-                    {awayTeam?.time.nome ?? '-'}
-                  </Text>
-                </>
-              ) : (
-                <Text numberOfLines={1} className="text-xs">
-                  A definir
-                </Text>
-              )}
-            </View>
           </View>
+
+          <TeamCupMatch match={match} teamId={match.time_visitante_id} />
         </View>
       </TouchableOpacity>
     </Link>

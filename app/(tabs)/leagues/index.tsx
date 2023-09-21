@@ -92,7 +92,7 @@ export default function () {
     await Promise.all([onRefetchMyClub && onRefetchMyClub(), onRefetchLeagues()]);
   }, [onRefetchLeagues, onRefetchMyClub]);
 
-  const isRefetching = isRefetchingMyClub || isRefetchingLeagues;
+  const isRefetching = isRefetchingMyClub && isRefetchingLeagues;
 
   if (!isAutheticated) {
     return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;

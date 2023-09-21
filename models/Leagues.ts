@@ -140,10 +140,14 @@ export interface CupMatch {
   chave_id: number;
   liga_id: number;
   tipo_fase: StageType;
-  time_mandante_id?: number;
-  time_visitante_id?: number;
+  time_mandante_id: number;
+  time_visitante_id: number;
   vencedor_id?: number;
   chave_subsequente_id?: number;
-  time_mandante_pontuacao?: number;
-  time_visitante_pontuacao?: number;
+  time_mandante_pontuacao: number;
+  time_visitante_pontuacao: number;
+}
+
+export interface ClubByLeague extends TeamLeague {
+  playersHavePlayed?: number;
 }

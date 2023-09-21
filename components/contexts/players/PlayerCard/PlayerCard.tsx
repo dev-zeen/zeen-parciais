@@ -68,25 +68,26 @@ export function PlayerCard({
   return (
     <TouchableOpacity
       activeOpacity={0.6}
-      className={`flex-row justify-between items-center rounded-lg px-4 py-2 ${stylePlayerInMyLineup}`}>
+      className={`flex-row justify-between items-center rounded-lg p-2 ${stylePlayerInMyLineup}`}>
       <View className={`flex-row items-center gap-1 rounded-lg ${stylePlayerInMyLineup}`}>
         <Image
           source={{
             uri: player?.foto?.replace('FORMATO', '220x220'),
           }}
-          className="w-12 h-12"
+          className="w-12 h-12 rounded-full"
           alt={player.apelido}
-        />
-        <Image
-          source={{
-            uri: club?.escudos?.['60x60'],
-          }}
-          className="w-6 h-6"
-          alt={`Escudo do ${club?.nome}`}
         />
         <View className={`${stylePlayerInMyLineup}`}>
           <Text className="font-semibold text-sm">{player.apelido}</Text>
-          <Text className="font-light text-xs">{position?.nome}</Text>
+          <View
+            className={`flex-row items-center ${stylePlayerInMyLineup}`}
+            style={{
+              gap: 4,
+            }}>
+            <Text className="font-normal text-xs">{position?.nome}</Text>
+            <View className="rounded-full bg-gray-300 h-1 w-1" />
+            <Text className="font-normal text-xs">{club?.nome}</Text>
+          </View>
         </View>
       </View>
       <View className={`justify-center items-end ${stylePlayerInMyLineup}`}>

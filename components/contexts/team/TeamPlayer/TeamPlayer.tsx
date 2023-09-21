@@ -63,7 +63,7 @@ export function TeamPlayer({
   return (
     <View
       className={`items-center justify-center ${
-        isReplaced || (isReservePlayer && !isEnteredInMatch && isMarketClose) ? 'opacity-50' : ''
+        isReplaced || (isReservePlayer && !isEnteredInMatch && isMarketClose) ? 'opacity-75' : ''
       }`}
       style={{
         gap: 2,

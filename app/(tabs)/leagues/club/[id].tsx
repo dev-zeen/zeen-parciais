@@ -1,13 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { ListRenderItemInfo, SectionList, useColorScheme } from 'react-native';
+import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 
-import { Text, View } from '@/components/Themed';
+import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
+import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePartialScore from '@/hooks/usePartialScore';
@@ -20,7 +21,7 @@ import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
 import { numberToString } from '@/utils/parseTo';
-import { onCalculatePartialScore, onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
+import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
 
 const TYPE_VIEW = {
   CAMPO: 'CAMPO',
@@ -30,6 +31,7 @@ const TYPE_VIEW = {
 export interface PlayerClub extends FullPlayer {
   isReplaced?: boolean;
   isJoined?: boolean;
+  isReserve?: boolean;
 }
 
 export default () => {
@@ -53,10 +55,9 @@ export default () => {
 
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
+  const marketRound = useMemo(() => marketStatus?.rodada_atual, [marketStatus?.rodada_atual]);
+
   const [currentRound, setCurrentRound] = useState(0);
-  const [clubAppreciation, setClubAppreciation] = useState(0);
-  const [reservePlayers, setReservePlayers] = useState<FullPlayer[] | PlayerClub[]>();
-  const [startingPlayers, setStartingPlayers] = useState<FullPlayer[] | PlayerClub[]>();
 
   const { team } = useTeam({
     teamId: Number(id),
@@ -68,22 +69,38 @@ export default () => {
     round: currentRound,
   });
 
-  const { partialScore } = usePartialScore({
-    teamId: team?.time?.time_id ?? 0,
-  });
+  const rounds = useMemo(
+    () => Array.from({ length: marketRound ?? 0 }, (_, index) => index + 1),
+    [marketRound]
+  );
 
-  useEffect(() => {
-    if (currentRound === marketStatus?.rodada_atual && isMarketClose && team) {
-      const currentSum = team.atletas.reduce((acc, current) => {
-        if (valorizations?.atletas[current.atleta_id]?.variacao_num) {
-          return (acc += valorizations?.atletas[current.atleta_id]?.variacao_num);
-        }
-        return acc;
-      }, 0);
+  const { partialScore, totalPartialScore, partialValorization, totalPartialValorization } =
+    usePartialScore({
+      teamId: team?.time?.time_id ?? 0,
+    });
 
-      setClubAppreciation(currentSum as number);
-    }
-  }, [valorizations, marketStatus, currentRound, team, isMarketClose]);
+  const onGetPlayersTab = (team: FullClubInfo) => {
+    const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
+      team,
+      substitutions
+    );
+
+    return [
+      {
+        title: 'Titulares',
+        data: playersUpdated,
+      },
+      {
+        title: 'Reservas',
+        data: reservesUpdated.map((item) => {
+          return {
+            ...item,
+            isReserve: true,
+          };
+        }),
+      },
+    ];
+  };
 
   useEffect(() => {
     if (marketStatus && isFirstRender.current) {
@@ -94,83 +111,114 @@ export default () => {
     }
   }, [isMarketClose, marketStatus]);
 
-  useEffect(() => {
-    if (team && substitutions && substitutions?.length > 0) {
-      const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
-        team,
-        substitutions
-      );
-      setStartingPlayers(playersUpdated);
-      setReservePlayers(reservesUpdated);
-    } else {
-      if (team?.atletas) setStartingPlayers(team.atletas);
-      if (team?.reservas) setReservePlayers(team.reservas);
-    }
-  }, [team, substitutions]);
-
   const onRefetch = useCallback(async () => {
     await Promise.all([onRefetchStats(), onRefetchValorizations()]);
   }, [onRefetchStats, onRefetchValorizations]);
 
-  const isRefetching = isRefetchingPlayerStats || isRefetchingValorizations;
+  const isRefetching = isRefetchingPlayerStats && isRefetchingValorizations;
+
+  const flatListRef = useRef<FlatList<number> | null>(null);
+
+  const scrollToSelectedRound = useCallback(() => {
+    if (marketRound && marketRound >= 1) {
+      flatListRef.current?.scrollToIndex({
+        index: marketRound - 1,
+        animated: true,
+        viewPosition: 0.5,
+      });
+    }
+  }, [marketRound]);
+
+  useEffect(() => {
+    scrollToSelectedRound();
+  }, [scrollToSelectedRound]);
 
   const renderItem = useCallback(
-    (player: PlayerClub, isReserve?: boolean) => {
+    ({ item: player }: ListRenderItemInfo<PlayerClub>) => {
       return (
         <ClubPlayerCard
-          key={player.atleta_id}
           player={player}
           isCapitain={team?.capitao_id === player.atleta_id}
           currentRound={currentRound}
           marketStatus={marketStatus as MarketStatus}
           playerStats={playerStats}
-          isReserve={isReserve}
+          isReserve={player.isReserve}
           appreciation={valorizations?.atletas[player.atleta_id]?.variacao_num}
+          isReplacePlayer={substitutions?.some(
+            (item) =>
+              item.entrou.atleta_id === player.atleta_id || item.saiu.atleta_id === player.atleta_id
+          )}
         />
       );
     },
-    [currentRound, marketStatus, playerStats, team?.capitao_id, valorizations?.atletas]
+    [
+      currentRound,
+      marketStatus,
+      playerStats,
+      substitutions,
+      team?.capitao_id,
+      valorizations?.atletas,
+    ]
+  );
+
+  const renderItemRound = useCallback(
+    ({ item }: ListRenderItemInfo<number>) => {
+      return (
+        <TouchableOpacity
+          className="w-12 py-4 items-center justify-center border-2 border-blue-400 rounded-md"
+          style={{
+            borderWidth: 2,
+            borderColor: currentRound === item ? '#60A5FA' : Colors.light.backgroundFull,
+          }}
+          onPress={() => setCurrentRound(item)}>
+          <Text>{item}</Text>
+        </TouchableOpacity>
+      );
+    },
+    [currentRound]
   );
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
+  const keyExtractor = useCallback((item: PlayerClub) => `${item.atleta_id}`, []);
+
   const isLoading = isMarketClose ? !playerStats || !marketStatus : !marketStatus;
 
-  if (isLoading || !team || startingPlayers?.length === 0) {
+  if (isLoading || !team || !marketRound || !rounds || !currentRound) {
     return <Loading />;
   }
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      showsHorizontalScrollIndicator={false}
-      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
+    <>
       <View
-        className="p-2"
+        className="px-2 pt-2"
         style={{
           gap: 8,
           backgroundColor:
             colorTheme === 'dark' ? BACKGROUND_DEFAULT_DARK : BACKGROUND_DEFAULT_LIGHT,
         }}>
         <TeamBanner team={team as FullClubInfo} />
-
         <View className="flex-row justify-between items-center rounded-lg p-3">
           <View className="justify-center items-center gap-1">
             <Text className="font-light text-xs">Patrim.</Text>
             <View className="flex-row">
               <Text className="font-semibold text-sm">
-                {isMarketClose && currentRound === marketStatus?.rodada_atual
-                  ? numberToString((team?.patrimonio as number) + clubAppreciation)
+                {isMarketClose && currentRound === marketRound
+                  ? numberToString(totalPartialValorization)
                   : numberToString(team?.patrimonio)}
               </Text>
-              {isMarketClose && currentRound === marketStatus?.rodada_atual && (
+              {isMarketClose && currentRound === marketRound && (
                 <View className="flex-row pl-2 justify-center items-center">
-                  <Text className="font-semibold text-sm">{numberToString(clubAppreciation)}</Text>
+                  <Text className="font-semibold text-sm">
+                    {numberToString(partialValorization)}
+                  </Text>
 
                   <Feather
                     size={16}
-                    name={clubAppreciation && clubAppreciation < 0 ? 'arrow-down' : 'arrow-up'}
-                    color={clubAppreciation && clubAppreciation < 0 ? '#ef4444' : '#4ade80'}
+                    name={
+                      partialValorization && partialValorization < 0 ? 'arrow-down' : 'arrow-up'
+                    }
+                    color={partialValorization && partialValorization < 0 ? '#ef4444' : '#4ade80'}
                   />
                 </View>
               )}
@@ -182,9 +230,9 @@ export default () => {
 
             <Text
               className={`font-semibold text-sm ${
-                currentRound === marketStatus?.rodada_atual && 'text-green-500'
+                currentRound === marketRound && 'text-green-500'
               }`}>
-              {currentRound === marketStatus?.rodada_atual
+              {currentRound === marketRound
                 ? numberToString(partialScore)
                 : numberToString(team?.pontos)}
             </Text>
@@ -194,96 +242,73 @@ export default () => {
             <Text className="font-light text-xs">Total</Text>
             <Text
               className={`font-semibold text-sm ${
-                currentRound === marketStatus?.rodada_atual && 'text-green-500'
+                currentRound === marketRound && 'text-green-500'
               }`}>
               {' '}
-              {currentRound === marketStatus?.rodada_atual
-                ? onCalculatePartialScore(
-                    team.atletas as FullPlayer[],
-                    team?.capitao_id as number,
-                    playerStats
-                  )
-                  ? numberToString(
-                      (onCalculatePartialScore(
-                        team.atletas as FullPlayer[],
-                        team?.capitao_id as number,
-                        playerStats
-                      ) as number) + (team?.pontos_campeonato as number)
-                    )
-                  : 0
+              {currentRound === marketRound
+                ? numberToString(totalPartialScore)
                 : numberToString(team?.pontos_campeonato)}
             </Text>
           </View>
         </View>
+      </View>
 
-        <View
-          className="rounded-lg p-2 flex-row items-center justify-center"
-          style={{
-            gap: 8,
-          }}>
-          <TouchableOpacity
-            activeOpacity={0.6}
-            className={`p-2 items-center justify-center mx-1 rounded-full ${
-              currentRound === 1 ? 'bg-gray-100' : 'bg-blue-50'
-            }`}
-            disabled={currentRound === 1}
-            onPress={() => setCurrentRound((previous) => previous - 1)}>
-            <Feather
-              name="chevron-left"
-              size={24}
-              color={currentRound === 1 ? '#d1d5db' : '#3b82f6'}
-            />
-          </TouchableOpacity>
-
-          <Text className="font-semibold">Rodada {currentRound}</Text>
-
-          <TouchableOpacity
-            activeOpacity={0.6}
-            className={`p-2 items-center justify-center mx-1 rounded-full ${
-              currentRound === marketStatus?.rodada_atual ? 'bg-gray-100' : 'bg-blue-50'
-            }`}
-            disabled={
-              isMarketClose
-                ? currentRound === marketStatus?.rodada_atual
-                : currentRound === (marketStatus?.rodada_atual as number) - 1
-            }
-            onPress={() => setCurrentRound((previous) => previous + 1)}>
-            <Feather
-              name="chevron-right"
-              size={24}
-              color={
-                isMarketClose
-                  ? currentRound === marketStatus?.rodada_atual
-                    ? '#d1d5db'
-                    : '#3b82f6'
-                  : currentRound === (marketStatus?.rodada_atual as number) - 1
-                  ? '#d1d5db'
-                  : '#3b82f6'
-              }
-            />
-          </TouchableOpacity>
-        </View>
+      <View
+        className="flex-row items-center justify-center px-2 pt-2"
+        style={{
+          gap: 8,
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        }}>
+        <FlatList
+          getItemLayout={(data, index) => ({
+            length: 52,
+            offset: 52 * index,
+            index,
+          })}
+          ref={flatListRef}
+          data={rounds}
+          renderItem={renderItemRound}
+          keyExtractor={(item) => `${item}`}
+          horizontal
+          contentContainerStyle={{
+            gap: 4,
+          }}
+          showsHorizontalScrollIndicator={false}
+          initialNumToRender={38}
+          initialScrollIndex={currentRound - 1}
+        />
       </View>
 
       {typeViewDefault === TYPE_VIEW.CAMPO && <View></View>}
 
       {typeViewDefault === TYPE_VIEW.LISTA && (
-        <View
-          className={`justify-center px-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
-          style={{
+        <SectionList
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+          initialNumToRender={17}
+          sections={onGetPlayersTab(team as FullClubInfo)}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          showsVerticalScrollIndicator={false}
+          stickyHeaderHiddenOnScroll
+          contentContainerStyle={{
             gap: 8,
-          }}>
-          <View className="rounded-lg py-2">
-            <Text className="font-semibold text-center text-lg">Titulares</Text>
-            {startingPlayers?.map((player) => renderItem(player))}
-          </View>
-
-          <View className="rounded-lg py-2 mb-2">
-            <Text className="font-semibold text-center text-lg">Reservas</Text>
-            {reservePlayers?.map((player) => renderItem(player, true))}
-          </View>
-        </View>
+            paddingHorizontal: 8,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          }}
+          renderSectionHeader={({ section: { title } }) => (
+            <View
+              className="pt-2 rounded"
+              style={{
+                backgroundColor:
+                  colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+              }}>
+              <Text className="font-bold text-base text-center items-center">{title}</Text>
+            </View>
+          )}
+        />
       )}
-    </ScrollView>
+    </>
   );
 };
