@@ -20,40 +20,32 @@ const useValorization = () => {
     isRefetching: isRefetchingValorizations,
   } = useGetAppreciations(!!allowRequest);
 
-  const [currentValorizations, setCurrentValorizations] = useState<Appreciations>();
+  const [currentValorizations, setCurrentValorizations] = useState<Appreciations | undefined>();
 
   useEffect(() => {
     if (
-      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO ||
+      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO &&
       marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_ATUALIZACAO
     ) {
       onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
         if (isMarketClose && res) {
           setCurrentValorizations(res);
         } else {
-          const newAppreciations = market?.atletas.reduce(
-            (acc, current) => {
-              if (current.entrou_em_campo) {
-                return {
-                  ...acc,
-                  atletas: {
-                    ...acc.atletas,
-                    [current?.atleta_id]: {
-                      posicao_id: current?.posicao_id,
-                      variacao_num: current?.variacao_num,
-                    },
+          const newAppreciations = market?.atletas
+            .filter((current) => current.entrou_em_campo)
+            .reduce(
+              (acc, current) => ({
+                ...acc,
+                atletas: {
+                  ...acc.atletas,
+                  [current?.atleta_id]: {
+                    posicao_id: current?.posicao_id,
+                    variacao_num: current?.variacao_num,
                   },
-                };
-              } else {
-                return {
-                  ...acc,
-                };
-              }
-            },
-            {
-              atletas: {},
-            } as Appreciations
-          );
+                },
+              }),
+              { atletas: {} } as Appreciations
+            );
 
           setCurrentValorizations(newAppreciations);
         }
@@ -62,7 +54,12 @@ const useValorization = () => {
   }, [marketStatus, isMarketClose, market]);
 
   return {
-    valorizations: isMarketClose ? valorizations : currentValorizations,
+    valorizations:
+      Object.keys(valorizations?.atletas ?? {}).length > 0
+        ? isMarketClose
+          ? valorizations
+          : currentValorizations
+        : null,
     isLoadingValorizations: useMemo(() => isLoadingValorizations, [isLoadingValorizations]),
     onRefetchValorizations: !allowRequest ? () => null : onRefetchValorizations,
     isRefetchingValorizations: useMemo(

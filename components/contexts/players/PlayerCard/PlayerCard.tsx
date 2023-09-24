@@ -123,19 +123,23 @@ export function PlayerCard({
           <Text className="font-semibold">{playerScore}</Text>
         </View>
 
-        <View className={`flex-row ${stylePlayerInMyLineup}`}>
-          {Object.entries(player?.scout as object).map(([key, value]) => (
-            <Text
-              key={key + value}
-              className={`text-xs font-semibold text-center ${
-                scoutsColors[key] === 'negative' && 'text-folly'
-              }
+        {player && player.scout && Object.entries(player?.scout as object).length > 0 ? (
+          <View className={`flex-row ${stylePlayerInMyLineup}`}>
+            {Object.entries(player?.scout as object).map(([key, value]) => (
+              <Text
+                key={key + value}
+                className={`text-xs font-semibold text-center ${
+                  scoutsColors[key] === 'negative' && 'text-folly'
+                }
 
-                ${scoutsColors[key] === 'positive' && 'text-green-500'}
-                
-                `}>{` ${value}${key}`}</Text>
-          ))}
-        </View>
+          ${scoutsColors[key] === 'positive' && 'text-green-500'}
+          
+          `}>{` ${value}${key}`}</Text>
+            ))}
+          </View>
+        ) : (
+          <></>
+        )}
       </View>
     </TouchableOpacity>
   );

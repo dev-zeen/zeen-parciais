@@ -25,7 +25,7 @@ export default () => {
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (!league || !clubsByLeague) return <Loading />;
+  if (!league) return <Loading />;
 
   return (
     <>

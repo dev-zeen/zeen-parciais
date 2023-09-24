@@ -57,8 +57,8 @@ export default () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myClub, playerStats]);
 
-  const onRefresh = useCallback(async () => {
-    await Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]);
+  const onRefresh = useCallback(() => {
+    Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]);
   }, [onRefetchMyClub, onRefetchPlayerStats]);
 
   const isRefetching = useMemo(
@@ -85,7 +85,7 @@ export default () => {
         refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={isRefetching} />}>
         <View
           className={`justify-center items-center pb-2 ${
-            colorTheme === 'dark' ? `bg-dark` : 'bg-light'
+            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
           }`}
           style={{ gap: 8 }}>
           <TeamActions initialLineupTeamFormation={initialLineupTeamFormation} />

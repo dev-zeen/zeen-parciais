@@ -112,8 +112,8 @@ export default () => {
     [removePlayerFromLineup]
   );
 
-  const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchValorizations(), onRefetchStats(), onRefetchMatches()]);
+  const onRefetch = useCallback(() => {
+    Promise.all([onRefetchValorizations(), onRefetchStats(), onRefetchMatches()]);
   }, [onRefetchMatches, onRefetchStats, onRefetchValorizations]);
 
   const isRefetching = useMemo(

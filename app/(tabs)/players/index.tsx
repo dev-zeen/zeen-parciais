@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-// import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { useCallback, useEffect, useState } from 'react';
 import { ListRenderItemInfo, RefreshControl, TextInput, useColorScheme } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
@@ -83,6 +82,11 @@ export default () => {
       setMainDataMarket(playerStatsMarket);
       setFilteredDataSource(playerStatsMarket);
     }
+
+    return () => {
+      setFilteredDataSource([]);
+      setMainDataMarket([]);
+    };
   }, [isMarketClose, market, playerStats]);
 
   const onRefetch = useCallback(async () => {
@@ -149,21 +153,6 @@ export default () => {
           autoCorrect={false}
         />
 
-        {/* <FlashList
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          data={filteredDataSource}
-          keyExtractor={keyExtractor}
-          ItemSeparatorComponent={() => (
-            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
-          )}
-          renderItem={renderItem}
-          estimatedItemSize={300}
-          contentContainerStyle={{
-            paddingVertical: 4,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}
-        /> */}
         <FlatList
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
           data={filteredDataSource}

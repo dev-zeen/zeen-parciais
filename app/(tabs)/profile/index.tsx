@@ -112,16 +112,16 @@ export default () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-        className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
+        className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View
-          className={`flex-1 rounded-lg ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}
+          className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
           style={{
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
           }}>
           <MarketStatusCard />
           <TeamBanner team={myClub} />
-          <View className={`flex-row gap-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
+          <View className={`flex-row gap-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
             <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
               <Text className="font-semibold">Total de Pontos</Text>
               <Text className="font-semibold text-xl">{totalScore}</Text>
@@ -136,7 +136,7 @@ export default () => {
           </View>
 
           {historyClub && historyClub.length > 0 && (
-            <View className={`flex-row gap-2 ${colorTheme === 'dark' ? `bg-dark` : 'bg-light'}`}>
+            <View className={`flex-row gap-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
               <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
                 <Text className="font-semibold">Maior Pontuação</Text>
                 <Text className="font-semibold text-xl text-blue-500">
