@@ -23,17 +23,13 @@ export function TeamBanner({ team }: TeamBannerProps) {
           />
           <View className="gap-1 pl-4">
             {team.time.assinante ? (
-              <Image
-                source={proImage}
-                className="w-10 h-5"
-                alt={`Selo PRO para quem é assinante`}
-              />
+              <Image source={proImage} className="w-10 h-5" alt="Selo PRO para quem é assinante" />
             ) : (
               <View />
             )}
 
             <Text className="font-semibold text-sm">{team.time.nome}</Text>
-            <Text className="font-light text-xs capitalize">{team.time.nome_cartola}</Text>
+            <Text className="text-xs capitalize">{team.time.nome_cartola}</Text>
           </View>
         </View>
       </Pressable>

@@ -96,7 +96,7 @@ export default () => {
               {!isMarketClose ? (
                 <View className="flex-row justify-around items-center rounded-lg py-2">
                   <View className="justify-center items-center gap-1">
-                    <Text className="font-light text-xs">Patrim.</Text>
+                    <Text className="text-xs">Patrim.</Text>
                     <Text className="font-bold text-sm">{numberToString(myClub?.patrimonio)}</Text>
 
                     <Text
@@ -108,7 +108,7 @@ export default () => {
                   </View>
 
                   <View className="justify-center items-center gap-1">
-                    <Text className="font-light text-xs">Ult. Rodada</Text>
+                    <Text className="text-xs">Ult. Rodada</Text>
 
                     <Text className="font-bold text-sm">{numberToString(myClub?.pontos)}</Text>
 
@@ -121,9 +121,7 @@ export default () => {
                   </View>
 
                   <View className="justify-center items-center gap-1">
-                    <Text className="font-light text-xs">
-                      {isMarketClose ? 'Total Parcial' : 'Total'}
-                    </Text>
+                    <Text className="text-xs">{isMarketClose ? 'Total Parcial' : 'Total'}</Text>
                     <Text className="font-bold text-sm">
                       {numberToString(myClub?.pontos_campeonato)}
                     </Text>
@@ -173,7 +171,7 @@ export default () => {
                       <Text className="text-sm font-semibold">{capitain?.apelido}</Text>
 
                       <View className="flex-row items-center">
-                        <Text className="text-xs font-light uppercase">
+                        <Text className="text-xs  uppercase">
                           {(positions as IPositions)[capitain?.posicao_id as number].nome}
                         </Text>
                       </View>

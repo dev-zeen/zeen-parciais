@@ -1,7 +1,13 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+// import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, RefreshControl, useColorScheme } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  ListRenderItemInfo,
+  RefreshControl,
+  useColorScheme,
+} from 'react-native';
 
 import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
@@ -224,7 +230,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
             <ActivityIndicator />
           </View>
         ) : (
-          <FlashList
+          <FlatList
             refreshControl={
               <RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />
             }
@@ -234,7 +240,8 @@ export function League({ league, clubsByLeague }: LeagueProps) {
               <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
             )}
             renderItem={renderItem}
-            estimatedItemSize={100}
+            initialNumToRender={15}
+            maxToRenderPerBatch={15}
             contentContainerStyle={{
               paddingTop: 8,
               paddingVertical: 8,

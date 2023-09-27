@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -41,8 +41,29 @@ export default () => {
     teamId: myClub?.time.time_id as number,
   });
 
-  const [highestScore, setHighestScore] = useState<TeamHistoryRound>();
-  const [lowestScore, setLowestScore] = useState<TeamHistoryRound>();
+  const highestScore: TeamHistoryRound | undefined = useMemo(() => {
+    return historyClub
+      ?.filter((item) => item.pontos)
+      .reduce((acc, item) => {
+        if (item.pontos > acc.pontos) {
+          return (acc = item);
+        } else {
+          return acc;
+        }
+      });
+  }, [historyClub]);
+
+  const lowestScore: TeamHistoryRound | undefined = useMemo(() => {
+    return historyClub
+      ?.filter((item) => item.pontos)
+      .reduce((acc, item) => {
+        if (item.pontos < acc.pontos) {
+          return (acc = item);
+        } else {
+          return acc;
+        }
+      });
+  }, [historyClub]);
 
   const totalScore = numberToString(
     (myClub?.pontos_campeonato as number) + (isMarketClose ? partialScore : 0)
@@ -51,37 +72,6 @@ export default () => {
   const totalPatrimony = myClub && numberToString(myClub?.patrimonio);
 
   const isLoading = isLoadingHistory || isLoadingMyClub || !myClub;
-
-  useEffect(() => {
-    if (historyClub && historyClub.length > 0) {
-      const highestScore =
-        historyClub?.length &&
-        historyClub
-          .filter((item) => item.pontos)
-          .reduce((acc, item) => {
-            if (item.pontos > acc.pontos) {
-              return (acc = item);
-            } else {
-              return acc;
-            }
-          });
-
-      const lowestScore =
-        historyClub?.length &&
-        historyClub
-          .filter((item) => item.pontos)
-          .reduce((acc, item) => {
-            if (item.pontos < acc.pontos) {
-              return (acc = item);
-            } else {
-              return acc;
-            }
-          });
-
-      setHighestScore(highestScore as TeamHistoryRound);
-      setLowestScore(lowestScore as TeamHistoryRound);
-    }
-  }, [historyClub]);
 
   const onRefetch = useCallback(async () => {
     if (onRefetchMyClub && onRefetchHistoricMyClub)
@@ -125,13 +115,13 @@ export default () => {
             <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
               <Text className="font-semibold">Total de Pontos</Text>
               <Text className="font-semibold text-xl">{totalScore}</Text>
-              <Text className="font-light">Pts</Text>
+              <Text>Pts</Text>
             </View>
 
             <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
               <Text className="font-semibold">Patrim.</Text>
               <Text className="font-semibold text-xl">{totalPatrimony}</Text>
-              <Text className="font-light">C$</Text>
+              <Text>C$</Text>
             </View>
           </View>
 
@@ -142,7 +132,7 @@ export default () => {
                 <Text className="font-semibold text-xl text-blue-500">
                   {numberToString(highestScore?.pontos as number)}
                 </Text>
-                <Text className="font-light">Rodada {highestScore?.rodada_id}</Text>
+                <Text>Rodada {highestScore?.rodada_id}</Text>
               </View>
 
               <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
@@ -150,7 +140,7 @@ export default () => {
                 <Text className="font-semibold text-xl text-red-500">
                   {numberToString(lowestScore?.pontos as number)}
                 </Text>
-                <Text className="font-light">Rodada {lowestScore?.rodada_id}</Text>
+                <Text>Rodada {lowestScore?.rodada_id}</Text>
               </View>
             </View>
           )}

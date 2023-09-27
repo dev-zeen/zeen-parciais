@@ -55,7 +55,7 @@ export default () => {
 
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
-  const marketRound = useMemo(() => marketStatus?.rodada_atual, [marketStatus?.rodada_atual]);
+  const marketRound = useMemo(() => marketStatus?.rodada_atual ?? 0, [marketStatus?.rodada_atual]);
 
   const [currentRound, setCurrentRound] = useState(0);
 
@@ -70,8 +70,12 @@ export default () => {
   });
 
   const rounds = useMemo(
-    () => Array.from({ length: marketRound ?? 0 }, (_, index) => index + 1),
-    [marketRound]
+    () =>
+      Array.from(
+        { length: isMarketClose ? marketRound : marketRound - 1 ?? 0 },
+        (_, index) => index + 1
+      ),
+    [isMarketClose, marketRound]
   );
 
   const { partialScore, totalPartialScore, partialValorization, totalPartialValorization } =
@@ -200,7 +204,7 @@ export default () => {
         <TeamBanner team={team as FullClubInfo} />
         <View className="flex-row justify-between items-center rounded-lg p-3">
           <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Patrim.</Text>
+            <Text className="text-xs">Patrim.</Text>
             <View className="flex-row">
               <Text className="font-semibold text-sm">
                 {isMarketClose && currentRound === marketRound
@@ -226,7 +230,7 @@ export default () => {
           </View>
 
           <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Pontuação</Text>
+            <Text className="text-xs">Pontuação</Text>
 
             <Text
               className={`font-semibold text-sm ${
@@ -239,7 +243,7 @@ export default () => {
           </View>
 
           <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Total</Text>
+            <Text className="text-xs">Total</Text>
             <Text
               className={`font-semibold text-sm ${
                 currentRound === marketRound && 'text-green-500'

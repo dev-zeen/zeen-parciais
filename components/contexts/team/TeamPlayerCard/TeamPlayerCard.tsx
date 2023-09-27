@@ -98,7 +98,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
                     alt={`Foto do ${player?.apelido}`}
                   />
                 )}
-                <Text className="font-light text-base">{positions?.[player.posicao_id].nome}</Text>
+                <Text className="text-base">{positions?.[player.posicao_id].nome}</Text>
               </View>
 
               <Text className="font-semibold text-xl">{player.apelido}</Text>

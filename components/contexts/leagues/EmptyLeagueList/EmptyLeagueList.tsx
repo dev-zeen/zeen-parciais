@@ -11,7 +11,7 @@ export function EmptyLeagueList() {
       <Image
         source={emptyLeaguesImage}
         className="w-72 h-72 rounded-full"
-        alt={`Imagem de erro na aplicação`}
+        alt="Imagem de erro na aplicação"
       />
 
       <View

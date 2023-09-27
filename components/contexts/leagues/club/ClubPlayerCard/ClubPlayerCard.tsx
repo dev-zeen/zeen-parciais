@@ -91,13 +91,9 @@ export function ClubPlayerCard({
             </View>
 
             <View className="flex-row items-center gap-x-1">
-              <Text className="text-xs font-light capitalize">
-                {positions?.[player.posicao_id]?.nome}
-              </Text>
+              <Text className="text-xs capitalize">{positions?.[player.posicao_id]?.nome}</Text>
               <View className="rounded-full bg-gray-300 h-1 w-1" />
-              <Text className="text-xs font-light capitalize">
-                {market?.clubes[player.clube_id]?.nome}
-              </Text>
+              <Text className="text-xs capitalize">{market?.clubes[player.clube_id]?.nome}</Text>
             </View>
           </View>
 

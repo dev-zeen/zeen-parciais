@@ -26,7 +26,7 @@ export function ErrorBoundaryComponent({ error, resetError }: CustomErrorBoundar
       <Image
         source={errorImage}
         className="w-48 h-48 rounded-full"
-        alt={`Imagem de erro na aplicação`}
+        alt="Imagem de erro na aplicação"
       />
       <Text className="font-semibold text-base text-center">{errorData?.message}</Text>
 

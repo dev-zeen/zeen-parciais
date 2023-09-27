@@ -1,10 +1,10 @@
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+// import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useCallback, useEffect, useState } from 'react';
-import { RefreshControl, useColorScheme } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
+import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { CupTeamsList } from '@/components/contexts/leagues/Cup/CupTeamsList';
 import { Loading } from '@/components/structure/Loading';
@@ -24,6 +24,8 @@ interface CupProps {
 export function Cup({ league: cup }: CupProps) {
   const colorTheme = useColorScheme();
 
+  console.log('convites', cup.pedidos); // TODO CRIAR TELA DE PEDIDOS PARA PARTICIPAR DA LIGA.
+
   const { marketStatus, isMarketClose } = useMarketStatus();
 
   const { data: myClub, isLoading: isLoadingMyClub } = useGetMyClub();
@@ -34,8 +36,6 @@ export function Cup({ league: cup }: CupProps) {
     useLeague({
       slug: cup.liga.slug,
     });
-
-  const [roundTabs, setRoundTabs] = useState<ITabs[]>([]);
 
   const renderCupMatchCard = useCallback(
     ({ item }: ListRenderItemInfo<CupMatch>) => {
@@ -54,15 +54,15 @@ export function Cup({ league: cup }: CupProps) {
     (round: string) => {
       if (cup && cup.chaves_mata_mata && marketStatus && myClub) {
         return (
-          <FlashList
+          <FlatList
             refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
             data={cup.chaves_mata_mata[round]}
             keyExtractor={(item) => `${item.chave_id}`}
             ItemSeparatorComponent={() => (
               <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
             )}
+            initialNumToRender={16}
             renderItem={renderCupMatchCard}
-            estimatedItemSize={16}
             contentContainerStyle={{
               paddingTop: 8,
               paddingHorizontal: 8,
@@ -76,21 +76,20 @@ export function Cup({ league: cup }: CupProps) {
     [cup, marketStatus, myClub]
   );
 
-  useEffect(() => {
+  const roundTabs: ITabs[] | undefined = useMemo(() => {
     if (isCupInProgress && cup && cup.chaves_mata_mata) {
-      const tabs = Object.keys(cup.chaves_mata_mata).map((round) => {
+      return Object.keys(cup.chaves_mata_mata).map((round) => {
         return {
           id: Number(round),
           title: round,
           content: () => renderItem(round),
         };
       });
-
-      setRoundTabs(tabs);
     }
+    return [];
   }, [cup, isCupInProgress, renderItem]);
 
-  const isLoading = isCupInProgress ? isLoadingMyClub || roundTabs.length < 1 : isLoadingMyClub;
+  const isLoading = isCupInProgress ? isLoadingMyClub || roundTabs?.length < 1 : isLoadingMyClub;
 
   if (isLoading || !cup || !marketStatus || !renderItem) return <Loading />;
 
@@ -165,6 +164,18 @@ export function Cup({ league: cup }: CupProps) {
           </View>
         </View>
       </View>
+
+      {!isCupInProgress && cup.pedidos && cup.pedidos.length > 0 && (
+        <TouchableOpacity
+          className="rounded-lg flex-row justify-around items-center p-4 mx-2 mb-2"
+          activeOpacity={0.6}
+          style={{
+            gap: 8,
+            paddingVertical: 8,
+          }}>
+          <Text>{cup.pedidos.length} Solicitação(es)</Text>
+        </TouchableOpacity>
+      )}
 
       {!isCupInProgress ? <CupTeamsList cup={cup} /> : <Tabs tabs={roundTabs} />}
     </View>

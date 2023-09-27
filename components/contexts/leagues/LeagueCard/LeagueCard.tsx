@@ -1,6 +1,7 @@
 import { Link } from 'expo-router';
 import { Image, TouchableOpacity } from 'react-native';
 
+import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { LeagueUserDetails } from '@/models/Leagues';
 
@@ -28,7 +29,7 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
           } as never
         }>
         <TouchableOpacity activeOpacity={0.6}>
-          <View className="flex-row rounded-lg py-2 gap-x-2">
+          <View className="flex-row rounded-lg py-2 gap-x-2 items-center">
             <Image
               source={{
                 uri: league.mata_mata ? league.url_trofeu_png : league.url_flamula_png,
@@ -41,13 +42,25 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
               <View className="gap-y-1">
                 <View>
                   <Text className="text-sm font-bold">{league.nome}</Text>
-                  <Text className="text-xs font-light">
+                  <Text className="text-xs ">
                     {league.mata_mata ? 'Mata-Mata' : 'Clássica'} | {typeLeague[league.tipo]} |{' '}
                     {`${league.total_times_liga} Cartoleiros`}
                   </Text>
                 </View>
               </View>
             </View>
+
+            {!league.sem_capitao && (
+              <Image
+                source={captainIcon}
+                style={{
+                  width: 24,
+                  height: 24,
+                  margin: 4,
+                }}
+                alt="Liga com Capitão"
+              />
+            )}
           </View>
         </TouchableOpacity>
       </Link>

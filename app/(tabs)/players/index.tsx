@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ListRenderItemInfo, RefreshControl, TextInput, useColorScheme } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 
@@ -18,12 +18,14 @@ import { useGetMarket } from '@/queries/market.query';
 import { GRAY_OPACITY } from '@/styles/colors';
 import { normalizeQuery } from '@/utils/format';
 
+interface ScorePlayersProps extends Player {
+  appreciation?: number;
+}
+
 export default () => {
   const colorTheme = useColorScheme();
 
-  const [mainDataMarket, setMainDataMarket] = useState<Player[]>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredDataSource, setFilteredDataSource] = useState<Player[] | undefined>();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
@@ -34,36 +36,17 @@ export default () => {
 
   const { onRefetchValorizations, valorizations } = useValorization();
 
-  const onSearchFilter = useCallback(
-    async (text: string) => {
-      const getFilteredData = (players: Player[], query: string) => {
-        return players.filter((item: Player) => {
-          const itemData = normalizeQuery(item.apelido);
-          const textData = normalizeQuery(query);
-          return itemData.includes(textData);
-        });
-      };
+  const getFilteredData = useCallback((players?: Player[], query?: string) => {
+    return players?.filter((item: Player) => {
+      const itemData = normalizeQuery(item.apelido);
+      const textData = normalizeQuery(query ?? '');
+      return itemData.includes(textData);
+    });
+  }, []);
 
-      const playersToFilter = isMarketClose
-        ? onGetPlayersPlayed(playerStats as PlayerStats)
-        : (mainDataMarket as Player[]);
-
-      const newData = getFilteredData(playersToFilter, text);
-
-      setFilteredDataSource(newData);
-      setSearchQuery(text);
-    },
-    [isMarketClose, mainDataMarket, playerStats]
-  );
-
-  useEffect(() => {
-    if (isMarketClose && playerStats) {
-      const data = onGetPlayersPlayed(playerStats as PlayerStats);
-      setFilteredDataSource(data);
-    }
-
+  const mainDataMarket: ScorePlayersProps[] | undefined = useMemo(() => {
     if (market && !isMarketClose) {
-      const playerStatsMarket: Player[] = market.atletas
+      return market?.atletas
         .filter((item) => item.entrou_em_campo)
         .map((item) => {
           return {
@@ -75,19 +58,23 @@ export default () => {
             clube_id: item.clube_id,
             entrou_em_campo: item.entrou_em_campo,
             scout: playerStats?.atletas[item.atleta_id].scout,
+            appreciation: valorizations?.atletas?.[item.atleta_id]?.variacao_num,
           };
         })
         .sort((a, b) => (b?.pontuacao as number) - (a?.pontuacao as number));
-
-      setMainDataMarket(playerStatsMarket);
-      setFilteredDataSource(playerStatsMarket);
     }
+  }, [isMarketClose, market, playerStats?.atletas, valorizations?.atletas]);
 
-    return () => {
-      setFilteredDataSource([]);
-      setMainDataMarket([]);
-    };
-  }, [isMarketClose, market, playerStats]);
+  const filteredDataSource = useMemo(() => {
+    const playersToFilter = isMarketClose
+      ? onGetPlayersPlayed(playerStats as PlayerStats)
+      : mainDataMarket;
+    return getFilteredData(playersToFilter, searchQuery);
+  }, [getFilteredData, isMarketClose, mainDataMarket, playerStats, searchQuery]);
+
+  const onSearchFilter = useCallback(async (text: string) => {
+    setSearchQuery(text);
+  }, []);
 
   const onRefetch = useCallback(async () => {
     await Promise.all([onRefetchValorizations(), onRefetchStats()]);
@@ -98,15 +85,15 @@ export default () => {
   const keyExtractor = useCallback((item: Player) => `${item?.foto} + ${item.id}`, []);
 
   const renderItem = useCallback(
-    ({ item: player }: ListRenderItemInfo<Player>) => (
+    ({ item: player }: ListRenderItemInfo<ScorePlayersProps>) => (
       <PlayerCard
         player={player}
         club={playerStats?.clubes[String(player.clube_id)]}
         position={playerStats?.posicoes[player.posicao_id]}
-        appreciation={valorizations?.atletas?.[player.id]?.variacao_num}
+        appreciation={player.appreciation}
       />
     ),
-    [playerStats, valorizations]
+    [playerStats]
   );
 
   if (!playerStats && !isLoadingPlayerStats) {

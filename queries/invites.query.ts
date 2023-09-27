@@ -1,10 +1,11 @@
 import { INVITES, RESPONSE_INVITE } from '@/constants/Endpoits';
-import { Invite } from '@/models/Leagues';
+import { Invite, Requests } from '@/models/Invites';
 import api from '@/services/api';
 import { useFetch } from '@/utils/reactQuery';
 
 type InviteProps = {
-  convites: Invite[];
+  convites?: Invite[];
+  solicitacoes?: Requests[];
 };
 
 export const useGetInvites = (allowRequest?: boolean) =>

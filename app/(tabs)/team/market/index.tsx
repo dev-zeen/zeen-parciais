@@ -11,7 +11,7 @@ import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard'
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
-import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
 import { FullPlayer, IPositions } from '@/models/Stats';
@@ -57,7 +57,8 @@ export default ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
-  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
+
+  const emptyPositions = useMemo(() => lineup && onGetEmptyPositions(lineup), [lineup]);
 
   const currentBalancePrice = useMemo(() => {
     if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
@@ -126,11 +127,6 @@ export default ({
     }
   }, [market, playerLowestPrice, position]);
 
-  useEffect(() => {
-    const emptyPositionsUpdated = onGetEmptyPositions(lineup as LineupPlayers);
-    setEmptyPositions(emptyPositionsUpdated);
-  }, [lineup]);
-
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
   const renderItem = useCallback(
@@ -173,12 +169,12 @@ export default ({
             gap: 16,
           }}>
           <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Valor atual</Text>
+            <Text className="text-xs">Valor atual</Text>
             <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
           </View>
 
           <View className="justify-center items-center gap-1">
-            <Text className="font-light text-xs">Restante</Text>
+            <Text className="text-xs">Restante</Text>
             <Text className="font-bold text-xs text-green-500">
               {numberToString(currentBalancePrice)}
             </Text>

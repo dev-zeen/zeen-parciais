@@ -1,4 +1,5 @@
 import { MyClubDetails } from '@/models/Club';
+import { Invite } from '@/models/Invites';
 
 export interface LeagueUserDetails {
   liga_id: number;
@@ -123,14 +124,6 @@ export interface ClubsByLeague {
 export interface IClubsByLeague {
   atletas: number[];
   capitao: number;
-}
-
-export interface Invite {
-  data: string;
-  mensagem_id: number;
-  time: TeamLeague;
-  liga?: Partial<LeagueUserDetails>;
-  nome_cartola?: string;
 }
 
 export type StageType = 'P' | 'O' | 'Q' | 'S' | 'F' | 'T';

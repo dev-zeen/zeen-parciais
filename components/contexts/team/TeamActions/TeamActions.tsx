@@ -174,7 +174,6 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
         return;
       }
 
-      // TODO BUG AO TENTAR mudar formação de 3-4-3 para 4-5-1 verificar se é aqui ou na função dentro do modal
       const playersToSell = onGetPlayersOnChangePositionSell(lineup as LineupPlayers, newFormation);
 
       if (!playersToSell.length) {
@@ -251,17 +250,17 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
     <>
       <View className="w-full flex-1 flex-row items-center rounded-lg px-2 py-3 justify-around">
         <View className="w-16 justify-center items-center">
-          <Text className="font-light text-sm">Patrim.</Text>
+          <Text className="text-sm">Patrim.</Text>
           <Text className="font-semibold text-base">{numberToString(myClub?.patrimonio)}</Text>
         </View>
 
         <View className="w-16 justify-center items-center">
-          <Text className="font-light text-sm">Preço</Text>
+          <Text className="text-sm">Preço</Text>
           <Text className="font-semibold text-base text-green-500">{numberToString(price)}</Text>
         </View>
 
         <View className="w-16 justify-center items-center">
-          <Text className="font-light text-sm">Rest.</Text>
+          <Text className="text-sm">Rest.</Text>
           <Text className="font-semibold text-base text-green-500">
             {numberToString((myClub?.patrimonio as number) - (price as number))}
           </Text>

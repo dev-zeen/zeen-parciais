@@ -1,6 +1,6 @@
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
+// import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { useCallback } from 'react';
-import { Image, RefreshControl, useColorScheme } from 'react-native';
+import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
@@ -32,7 +32,7 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
       if (!isCupInProgress) {
         return (
           <View
-            className="flex-1 rounded-lg items-center justify-center p-2"
+            className="flex-1 rounded-lg items-center justify-center p-2 mx-2"
             style={{
               backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
               gap: 4,
@@ -47,7 +47,10 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
                 source={{
                   uri: item.url_escudo_png,
                 }}
-                className="w-10 h-10"
+                style={{
+                  margin: 2,
+                }}
+                className="w-12 h-12"
                 alt={`Imagem do time do ${item.nome_cartola}`}
               />
             </View>
@@ -60,7 +63,7 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
               }}>
               {item.nome}
             </Text>
-            <Text className="font-light capitalize">{item.nome_cartola}</Text>
+            <Text className=" capitalize">{item.nome_cartola}</Text>
           </View>
         );
       }
@@ -72,7 +75,7 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
   const keyExtractor = useCallback((item: TeamCup) => `${item.time_id}`, []);
 
   return (
-    <FlashList
+    <FlatList
       refreshControl={
         <RefreshControl onRefresh={onRefetchLeague} refreshing={isRefetchingLeague} />
       }
@@ -83,10 +86,9 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
       }
       keyExtractor={keyExtractor}
       renderItem={renderItem}
-      estimatedItemSize={32}
+      initialNumToRender={32}
       numColumns={2}
       contentContainerStyle={{
-        paddingVertical: 8,
         backgroundColor:
           colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}

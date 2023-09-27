@@ -14,6 +14,7 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { useGetMyClub } from '@/queries/club.query';
+import { useGetInvites } from '@/queries/invites.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 
 type SectionLeagueProps = {
@@ -37,6 +38,12 @@ export default function () {
   const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>([]);
 
   const {
+    isLoading: isLoadingInvites,
+    refetch: onRefetchInvites,
+    isRefetching: isRefetchingInvites,
+  } = useGetInvites(allowRequest);
+
+  const {
     data: leagues,
     refetch: onRefetchLeagues,
     isRefetching: isRefetchingLeagues,
@@ -47,7 +54,7 @@ export default function () {
       return;
     }
 
-    const { ligas } = leagues;
+    const { ligas } = leagues || {};
     const { max_ligas_pro, max_ligas_free, max_ligas_matamata_pro, max_ligas_matamata_free } =
       marketStatus as MarketStatus;
 
@@ -89,10 +96,10 @@ export default function () {
   }, []);
 
   const onRefetch = useCallback(async () => {
-    Promise.all([onRefetchMyClub && onRefetchMyClub(), onRefetchLeagues()]);
-  }, [onRefetchLeagues, onRefetchMyClub]);
+    Promise.all([onRefetchMyClub && onRefetchMyClub(), onRefetchLeagues(), onRefetchInvites()]);
+  }, [onRefetchInvites, onRefetchLeagues, onRefetchMyClub]);
 
-  const isRefetching = isRefetchingMyClub && isRefetchingLeagues;
+  const isRefetching = isRefetchingMyClub && isRefetchingLeagues && isRefetchingInvites;
 
   if (!isAutheticated) {
     return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;
@@ -102,7 +109,7 @@ export default function () {
     return <MaintenanceMarket />;
   }
 
-  if (!leagues || !myClub) {
+  if (!leagues || !myClub || isLoadingInvites) {
     return <Loading />;
   }
 

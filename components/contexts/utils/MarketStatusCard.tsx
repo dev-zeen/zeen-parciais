@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 
 import { Text, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
@@ -24,16 +24,13 @@ export function MarketStatusCard() {
     4: 'Mercado em Manutenção',
   };
 
-  const [marketClosingDate, setMarketClosingDate] = useState<string>('');
-
-  useEffect(() => {
+  const marketClosingDate: string | undefined = useMemo(() => {
     if (marketStatus) {
       const { dia, mes, ano, hora, minuto } = marketStatus.fechamento;
       const date = new Date(ano, mes - 1, dia, hora, minuto);
-      const closeMarket = format(date, "EEEE 'ás' HH:mm", {
+      return format(date, "EEEE 'ás' HH:mm", {
         locale: ptBR,
       });
-      setMarketClosingDate(closeMarket);
     }
   }, [marketStatus]);
 

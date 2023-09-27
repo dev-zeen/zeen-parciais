@@ -16,13 +16,9 @@ export function EmptyData({ title, subtitle }: EmptyDataProps) {
   return (
     <View
       className={`flex-1 rounded-lg ${
-        colorTheme === 'dark' ? `bg-dark` : 'bg-light'
+        colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
       } items-center justify-center`}>
-      <Image
-        source={noData}
-        className="w-72 h-72 rounded-full"
-        alt={`Imagem de erro na aplicação`}
-      />
+      <Image source={noData} className="w-72 h-72 rounded-full" alt="Imagem de erro na aplicação" />
 
       <View
         className="mx-8 items-center justify-center"

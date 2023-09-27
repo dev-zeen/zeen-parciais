@@ -14,7 +14,7 @@ import { Button } from '@/components/structure/Button';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { Invite } from '@/models/Leagues';
+import { Invite } from '@/models/Invites';
 import { onAcceptInvite, onDeclineInvitation, useGetInvites } from '@/queries/invites.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 
@@ -36,16 +36,20 @@ export default () => {
     await Promise.all([onRefetchLeagues(), onRefetchInvites()]);
   }, [onRefetchInvites, onRefetchLeagues]);
 
-  const handleAcceptInvite = useCallback(async (messageId: number) => {
-    await onAcceptInvite(String(messageId)).then((response) => {
-      Alert.alert('Tudo certo Cartoleiro!', response.data.mensagem, [
-        {
-          text: 'Ok',
-          style: 'cancel',
-        },
-      ]);
-    });
-  }, []);
+  const handleAcceptInvite = useCallback(
+    async (messageId: number) => {
+      await onAcceptInvite(String(messageId)).then((response) => {
+        Alert.alert('Tudo certo Cartoleiro!', response.data.mensagem, [
+          {
+            text: 'Ok',
+            style: 'cancel',
+          },
+        ]);
+      });
+      await onRefetch();
+    },
+    [onRefetch]
+  );
 
   const handleDeclineInvitation = useCallback(async (messageId: number) => {
     await onDeclineInvitation(String(messageId)).then((response) => {
@@ -79,9 +83,9 @@ export default () => {
 
             <View className="">
               <Text className="text-sm font-bold">{invite.liga?.nome}</Text>
-              <Text className="text-sm font-normal">{invite.time.nome}</Text>
+              <Text className="text-sm ">{invite.time.nome}</Text>
 
-              <Text className="text-xs font-light">
+              <Text className="text-xs ">
                 {invite.liga?.mata_mata ? 'Mata-Mata' : 'Clássica'} | {invite.liga?.tipo}
               </Text>
             </View>

@@ -30,7 +30,7 @@ export function TopPlayerCard({ player }: TopPlayerCardProps) {
               <Text className="text-sm font-medium">{player.Atleta.apelido}</Text>
 
               <View className="flex-row items-center gap-x-1">
-                <Text className="text-xs font-normal uppercase">{player.posicao_abreviacao}</Text>
+                <Text className="text-xs uppercase">{player.posicao_abreviacao}</Text>
 
                 <View className="relative rounded-full h-1 w-1 bg-gray-400"></View>
 

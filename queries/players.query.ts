@@ -37,7 +37,7 @@ export const useGetAppreciations = (allowRequest: boolean) => {
   return useFetch<Appreciations>(GET_APPRECIATIONS, undefined, {
     enabled: !!allowRequest,
     select: (data) => {
-      if (data) onSaveStorage(APPRECIATIONS, data);
+      if (data.atletas && Object.keys(data.atletas).length > 0) onSaveStorage(APPRECIATIONS, data);
       return data;
     },
   });

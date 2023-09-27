@@ -181,7 +181,7 @@ export function ListPlayersSale({
                                       }}>
                                       <View className="items-center justify-center">
                                         <Text
-                                          className="font-light uppercase"
+                                          className="uppercase"
                                           style={{
                                             fontSize: 10,
                                           }}>
@@ -194,7 +194,7 @@ export function ListPlayersSale({
 
                                       <View className="items-center justify-center">
                                         <Text
-                                          className="font-light uppercase"
+                                          className="uppercase"
                                           style={{
                                             fontSize: 10,
                                           }}>
@@ -207,7 +207,7 @@ export function ListPlayersSale({
 
                                       <View className="items-center justify-center">
                                         <Text
-                                          className="font-light uppercase"
+                                          className=" uppercase"
                                           style={{
                                             fontSize: 10,
                                           }}>

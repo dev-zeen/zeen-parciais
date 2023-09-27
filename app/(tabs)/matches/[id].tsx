@@ -66,23 +66,18 @@ export default () => {
 
   const { data: positions } = useGetPositions();
 
-  const [emptyPositions, setEmptyPositions] = useState<Set<number>>();
-
   const price = useTeamLineupStore((state) => state.price);
   const lineup = useTeamLineupStore((state) => state.lineup);
 
   const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
+  const emptyPositions: Set<number> | undefined = useMemo(
+    () => lineup && onGetEmptyPositions(lineup),
+    [lineup]
+  );
+
   const { isRefetching: isRefetchingMatches, refetch: onRefetchMatches } = useGetMatchs();
-
-  useEffect(() => {
-    if (lineup) {
-      const positions = onGetEmptyPositions(lineup);
-
-      setEmptyPositions(positions);
-    }
-  }, [lineup]);
 
   const currentBalancePrice = useMemo(() => {
     if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
@@ -92,9 +87,10 @@ export default () => {
   const addPlayerToLineup = useTeamLineupStore((state) => state.addPlayerToLineup);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  const [match, setMatch] = useState<IMatch>();
   const [isRendering, setIsRendering] = useState(false);
   const [teamPlayers, setTeamPlayers] = useState<FullPlayerPartials[] | undefined>();
+
+  const match: IMatch = useMemo(() => id && JSON.parse(id as string), [id]);
 
   const handleAddPlayerToLineup = useCallback(
     (player: FullPlayer) => {
@@ -162,13 +158,6 @@ export default () => {
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.foto} + ${item.apelido}`, []);
-
-  useEffect(() => {
-    if (id) {
-      const match = JSON.parse(id as string);
-      setMatch(match);
-    }
-  }, [id]);
 
   const onGetTabPlayers = useCallback(
     (teamId: number) => {
@@ -287,8 +276,8 @@ export default () => {
             data={teamPlayers}
             renderItem={isMarketClose ? renderItemWithPartials : renderItem}
             keyExtractor={keyExtractor}
-            maxToRenderPerBatch={10}
-            initialNumToRender={10}
+            maxToRenderPerBatch={12}
+            initialNumToRender={12}
           />
         )}
       </View>
