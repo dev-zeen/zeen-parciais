@@ -41,7 +41,7 @@ export function TeamCupMatch({ match, teamId }: TeamCupMatchProps) {
             source={{
               uri: team?.time.url_escudo_png,
             }}
-            className="w-12 h-12"
+            className="w-10 h-10"
             alt={`Escudo do ${team?.time.nome}`}
           />
 

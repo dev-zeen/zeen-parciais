@@ -10,11 +10,11 @@ import { Login } from '@/components/structure/Login';
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
+import useInvites from '@/hooks/useInvites';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
 import { useGetMyClub } from '@/queries/club.query';
-import { useGetInvites } from '@/queries/invites.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 
 type SectionLeagueProps = {
@@ -35,13 +35,9 @@ export default function () {
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
 
-  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>([]);
+  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>();
 
-  const {
-    isLoading: isLoadingInvites,
-    refetch: onRefetchInvites,
-    isRefetching: isRefetchingInvites,
-  } = useGetInvites(allowRequest);
+  const { isLoadingInvites, onRefetchInvites, isRefetchingInvites } = useInvites();
 
   const {
     data: leagues,
@@ -59,34 +55,42 @@ export default function () {
       marketStatus as MarketStatus;
 
     const privateLeagues = ligas.filter((item) => item.time_dono_id && !item.mata_mata);
-    const defaultLeagues = ligas.filter((item) => !item.time_dono_id);
     const cups = ligas.filter((item) => item.mata_mata);
+    const isProAssinante = myClub?.time.assinante;
 
-    const sectionLeagues = [
-      {
-        title: `Ligas Clássicas - ${privateLeagues.length} / ${
-          myClub?.time.assinante ? max_ligas_pro : max_ligas_free
-        }`,
-        data: privateLeagues,
-      },
-      {
-        title: `Mata Mata - ${cups.length} / ${
-          myClub?.time.assinante ? max_ligas_matamata_pro : max_ligas_matamata_free
-        }`,
-        data: cups,
-      },
-    ];
+    const sectionLeagues:
+      | ((prevState: SectionLeagueProps[] | undefined) => SectionLeagueProps[] | undefined)
+      | { title: any; data: any }[]
+      | undefined = [];
+
+    const createLeagueSection = (title: string, data: LeagueUserDetails[]) => {
+      if (data.length > 0) {
+        sectionLeagues.push({ title, data });
+      }
+    };
+
+    createLeagueSection(
+      `Ligas Clássicas - ${privateLeagues.length} / ${
+        isProAssinante ? max_ligas_pro : max_ligas_free
+      }`,
+      ligas.filter((item) => item.time_dono_id && !item.mata_mata)
+    );
+
+    createLeagueSection(
+      `Mata Mata - ${cups.length} / ${
+        isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free
+      }`,
+      ligas.filter((item) => item.mata_mata)
+    );
 
     if (!isMarketClose) {
-      sectionLeagues.push({
-        title: 'Ligas Padrão',
-        data: defaultLeagues,
-      });
+      createLeagueSection(
+        'Ligas Padrão',
+        ligas.filter((item) => !item.time_dono_id)
+      );
     }
 
-    const filteredSectionLeagues = sectionLeagues.filter((item) => item.data.length > 0);
-
-    setSectionLeaguesList(filteredSectionLeagues);
+    setSectionLeaguesList(sectionLeagues);
   }, [leagues, isMarketClose, marketStatus, myClub?.time.assinante]);
 
   const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
@@ -109,8 +113,8 @@ export default function () {
     return <MaintenanceMarket />;
   }
 
-  if (!leagues || !myClub || isLoadingInvites) {
-    return <Loading />;
+  if (!leagues || !myClub || isLoadingInvites || !sectionLeaguesList) {
+    return <Loading title="Carregando minhas ligas" />;
   }
 
   return (

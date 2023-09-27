@@ -80,9 +80,9 @@ export default () => {
     await Promise.all([onRefetchValorizations(), onRefetchStats()]);
   }, [onRefetchValorizations, onRefetchStats]);
 
-  const isRefetching = isRefetchingPlayerStats;
-
   const keyExtractor = useCallback((item: Player) => `${item?.foto} + ${item.id}`, []);
+
+  const isRefetching = isRefetchingPlayerStats;
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<ScorePlayersProps>) => (
@@ -96,7 +96,13 @@ export default () => {
     [playerStats]
   );
 
-  if (!playerStats && !isLoadingPlayerStats) {
+  const isLoading = !marketStatus || isLoadingPlayerStats;
+
+  if (isLoading) {
+    return <Loading title="Carregando Pontuações" />;
+  }
+
+  if (!playerStats) {
     return (
       <SafeAreaViewContainer>
         <View className="mx-2 rounded-lg">
@@ -114,12 +120,6 @@ export default () => {
         </View>
       </SafeAreaViewContainer>
     );
-  }
-
-  const isLoading = !marketStatus || !playerStats;
-
-  if (isLoading) {
-    return <Loading />;
   }
 
   return (

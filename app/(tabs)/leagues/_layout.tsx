@@ -10,7 +10,7 @@ export default function StackLayout() {
         }}
       />
       <Stack.Screen
-        name="[id]"
+        name="league"
         options={{
           headerShown: false,
         }}

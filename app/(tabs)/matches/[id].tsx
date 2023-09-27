@@ -231,7 +231,7 @@ export default () => {
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
 
   if (isLoading) {
-    return <Loading />;
+    return <Loading title="Carregando Partidas" />;
   }
 
   return (

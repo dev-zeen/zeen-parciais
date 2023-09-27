@@ -51,7 +51,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       return (
         <MaterialCommunityIcons
           name={variation !== 0 ? iconName : 'equal'}
-          color={variation !== 0 ? iconColor : theme.Tokens.COLORS.GRAY_300}
+          color={variation !== 0 ? iconColor : theme.Tokens.COLORS.GRAY_400}
           size={14}
         />
       );

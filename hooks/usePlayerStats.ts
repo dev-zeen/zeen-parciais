@@ -18,12 +18,15 @@ const usePlayerStats = () => {
     isRefetching: isRefetchingPlayerStats,
   } = useGetScoredPlayers(isMarketClose);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     onGetFromStorage<string>(CURRENT_STATS).then((res: string) => {
       const statsFormated: PlayerStats = JSON.parse(res);
       if (res) {
         setCurrentStats(statsFormated);
       }
+      setIsLoading(false);
     });
   }, []);
 
@@ -32,7 +35,10 @@ const usePlayerStats = () => {
       () => (isMarketClose ? playerStats : currentStats),
       [currentStats, isMarketClose, playerStats]
     ),
-    isLoadingPlayerStats: useMemo(() => isLoadingPlayerStats, [isLoadingPlayerStats]),
+    isLoadingPlayerStats: useMemo(
+      () => isLoadingPlayerStats || isLoading,
+      [isLoading, isLoadingPlayerStats]
+    ),
     onRefetchStats,
     isRefetchingPlayerStats: useMemo(() => isRefetchingPlayerStats, [isRefetchingPlayerStats]),
   };

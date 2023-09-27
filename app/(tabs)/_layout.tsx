@@ -4,7 +4,7 @@ import { Pressable, View, useColorScheme } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import { useGetInvites } from '@/queries/invites.query';
+import useInvites from '@/hooks/useInvites';
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -16,7 +16,7 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name'];
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
-  const { data: invites } = useGetInvites();
+  const { invites } = useInvites();
 
   return (
     <Tabs
@@ -62,7 +62,7 @@ export default function TabLayout() {
           // headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
           headerRight: () => (
-            <Link href="/leagues/invites" asChild>
+            <Link href="/leagues/invites/" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <View
@@ -70,7 +70,7 @@ export default function TabLayout() {
                     style={{
                       gap: 4,
                     }}>
-                    {invites && invites?.convites?.length > 0 && (
+                    {invites && invites.convites && invites?.convites?.length > 0 && (
                       <View className="w-6 h-6 bg-violet-600 items-center justify-center rounded-full">
                         <Text className="text-neutral-100">{invites?.convites?.length}</Text>
                       </View>

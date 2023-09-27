@@ -1,34 +1,41 @@
+import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
-import { InviteCard } from '@/components/contexts/leagues/InviteCard';
+import { RequestCard } from '@/components/contexts/leagues/RequestCard';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
-import useInvites from '@/hooks/useInvites';
 import { Invite } from '@/models/Invites';
-import { useGetLeagues } from '@/queries/leagues.query';
+import { useGetLeague } from '@/queries/leagues.query';
 
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { invites, isLoadingInvites, onRefetchInvites, isRefetchingInvites } = useInvites();
+  const { id: slug } = useLocalSearchParams();
 
-  const { refetch: onRefetchLeagues } = useGetLeagues();
+  const {
+    data: league,
+    isLoading: isLoadingLeague,
+    refetch: onRefetchLeague,
+    isRefetching: isRefetchingLeague,
+  } = useGetLeague(slug as string);
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchLeagues(), onRefetchInvites()]);
-  }, [onRefetchInvites, onRefetchLeagues]);
+    await Promise.all([onRefetchLeague()]);
+  }, [onRefetchLeague]);
 
-  const keyExtractor = useCallback((item: Invite) => `${item.liga?.liga_id}`, []);
+  const keyExtractor = useCallback((item: Invite) => `${item.mensagem_id}`, []);
 
   const renderItem = useCallback(
-    ({ item: invite }: ListRenderItemInfo<Invite>) => <InviteCard invite={invite} />,
+    ({ item: request }: ListRenderItemInfo<Invite>) => (
+      <RequestCard request={request} onRefetchLeague={onRefetchLeague} />
+    ),
     []
   );
 
-  if (isLoadingInvites) return <Loading title="Carregando Convites" />;
+  if (isLoadingLeague) return <Loading title="Carregando solicitações" />;
 
   return (
     <View
@@ -43,13 +50,13 @@ export default () => {
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
-        <Text className="text-lg font-semibold"> Convites </Text>
+        <Text className="text-lg font-semibold"> Solicitações </Text>
       </View>
       <FlatList
         ListEmptyComponent={<EmptyInviteList />}
-        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingInvites} />}
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
         keyExtractor={keyExtractor}
-        data={invites?.convites}
+        data={league?.pedidos}
         renderItem={renderItem}
         initialNumToRender={10}
         maxToRenderPerBatch={5}

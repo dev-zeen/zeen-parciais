@@ -21,6 +21,7 @@ const useValorization = () => {
   } = useGetAppreciations(!!allowRequest);
 
   const [currentValorizations, setCurrentValorizations] = useState<Appreciations | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (
@@ -49,6 +50,8 @@ const useValorization = () => {
 
           setCurrentValorizations(newAppreciations);
         }
+
+        setIsLoading(false);
       });
     }
   }, [marketStatus, isMarketClose, market]);
@@ -60,7 +63,10 @@ const useValorization = () => {
           ? valorizations
           : currentValorizations
         : null,
-    isLoadingValorizations: useMemo(() => isLoadingValorizations, [isLoadingValorizations]),
+    isLoadingValorizations: useMemo(
+      () => isLoadingValorizations || isLoading,
+      [isLoading, isLoadingValorizations]
+    ),
     onRefetchValorizations: !allowRequest ? () => null : onRefetchValorizations,
     isRefetchingValorizations: useMemo(
       () => isRefetchingValorizations,

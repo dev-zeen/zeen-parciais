@@ -1,11 +1,20 @@
 import { ActivityIndicator } from 'react-native';
 
-import { View } from '@/components/Themed';
+import { Text, View } from '@/components/Themed';
 
-export function Loading() {
+type LoadingProps = {
+  title?: string;
+};
+
+export function Loading({ title }: LoadingProps) {
   return (
-    <View className="flex-1 items-center justify-center mx-2 rounded-lg">
+    <View
+      className="flex-1 items-center justify-center mx-2 rounded-lg"
+      style={{
+        gap: 8,
+      }}>
       <ActivityIndicator />
+      <Text className="font-medium text-sm">{title ?? 'Carregando'}</Text>
     </View>
   );
 }

@@ -1,4 +1,3 @@
-// import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { useCallback } from 'react';
 import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
 
@@ -32,7 +31,7 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
       if (!isCupInProgress) {
         return (
           <View
-            className="flex-1 rounded-lg items-center justify-center p-2 mx-2"
+            className="flex-1 rounded-lg items-center justify-center p-2 mx-2 mb-1"
             style={{
               backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
               gap: 4,

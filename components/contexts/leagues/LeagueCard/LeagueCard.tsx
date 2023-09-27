@@ -22,7 +22,7 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
         asChild
         href={
           {
-            pathname: '/leagues/[id]',
+            pathname: '/leagues/league/[id]',
             params: {
               id: league.slug,
             },
@@ -54,8 +54,8 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
               <Image
                 source={captainIcon}
                 style={{
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                   margin: 4,
                 }}
                 alt="Liga com Capitão"

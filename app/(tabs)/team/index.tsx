@@ -75,7 +75,7 @@ export default () => {
   }
 
   if (!myClub || !lineup) {
-    return <Loading />;
+    return <Loading title="Carregando meu time" />;
   }
 
   return (
