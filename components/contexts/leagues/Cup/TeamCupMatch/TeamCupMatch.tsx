@@ -2,8 +2,9 @@ import { useCallback } from 'react';
 import { Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import useTeam from '@/hooks/useTeam';
+import { Loading } from '@/components/structure/Loading';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
+import { useGetClub } from '@/queries/club.query';
 
 type TeamCupMatchProps = {
   match: CupMatchModel;
@@ -11,10 +12,10 @@ type TeamCupMatchProps = {
 };
 
 export function TeamCupMatch({ match, teamId }: TeamCupMatchProps) {
-  const { team } = useTeam({
-    teamId: teamId ?? 0,
-    round: match.rodada_id,
-  });
+  const { data: team, isInitialLoading: isInitialLoadingTeam } = useGetClub(
+    teamId,
+    match.rodada_id
+  );
 
   const teamOpacity = useCallback((score?: number, compareScore?: number) => {
     if (score && compareScore) {
@@ -22,6 +23,10 @@ export function TeamCupMatch({ match, teamId }: TeamCupMatchProps) {
     }
     return 1;
   }, []);
+
+  if (isInitialLoadingTeam) {
+    return <Loading />;
+  }
 
   return (
     <View

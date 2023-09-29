@@ -11,6 +11,7 @@ import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
+import { League } from '@/models/Leagues';
 import theme from '@/styles/theme';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 
@@ -23,13 +24,13 @@ export default () => {
 
   const { id: slug } = useLocalSearchParams();
 
-  const { league, clubsByLeague } = useLeague({
+  const { league, clubsByLeague, isLoadingLeague } = useLeague({
     slug: slug as string,
   });
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (!league) return <Loading />;
+  if (isLoadingLeague) return <Loading />;
 
   return (
     <>
@@ -41,7 +42,9 @@ export default () => {
         <View className="flex-1 flex-row justify-center items-center py-2 px-1 rounded-lg mt-2">
           <Image
             source={{
-              uri: league.liga.mata_mata ? league.liga.url_trofeu_png : league.liga.url_flamula_png,
+              uri: league?.liga.mata_mata
+                ? league.liga.url_trofeu_png
+                : league?.liga.url_flamula_png,
             }}
             style={{
               width: theme.Tokens.SIZE.sm,
@@ -57,7 +60,7 @@ export default () => {
             }}>
             {league?.liga.nome}
           </Text>
-          {!league.liga.sem_capitao && (
+          {!league?.liga.sem_capitao && (
             <Image
               source={captainIcon}
               style={{
@@ -70,7 +73,7 @@ export default () => {
           )}
         </View>
 
-        {league.pedidos && league.pedidos?.length > 0 && (
+        {league?.pedidos && league.pedidos?.length > 0 && (
           <Link
             asChild
             href={
@@ -119,10 +122,13 @@ export default () => {
         </TouchableOpacity> */}
       </View>
 
-      {league.liga.mata_mata ? (
+      {league?.liga.mata_mata ? (
         <Cup league={league} />
       ) : (
-        <LeagueComponent clubsByLeague={clubsByLeague as ClubsByLeagueUtils} league={league} />
+        <LeagueComponent
+          clubsByLeague={clubsByLeague as ClubsByLeagueUtils}
+          league={league as League}
+        />
       )}
 
       {/* <Modal

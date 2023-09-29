@@ -4,6 +4,7 @@ import { RefreshControl } from 'react-native-gesture-handler';
 
 import { Text, View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
+import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullClubInfo } from '@/models/Club';
@@ -27,10 +28,11 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
   const { refetch: onRefetchStats, isRefetching: isRefetchingPlayerStats } =
     useGetScoredPlayers(isMarketClose);
 
-  const { data: substitutions } = useGetMatchSubstitutions({
-    id: team?.time.time_id,
-    round: match.rodada_id,
-  });
+  const { data: substitutions, isInitialLoading: isInitialLoadingSubstitutions } =
+    useGetMatchSubstitutions({
+      id: team?.time.time_id,
+      round: match.rodada_id,
+    });
 
   const onGetPlayersTab = (team: FullClubInfo) => {
     const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
@@ -70,6 +72,10 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
   );
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
+
+  if (isInitialLoadingSubstitutions) {
+    return <Loading />;
+  }
 
   return (
     <SectionList

@@ -10,7 +10,7 @@ type ClubProps = {
 const useTeam = ({ teamId, round }: ClubProps) => {
   const {
     data: team,
-    isLoading: isLoadingTeam,
+    isInitialLoading: isLoadingTeam,
     refetch: onRefetchTeam,
     isRefetching: isRefetchingTeam,
   } = useGetClub(teamId, round);

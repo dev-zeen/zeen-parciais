@@ -55,7 +55,7 @@ export default ({
   const lineup = useTeamLineupStore((state) => state.lineup);
   const price = useTeamLineupStore((state) => state.price);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [marketPlayers, setMarketPlayers] = useState<FullPlayer[]>();
 
   const emptyPositions = useMemo(() => lineup && onGetEmptyPositions(lineup), [lineup]);
@@ -84,8 +84,8 @@ export default ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleIsLoading = useCallback(() => {
-    setIsLoading((previous) => !previous);
+  const handleFiltering = useCallback(() => {
+    setIsFiltering((previous) => !previous);
   }, []);
 
   const applyFilter = useCallback(
@@ -96,7 +96,7 @@ export default ({
           : data;
 
         setMarketPlayers(playersUpdated);
-        handleIsLoading();
+        handleFiltering();
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -158,7 +158,9 @@ export default ({
     ]
   );
 
-  if (!marketPlayers || !myClub || !market || !matches || !lineup || isLoading) return <Loading />;
+  const isLoading = !marketPlayers || !myClub || !market || !matches || !lineup || isFiltering;
+
+  if (isLoading) return <Loading />;
 
   return (
     <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
@@ -191,7 +193,7 @@ export default ({
 
       <MarketFilters
         applyFilter={applyFilter}
-        handleIsLoading={handleIsLoading}
+        handleIsLoading={handleFiltering}
         maximumPrice={playerLowestPrice?.preco_num}
       />
 

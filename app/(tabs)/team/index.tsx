@@ -15,7 +15,8 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useGetMyClub } from '@/queries/club.query';
+import { PlayerStats } from '@/models/Stats';
+import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
@@ -28,6 +29,7 @@ export default () => {
 
   const {
     data: playerStats,
+    isLoading: isLoadingPlayerStats,
     refetch: onRefetchPlayerStats,
     isRefetching: isRefetchingPlayerStats,
   } = useGetScoredPlayers(isMarketClose);
@@ -37,6 +39,11 @@ export default () => {
     isRefetching: isRefetchingMyClub,
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
+
+  const { data: substitutions, isInitialLoading: isInitialLoadingSubstitutions } =
+    useGetMatchSubstitutions({
+      id: myClub?.time.time_id,
+    });
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -74,7 +81,7 @@ export default () => {
     return <MaintenanceMarket />;
   }
 
-  if (!myClub || !lineup) {
+  if (!myClub || !lineup || isInitialLoadingSubstitutions || isLoadingPlayerStats) {
     return <Loading title="Carregando meu time" />;
   }
 
@@ -90,9 +97,14 @@ export default () => {
           style={{ gap: 8 }}>
           <TeamActions initialLineupTeamFormation={initialLineupTeamFormation} />
 
-          <SoccerField />
+          <SoccerField
+            playerStats={playerStats}
+            lineup={lineup}
+            capitain={myClub.capitao_id}
+            substitutions={substitutions}
+          />
 
-          <ListReservePlayers />
+          <ListReservePlayers playerStats={playerStats as PlayerStats} lineup={lineup} />
         </View>
       </ScrollView>
     </SafeAreaViewContainer>

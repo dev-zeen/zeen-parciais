@@ -8,7 +8,7 @@ import { Text, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { CupTeamsList } from '@/components/contexts/leagues/Cup/CupTeamsList';
 import { Loading } from '@/components/structure/Loading';
-import { ITabs, Tabs } from '@/components/structure/Tabs';
+import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -72,7 +72,7 @@ export function Cup({ league: cup }: CupProps) {
     [cup, marketStatus, myClub]
   );
 
-  const roundTabs: ITabs[] | undefined = useMemo(() => {
+  const roundTabs: ITab[] | undefined = useMemo(() => {
     if (isCupInProgress && cup && cup.chaves_mata_mata) {
       return Object.keys(cup.chaves_mata_mata).map((round) => {
         return {

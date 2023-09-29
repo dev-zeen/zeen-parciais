@@ -15,7 +15,7 @@ import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard';
 import { Loading } from '@/components/structure/Loading';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { ITabs, Tabs } from '@/components/structure/Tabs';
+import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
@@ -197,7 +197,7 @@ export default () => {
     [isMarketClose, market, playerStats]
   );
 
-  const tabs: ITabs[] = [
+  const tabs: ITab[] = [
     {
       id: 1,
       title: isMarketClose

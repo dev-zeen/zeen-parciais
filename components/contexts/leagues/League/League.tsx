@@ -1,13 +1,18 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, RefreshControl, useColorScheme } from 'react-native';
+import {
+  ActivityIndicator,
+  ListRenderItemInfo,
+  RefreshControl,
+  useColorScheme,
+} from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
 
 import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
 import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
-import { ITabs, Tabs } from '@/components/structure/Tabs';
+import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -96,7 +101,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
 
       setTimeout(() => {
         setIsSortingClubs(false);
-      }, 50);
+      }, 200);
     },
     [handleOrderByPatrimony, sortClubs]
   );
@@ -122,14 +127,15 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     }
   }, [league]);
 
-  const tabs: ITabs[] = useMemo(
+  const tabs: ITab[] = useMemo(
     () => [
       {
         id: 1,
         title: 'Rodada',
         onPress() {
-          const sortProp = OrderByOptions.RODADA;
           setIsSortingClubs(true);
+          const sortProp = OrderByOptions.RODADA;
+
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -137,8 +143,9 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 2,
         title: 'Total',
         onPress() {
-          const sortProp = OrderByOptions.CAMPEONATO;
           setIsSortingClubs(true);
+          const sortProp = OrderByOptions.CAMPEONATO;
+
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -146,8 +153,9 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 3,
         title: 'Turno',
         onPress() {
-          const sortProp = OrderByOptions.TURNO;
           setIsSortingClubs(true);
+          const sortProp = OrderByOptions.TURNO;
+
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -155,8 +163,9 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 4,
         title: 'Mês',
         onPress() {
-          const sortProp = OrderByOptions.MES;
           setIsSortingClubs(true);
+          const sortProp = OrderByOptions.MES;
+
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -164,8 +173,9 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 5,
         title: 'C$',
         onPress() {
-          const sortProp = OrderByOptions.PATRIMONIO;
           setIsSortingClubs(true);
+          const sortProp = OrderByOptions.PATRIMONIO;
+
           handleOnPressOrderBy(sortProp);
         },
       },
@@ -224,7 +234,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
             <ActivityIndicator />
           </View>
         ) : (
-          <FlashList
+          <FlatList
             refreshControl={
               <RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />
             }
@@ -234,9 +244,8 @@ export function League({ league, clubsByLeague }: LeagueProps) {
               <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
             )}
             renderItem={renderItem}
-            // initialNumToRender={15}
-            // maxToRenderPerBatch={15}
-            estimatedItemSize={100}
+            initialNumToRender={30}
+            maxToRenderPerBatch={15}
             contentContainerStyle={{
               paddingTop: 8,
               paddingVertical: 8,

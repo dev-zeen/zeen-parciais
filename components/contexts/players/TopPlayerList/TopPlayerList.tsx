@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 
 import { Text, View } from '@/components/Themed';
 import { TopPlayerCard } from '@/components/contexts/utils/TopPlayerCard';
-import { ITabs, Tabs } from '@/components/structure/Tabs';
+import { ITab, Tabs } from '@/components/structure/Tabs';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useGetTopPlayers } from '@/queries/players.query';
 
@@ -17,7 +17,7 @@ export const TopPlayerList = memo(() => {
   //   if (topPlayers && topPlayers?.length > 0) setHighlights(true);
   // }, [topPlayers]);
 
-  const playersTabs: ITabs[] = useMemo(
+  const playersTabs: ITab[] = useMemo(
     () => [
       {
         id: 1,

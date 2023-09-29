@@ -63,6 +63,7 @@ export default () => {
           refreshControl={
             <RefreshControl onRefresh={onRefetchMatches} refreshing={isRefetchingMatches} />
           }
+          showsVerticalScrollIndicator={false}
           initialNumToRender={10}
           data={matches?.partidas}
           keyExtractor={keyExtractor}

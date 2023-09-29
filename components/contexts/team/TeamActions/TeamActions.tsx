@@ -73,7 +73,6 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
 
       const initialLineupMounted = fillLineupWithPlayers(
         res.data as FullClubInfo,
-        initialLineupTeamFormation,
         playerStats as PlayerStats,
         isMarketClose
       );

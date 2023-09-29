@@ -14,7 +14,7 @@ export interface TeamCup extends TeamLeague {
 const useLeague = ({ slug }: UseLeagueProps) => {
   const {
     data: league,
-    isLoading: isLoadingLeague,
+    isInitialLoading: isLoadingLeague,
     refetch: onRefetchLeague,
     isRefetching: isRefetchingLeague,
   } = useGetLeague(slug as string);

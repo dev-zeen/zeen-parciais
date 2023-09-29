@@ -6,7 +6,7 @@ import { View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { CupMatchTeamDetails } from '@/components/contexts/leagues/Cup/CupMatchTeamDetails';
 import { Loading } from '@/components/structure/Loading';
-import { ITabs, Tabs } from '@/components/structure/Tabs';
+import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
@@ -29,7 +29,7 @@ export default () => {
     round: cupMatch.rodada_id,
   });
 
-  const tabs: ITabs[] = [
+  const tabs: ITab[] = [
     {
       id: 1,
       title: homeTeam?.time.nome as string,

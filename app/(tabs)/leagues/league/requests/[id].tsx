@@ -17,7 +17,7 @@ export default () => {
 
   const {
     data: league,
-    isLoading: isLoadingLeague,
+    isInitialLoading: isInitialLoadingLeague,
     refetch: onRefetchLeague,
     isRefetching: isRefetchingLeague,
   } = useGetLeague(slug as string);
@@ -32,10 +32,11 @@ export default () => {
     ({ item: request }: ListRenderItemInfo<Invite>) => (
       <RequestCard request={request} onRefetchLeague={onRefetchLeague} />
     ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  if (isLoadingLeague) return <Loading title="Carregando solicitações" />;
+  if (isInitialLoadingLeague) return <Loading title="Carregando solicitações" />;
 
   return (
     <View

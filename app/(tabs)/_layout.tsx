@@ -6,9 +6,6 @@ import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useInvites from '@/hooks/useInvites';
 
-/**
- * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
- */
 function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name']; color: string }) {
   return <Feather size={24} style={{ marginBottom: -3 }} {...props} />;
 }
@@ -22,11 +19,25 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        headerStyle: {
+          backgroundColor:
+            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        },
+        tabBarStyle: {
+          backgroundColor:
+            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          paddingBottom: 2,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Início',
+
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           // headerRight: () => (
@@ -59,7 +70,6 @@ export default function TabLayout() {
         options={{
           tabBarLabel: 'Ligas',
           headerTitle: 'Ligas',
-          // headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
           headerRight: () => (
             <Link href="/leagues/invites/" asChild>

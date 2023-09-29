@@ -10,7 +10,7 @@ export function SafeAreaViewContainer({ children }: SafeAreaViewContainerProps) 
 
   return (
     <SafeAreaView
-      className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
+      className={`flex-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
       style={styles.container}>
       {children}
     </SafeAreaView>

@@ -63,13 +63,13 @@ export const PlayerCard = memo(
     return (
       <TouchableOpacity
         activeOpacity={0.6}
-        className={`flex-row justify-between items-center rounded-lg p-2 ${stylePlayerInMyLineup}`}>
+        className={`flex-row justify-between items-center rounded-lg py-2 pl-2 pr-4 ${stylePlayerInMyLineup}`}>
         <View className={`flex-row items-center gap-1 rounded-lg ${stylePlayerInMyLineup}`}>
           <Image
             source={{
               uri: player?.foto?.replace('FORMATO', '220x220'),
             }}
-            className="w-12 h-12 rounded-full"
+            className="w-14 h-14 rounded-full"
             alt={player.apelido}
           />
           <View className={`${stylePlayerInMyLineup}`}>

@@ -7,27 +7,30 @@ import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
 import { Positions, Zone } from '@/constants/Formations';
-import { LineupPlayer, LineupPosition } from '@/models/Formations';
-import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
+import { Substitutions } from '@/models/Club';
+import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { PlayerStats } from '@/models/Stats';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 const screenWidth = Dimensions.get('window').width;
 const fieldWidth = screenWidth;
 
-export function SoccerField() {
-  const { data: playerStats } = useGetScoredPlayers();
+type SoccerFieldProps = {
+  playerStats: PlayerStats | undefined;
+  lineup: LineupPlayers;
+  capitain: number;
+  substitutions?: Substitutions[];
+  isViewOnly?: boolean;
+};
 
-  const { data: myClub } = useGetMyClub();
-
-  const { data: substitutions } = useGetMatchSubstitutions({
-    id: myClub?.time.time_id,
-  });
-
-  const lineup = useTeamLineupStore((state) => state.lineup);
-
+export function SoccerField({
+  playerStats,
+  lineup,
+  substitutions,
+  capitain,
+  isViewOnly = false,
+}: SoccerFieldProps) {
   const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
-  const capitain = useTeamLineupStore((state) => state.capitain);
 
   const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
@@ -51,39 +54,44 @@ export function SoccerField() {
     if (positionMarketSearch) setShowMarketModal(true);
   }, [positionMarketSearch]);
 
-  const renderItem = (position: LineupPosition, index: number) => {
-    return (
-      <View
-        key={position.player ? position.player.atleta_id : position.abbr + index}
-        style={{
-          backgroundColor: 'transparent',
-        }}>
-        {position.player ? (
-          <TeamPlayer
-            player={position.player as LineupPlayer}
-            isCapitain={capitain === position.player?.atleta_id}
-            handleCapitain={updateCapitain}
-            isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
-            isReplaced={substitutions?.some(
-              (item) => item.saiu.atleta_id === position.player?.atleta_id
-            )}
-          />
-        ) : (
-          <AddPlayerButton
-            onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
-            positionLineup={position}
-          />
-        )}
-      </View>
-    );
-  };
+  const renderItem = useCallback(
+    (position: LineupPosition, index: number) => {
+      return (
+        <View
+          key={position.player ? position.player.atleta_id : position.abbr + index}
+          style={{
+            backgroundColor: 'transparent',
+          }}>
+          {position.player ? (
+            <TeamPlayer
+              isViewOnly={isViewOnly}
+              player={position.player as LineupPlayer}
+              isCapitain={capitain === position.player?.atleta_id}
+              handleCapitain={updateCapitain}
+              isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
+              isReplaced={substitutions?.some(
+                (item) => item.saiu.atleta_id === position.player?.atleta_id
+              )}
+            />
+          ) : (
+            <AddPlayerButton
+              onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
+              positionLineup={position}
+            />
+          )}
+        </View>
+      );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [capitain, isViewOnly, playerStats, substitutions]
+  );
 
   return (
     <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2">
       <ImageBackground
         source={footballField}
         style={{
-          height: 480,
+          height: 430,
           width: fieldWidth,
         }}
         alt="Campinho"
@@ -91,8 +99,9 @@ export function SoccerField() {
 
       <View
         style={{
+          borderRadius: 16,
           position: 'absolute',
-          top: 15,
+          top: 13,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -104,7 +113,8 @@ export function SoccerField() {
       <View
         style={{
           position: 'absolute',
-          top: 130,
+          top: 112,
+          borderRadius: 16,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -116,7 +126,8 @@ export function SoccerField() {
       <View
         style={{
           position: 'absolute',
-          top: 250,
+          top: 210,
+          borderRadius: 16,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -132,7 +143,8 @@ export function SoccerField() {
       <View
         style={{
           position: 'absolute',
-          top: 350,
+          top: 305,
+          borderRadius: 16,
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
@@ -144,8 +156,9 @@ export function SoccerField() {
       <View
         style={{
           position: 'absolute',
-          top: 350,
+          top: 305,
           left: 20,
+          borderRadius: 16,
           flexDirection: 'row',
           justifyContent: 'flex-start',
           alignItems: 'flex-start',
@@ -154,7 +167,7 @@ export function SoccerField() {
         {lineup?.starting.filter((item) => item.position === Positions.TECNICO).map(renderItem)}
       </View>
 
-      {showMarketModal && (
+      {showMarketModal && !isViewOnly && (
         <Modal
           animationType="slide"
           transparent

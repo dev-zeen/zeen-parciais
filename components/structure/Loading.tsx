@@ -1,4 +1,4 @@
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 
@@ -7,14 +7,18 @@ type LoadingProps = {
 };
 
 export function Loading({ title }: LoadingProps) {
+  const colorTheme = useColorScheme();
+
   return (
     <View
-      className="flex-1 items-center justify-center mx-2 rounded-lg"
+      className={`flex-1 items-center justify-center ${
+        colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
+      }`}
       style={{
         gap: 8,
       }}>
       <ActivityIndicator />
-      <Text className="font-medium text-sm">{title ?? 'Carregando'}</Text>
+      {title && <Text className="font-medium text-sm">{title}</Text>}
     </View>
   );
 }

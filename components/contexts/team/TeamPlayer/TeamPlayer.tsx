@@ -20,6 +20,7 @@ type TeamPlayerProps = {
   isReplaced?: boolean;
   isEnteredInMatch?: boolean;
   isReservePlayer?: boolean;
+  isViewOnly: boolean;
 };
 
 export function TeamPlayer({
@@ -29,6 +30,7 @@ export function TeamPlayer({
   isReplaced,
   isEnteredInMatch,
   isReservePlayer = false,
+  isViewOnly = false,
 }: TeamPlayerProps) {
   const { isMarketClose } = useMarketStatus();
 
@@ -36,9 +38,9 @@ export function TeamPlayer({
 
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  const handleModalPlayerCard = () => {
+  const handleModalPlayerCard = useCallback(() => {
     setActivePlayerCard((previous) => !previous);
-  };
+  }, []);
 
   const handleRemovePlayerFromLayout = useCallback(
     (player: LineupPlayer | FullPlayer) => {
@@ -48,6 +50,9 @@ export function TeamPlayer({
     [isMarketClose, removePlayerFromLineup]
   );
 
+  const isViewOnlyScore =
+    isCapitain && player?.pontos_num !== undefined ? player?.pontos_num * 1.5 : player?.pontos_num;
+
   const scoreWithMarketStatus = isMarketClose
     ? isCapitain
       ? (player as LineupPlayer)?.pontuacao * 1.5 || 0
@@ -56,7 +61,11 @@ export function TeamPlayer({
     ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
     : (player as LineupPlayer)?.pontos_num;
 
-  const scoreFinal = isPlayed ? numberToString(scoreWithMarketStatus) : '-';
+  const scoreFinal = isViewOnly
+    ? numberToString(isViewOnlyScore)
+    : isPlayed
+    ? numberToString(scoreWithMarketStatus)
+    : '-';
 
   const playerPrice = numberToString(player?.preco_num);
 
@@ -67,11 +76,11 @@ export function TeamPlayer({
       }`}
       style={{
         gap: 2,
-        maxWidth: 78,
-        minWidth: 78,
+        maxWidth: 76,
+        minWidth: 76,
         backgroundColor: 'transparent',
       }}>
-      {isMarketClose ? (
+      {isMarketClose || isViewOnly ? (
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
           <Text numberOfLines={1} className="text-blue-500 font-semibold text-center text-xs">
             {scoreFinal}
@@ -86,11 +95,12 @@ export function TeamPlayer({
       )}
 
       <TouchableOpacity
+        disabled={isViewOnly}
         activeOpacity={0.6}
         onPress={handleModalPlayerCard}
         onLongPress={() => handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)}
         className={`justify-center items-center border-2 rounded-full ${
-          player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
+          player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL && !isViewOnly
             ? 'border-red-500 bg-red-500'
             : 'border-neutral-200'
         }`}
@@ -99,7 +109,7 @@ export function TeamPlayer({
           source={{
             uri: player?.foto?.replace('FORMATO', '220x220'),
           }}
-          className="w-12 h-12 rounded-full bg-neutral-100 overflow-hidden"
+          className="w-11 h-11 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
         {isCapitain && (
@@ -117,22 +127,24 @@ export function TeamPlayer({
             />
           </View>
         )}
-        <View
-          className="absolute w-4 h-4 rounded-xl justify-center items-center"
-          style={{
-            bottom: -2,
-            right: 0,
-            backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.background,
-          }}>
-          <Feather
-            name={
-              OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
-                ?.icon as keyof typeof Feather.glyphMap
-            }
-            color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.color}
-            size={14}
-          />
-        </View>
+        {!isViewOnly && (
+          <View
+            className="absolute w-4 h-4 rounded-xl justify-center items-center"
+            style={{
+              bottom: -2,
+              right: 0,
+              backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.background,
+            }}>
+            <Feather
+              name={
+                OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
+                  ?.icon as keyof typeof Feather.glyphMap
+              }
+              color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.color}
+              size={14}
+            />
+          </View>
+        )}
       </TouchableOpacity>
       <View className="bg-neutral-50 items-center justify-center rounded py-0.5">
         <Text

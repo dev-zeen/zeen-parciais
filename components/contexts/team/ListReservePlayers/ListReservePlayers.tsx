@@ -5,32 +5,36 @@ import Market from '@/app/(tabs)/team/market';
 import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
-import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
-import { useGetScoredPlayers } from '@/queries/stats.query';
-import useTeamLineupStore from '@/store/useTeamLineupStore';
+import { PlayerStats } from '@/models/Stats';
 import { onGetPlayerLowestPrice } from '@/utils/team';
 
-export function ListReservePlayers() {
-  const alertToStartingsPlayerPositionNotFilled = () =>
-    Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
-      { text: 'OK' },
-    ]);
+type ListReservePlayersProps = {
+  playerStats: PlayerStats;
+  lineup: LineupPlayers;
+  substitutions?: Substitutions[];
+  isViewOnly?: boolean;
+};
 
-  const { data: playerStats } = useGetScoredPlayers();
-
-  const { data: myClub } = useGetMyClub();
+export function ListReservePlayers({
+  playerStats,
+  lineup,
+  substitutions,
+  isViewOnly = false,
+}: ListReservePlayersProps) {
+  const alertToStartingsPlayerPositionNotFilled = useCallback(
+    () =>
+      Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
+        { text: 'OK' },
+      ]),
+    []
+  );
 
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
   const [showMarketModal, setShowMarketModal] = useState(false);
   const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
-
-  const lineup = useTeamLineupStore((state) => state.lineup);
-
-  const { data: substitutions } = useGetMatchSubstitutions({
-    id: myClub?.time.time_id,
-  });
 
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
@@ -74,6 +78,7 @@ export function ListReservePlayers() {
             <View key={position.position} className="flex-1 items-center">
               {position && position.player ? (
                 <TeamPlayer
+                  isViewOnly={isViewOnly}
                   player={position.player as LineupPlayer}
                   isReservePlayer
                   isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
