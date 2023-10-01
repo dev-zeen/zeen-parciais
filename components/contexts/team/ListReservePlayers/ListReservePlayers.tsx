@@ -5,23 +5,23 @@ import Market from '@/app/(tabs)/team/market';
 import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
-import { PlayerStats } from '@/models/Stats';
 import { onGetPlayerLowestPrice } from '@/utils/team';
 
 type ListReservePlayersProps = {
-  playerStats: PlayerStats;
   lineup: LineupPlayers;
   substitutions?: Substitutions[];
   isViewOnly?: boolean;
+  round?: number;
 };
 
 export function ListReservePlayers({
-  playerStats,
   lineup,
   substitutions,
   isViewOnly = false,
+  round,
 }: ListReservePlayersProps) {
   const alertToStartingsPlayerPositionNotFilled = useCallback(
     () =>
@@ -30,6 +30,8 @@ export function ListReservePlayers({
       ]),
     []
   );
+
+  const { playerStats } = usePlayerStats();
 
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
   const [showMarketModal, setShowMarketModal] = useState(false);
@@ -57,6 +59,7 @@ export function ListReservePlayers({
       setPositionMarketSearch(player);
       setPlayerIndex(playerIndex);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lineup]
   );
 
@@ -85,6 +88,7 @@ export function ListReservePlayers({
                   isEnteredInMatch={substitutions?.some(
                     (item) => item.entrou.atleta_id === position.player?.atleta_id
                   )}
+                  round={round}
                 />
               ) : (
                 <AddPlayerButton

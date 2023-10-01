@@ -18,7 +18,7 @@ import { useGetMarket } from '@/queries/market.query';
 import { GRAY_OPACITY } from '@/styles/colors';
 import { normalizeQuery } from '@/utils/format';
 
-interface ScorePlayersProps extends Player {
+export interface ScorePlayersProps extends Player {
   appreciation?: number;
 }
 
@@ -63,14 +63,14 @@ export default () => {
         })
         .sort((a, b) => (b?.pontuacao as number) - (a?.pontuacao as number));
     }
-  }, [isMarketClose, market, playerStats?.atletas, valorizations?.atletas]);
+  }, [isMarketClose, market, playerStats?.atletas, valorizations]);
 
   const filteredDataSource = useMemo(() => {
     const playersToFilter = isMarketClose
-      ? onGetPlayersPlayed(playerStats as PlayerStats)
+      ? onGetPlayersPlayed(playerStats as PlayerStats, valorizations)
       : mainDataMarket;
     return getFilteredData(playersToFilter, searchQuery);
-  }, [getFilteredData, isMarketClose, mainDataMarket, playerStats, searchQuery]);
+  }, [getFilteredData, isMarketClose, mainDataMarket, playerStats, searchQuery, valorizations]);
 
   const onSearchFilter = useCallback(async (text: string) => {
     setSearchQuery(text);
@@ -93,7 +93,7 @@ export default () => {
         appreciation={player.appreciation}
       />
     ),
-    [playerStats]
+    [playerStats?.clubes, playerStats?.posicoes]
   );
 
   const isLoading = !marketStatus || isLoadingPlayerStats;

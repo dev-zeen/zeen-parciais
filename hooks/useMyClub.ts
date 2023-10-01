@@ -18,14 +18,14 @@ const useMyClub = () => {
     isRefetching: isRefetchingMyClub,
   } = useGetMyClub(!!allowRequest);
 
-  const capitain = myClub && myClub.atletas.find((item) => item.atleta_id === myClub.capitao_id);
+  const captain = myClub && myClub.atletas.find((item) => item.atleta_id === myClub.capitao_id);
 
   return {
     myClub,
     isLoadingMyClub,
     onRefetchMyClub: !allowRequest ? null : onRefetchMyClub,
     isRefetchingMyClub,
-    capitain,
+    captain,
 
     historyClub,
     isLoadingHistory,

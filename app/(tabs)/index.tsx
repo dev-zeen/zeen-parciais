@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { TopPlayerList } from '@/components/contexts/players/TopPlayerList';
-import { CapitainCard } from '@/components/contexts/utils/CapitainCard';
+import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { ReviewLikelyPlayers } from '@/components/contexts/utils/ReviewLikelyPlayers';
@@ -99,7 +99,7 @@ export default () => {
                 <ReviewLikelyPlayers lineupPlayersUnlikely={lineupPlayersUnlikely} />
               )}
 
-              <CapitainCard />
+              <CaptainCard />
 
               <TopPlayerList />
             </>

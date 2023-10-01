@@ -18,11 +18,11 @@ interface ClubCardProps {
   orderBy: string;
   position: number;
   firstPlaceScore: number;
-  isLeagueAcceptCapitain: boolean;
+  isLeagueAcceptCaptain: boolean;
 }
 
 export const ClubCard: React.FC<ClubCardProps> = memo(
-  ({ league, club, orderBy, position, firstPlaceScore, isLeagueAcceptCapitain }) => {
+  ({ league, club, orderBy, position, firstPlaceScore, isLeagueAcceptCaptain }) => {
     const colorTheme = useColorScheme();
 
     const { marketStatus, isMarketClose } = useMarketStatus();
@@ -31,7 +31,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       teamId: club.time_id,
     });
 
-    const capitainPlayer = team?.atletas.find((item) => item.atleta_id === team.capitao_id);
+    const captainPlayer = team?.atletas.find((item) => item.atleta_id === team.capitao_id);
 
     const isOrderByPatrimonio = orderBy === 'patrimonio';
     const patrimony = numberToString(club.patrimonio);
@@ -115,11 +115,11 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                     gap: 4,
                   }}>
                   <Text className="text-xs capitalize">{club.nome_cartola}</Text>
-                  {isLeagueAcceptCapitain ? (
+                  {isLeagueAcceptCaptain ? (
                     <>
                       <View className="relative rounded-full h-1 w-1 bg-gray-400"></View>
                       <View className="flex-row items-center" style={containerStyle}>
-                        <Text className="text-xs">{capitainPlayer?.apelido}</Text>
+                        <Text className="text-xs">{captainPlayer?.apelido}</Text>
 
                         <Image
                           source={captainIcon}

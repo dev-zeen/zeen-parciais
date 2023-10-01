@@ -15,7 +15,6 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { PlayerStats } from '@/models/Stats';
 import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
@@ -47,7 +46,7 @@ export default () => {
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
 
   const initialLineupTeamFormation = useMemo(
     () => onGetDefaultLineupTeam(myClub?.time.esquema_id as number),
@@ -64,7 +63,7 @@ export default () => {
       const defaultLineup = onGetFillLineupDefaultPlayers(myClub, playerStats, isMarketClose);
 
       updateLineup(defaultLineup);
-      updateCapitain(myClub.capitao_id);
+      updateCaptain(myClub.capitao_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMarketClose, isRefetching, myClub, playerStats]);
@@ -81,7 +80,13 @@ export default () => {
     return <MaintenanceMarket />;
   }
 
-  if (!myClub || !lineup || isInitialLoadingSubstitutions || isLoadingPlayerStats) {
+  if (
+    !myClub ||
+    !lineup ||
+    isInitialLoadingSubstitutions ||
+    isLoadingPlayerStats ||
+    !marketStatus
+  ) {
     return <Loading title="Carregando meu time" />;
   }
 
@@ -98,13 +103,17 @@ export default () => {
           <TeamActions initialLineupTeamFormation={initialLineupTeamFormation} />
 
           <SoccerField
-            playerStats={playerStats}
             lineup={lineup}
-            capitain={myClub.capitao_id}
+            captain={myClub.capitao_id}
             substitutions={substitutions}
+            round={marketStatus?.rodada_atual}
           />
 
-          <ListReservePlayers playerStats={playerStats as PlayerStats} lineup={lineup} />
+          <ListReservePlayers
+            lineup={lineup}
+            substitutions={substitutions}
+            round={marketStatus?.rodada_atual}
+          />
         </View>
       </ScrollView>
     </SafeAreaViewContainer>

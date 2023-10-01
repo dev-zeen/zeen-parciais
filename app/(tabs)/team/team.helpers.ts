@@ -243,7 +243,7 @@ export const emptyReservePlayers = (onSuccess: () => void) =>
     ]
   );
 
-export const emptyCapitain = () =>
+export const emptyCaptain = () =>
   Alert.alert('Atenção', 'Selecione um capitão', [
     {
       text: 'Ok',

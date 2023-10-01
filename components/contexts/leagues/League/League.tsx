@@ -192,7 +192,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
           orderBy={orderBy}
           position={index + 1}
           firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
-          isLeagueAcceptCapitain={!league.liga.sem_capitao}
+          isLeagueAcceptCaptain={!league.liga.sem_capitao}
         />
       );
     },

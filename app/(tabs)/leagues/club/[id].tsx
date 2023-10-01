@@ -17,7 +17,7 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import useTeam from '@/hooks/useTeam';
 import useValorization from '@/hooks/useValorization';
 import { FullClubInfo } from '@/models/Club';
-import { FullPlayer, PlayerStats } from '@/models/Stats';
+import { FullPlayer } from '@/models/Stats';
 import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
@@ -137,7 +137,7 @@ export default () => {
   //     return (
   //       <ClubPlayerCard
   //         player={player}
-  //         isCapitain={team?.capitao_id === player.atleta_id}
+  //         isCaptain={team?.capitao_id === player.atleta_id}
   //         currentRound={currentRound}
   //         marketStatus={marketStatus as MarketStatus}
   //         playerStats={playerStats}
@@ -246,15 +246,16 @@ export default () => {
                 colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
             }}>
             <SoccerField
-              playerStats={playerStats}
               lineup={lineup}
               substitutions={substitutions}
-              capitain={team.capitao_id}
+              captain={team.capitao_id}
+              round={currentRound}
               isViewOnly
             />
             <ListReservePlayers
-              playerStats={playerStats as PlayerStats}
               lineup={lineup}
+              substitutions={substitutions}
+              round={currentRound}
               isViewOnly
             />
           </View>

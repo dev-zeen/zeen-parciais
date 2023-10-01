@@ -62,7 +62,7 @@ const useValorization = () => {
         ? isMarketClose
           ? valorizations
           : currentValorizations
-        : null,
+        : undefined,
     isLoadingValorizations: useMemo(
       () => isLoadingValorizations || isLoading,
       [isLoading, isLoadingValorizations]

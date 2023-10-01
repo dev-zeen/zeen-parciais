@@ -18,7 +18,7 @@ type ClubPlayerCardProps = {
   player: PlayerClub;
   currentRound: number;
   marketStatus: MarketStatus;
-  isCapitain: boolean;
+  isCaptain: boolean;
   appreciation?: number;
   playerStats?: PlayerStats;
   isReserve?: boolean;
@@ -31,7 +31,7 @@ export function ClubPlayerCard({
   marketStatus,
   appreciation,
   isReserve,
-  isCapitain,
+  isCaptain,
   isReplacePlayer,
 }: ClubPlayerCardProps) {
   const colorTheme = useColorScheme();
@@ -58,9 +58,9 @@ export function ClubPlayerCard({
           ? scoreWithCurrentRound
           : scoreRound;
 
-      return isCapitain ? score * 1.5 : score;
+      return isCaptain ? score * 1.5 : score;
     },
-    [currentRound, isCapitain, isMarketClose, marketStatus?.rodada_atual, playerStats]
+    [currentRound, isCaptain, isMarketClose, marketStatus?.rodada_atual, playerStats]
   );
 
   return (
@@ -81,7 +81,7 @@ export function ClubPlayerCard({
           <View>
             <View className="flex-row items-center gap-x-1">
               <Text className="text-sm font-semibold">{player.apelido_abreviado}</Text>
-              {isCapitain && (
+              {isCaptain && (
                 <Image
                   source={captainImage}
                   className="w-5 h-5 rounded-full overflow-hidden"

@@ -12,11 +12,11 @@ export type AddPlayerToLineupProps = {
 
 type TeamLineupStore = {
   lineup: LineupPlayers | undefined;
-  capitain: number;
+  captain: number;
   price: number;
   formation: string;
   updateLineup: (lineup: LineupPlayers) => void;
-  updateCapitain: (value: number) => void;
+  updateCaptain: (value: number) => void;
   updatePrice: (value: number) => void;
   updateFormation: (formation: string) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
@@ -26,7 +26,7 @@ type TeamLineupStore = {
 
 const initialState = {
   lineup: undefined,
-  capitain: 0,
+  captain: 0,
   price: 0,
   formation: '',
 };
@@ -38,9 +38,9 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
       lineup,
     }));
   },
-  updateCapitain: (capitain: number) => {
+  updateCaptain: (captain: number) => {
     set((_state) => ({
-      capitain,
+      captain,
     }));
   },
   updatePrice: (price: number) => {
@@ -63,7 +63,7 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
 
       return {
         lineup: lineupUpdated,
-        capitain: player.atleta_id === state.capitain ? 0 : state.capitain,
+        captain: player.atleta_id === state.captain ? 0 : state.captain,
         price: priceUpdated,
       };
     });

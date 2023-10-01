@@ -23,15 +23,6 @@ export default function TabLayout() {
           backgroundColor:
             colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         },
-        tabBarStyle: {
-          backgroundColor:
-            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          paddingBottom: 2,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
       }}>
       <Tabs.Screen
         name="index"

@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Image, Modal, TouchableOpacity } from 'react-native';
 
 import captainImage from '@/assets/images/letter-c.png';
@@ -14,25 +14,27 @@ import { numberToString } from '@/utils/parseTo';
 
 type TeamPlayerProps = {
   player?: LineupPlayer;
-  isCapitain?: boolean;
-  handleCapitain?: (id: number) => void;
+  isCaptain?: boolean;
+  handleCaptain?: (id: number) => void;
   isPlayed?: boolean;
   isReplaced?: boolean;
   isEnteredInMatch?: boolean;
   isReservePlayer?: boolean;
   isViewOnly: boolean;
+  round?: number;
 };
 
 export function TeamPlayer({
   player,
-  isCapitain,
+  isCaptain,
   isPlayed,
   isReplaced,
   isEnteredInMatch,
   isReservePlayer = false,
   isViewOnly = false,
+  round,
 }: TeamPlayerProps) {
-  const { isMarketClose } = useMarketStatus();
+  const { isMarketClose, marketStatus } = useMarketStatus();
 
   const [activePlayerCard, setActivePlayerCard] = useState(false);
 
@@ -50,36 +52,42 @@ export function TeamPlayer({
     [isMarketClose, removePlayerFromLineup]
   );
 
-  const isViewOnlyScore = isMarketClose
-    ? isCapitain && player?.pontuacao !== undefined
-      ? player?.pontuacao * 1.5
-      : player?.pontuacao
-    : isCapitain && player?.pontos_num !== undefined
-    ? player?.pontos_num * 1.5
-    : player?.pontos_num;
+  const partialScore = useMemo(() => {
+    if (isPlayed) {
+      return isCaptain
+        ? (player as LineupPlayer)?.pontuacao * 1.5 || 0
+        : (player as LineupPlayer)?.pontuacao;
+    }
+    return null;
+  }, [isCaptain, isPlayed, player]);
 
-  const scoreWithMarketStatus = isMarketClose
-    ? isCapitain
-      ? (player as LineupPlayer)?.pontuacao * 1.5 || 0
-      : (player as LineupPlayer)?.pontuacao
-    : isCapitain
-    ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
-    : (player as LineupPlayer)?.pontos_num;
+  const score = useMemo(() => {
+    if (player?.pontos_num !== null) {
+      return isCaptain
+        ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
+        : (player as LineupPlayer)?.pontos_num;
+    }
+    return null;
+  }, [isCaptain, player]);
 
-  const scoreFinal = isViewOnly
-    ? isPlayed
-      ? numberToString(isViewOnlyScore)
-      : '-'
-    : isPlayed
-    ? numberToString(scoreWithMarketStatus)
-    : '-';
+  const scorePartialFormated = useMemo(
+    () => (isMarketClose && partialScore ? numberToString(partialScore) : '-'),
+    [isMarketClose, partialScore]
+  );
 
-  const playerPrice = numberToString(player?.preco_num);
+  const scoreFormated = useMemo(() => (score ? numberToString(score) : '-'), [score]);
+
+  const scoreFinal = useMemo(
+    () => (round === marketStatus?.rodada_atual ? scorePartialFormated : scoreFormated),
+    [marketStatus?.rodada_atual, round, scoreFormated, scorePartialFormated]
+  );
+
+  const playerPrice = useMemo(() => numberToString(player?.preco_num), [player?.preco_num]);
 
   return (
     <View
       className={`items-center justify-center ${
-        isReplaced || (isReservePlayer && !isEnteredInMatch && isMarketClose) ? 'opacity-75' : ''
+        isReplaced || (isReservePlayer && !isEnteredInMatch && isMarketClose) ? 'opacity-60' : ''
       }`}
       style={{
         gap: 2,
@@ -102,10 +110,11 @@ export function TeamPlayer({
       )}
 
       <TouchableOpacity
-        disabled={isViewOnly}
         activeOpacity={0.6}
         onPress={handleModalPlayerCard}
-        onLongPress={() => handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer)}
+        onLongPress={() =>
+          !isViewOnly ? handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer) : null
+        }
         className={`justify-center items-center border-2 rounded-full ${
           player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL && !isViewOnly
             ? 'border-red-500 bg-red-500'
@@ -119,7 +128,7 @@ export function TeamPlayer({
           className="w-11 h-11 rounded-full bg-neutral-100 overflow-hidden"
           alt={`Foto do ${player?.apelido}`}
         />
-        {isCapitain && (
+        {isCaptain && (
           <View
             className="relative w-0.5 h-0.5 justify-center items-center"
             style={{

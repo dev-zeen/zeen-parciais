@@ -92,7 +92,7 @@ export const onGetLeagueWithPartials = (
   const partialsByClub =
     clubsByLeague && playerStats && onGetClubsLeagueWithPartial(clubsByLeague, playerStats);
 
-  const isUsingCapitainScore = !league.liga.sem_capitao;
+  const isUsingCaptainScore = !league.liga.sem_capitao;
 
   const clubMap = partialsByClub?.reduce((map, club) => {
     map.set(String(club.club), club);
@@ -111,25 +111,25 @@ export const onGetLeagueWithPartials = (
       pontos: {
         ...clubLeague.pontos,
         rodada: club
-          ? club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0)
+          ? club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0)
           : 0,
         campeonato:
           clubLeague.pontos?.campeonato +
           (club
-            ? club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0)
+            ? club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0)
             : 0),
         mes:
           clubLeague.pontos?.mes +
           (club
-            ? club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0)
+            ? club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0)
             : 0),
         turno:
           marketStatus?.rodada_atual !== 20
             ? clubLeague.pontos?.turno +
               (club
-                ? club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0)
+                ? club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0)
                 : 0)
-            : club.partial + (captain && isUsingCapitainScore ? captain.pontuacao * 0.5 : 0),
+            : club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0),
       },
     };
 

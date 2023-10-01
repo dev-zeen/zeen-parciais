@@ -57,7 +57,7 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
         <ClubPlayerCard
           key={player.atleta_id}
           player={player}
-          isCapitain={team?.capitao_id === player.atleta_id}
+          isCaptain={team?.capitao_id === player.atleta_id}
           currentRound={match.rodada_id}
           marketStatus={marketStatus as MarketStatus}
           isReplacePlayer={substitutions?.some(
@@ -120,7 +120,7 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
     //       playerStats={playerStats}
     //       lineup={lineup}
     //       substitutions={substitutions}
-    //       capitain={team.capitao_id}
+    //       captain={team.capitao_id}
     //       isViewOnly
     //       round={match.rodada_id}
     //     />

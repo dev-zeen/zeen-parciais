@@ -6,7 +6,7 @@ import SelectDropdown from 'react-native-select-dropdown';
 import {
   PlayersToSell,
   clearLineup,
-  emptyCapitain,
+  emptyCaptain,
   emptyLineupFormation,
   emptyReservePlayers,
   fillLineupOnChangeFormation,
@@ -54,8 +54,8 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
 
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
-  const capitain = useTeamLineupStore((state) => state.capitain);
+  const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
+  const captain = useTeamLineupStore((state) => state.captain);
 
   const updatePrice = useTeamLineupStore((state) => state.updatePrice);
   const price = useTeamLineupStore((state) => state.price);
@@ -80,7 +80,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
       updatePrice(defaultPrice);
 
       updateLineup(initialLineupMounted);
-      updateCapitain(res.data?.capitao_id as number);
+      updateCaptain(res.data?.capitao_id as number);
     });
     await onRefetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -120,7 +120,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
     };
 
     updateLineup(lineupWithoutPlayers);
-    updateCapitain(0);
+    updateCaptain(0);
     updatePrice(newPrice);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -128,13 +128,13 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
   const onSaveTeam = useCallback(() => {
     const payload = onGetPayloadSaveTeam({
       lineup: lineup as LineupPlayers,
-      capitain,
+      captain,
       formation,
     });
 
     mutate(payload);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineup, capitain, formation]);
+  }, [lineup, captain, formation]);
 
   const isReservesCompleted = useCallback((reserves: LineupPosition[]) => {
     return reserves.every((item) => item.player);
@@ -146,8 +146,8 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
       return;
     }
 
-    if (!capitain) {
-      emptyCapitain();
+    if (!captain) {
+      emptyCaptain();
       return;
     }
 
@@ -157,7 +157,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
     }
     onSaveTeam();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [capitain, formation, lineup]);
+  }, [captain, formation, lineup]);
 
   const handleChangeFormation = useCallback(
     (lineup: LineupPlayers, formation: number) => {
@@ -199,12 +199,12 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
   );
 
   const onShowSaveLineupButton = useCallback(
-    (lineup: LineupPlayers, capitain: number, club: FullClubInfo) => {
+    (lineup: LineupPlayers, captain: number, club: FullClubInfo) => {
       const isEqualLineups = onGetEqualLineups(lineup, club);
-      const isSameCapitain = club.capitao_id === capitain;
+      const isSameCaptain = club.capitao_id === captain;
 
-      if (!isSameCapitain || !isEqualLineups) setIsLineupComplete(true);
-      if (isSameCapitain && isEqualLineups) setIsLineupComplete(false);
+      if (!isSameCaptain || !isEqualLineups) setIsLineupComplete(true);
+      if (isSameCaptain && isEqualLineups) setIsLineupComplete(false);
     },
     []
   );
@@ -223,17 +223,17 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
   }, []);
 
   useEffect(() => {
-    if (lineup && myClub && capitain) {
+    if (lineup && myClub && captain) {
       const isFilledLineup = onGetIsLineupComplete(lineup);
 
       if (isFilledLineup) {
-        onShowSaveLineupButton(lineup as LineupPlayers, capitain, myClub as FullClubInfo);
+        onShowSaveLineupButton(lineup as LineupPlayers, captain, myClub as FullClubInfo);
       } else {
         setIsLineupComplete(false);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [capitain, myClub, lineup]);
+  }, [captain, myClub, lineup]);
 
   useEffect(() => {
     if (lineup && isFirstRender.current) {

@@ -47,25 +47,27 @@ export function StatsMyClubCard({ team, round }: StatsMyClubCardProps) {
               </View>
             </View>
 
-            <Text className="font-semibold text-lg text-green-500">
+            <Text className="font-semibold text-md text-green-500">
               {numberToString(totalPartialValorization)}
             </Text>
           </View>
           <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
             <Text className="font-semibold text-xs">Parcial</Text>
-            <Text className="font-bold text-lg text-green-500">{numberToString(partialScore)}</Text>
+            <Text className="font-semibold text-md text-green-500">
+              {numberToString(partialScore)}
+            </Text>
           </View>
           <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
             <Text className="font-semibold text-xs">Total</Text>
 
-            <Text className="font-bold text-lg text-green-500">
+            <Text className="font-semibold text-md text-green-500">
               {numberToString(totalPartialScore)}
             </Text>
           </View>
           <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
             <Text className="font-semibold text-xs">Pontuados</Text>
 
-            <Text className="font-bold text-lg text-green-500">
+            <Text className="font-semibold text-md text-green-500">
               {`${playersHaveAlreadyPlayed || '0'}/12`}
             </Text>
           </View>
@@ -74,17 +76,17 @@ export function StatsMyClubCard({ team, round }: StatsMyClubCardProps) {
         <View className="flex-row justify-around items-center rounded-lg py-2 mt-2">
           <View className="justify-center items-center gap-1">
             <Text className="text-xs">Patrim.</Text>
-            <Text className="font-bold text-sm">{numberToString(team?.patrimonio)}</Text>
+            <Text className="font-semibold text-sm">{numberToString(team?.patrimonio)}</Text>
           </View>
 
           <View className="justify-center items-center gap-1">
             <Text className="text-xs">Rodada</Text>
-            <Text className="font-bold text-sm">{numberToString(team?.pontos)}</Text>
+            <Text className="font-semibold text-sm">{numberToString(team?.pontos)}</Text>
           </View>
 
           <View className="justify-center items-center gap-1">
             <Text className="text-xs">{isMarketClose ? 'Total Parcial' : 'Total'}</Text>
-            <Text className="font-bold text-sm">{numberToString(team?.pontos_campeonato)}</Text>
+            <Text className="font-semibold text-sm">{numberToString(team?.pontos_campeonato)}</Text>
           </View>
         </View>
       )}

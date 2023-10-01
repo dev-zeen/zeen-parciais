@@ -23,10 +23,10 @@ type TeamPlayerCardProps = {
 export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerCardProps) {
   const colorTheme = useColorScheme();
 
-  const capitain = useTeamLineupStore((state) => state.capitain);
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const captain = useTeamLineupStore((state) => state.captain);
+  const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
 
-  const isCapitain = capitain === player.atleta_id;
+  const isCaptain = captain === player.atleta_id;
 
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
@@ -35,9 +35,9 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
-  const handleSelectCapitain = useCallback(() => {
-    updateCapitain(player.atleta_id);
-  }, [player.atleta_id, updateCapitain]);
+  const handleSelectCaptain = useCallback(() => {
+    updateCaptain(player.atleta_id);
+  }, [player.atleta_id, updateCaptain]);
 
   const handleRemovePlayerFromLineup = useCallback(() => {
     removePlayerFromLineup(player);
@@ -91,7 +91,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
                 style={{
                   gap: 8,
                 }}>
-                {isCapitain && (
+                {isCaptain && (
                   <Image
                     source={captainImage}
                     className="w-8 h-8 overflow-hidden"
@@ -143,12 +143,12 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
           {!isMarketClose && (
             <View className="flex-row px-4 mx-2 rounded-lg items-center justify-evenly">
-              {!isCapitain && !isReservePlayer && player.posicao_id !== Positions.TECNICO && (
+              {!isCaptain && !isReservePlayer && player.posicao_id !== Positions.TECNICO && (
                 <TouchableOpacity
-                  onPress={handleSelectCapitain}
-                  disabled={isCapitain}
+                  onPress={handleSelectCaptain}
+                  disabled={isCaptain}
                   activeOpacity={0.6}
-                  className={`${isCapitain ? 'F5F5F5' : 'border-2 border-violet-500'}  ${
+                  className={`${isCaptain ? 'F5F5F5' : 'border-2 border-violet-500'}  ${
                     colorTheme === 'dark' ? 'bg-violet-500' : 'bg-violet-200'
                   } p-3 rounded-lg`}>
                   <Text>Tornar Capitão</Text>

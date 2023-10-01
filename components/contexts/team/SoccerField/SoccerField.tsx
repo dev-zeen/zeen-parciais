@@ -7,30 +7,32 @@ import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
 import { Positions, Zone } from '@/constants/Formations';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
-import { PlayerStats } from '@/models/Stats';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 const screenWidth = Dimensions.get('window').width;
 const fieldWidth = screenWidth;
 
 type SoccerFieldProps = {
-  playerStats: PlayerStats | undefined;
   lineup: LineupPlayers;
-  capitain: number;
+  captain: number;
   substitutions?: Substitutions[];
   isViewOnly?: boolean;
+  round: number;
 };
 
 export function SoccerField({
-  playerStats,
   lineup,
   substitutions,
-  capitain,
+  captain,
   isViewOnly = false,
+  round,
 }: SoccerFieldProps) {
-  const updateCapitain = useTeamLineupStore((state) => state.updateCapitain);
+  const { playerStats } = usePlayerStats();
+
+  const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
 
   const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
   const [playerIndex, setPlayerIndex] = useState(0);
@@ -66,12 +68,13 @@ export function SoccerField({
             <TeamPlayer
               isViewOnly={isViewOnly}
               player={position.player as LineupPlayer}
-              isCapitain={capitain === position.player?.atleta_id}
-              handleCapitain={updateCapitain}
+              isCaptain={captain === position.player?.atleta_id}
+              handleCaptain={updateCaptain}
               isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
               isReplaced={substitutions?.some(
                 (item) => item.saiu.atleta_id === position.player?.atleta_id
               )}
+              round={round}
             />
           ) : (
             <AddPlayerButton
@@ -83,7 +86,7 @@ export function SoccerField({
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [capitain, isViewOnly, playerStats, substitutions]
+    [isViewOnly, captain, playerStats?.atletas, substitutions, round]
   );
 
   return (
