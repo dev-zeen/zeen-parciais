@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import { ListRenderItemInfo, SectionList, useColorScheme } from 'react-native';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { ListRenderItemInfo, RefreshControl, SectionList, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
@@ -105,5 +104,28 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
         </View>
       )}
     />
+
+    // <ScrollView
+    //   refreshControl={
+    //     <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
+    //   }>
+    //   <View
+    //     className="items-center justify-center pt-2 pb-2 mb-2"
+    //     style={{
+    //       gap: 8,
+    //       backgroundColor:
+    //         colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+    //     }}>
+    //     <SoccerField
+    //       playerStats={playerStats}
+    //       lineup={lineup}
+    //       substitutions={substitutions}
+    //       capitain={team.capitao_id}
+    //       isViewOnly
+    //       round={match.rodada_id}
+    //     />
+    //     <ListReservePlayers playerStats={playerStats as PlayerStats} lineup={lineup} isViewOnly />
+    //   </View>
+    // </ScrollView>
   );
 }

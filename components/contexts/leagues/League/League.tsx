@@ -106,20 +106,18 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     [handleOrderByPatrimony, sortClubs]
   );
 
-  useEffect(() => {
-    if (!clubs) {
-      if (league && orderBy === OrderByOptions.PATRIMONIO) {
-        handleOrderByPatrimony();
-        return;
-      }
-      sortClubs(orderBy);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clubs, league, orderBy]);
-
   const handleConfirmDialog = useCallback(() => {
     setShowModalPublicLeague(false);
   }, []);
+
+  useEffect(() => {
+    if (league && orderBy === OrderByOptions.PATRIMONIO) {
+      handleOrderByPatrimony();
+      return;
+    }
+    sortClubs(orderBy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [league, orderBy, sortClubs]);
 
   useEffect(() => {
     if (league && !league?.liga.time_dono_id) {
@@ -204,7 +202,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
 
   const onRefetch = useCallback(async () => {
     sortClubs(orderBy);
-    onRefetchLeague();
+    await onRefetchLeague();
   }, [onRefetchLeague, orderBy, sortClubs]);
 
   const isLoading = !clubs;
@@ -216,7 +214,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   return (
     <>
       <View
-        className="flex-1"
         style={{
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
@@ -228,34 +225,33 @@ export function League({ league, clubsByLeague }: LeagueProps) {
           }}>
           <Tabs tabs={tabs} />
         </View>
-
-        {isSortingClubs ? (
-          <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
-            <ActivityIndicator />
-          </View>
-        ) : (
-          <FlatList
-            refreshControl={
-              <RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />
-            }
-            data={clubs}
-            keyExtractor={keyExtractor}
-            ItemSeparatorComponent={() => (
-              <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
-            )}
-            renderItem={renderItem}
-            initialNumToRender={30}
-            maxToRenderPerBatch={15}
-            contentContainerStyle={{
-              paddingTop: 8,
-              paddingVertical: 8,
-              paddingHorizontal: 8,
-              backgroundColor:
-                colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-            }}
-          />
-        )}
       </View>
+
+      {isSortingClubs ? (
+        <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
+          data={clubs}
+          keyExtractor={keyExtractor}
+          ItemSeparatorComponent={() => (
+            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+          )}
+          renderItem={renderItem}
+          initialNumToRender={30}
+          maxToRenderPerBatch={15}
+          contentContainerStyle={{
+            paddingTop: 8,
+            paddingVertical: 8,
+            paddingHorizontal: 8,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          }}
+        />
+      )}
 
       {showModalPublicLeague && (
         <DialogComponent

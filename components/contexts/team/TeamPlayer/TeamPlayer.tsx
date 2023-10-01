@@ -50,8 +50,13 @@ export function TeamPlayer({
     [isMarketClose, removePlayerFromLineup]
   );
 
-  const isViewOnlyScore =
-    isCapitain && player?.pontos_num !== undefined ? player?.pontos_num * 1.5 : player?.pontos_num;
+  const isViewOnlyScore = isMarketClose
+    ? isCapitain && player?.pontuacao !== undefined
+      ? player?.pontuacao * 1.5
+      : player?.pontuacao
+    : isCapitain && player?.pontos_num !== undefined
+    ? player?.pontos_num * 1.5
+    : player?.pontos_num;
 
   const scoreWithMarketStatus = isMarketClose
     ? isCapitain
@@ -62,7 +67,9 @@ export function TeamPlayer({
     : (player as LineupPlayer)?.pontos_num;
 
   const scoreFinal = isViewOnly
-    ? numberToString(isViewOnlyScore)
+    ? isPlayed
+      ? numberToString(isViewOnlyScore)
+      : '-'
     : isPlayed
     ? numberToString(scoreWithMarketStatus)
     : '-';

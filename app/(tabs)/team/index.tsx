@@ -54,6 +54,11 @@ export default () => {
     [myClub]
   );
 
+  const isRefetching = useMemo(
+    () => isRefetchingPlayerStats || isRefetchingMyClub,
+    [isRefetchingMyClub, isRefetchingPlayerStats]
+  );
+
   useEffect(() => {
     if (!lineup && myClub && !isRefetching) {
       const defaultLineup = onGetFillLineupDefaultPlayers(myClub, playerStats, isMarketClose);
@@ -62,16 +67,11 @@ export default () => {
       updateCapitain(myClub.capitao_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [myClub, playerStats]);
+  }, [isMarketClose, isRefetching, myClub, playerStats]);
 
   const onRefresh = useCallback(() => {
     Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]);
   }, [onRefetchMyClub, onRefetchPlayerStats]);
-
-  const isRefetching = useMemo(
-    () => isRefetchingPlayerStats || isRefetchingMyClub,
-    [isRefetchingMyClub, isRefetchingPlayerStats]
-  );
 
   if (!isAutheticated) {
     return <Login title="Para acessar o seu time, é necessário efetuar o login." />;

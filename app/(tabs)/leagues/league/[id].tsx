@@ -24,9 +24,17 @@ export default () => {
 
   const { id: slug } = useLocalSearchParams();
 
+  // const { league, clubsByLeague, isLoadingLeague, onRefetchLeague } = useLeague({
+  //   slug: slug as string,
+  // });
+
   const { league, clubsByLeague, isLoadingLeague } = useLeague({
     slug: slug as string,
   });
+
+  // const onRefetch = useCallback(async () => {
+  //   await onRefetchLeague();
+  // }, [onRefetchLeague]);
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
@@ -39,38 +47,51 @@ export default () => {
         style={{
           gap: 4,
         }}>
-        <View className="flex-1 flex-row justify-center items-center py-2 px-1 rounded-lg mt-2">
-          <Image
-            source={{
-              uri: league?.liga.mata_mata
-                ? league.liga.url_trofeu_png
-                : league?.liga.url_flamula_png,
-            }}
-            style={{
-              width: theme.Tokens.SIZE.sm,
-              height: theme.Tokens.SIZE.sm,
-            }}
-            alt={`Imagem da liga ${league?.liga.nome}`}
-          />
-          <Text
-            style={{
-              fontWeight: '700',
-              fontSize: theme.Tokens.TEXT.xs,
-              textTransform: 'uppercase',
-            }}>
-            {league?.liga.nome}
-          </Text>
-          {!league?.liga.sem_capitao && (
+        <View className="flex-1 flex-row justify-between items-center py-2 px-4 rounded-lg mt-2">
+          <View className="flex-row justify-center items-center">
             <Image
-              source={captainIcon}
-              style={{
-                width: 24,
-                height: 24,
-                margin: 4,
+              source={{
+                uri: league?.liga.mata_mata
+                  ? league.liga.url_trofeu_png
+                  : league?.liga.url_flamula_png,
               }}
-              alt="Liga com Capitão"
+              style={{
+                width: theme.Tokens.SIZE.sm,
+                height: theme.Tokens.SIZE.sm,
+              }}
+              alt={`Imagem da liga ${league?.liga.nome}`}
             />
-          )}
+            <Text
+              style={{
+                fontWeight: '700',
+                fontSize: theme.Tokens.TEXT.xs,
+                textTransform: 'uppercase',
+              }}>
+              {league?.liga.nome}
+            </Text>
+            {!league?.liga.sem_capitao && (
+              <Image
+                source={captainIcon}
+                style={{
+                  width: 24,
+                  height: 24,
+                  margin: 4,
+                }}
+                alt="Liga com Capitão"
+              />
+            )}
+          </View>
+          {/* <TouchableOpacity
+            onPress={onRefetch}
+            activeOpacity={0.6}
+            className="p-3 rounded-full"
+            style={{
+              backgroundColor: colorTheme === 'dark' ? '#1e40af' : '#3b82f6',
+              borderColor: colorTheme === 'dark' ? '#1e3a8a' : '#60a5fa',
+              borderWidth: 1,
+            }}>
+            <Feather name="refresh-ccw" size={14} color="white" />
+          </TouchableOpacity> */}
         </View>
 
         {league?.pedidos && league.pedidos?.length > 0 && (

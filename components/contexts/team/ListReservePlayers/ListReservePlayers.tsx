@@ -91,6 +91,7 @@ export function ListReservePlayers({
                   key={position.abbr}
                   onPurchasePlayerOnMarket={() => handlePurchasePlayerOnMarket(position, index)}
                   positionLineup={position}
+                  isViewOnly={isViewOnly}
                 />
               )}
             </View>

@@ -103,7 +103,11 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
             borderWidth: 2,
             gap: 4,
           }}>
-          <TeamCupMatch match={match} teamId={match.time_mandante_id} />
+          <TeamCupMatch
+            match={match}
+            teamId={match.time_mandante_id}
+            opacity={match.time_mandante_pontuacao > match.time_visitante_pontuacao ? 1 : 0.3}
+          />
 
           <View className="justify-center items-center rounded z-40 mb-3" style={{}}>
             <Text className="text-sm">{STAGE_TYPE_NAMED[match.tipo_fase]}</Text>
@@ -155,7 +159,11 @@ export function CupMatchCard({ match, myTeam }: CupMatchProps) {
             </View>
           </View>
 
-          <TeamCupMatch match={match} teamId={match.time_visitante_id} />
+          <TeamCupMatch
+            match={match}
+            teamId={match.time_visitante_id}
+            opacity={match.time_visitante_pontuacao > match.time_mandante_pontuacao ? 1 : 0.3}
+          />
         </View>
       </TouchableOpacity>
     </Link>

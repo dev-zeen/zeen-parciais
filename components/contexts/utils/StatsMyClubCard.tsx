@@ -1,0 +1,93 @@
+import { Feather } from '@expo/vector-icons';
+import { useColorScheme } from 'react-native';
+
+import { Text, View } from '@/components/Themed';
+import useMarketStatus from '@/hooks/useMarketStatus';
+import usePartialScore from '@/hooks/usePartialScore';
+import { FullClubInfo } from '@/models/Club';
+import { numberToString } from '@/utils/parseTo';
+
+type StatsMyClubCardProps = {
+  team: FullClubInfo;
+  round?: number;
+};
+
+export function StatsMyClubCard({ team, round }: StatsMyClubCardProps) {
+  const colorTheme = useColorScheme();
+
+  const { isMarketClose, marketStatus } = useMarketStatus();
+
+  const {
+    totalPartialValorization,
+    partialValorization,
+    partialScore,
+    playersHaveAlreadyPlayed,
+    totalPartialScore,
+  } = usePartialScore({
+    teamId: team.time.time_id,
+  });
+
+  return (
+    <>
+      {isMarketClose && round === marketStatus?.rodada_atual ? (
+        <View
+          className={`flex-row justify-between items-center gap-2 ${
+            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
+          }`}>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <View className="flex-row">
+              <Text className="font-semibold text-xs">Patr.</Text>
+              <View className="flex-row pl-1 justify-center items-center">
+                <Text className="font-semibold text-xs">{numberToString(partialValorization)}</Text>
+                <Feather
+                  size={12}
+                  name={partialValorization && partialValorization < 0 ? 'arrow-down' : 'arrow-up'}
+                  color={partialValorization && partialValorization < 0 ? '#ef4444' : '#4ade80'}
+                />
+              </View>
+            </View>
+
+            <Text className="font-semibold text-lg text-green-500">
+              {numberToString(totalPartialValorization)}
+            </Text>
+          </View>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <Text className="font-semibold text-xs">Parcial</Text>
+            <Text className="font-bold text-lg text-green-500">{numberToString(partialScore)}</Text>
+          </View>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <Text className="font-semibold text-xs">Total</Text>
+
+            <Text className="font-bold text-lg text-green-500">
+              {numberToString(totalPartialScore)}
+            </Text>
+          </View>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <Text className="font-semibold text-xs">Pontuados</Text>
+
+            <Text className="font-bold text-lg text-green-500">
+              {`${playersHaveAlreadyPlayed || '0'}/12`}
+            </Text>
+          </View>
+        </View>
+      ) : (
+        <View className="flex-row justify-around items-center rounded-lg py-2 mt-2">
+          <View className="justify-center items-center gap-1">
+            <Text className="text-xs">Patrim.</Text>
+            <Text className="font-bold text-sm">{numberToString(team?.patrimonio)}</Text>
+          </View>
+
+          <View className="justify-center items-center gap-1">
+            <Text className="text-xs">Rodada</Text>
+            <Text className="font-bold text-sm">{numberToString(team?.pontos)}</Text>
+          </View>
+
+          <View className="justify-center items-center gap-1">
+            <Text className="text-xs">{isMarketClose ? 'Total Parcial' : 'Total'}</Text>
+            <Text className="font-bold text-sm">{numberToString(team?.pontos_campeonato)}</Text>
+          </View>
+        </View>
+      )}
+    </>
+  );
+}

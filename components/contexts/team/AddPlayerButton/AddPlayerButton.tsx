@@ -7,11 +7,13 @@ import { LineupPosition } from '@/models/Formations';
 type AddPlayerButtonProps = {
   positionLineup: LineupPosition;
   onPurchasePlayerOnMarket: (player: LineupPosition) => void;
+  isViewOnly?: boolean;
 };
 
 export function AddPlayerButton({
   positionLineup,
   onPurchasePlayerOnMarket,
+  isViewOnly = false,
 }: AddPlayerButtonProps) {
   return (
     <View
@@ -22,6 +24,7 @@ export function AddPlayerButton({
         minWidth: 76,
       }}>
       <TouchableOpacity
+        disabled={isViewOnly}
         activeOpacity={0.6}
         onPress={() => onPurchasePlayerOnMarket(positionLineup)}
         className="justify-center items-center border-2 w-11 h-11 rounded-full border-neutral-200 bg-white">

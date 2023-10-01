@@ -1,23 +1,24 @@
-import { useCallback } from 'react';
-import { Image, RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
+import { View } from '@/components/Themed';
 import { TopPlayerList } from '@/components/contexts/players/TopPlayerList';
+import { CapitainCard } from '@/components/contexts/utils/CapitainCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
+import { ReviewLikelyPlayers } from '@/components/contexts/utils/ReviewLikelyPlayers';
+import { StatsMyClubCard } from '@/components/contexts/utils/StatsMyClubCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
-import usePartialScore from '@/hooks/usePartialScore';
-import { IPositions } from '@/models/Stats';
 import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
-import { numberToString } from '@/utils/parseTo';
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -30,21 +31,19 @@ export default () => {
     allowRequest,
   } = useMarketStatus();
 
-  const { myClub, isLoadingMyClub, onRefetchMyClub, isRefetchingMyClub, capitain } = useMyClub();
+  const { myClub, isLoadingMyClub, onRefetchMyClub, isRefetchingMyClub } = useMyClub();
 
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
+  const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const { refetch: onRefetchTopPlayers } = useGetTopPlayers();
 
-  const {
-    data: positions,
-    isLoading: isLoadingPositions,
-    refetch: onRefetchPositions,
-  } = useGetPositions();
+  const lineupPlayersUnlikely = useMemo(
+    () =>
+      myClub?.atletas.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
+    [myClub?.atletas]
+  );
 
-  const { partialScore, playersHaveAlreadyPlayed, totalPartialScore } = usePartialScore({
-    teamId: myClub?.time.time_id as number,
-  });
+  const { isLoading: isLoadingPositions, refetch: onRefetchPositions } = useGetPositions();
 
   const onRefetch = useCallback(async () => {
     await Promise.all([
@@ -93,119 +92,14 @@ export default () => {
           {myClub ? (
             <>
               <TeamBanner team={myClub} />
-              {!isMarketClose ? (
-                <View className="flex-row justify-around items-center rounded-lg py-2">
-                  <View className="justify-center items-center gap-1">
-                    <Text className="text-xs">Patrim.</Text>
-                    <Text className="font-bold text-sm">{numberToString(myClub?.patrimonio)}</Text>
 
-                    <Text
-                      className={`text-sm font-semibold ${
-                        myClub?.variacao_patrimonio > 0 ? 'text-green-500' : 'text-folly'
-                      } `}>
-                      {numberToString(myClub?.variacao_patrimonio)}
-                    </Text>
-                  </View>
+              <StatsMyClubCard team={myClub} round={marketStatus?.rodada_atual} />
 
-                  <View className="justify-center items-center gap-1">
-                    <Text className="text-xs">Ult. Rodada</Text>
-
-                    <Text className="font-bold text-sm">{numberToString(myClub?.pontos)}</Text>
-
-                    <Text
-                      className={`text-sm font-semibold ${
-                        myClub?.variacao_pontos > 0 ? 'text-green-500' : 'text-folly'
-                      } `}>
-                      {numberToString(myClub?.variacao_pontos)}
-                    </Text>
-                  </View>
-
-                  <View className="justify-center items-center gap-1">
-                    <Text className="text-xs">{isMarketClose ? 'Total Parcial' : 'Total'}</Text>
-                    <Text className="font-bold text-sm">
-                      {numberToString(myClub?.pontos_campeonato)}
-                    </Text>
-                  </View>
-                </View>
-              ) : (
-                <View
-                  className={`flex-row justify-between items-center gap-2 ${
-                    colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
-                  }`}>
-                  <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-                    <Text className="font-semibold text-xs">Parcial</Text>
-                    <Text className="font-bold text-lg text-green-500">
-                      {numberToString(partialScore)}
-                    </Text>
-                  </View>
-                  <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-                    <Text className="font-semibold text-xs">Total</Text>
-
-                    <Text className="font-bold text-lg text-green-500">
-                      {numberToString(totalPartialScore)}
-                    </Text>
-                  </View>
-                  <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-                    <Text className="font-semibold text-xs">Pontuados</Text>
-
-                    <Text className="font-bold text-lg text-green-500">
-                      {`${playersHaveAlreadyPlayed || '0'}/12`}
-                    </Text>
-                  </View>
-                </View>
+              {lineupPlayersUnlikely && lineupPlayersUnlikely.length > 0 && (
+                <ReviewLikelyPlayers lineupPlayersUnlikely={lineupPlayersUnlikely} />
               )}
 
-              <View className="p-2 rounded-lg">
-                <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">Meu Capitão</Text>
-                <View className="flex-row py-2 gap-x-1">
-                  <Image
-                    source={{
-                      uri: capitain?.foto?.replace('FORMATO', '220x220'),
-                    }}
-                    className="w-14 h-14 rounded-full"
-                    alt={`Foto do ${capitain?.apelido}`}
-                  />
-
-                  <View className=" flex-1 flex-row items-center justify-between">
-                    <View>
-                      <Text className="text-sm font-semibold">{capitain?.apelido}</Text>
-
-                      <View className="flex-row items-center">
-                        <Text className="text-xs  uppercase">
-                          {(positions as IPositions)[capitain?.posicao_id as number].nome}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {isMarketClose &&
-                    capitain &&
-                    playerStats &&
-                    playerStats.atletas[capitain?.atleta_id] ? (
-                      <View className="items-center flex-row gap-x-2">
-                        <View className="flex-row items-center">
-                          <Text className="text-sm font-bold">
-                            {numberToString(playerStats.atletas[capitain?.atleta_id]?.pontuacao)}
-                          </Text>
-                          <Text className="text-xs font-semibold"> * 1.5</Text>
-                        </View>
-
-                        <Text
-                          className={`text-sm font-bold ${
-                            playerStats?.atletas[capitain?.atleta_id]?.pontuacao * 1.5 > 0
-                              ? 'text-green-500'
-                              : 'text-red-500'
-                          }`}>
-                          {numberToString(
-                            playerStats?.atletas[capitain?.atleta_id]?.pontuacao * 1.5
-                          )}
-                        </Text>
-                      </View>
-                    ) : (
-                      <></>
-                    )}
-                  </View>
-                </View>
-              </View>
+              <CapitainCard />
 
               <TopPlayerList />
             </>
