@@ -118,29 +118,36 @@ export default function () {
   }
 
   return (
-    <SectionList
-      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-      sections={sectionLeaguesList}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      showsVerticalScrollIndicator={false}
-      stickyHeaderHiddenOnScroll
-      contentContainerStyle={{
-        gap: 8,
+    <View
+      style={{
+        flex: 1,
         backgroundColor:
           colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-      }}
-      renderSectionHeader={({ section: { title } }) => (
-        <View
-          className="p-2 mx-2 rounded"
-          style={{
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}>
-          <Text className="font-bold text-base text-center items-center">{title}</Text>
-        </View>
-      )}
-      ListEmptyComponent={<EmptyLeagueList />}
-    />
+      }}>
+      <SectionList
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+        sections={sectionLeaguesList}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderHiddenOnScroll
+        contentContainerStyle={{
+          gap: 8,
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        }}
+        renderSectionHeader={({ section: { title } }) => (
+          <View
+            className="p-2 mx-2 rounded"
+            style={{
+              backgroundColor:
+                colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+            }}>
+            <Text className="font-bold text-base text-center items-center">{title}</Text>
+          </View>
+        )}
+        ListEmptyComponent={<EmptyLeagueList />}
+      />
+    </View>
   );
 }
