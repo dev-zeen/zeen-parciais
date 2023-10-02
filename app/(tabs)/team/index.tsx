@@ -107,12 +107,14 @@ export default () => {
             captain={myClub.capitao_id}
             substitutions={substitutions}
             round={marketStatus?.rodada_atual}
+            isViewOnly={isMarketClose}
           />
 
           <ListReservePlayers
             lineup={lineup}
             substitutions={substitutions}
             round={marketStatus?.rodada_atual}
+            isViewOnly={isMarketClose}
           />
         </View>
       </ScrollView>

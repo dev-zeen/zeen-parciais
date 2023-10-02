@@ -7,12 +7,12 @@ import usePartialScore from '@/hooks/usePartialScore';
 import { FullClubInfo } from '@/models/Club';
 import { numberToString } from '@/utils/parseTo';
 
-type StatsMyClubCardProps = {
+type StatsClubCardProps = {
   team: FullClubInfo;
   round?: number;
 };
 
-export function StatsMyClubCard({ team, round }: StatsMyClubCardProps) {
+export function StatsClubCard({ team, round }: StatsClubCardProps) {
   const colorTheme = useColorScheme();
 
   const { isMarketClose, marketStatus } = useMarketStatus();
@@ -73,20 +73,27 @@ export function StatsMyClubCard({ team, round }: StatsMyClubCardProps) {
           </View>
         </View>
       ) : (
-        <View className="flex-row justify-around items-center rounded-lg py-2 mt-2">
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">Patrim.</Text>
-            <Text className="font-semibold text-sm">{numberToString(team?.patrimonio)}</Text>
+        <View
+          className={`flex-row justify-between items-center gap-2 ${
+            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
+          }`}>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <Text className="font-semibold text-xs">Patrim.</Text>
+            <Text className="font-semibold text-md text-blue-500">
+              {numberToString(team.patrimonio)}
+            </Text>
           </View>
-
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">Rodada</Text>
-            <Text className="font-semibold text-sm">{numberToString(team?.pontos)}</Text>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <Text className="font-semibold text-xs">Rodada</Text>
+            <Text className="font-semibold text-md text-blue-500">
+              {numberToString(team.pontos)}
+            </Text>
           </View>
-
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">{isMarketClose ? 'Total Parcial' : 'Total'}</Text>
-            <Text className="font-semibold text-sm">{numberToString(team?.pontos_campeonato)}</Text>
+          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
+            <Text className="font-semibold text-xs">Total</Text>
+            <Text className="font-semibold text-md text-blue-500">
+              {numberToString(team.pontos_campeonato)}
+            </Text>
           </View>
         </View>
       )}

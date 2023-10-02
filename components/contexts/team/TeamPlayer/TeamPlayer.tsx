@@ -143,7 +143,7 @@ export function TeamPlayer({
             />
           </View>
         )}
-        {!isViewOnly && (
+        {!isViewOnly ? (
           <View
             className="absolute w-4 h-4 rounded-xl justify-center items-center"
             style={{
@@ -160,6 +160,21 @@ export function TeamPlayer({
               size={14}
             />
           </View>
+        ) : (
+          <></>
+        )}
+        {isReplaced || isEnteredInMatch ? (
+          <View
+            className="absolute w-4 h-4 rounded-xl justify-center items-center"
+            style={{
+              bottom: -2,
+              right: 30,
+              backgroundColor: isReplaced ? '#ef4444' : '#22c55e',
+            }}>
+            <Feather name={isReplaced ? 'arrow-down' : 'arrow-up'} color={'#fafafa'} size={14} />
+          </View>
+        ) : (
+          <></>
         )}
       </TouchableOpacity>
       <View className="bg-neutral-50 items-center justify-center rounded py-0.5">

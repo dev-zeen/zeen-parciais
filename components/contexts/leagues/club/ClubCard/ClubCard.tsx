@@ -31,19 +31,23 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       teamId: club.time_id,
     });
 
+    // const { partialValorization } = usePartialScore({
+    //   teamId: club.time_id,
+    // });
+
     const captainPlayer = team?.atletas.find((item) => item.atleta_id === team.capitao_id);
 
     const isOrderByPatrimonio = orderBy === 'patrimonio';
+
     const patrimony = numberToString(club.patrimonio);
 
     const isMarketOpen = marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO;
 
     const score = isOrderByPatrimonio ? patrimony : numberToString((club.pontos as any)[orderBy]);
 
-    const diffScore =
-      firstPlaceScore && orderBy !== 'patrimonio'
-        ? (club.pontos as any)[orderBy] - firstPlaceScore
-        : 0;
+    const diffScore = !isOrderByPatrimonio
+      ? (club.pontos as any)[orderBy] - firstPlaceScore
+      : (club?.patrimonio ?? 0) - firstPlaceScore;
 
     const renderVariationIcon = useCallback((variation: number) => {
       const iconName = variation >= 1 ? 'arrow-up' : 'arrow-down';
@@ -73,7 +77,7 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
       : null;
 
     return (
-      <View className="rounded-lg py-4 pr-3 justify-center" style={containerStyle}>
+      <View className="rounded-lg py-2 pr-3 justify-center" style={containerStyle}>
         <TouchableOpacity activeOpacity={0.6} onPress={onPressHandler}>
           <View className="flex-row justify-between items-center" style={containerStyle}>
             <View
@@ -115,45 +119,70 @@ export const ClubCard: React.FC<ClubCardProps> = memo(
                     gap: 4,
                   }}>
                   <Text className="text-xs capitalize">{club.nome_cartola}</Text>
-                  {isLeagueAcceptCaptain ? (
-                    <>
-                      <View className="relative rounded-full h-1 w-1 bg-gray-400"></View>
-                      <View className="flex-row items-center" style={containerStyle}>
-                        <Text className="text-xs">{captainPlayer?.apelido}</Text>
-
-                        <Image
-                          source={captainIcon}
-                          style={{
-                            width: 12,
-                            height: 12,
-                            marginRight: 1,
-                            marginLeft: 4,
-                          }}
-                          alt={'Liga com Capitão'}
-                        />
-                      </View>
-                    </>
-                  ) : (
-                    <></>
-                  )}
                 </View>
+                {isLeagueAcceptCaptain ? (
+                  <>
+                    <View className="flex-row items-center" style={containerStyle}>
+                      <Text className="text-xs">{captainPlayer?.apelido}</Text>
+
+                      <Image
+                        source={captainIcon}
+                        style={{
+                          width: 14,
+                          height: 14,
+                          marginLeft: 4,
+                        }}
+                        alt={'Liga com Capitão'}
+                      />
+                    </View>
+                  </>
+                ) : (
+                  <></>
+                )}
               </View>
             </View>
 
             <View className="items-end" style={containerStyle}>
               <View className="flex-row gap-x-1" style={containerStyle}>
-                <Text className="text-xs font-semibold">{score}</Text>
+                <Text className="text-sm font-semibold">{score}</Text>
               </View>
 
-              {!isOrderByPatrimonio && (
-                <View className="flex-row" style={containerStyle}>
-                  <Text className="text-xs">
-                    {isMarketClose && club.playersHavePlayed !== undefined
-                      ? `${club.playersHavePlayed}/12`
-                      : diffScore < 0 && numberToString(diffScore)}
+              <View className="items-end" style={containerStyle}>
+                <Text className="text-xs font-normal">
+                  {diffScore < 0 && numberToString(diffScore)}
+                </Text>
+
+                {isMarketClose && club.playersHavePlayed !== undefined ? (
+                  <>
+                    <Text className="text-xs font-medium">{club.playersHavePlayed}/12</Text>
+                  </>
+                ) : (
+                  <></>
+                )}
+
+                {/* <View className="flex-row items-center justify-center" style={containerStyle}>
+                  <Text
+                    className="text-xs font-medium"
+                    style={{
+                      color:
+                        (partialValorization ?? 0) > 0
+                          ? '#22c55e'
+                          : (partialValorization ?? 0) < 0
+                          ? '#ef4444'
+                          : '#fafafa',
+                    }}>
+                    C$ {numberToString(partialValorization)}
                   </Text>
-                </View>
-              )}
+                  {isMarketClose && club.playersHavePlayed !== undefined ? (
+                    <>
+                      <View className="rounded-full bg-gray-300 h-1 w-1 mx-1" />
+                      <Text className="text-xs font-medium">{club.playersHavePlayed}/12</Text>
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </View> */}
+              </View>
             </View>
           </View>
         </TouchableOpacity>

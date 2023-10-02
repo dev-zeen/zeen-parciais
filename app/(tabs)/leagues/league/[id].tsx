@@ -47,7 +47,7 @@ export default () => {
         style={{
           gap: 4,
         }}>
-        <View className="flex-1 flex-row justify-between items-center py-2 px-4 rounded-lg mt-2">
+        <View className="flex-1 flex-row justify-between items-center py-2 px-4 rounded-lg">
           <View className="flex-row justify-center items-center">
             <Image
               source={{

@@ -8,7 +8,7 @@ import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
-import { StatsMyClubCard } from '@/components/contexts/utils/StatsMyClubCard';
+import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
@@ -193,7 +193,7 @@ export default () => {
       }}>
       <TeamBanner team={team as FullClubInfo} />
 
-      <StatsMyClubCard team={team} round={currentRound} />
+      <StatsClubCard team={team} round={currentRound} />
 
       <View
         className="flex-row items-center justify-center px-2 pt-2"

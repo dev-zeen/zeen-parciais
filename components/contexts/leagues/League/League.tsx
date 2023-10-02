@@ -191,7 +191,9 @@ export function League({ league, clubsByLeague }: LeagueProps) {
           league={league}
           orderBy={orderBy}
           position={index + 1}
-          firstPlaceScore={(clubs?.[0].pontos as any)[orderBy]}
+          firstPlaceScore={
+            orderBy !== 'patrimonio' ? (clubs?.[0].pontos as any)[orderBy] : clubs?.[0].patrimonio
+          }
           isLeagueAcceptCaptain={!league.liga.sem_capitao}
         />
       );

@@ -7,7 +7,7 @@ import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { ReviewLikelyPlayers } from '@/components/contexts/utils/ReviewLikelyPlayers';
-import { StatsMyClubCard } from '@/components/contexts/utils/StatsMyClubCard';
+import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
@@ -93,7 +93,7 @@ export default () => {
             <>
               <TeamBanner team={myClub} />
 
-              <StatsMyClubCard team={myClub} round={marketStatus?.rodada_atual} />
+              <StatsClubCard team={myClub} round={marketStatus?.rodada_atual} />
 
               {lineupPlayersUnlikely && lineupPlayersUnlikely.length > 0 && (
                 <ReviewLikelyPlayers lineupPlayersUnlikely={lineupPlayersUnlikely} />
