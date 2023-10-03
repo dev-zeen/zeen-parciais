@@ -1,15 +1,18 @@
-import { useCallback } from 'react';
-import { ListRenderItemInfo, RefreshControl, SectionList, useColorScheme } from 'react-native';
+import { useCallback, useMemo } from 'react';
+import { ListRenderItemInfo, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
+import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/team.helpers';
+import { View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
+import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
+import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
 import { MarketStatus } from '@/models/Market';
-import { FullPlayer } from '@/models/Stats';
+import { FullPlayer, PlayerStats } from '@/models/Stats';
 import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
@@ -17,9 +20,10 @@ import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
 type CupMatchTeamDetailsProps = {
   match: CupMatch;
   team: FullClubInfo;
+  playerStats: PlayerStats;
 };
 
-export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
+export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDetailsProps) {
   const colorTheme = useColorScheme();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
@@ -32,6 +36,11 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
       id: team?.time.time_id,
       round: match.rodada_id,
     });
+
+  const lineup = useMemo(() => {
+    if (team)
+      return onGetFillLineupDefaultPlayers(team as FullClubInfo, playerStats, isMarketClose);
+  }, [isMarketClose, playerStats, team]);
 
   const onGetPlayersTab = (team: FullClubInfo) => {
     const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
@@ -72,60 +81,65 @@ export function CupMatchTeamDetails({ match, team }: CupMatchTeamDetailsProps) {
 
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
-  if (isInitialLoadingSubstitutions) {
+  if (isInitialLoadingSubstitutions || !lineup) {
     return <Loading />;
   }
 
   return (
-    <SectionList
-      refreshControl={
-        <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
-      }
-      sections={onGetPlayersTab(team as FullClubInfo)}
-      ListEmptyComponent={() => <Text>Sem dados para mostrar</Text>}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      showsVerticalScrollIndicator={false}
-      stickyHeaderHiddenOnScroll
-      contentContainerStyle={{
-        paddingHorizontal: 8,
-        gap: 8,
-        backgroundColor:
-          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-      }}
-      renderSectionHeader={({ section: { title } }) => (
-        <View
-          className="p-2 mx-2 rounded"
-          style={{
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}>
-          <Text className="font-bold text-base text-center items-center">{title}</Text>
-        </View>
-      )}
-    />
-
-    // <ScrollView
+    // <SectionList
     //   refreshControl={
     //     <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
-    //   }>
-    //   <View
-    //     className="items-center justify-center pt-2 pb-2 mb-2"
-    //     style={{
-    //       gap: 8,
-    //       backgroundColor:
-    //         colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-    //     }}>
-    //     <SoccerField
-    //       playerStats={playerStats}
-    //       lineup={lineup}
-    //       substitutions={substitutions}
-    //       captain={team.capitao_id}
-    //       isViewOnly
-    //       round={match.rodada_id}
-    //     />
-    //     <ListReservePlayers playerStats={playerStats as PlayerStats} lineup={lineup} isViewOnly />
-    //   </View>
-    // </ScrollView>
+    //   }
+    //   sections={onGetPlayersTab(team as FullClubInfo)}
+    //   ListEmptyComponent={() => <Text>Sem dados para mostrar</Text>}
+    //   keyExtractor={keyExtractor}
+    //   renderItem={renderItem}
+    //   showsVerticalScrollIndicator={false}
+    //   stickyHeaderHiddenOnScroll
+    //   contentContainerStyle={{
+    //     paddingHorizontal: 8,
+    //     gap: 8,
+    //     backgroundColor:
+    //       colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+    //   }}
+    //   renderSectionHeader={({ section: { title } }) => (
+    //     <View
+    //       className="p-2 mx-2 rounded"
+    //       style={{
+    //         backgroundColor:
+    //           colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+    //       }}>
+    //       <Text className="font-bold text-base text-center items-center">{title}</Text>
+    //     </View>
+    //   )}
+    // />
+
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
+      }>
+      <View
+        className="items-center justify-center pt-2 pb-2 mb-2"
+        style={{
+          gap: 8,
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        }}>
+        <SoccerField
+          lineup={lineup}
+          substitutions={substitutions}
+          captain={team.capitao_id}
+          round={match.rodada_id}
+          isViewOnly
+        />
+        <ListReservePlayers
+          lineup={lineup}
+          substitutions={substitutions}
+          round={match.rodada_id}
+          isViewOnly
+        />
+      </View>
+    </ScrollView>
   );
 }

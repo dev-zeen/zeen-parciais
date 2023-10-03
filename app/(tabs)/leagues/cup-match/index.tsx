@@ -8,9 +8,11 @@ import { CupMatchTeamDetails } from '@/components/contexts/leagues/Cup/CupMatchT
 import { Loading } from '@/components/structure/Loading';
 import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
+import usePlayerStats from '@/hooks/usePlayerStats';
 import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
+import { PlayerStats } from '@/models/Stats';
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -18,6 +20,8 @@ export default () => {
   const { match } = useLocalSearchParams();
 
   const cupMatch: CupMatch = useMemo(() => JSON.parse(match as string), [match]);
+
+  const { playerStats } = usePlayerStats();
 
   const { team: homeTeam } = useTeam({
     teamId: cupMatch.time_mandante_id ?? 0,
@@ -34,14 +38,26 @@ export default () => {
       id: 1,
       title: homeTeam?.time.nome as string,
       content: () => {
-        return <CupMatchTeamDetails match={cupMatch} team={homeTeam as FullClubInfo} />;
+        return (
+          <CupMatchTeamDetails
+            match={cupMatch}
+            team={homeTeam as FullClubInfo}
+            playerStats={playerStats as PlayerStats}
+          />
+        );
       },
     },
     {
       id: 2,
       title: awayTeam?.time.nome as string,
       content: () => {
-        return <CupMatchTeamDetails match={cupMatch} team={awayTeam as FullClubInfo} />;
+        return (
+          <CupMatchTeamDetails
+            match={cupMatch}
+            team={awayTeam as FullClubInfo}
+            playerStats={playerStats as PlayerStats}
+          />
+        );
       },
     },
   ];

@@ -55,27 +55,30 @@ export function TeamPlayer({
   const partialScore = useMemo(() => {
     if (isPlayed) {
       return isCaptain
-        ? (player as LineupPlayer)?.pontuacao * 1.5 || 0
-        : (player as LineupPlayer)?.pontuacao;
+        ? (player as LineupPlayer)?.pontuacao * 1.5 ?? 0
+        : (player as LineupPlayer)?.pontuacao ?? 0;
     }
-    return null;
   }, [isCaptain, isPlayed, player]);
 
   const score = useMemo(() => {
     if (player?.pontos_num !== null) {
       return isCaptain
         ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
-        : (player as LineupPlayer)?.pontos_num;
+        : (player as LineupPlayer)?.pontos_num ?? 0;
     }
-    return null;
   }, [isCaptain, player]);
 
   const scorePartialFormated = useMemo(
-    () => (isMarketClose && partialScore ? numberToString(partialScore) : '-'),
-    [isMarketClose, partialScore]
+    () => (isMarketClose && isPlayed ? numberToString(partialScore) : '-'),
+    [isMarketClose, isPlayed, partialScore]
   );
 
-  const scoreFormated = useMemo(() => (score ? numberToString(score) : '-'), [score]);
+  const scoreFormated = useMemo(() => {
+    if (!isNaN(score as number)) {
+      return numberToString(score);
+    }
+    return '-';
+  }, [score]);
 
   const scoreFinal = useMemo(
     () => (round === marketStatus?.rodada_atual ? scorePartialFormated : scoreFormated),

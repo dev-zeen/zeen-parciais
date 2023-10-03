@@ -73,7 +73,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               source={{
                 uri: player.foto?.replace('FORMATO', '220x220'),
               }}
-              className="w-32 h-32 rounded-full mr-2"
+              className="w-24 h-24 rounded-full mr-2"
               style={{
                 borderWidth: 2,
                 borderColor: Colors.light.backgroundFull,

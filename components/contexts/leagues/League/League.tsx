@@ -214,7 +214,12 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   }
 
   return (
-    <>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+      }}>
       <View
         style={{
           backgroundColor:
@@ -262,6 +267,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
           subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
         />
       )}
-    </>
+    </View>
   );
 }

@@ -15,7 +15,7 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import useMyClub from '@/hooks/useMyClub';
+import { useGetMyClub } from '@/queries/club.query';
 import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
@@ -31,7 +31,12 @@ export default () => {
     allowRequest,
   } = useMarketStatus();
 
-  const { myClub, isLoadingMyClub, onRefetchMyClub, isRefetchingMyClub } = useMyClub();
+  const {
+    data: myClub,
+    isLoading: isLoadingMyClub,
+    refetch: onRefetchMyClub,
+    isRefetching: isRefetchingMyClub,
+  } = useGetMyClub(allowRequest);
 
   const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 

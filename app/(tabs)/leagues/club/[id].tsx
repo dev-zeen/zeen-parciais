@@ -237,29 +237,27 @@ export default () => {
       {/* </View> */}
 
       {view === TYPE_VIEW.FIELD && (
-        <>
-          <View
-            className="items-center justify-center pt-2 pb-2 mb-2"
-            style={{
-              gap: 8,
-              backgroundColor:
-                colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-            }}>
-            <SoccerField
-              lineup={lineup}
-              substitutions={substitutions}
-              captain={team.capitao_id}
-              round={currentRound}
-              isViewOnly
-            />
-            <ListReservePlayers
-              lineup={lineup}
-              substitutions={substitutions}
-              round={currentRound}
-              isViewOnly
-            />
-          </View>
-        </>
+        <View
+          className="items-center justify-center pt-2 pb-2 mb-2"
+          style={{
+            gap: 8,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          }}>
+          <SoccerField
+            lineup={lineup}
+            substitutions={substitutions}
+            captain={team.capitao_id}
+            round={currentRound}
+            isViewOnly
+          />
+          <ListReservePlayers
+            lineup={lineup}
+            substitutions={substitutions}
+            round={currentRound}
+            isViewOnly
+          />
+        </View>
       )}
 
       {/* {view === TYPE_VIEW.LIST && (
