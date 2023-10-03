@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -58,10 +58,10 @@ const useInvites = () => {
   );
 
   return {
-    invites,
-    isLoadingInvites,
-    onRefetchInvites,
-    isRefetchingInvites,
+    invites: useMemo(() => invites, [invites]),
+    isLoadingInvites: useMemo(() => isLoadingInvites, [isLoadingInvites]),
+    onRefetchInvites: useMemo(() => onRefetchInvites, [onRefetchInvites]),
+    isRefetchingInvites: useMemo(() => isRefetchingInvites, [isRefetchingInvites]),
     handleAcceptInvite,
     handleDeclineInvitation,
   };

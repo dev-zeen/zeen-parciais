@@ -85,8 +85,15 @@ export function SoccerField({
         </View>
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [isViewOnly, captain, playerStats?.atletas, substitutions, round]
+    [
+      isViewOnly,
+      captain,
+      updateCaptain,
+      playerStats?.atletas,
+      substitutions,
+      round,
+      handlePurchasePlayerOnMarket,
+    ]
   );
 
   return (

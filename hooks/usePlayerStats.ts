@@ -12,7 +12,6 @@ const usePlayerStats = () => {
   const [currentStats, setCurrentStats] = useState<PlayerStats>();
 
   const {
-    data: playerStats,
     isLoading: isLoadingPlayerStats,
     refetch: onRefetchStats,
     isRefetching: isRefetchingPlayerStats,
@@ -31,10 +30,7 @@ const usePlayerStats = () => {
   }, []);
 
   return {
-    playerStats: useMemo(
-      () => (isMarketClose ? playerStats : currentStats),
-      [currentStats, isMarketClose, playerStats]
-    ),
+    playerStats: useMemo(() => currentStats, [currentStats]),
     isLoadingPlayerStats: useMemo(
       () => isLoadingPlayerStats || isLoading,
       [isLoading, isLoadingPlayerStats]

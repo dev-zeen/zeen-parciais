@@ -110,7 +110,7 @@ export default function () {
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
-    return <MaintenanceMarket />;
+    return <MaintenanceMarket hasHeader />;
   }
 
   if (!leagues || !myClub || isLoadingInvites || !sectionLeaguesList) {

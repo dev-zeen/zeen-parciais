@@ -47,6 +47,7 @@ export default () => {
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
   const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
+  const captain = useTeamLineupStore((state) => state.captain);
 
   const initialLineupTeamFormation = useMemo(
     () => onGetDefaultLineupTeam(myClub?.time.esquema_id as number),
@@ -104,7 +105,7 @@ export default () => {
 
           <SoccerField
             lineup={lineup}
-            captain={myClub.capitao_id}
+            captain={captain}
             substitutions={substitutions}
             round={marketStatus?.rodada_atual}
             isViewOnly={isMarketClose}
