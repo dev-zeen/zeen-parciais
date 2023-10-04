@@ -74,6 +74,9 @@ export function SoccerField({
               isReplaced={substitutions?.some(
                 (item) => item.saiu.atleta_id === position.player?.atleta_id
               )}
+              isEnteredInMatch={substitutions?.some(
+                (item) => item.entrou.atleta_id === position.player?.atleta_id
+              )}
               round={round}
             />
           ) : (

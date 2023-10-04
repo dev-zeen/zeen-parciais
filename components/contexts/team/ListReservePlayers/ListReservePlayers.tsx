@@ -89,6 +89,9 @@ export function ListReservePlayers({
                     (item) => item.entrou.atleta_id === position.player?.atleta_id
                   )}
                   round={round}
+                  isReplaced={substitutions?.some(
+                    (item) => item.saiu.atleta_id === position.player?.atleta_id
+                  )}
                 />
               ) : (
                 <AddPlayerButton

@@ -101,7 +101,7 @@ export function TeamPlayer({
       {isMarketClose || isViewOnly ? (
         <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
           <Text numberOfLines={1} className="text-blue-500 font-semibold text-center text-xs">
-            {scoreFinal}
+            {isReplaced ? '-' : scoreFinal}
           </Text>
         </View>
       ) : (
