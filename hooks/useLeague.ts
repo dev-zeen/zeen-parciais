@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { TeamLeague } from '@/models/Leagues';
 import { useGetClubsByLeagueId, useGetLeague } from '@/queries/leagues.query';
 
@@ -12,12 +13,14 @@ export interface TeamCup extends TeamLeague {
 }
 
 const useLeague = ({ slug }: UseLeagueProps) => {
+  const { allowRequest } = useMarketStatus();
+
   const {
     data: league,
     isInitialLoading: isLoadingLeague,
     refetch: onRefetchLeague,
     isRefetching: isRefetchingLeague,
-  } = useGetLeague(slug as string);
+  } = useGetLeague(slug as string, allowRequest);
 
   const { data: clubsByLeague, isInitialLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
     league?.liga.liga_id

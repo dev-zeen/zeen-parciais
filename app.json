@@ -2,7 +2,7 @@
   "expo": {
     "name": "AFC Parciais",
     "slug": "meu-cartola",
-    "version": "0.5.5",
+    "version": "0.6.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.clizioguedes.meucartola",
-      "buildNumber": "20"
+      "buildNumber": "22"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.clizioguedes.meucartola",
-      "versionCode": 23
+      "versionCode": 25
     },
     "web": {
       "bundler": "metro",

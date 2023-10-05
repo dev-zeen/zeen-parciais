@@ -177,23 +177,31 @@ export function fillLineupOnChangeFormation(
   return newLineup;
 }
 
-export function fillLineupWithPlayers(
-  team: FullClubInfo,
-  playerStats?: PlayerStats,
-  isMarketClose?: boolean
-): LineupPlayers {
-  const formation = (LINEUPS_DEFAULT_OBJECT as any)[team?.esquema_id as number];
+export function fillLineupWithPlayers({
+  lineupStart,
+  reserves,
+  formationId,
+  playerStats,
+  isMarketClose,
+}: {
+  lineupStart: FullPlayer[];
+  reserves: FullPlayer[];
+  formationId: number;
+  playerStats?: PlayerStats;
+  isMarketClose?: boolean;
+}): LineupPlayers {
+  const formation = (LINEUPS_DEFAULT_OBJECT as any)[formationId];
   const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[formation]);
 
   fillPlayersInLineup({
-    players: team.atletas,
+    players: lineupStart,
     arrayFillTarget: lineupUpdated.starting,
     playerStats,
     isMarketClose,
   });
 
   fillPlayersInLineup({
-    players: team.reservas,
+    players: reserves,
     arrayFillTarget: lineupUpdated.reserves as LineupPosition[],
     playerStats,
     isMarketClose,
@@ -270,11 +278,25 @@ export const onGetEmptyPositions = (lineup: LineupPlayers) => {
   return emptyPositionsUpdated;
 };
 
-export const onGetFillLineupDefaultPlayers = (
-  team: FullClubInfo,
-  playerStats?: PlayerStats,
-  isMarketClose?: boolean
-) => {
-  const defaultLineup = fillLineupWithPlayers(team as FullClubInfo, playerStats, isMarketClose);
+export const onGetFillLineupDefaultPlayers = ({
+  lineupStart,
+  reserves,
+  formationId,
+  playerStats,
+  isMarketClose,
+}: {
+  lineupStart: FullPlayer[];
+  reserves: FullPlayer[];
+  formationId: number;
+  playerStats?: PlayerStats;
+  isMarketClose?: boolean;
+}) => {
+  const defaultLineup = fillLineupWithPlayers({
+    lineupStart,
+    reserves,
+    formationId,
+    playerStats,
+    isMarketClose,
+  });
   return defaultLineup;
 };

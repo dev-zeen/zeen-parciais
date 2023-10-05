@@ -27,7 +27,7 @@ import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayers, LineupPosition } from '@/models/Formations';
-import { FullPlayer, PlayerStats } from '@/models/Stats';
+import { FullPlayer } from '@/models/Stats';
 import { useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
@@ -70,17 +70,21 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
   const handleResetClub = useCallback(async () => {
     await onRefetchMyClub().then((res) => {
       updateFormation(initialLineupTeamFormation);
+      if (res.data) {
+        const initialLineupMounted = fillLineupWithPlayers({
+          lineupStart: res.data?.atletas as FullPlayer[],
+          reserves: res.data?.reservas as FullPlayer[],
+          formationId: res.data?.esquema_id as number,
+          playerStats,
+          isMarketClose,
+        });
 
-      const initialLineupMounted = fillLineupWithPlayers(
-        res.data as FullClubInfo,
-        playerStats as PlayerStats,
-        isMarketClose
-      );
-      const defaultPrice = onGetTeamPrice(initialLineupMounted.starting);
-      updatePrice(defaultPrice);
+        const defaultPrice = onGetTeamPrice(initialLineupMounted.starting);
+        updatePrice(defaultPrice);
 
-      updateLineup(initialLineupMounted);
-      updateCaptain(res.data?.capitao_id as number);
+        updateLineup(initialLineupMounted);
+        updateCaptain(res.data?.capitao_id as number);
+      }
     });
     await onRefetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps

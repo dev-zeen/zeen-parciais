@@ -111,7 +111,13 @@ export default () => {
 
   const lineup = useMemo(() => {
     if (team)
-      return onGetFillLineupDefaultPlayers(team as FullClubInfo, playerStats, isMarketClose);
+      return onGetFillLineupDefaultPlayers({
+        lineupStart: team.atletas,
+        reserves: team.reservas,
+        formationId: team.esquema_id,
+        playerStats,
+        isMarketClose,
+      });
   }, [isMarketClose, playerStats, team]);
 
   useEffect(() => {

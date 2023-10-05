@@ -32,12 +32,13 @@ interface LeagueProps {
 export function League({ league, clubsByLeague }: LeagueProps) {
   const colorTheme = useColorScheme();
 
-  const { marketStatus, isMarketClose } = useMarketStatus();
+  const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
 
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const { refetch: onRefetchLeague, isRefetching: isRefetchingLeague } = useGetLeague(
-    league.liga.slug
+    league.liga.slug,
+    allowRequest
   );
 
   const [isSortingClubs, setIsSortingClubs] = useState(false);

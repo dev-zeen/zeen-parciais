@@ -61,7 +61,13 @@ export default () => {
 
   useEffect(() => {
     if (!lineup && myClub && !isRefetching) {
-      const defaultLineup = onGetFillLineupDefaultPlayers(myClub, playerStats, isMarketClose);
+      const defaultLineup = onGetFillLineupDefaultPlayers({
+        lineupStart: myClub.atletas,
+        reserves: myClub.reservas,
+        formationId: myClub.time.esquema_id,
+        playerStats,
+        isMarketClose,
+      });
 
       updateLineup(defaultLineup);
       updateCaptain(myClub.capitao_id);

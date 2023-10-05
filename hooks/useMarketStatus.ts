@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
@@ -14,12 +14,18 @@ const useMarketStatus = () => {
     isRefetching: isRefetchingMarketStatus,
   } = useGetMarketStatus();
 
-  const isMarketClose = marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO;
+  const isMarketClose = useMemo(
+    () => marketStatus?.status_mercado !== MARKET_STATUS_NAME.ABERTO,
+    [marketStatus?.status_mercado]
+  );
 
-  const allowRequest =
-    isAutheticated &&
-    marketStatus &&
-    marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO;
+  const allowRequest = useMemo(
+    () =>
+      isAutheticated &&
+      marketStatus &&
+      marketStatus?.status_mercado !== MARKET_STATUS_NAME.EM_MANUTENCAO,
+    [isAutheticated, marketStatus]
+  );
 
   return {
     marketStatus,

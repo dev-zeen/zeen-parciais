@@ -24,6 +24,7 @@ api.interceptors.response.use(
   async (response: AxiosResponse) => response,
   async (error: AxiosError) => {
     const originalConfig = error.config;
+
     if (error.response && error.response.status === 401 && originalConfig && !isRefreshing) {
       isRefreshing = true;
       try {

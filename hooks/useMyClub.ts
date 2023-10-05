@@ -20,8 +20,10 @@ const useMyClub = () => {
     isRefetching: isRefetchingMyClub,
   } = useGetMyClub(!!allowRequest);
 
-  const defaultCapitainClub =
-    myClub && myClub.atletas.find((item) => item.atleta_id === myClub.capitao_id);
+  const defaultCapitainClub = useMemo(
+    () => myClub && myClub.atletas.find((item) => item.atleta_id === myClub.capitao_id),
+    [myClub]
+  );
 
   return {
     myClub: useMemo(() => myClub, [myClub]),

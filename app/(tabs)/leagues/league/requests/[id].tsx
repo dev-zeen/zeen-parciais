@@ -7,6 +7,7 @@ import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
 import { RequestCard } from '@/components/contexts/leagues/RequestCard';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { Invite } from '@/models/Invites';
 import { useGetLeague } from '@/queries/leagues.query';
 
@@ -15,12 +16,14 @@ export default () => {
 
   const { id: slug } = useLocalSearchParams();
 
+  const { allowRequest } = useMarketStatus();
+
   const {
     data: league,
     isInitialLoading: isInitialLoadingLeague,
     refetch: onRefetchLeague,
     isRefetching: isRefetchingLeague,
-  } = useGetLeague(slug as string);
+  } = useGetLeague(slug as string, allowRequest);
 
   const onRefetch = useCallback(async () => {
     await Promise.all([onRefetchLeague()]);

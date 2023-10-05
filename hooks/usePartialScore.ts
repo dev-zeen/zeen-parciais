@@ -56,7 +56,10 @@ const usePartialScore = ({ teamId }: PartialScoreProps) => {
     return 0;
   }, [playersUpdated, playerStats]);
 
-  const totalPartialScore = newPartialScore + (team?.pontos_campeonato ?? 0);
+  const totalPartialScore = useMemo(
+    () => newPartialScore + (team?.pontos_campeonato ?? 0),
+    [newPartialScore, team?.pontos_campeonato]
+  );
 
   const totalPartialValorization = useMemo(
     () => (partialValorization ?? 0) + (team?.patrimonio ?? 0),

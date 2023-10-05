@@ -17,14 +17,14 @@ export const useGetLeagues = (allowRequest?: boolean) =>
     enabled: !!allowRequest,
   });
 
-export const useGetLeague = (slug: string, filters?: Filter) =>
+export const useGetLeague = (slug: string, allowRequest?: boolean, filters?: Filter) =>
   useFetch<League>(
     GET_LEAGUE_BY_SLUG.replace(':slug', slug),
     {
       ...filters,
     },
     {
-      enabled: !!slug,
+      enabled: !!slug && allowRequest,
     }
   );
 
