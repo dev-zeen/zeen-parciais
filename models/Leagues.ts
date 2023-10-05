@@ -1,4 +1,4 @@
-import { MyClubDetails } from '@/models/Club';
+import { FullClubInfo, MyClubDetails } from '@/models/Club';
 import { Invite } from '@/models/Invites';
 
 export interface LeagueUserDetails {
@@ -43,6 +43,7 @@ export interface LeagueUserDetails {
   total_amigos_na_liga: number;
   data_inicio?: string;
   data_fim?: string;
+  vencedor?: FullClubInfo;
 }
 
 export interface Friend {

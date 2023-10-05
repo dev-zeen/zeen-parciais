@@ -43,8 +43,7 @@ export function LeagueCard({ league }: CardLeagueStatsProps) {
                 <View>
                   <Text className="text-sm font-bold">{league.nome}</Text>
                   <Text className="text-xs ">
-                    {league.mata_mata ? 'Mata-Mata' : 'Clássica'} | {typeLeague[league.tipo]} |{' '}
-                    {`${league.total_times_liga} Cartoleiros`}
+                    {typeLeague[league.tipo]} | {`${league.total_times_liga} Cartoleiros`}
                   </Text>
                 </View>
               </View>

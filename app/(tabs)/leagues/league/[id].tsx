@@ -106,7 +106,7 @@ export default () => {
               } as never
             }>
             <Pressable
-              className="flex-row justify-center items-center p-2 rounded-lg mt-2 border-2 border-blue-500"
+              className="flex-row justify-center items-center p-2 rounded-lg border-2 border-blue-500"
               style={{
                 backgroundColor:
                   colorTheme === 'dark' ? Colors.dark.background : Colors.light.background,
