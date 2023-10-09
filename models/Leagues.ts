@@ -144,4 +144,12 @@ export interface CupMatch {
 
 export interface ClubByLeague extends TeamLeague {
   playersHavePlayed?: number;
+  pontos?: {
+    rodada: number;
+    mes: number;
+    turno: number;
+    campeonato: number;
+    capitao?: number;
+    patrimonio?: number;
+  };
 }

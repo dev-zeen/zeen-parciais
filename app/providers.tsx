@@ -1,9 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 import { ReactNode } from 'react';
-import ErrorBoundary from 'react-native-error-boundary';
 
-import { ErrorBoundaryComponent } from '@/components/structure/ErrorBoundary';
 import { AuthContextProvider } from '@/contexts/Auth.context';
 
 type ProvidersProps = {
@@ -22,16 +19,16 @@ export function Providers({ children }: ProvidersProps): ReactNode {
   });
 
   return (
-    <ErrorBoundary
-      FallbackComponent={(props) => (
-        <ErrorBoundaryComponent
-          error={props.error as AxiosError<Error>}
-          resetError={props.resetError}
-        />
-      )}>
-      <QueryClientProvider client={queryClient}>
-        <AuthContextProvider>{children}</AuthContextProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
+    // <ErrorBoundary
+    //   FallbackComponent={(props) => (
+    //     <ErrorBoundaryComponent
+    //       error={props.error as AxiosError<Error>}
+    //       resetError={props.resetError}
+    //     />
+    //   )}>
+    <QueryClientProvider client={queryClient}>
+      <AuthContextProvider>{children}</AuthContextProvider>
+    </QueryClientProvider>
+    // </ErrorBoundary>
   );
 }

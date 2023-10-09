@@ -42,7 +42,13 @@ export function StatsClubCard({ team, round }: StatsClubCardProps) {
                 <Feather
                   size={12}
                   name={partialValorization && partialValorization < 0 ? 'arrow-down' : 'arrow-up'}
-                  color={partialValorization && partialValorization < 0 ? '#ef4444' : '#4ade80'}
+                  color={
+                    (partialValorization ?? 0) > 0
+                      ? '#22c55e'
+                      : (partialValorization ?? 0) < 0
+                      ? '#ef4444'
+                      : '#fafafa'
+                  }
                 />
               </View>
             </View>

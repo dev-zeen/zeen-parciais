@@ -1,12 +1,12 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   ListRenderItemInfo,
   RefreshControl,
   useColorScheme,
 } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
 
 import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
@@ -44,10 +44,15 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   const [isSortingClubs, setIsSortingClubs] = useState(false);
   const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
   const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
-
   const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
 
   const { getItem } = useAsyncStorage(CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`));
+
+  const onGetClubsByLeagueFromStorage = useCallback(async () => {
+    const fromStorage = await getItem();
+    const data: ClubsByLeagueUtils | null = fromStorage ? JSON.parse(fromStorage) : null;
+    return data;
+  }, [getItem]);
 
   const handleOrderByPatrimony = useCallback(() => {
     const newOrderBy =
@@ -59,15 +64,9 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     return newOrderBy;
   }, [league]);
 
-  const onGetClubsByLeagueFromStorage = useCallback(async () => {
-    const data = await getItem();
-    return data;
-  }, [getItem]);
-
   const sortClubs = useCallback(
     async (sortBy: string) => {
-      const clubsByLeague: ClubsByLeagueUtils | undefined =
-        await onGetClubsByLeagueFromStorage().then((data) => (data ? JSON.parse(data) : ''));
+      const clubsByLeague = await onGetClubsByLeagueFromStorage();
 
       const compareFn = (a: ClubByLeague, b: ClubByLeague) =>
         ((b.pontos as any)[sortBy] as number) - ((a.pontos as any)[sortBy] as number);
@@ -93,38 +92,20 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   const handleOnPressOrderBy = useCallback(
     async (sortProp: string) => {
       setOrderBy(sortProp as OrderByOptions);
+
       if (sortProp === OrderByOptions.PATRIMONIO) {
-        const newOrderByPatrimony = handleOrderByPatrimony();
-        setClubs(newOrderByPatrimony);
-      } else {
-        await sortClubs(sortProp);
+        const clubsSortedByPatrimony = handleOrderByPatrimony();
+        setClubs(clubsSortedByPatrimony);
+        setIsSortingClubs(false);
+        return;
       }
 
-      setTimeout(() => {
-        setIsSortingClubs(false);
-      }, 200);
+      await sortClubs(sortProp);
+
+      setIsSortingClubs(false);
     },
     [handleOrderByPatrimony, sortClubs]
   );
-
-  const handleConfirmDialog = useCallback(() => {
-    setShowModalPublicLeague(false);
-  }, []);
-
-  useEffect(() => {
-    if (league && orderBy === OrderByOptions.PATRIMONIO) {
-      handleOrderByPatrimony();
-      return;
-    }
-    sortClubs(orderBy);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [league, orderBy, sortClubs]);
-
-  useEffect(() => {
-    if (league && !league?.liga.time_dono_id) {
-      setShowModalPublicLeague(true);
-    }
-  }, [league]);
 
   const tabs: ITab[] = useMemo(
     () => [
@@ -133,9 +114,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         title: 'Rodada',
         onPress() {
           setIsSortingClubs(true);
-          const sortProp = OrderByOptions.RODADA;
-
-          handleOnPressOrderBy(sortProp);
+          handleOnPressOrderBy(OrderByOptions.RODADA);
         },
       },
       {
@@ -143,9 +122,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         title: 'Total',
         onPress() {
           setIsSortingClubs(true);
-          const sortProp = OrderByOptions.CAMPEONATO;
-
-          handleOnPressOrderBy(sortProp);
+          handleOnPressOrderBy(OrderByOptions.CAMPEONATO);
         },
       },
       {
@@ -153,9 +130,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         title: 'Turno',
         onPress() {
           setIsSortingClubs(true);
-          const sortProp = OrderByOptions.TURNO;
-
-          handleOnPressOrderBy(sortProp);
+          handleOnPressOrderBy(OrderByOptions.TURNO);
         },
       },
       {
@@ -163,9 +138,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         title: 'Mês',
         onPress() {
           setIsSortingClubs(true);
-          const sortProp = OrderByOptions.MES;
-
-          handleOnPressOrderBy(sortProp);
+          handleOnPressOrderBy(OrderByOptions.MES);
         },
       },
       {
@@ -173,9 +146,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         title: 'C$',
         onPress() {
           setIsSortingClubs(true);
-          const sortProp = OrderByOptions.PATRIMONIO;
-
-          handleOnPressOrderBy(sortProp);
+          handleOnPressOrderBy(OrderByOptions.PATRIMONIO);
         },
       },
     ],
@@ -188,27 +159,43 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     ({ item, index }: ListRenderItemInfo<TeamLeague>) => {
       return (
         <ClubCard
+          score={
+            !isMarketClose && orderBy === OrderByOptions.PATRIMONIO
+              ? item.patrimonio
+              : (item.pontos as any)[orderBy]
+          }
           club={item}
-          league={league}
           orderBy={orderBy}
           position={index + 1}
-          firstPlaceScore={
+          highestScoringTeam={
             orderBy !== 'patrimonio' ? (clubs?.[0].pontos as any)[orderBy] : clubs?.[0].patrimonio
           }
           isLeagueAcceptCaptain={!league.liga.sem_capitao}
+          isMarketClose={isMarketClose}
+          isMyTeam={league?.time_usuario?.time_id === item.time_id}
         />
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clubs, league, orderBy]
+    [clubs, isMarketClose, league.liga.sem_capitao, league?.time_usuario?.time_id, orderBy]
   );
 
   const onRefetch = useCallback(async () => {
-    sortClubs(orderBy);
-    await onRefetchLeague();
+    await onRefetchLeague().then((response) => {
+      sortClubs(orderBy);
+    });
   }, [onRefetchLeague, orderBy, sortClubs]);
 
-  const isLoading = !clubs;
+  const isLoading = useMemo(() => !clubs, [clubs]);
+
+  useEffect(() => {
+    sortClubs(orderBy);
+  }, [orderBy, sortClubs]);
+
+  useEffect(() => {
+    if (league && !league?.liga.time_dono_id) {
+      setShowModalPublicLeague(true);
+    }
+  }, [league]);
 
   if (isLoading || !renderItem) {
     return <Loading />;
@@ -246,7 +233,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
           data={clubs}
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={() => (
-            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+            <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
           )}
           renderItem={renderItem}
           initialNumToRender={30}
@@ -264,7 +251,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
       {showModalPublicLeague && (
         <DialogComponent
           isVisible={showModalPublicLeague}
-          onPressConfirm={handleConfirmDialog}
+          onPressConfirm={() => setShowModalPublicLeague(false)}
           subtitile="Apenas os 100 primeiros times são exibidos nas ligas públicas por questões de desempenho."
         />
       )}

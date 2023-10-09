@@ -203,7 +203,7 @@ export default ({
         data={marketPlayers}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        estimatedItemSize={50}
+        estimatedItemSize={100}
         ItemSeparatorComponent={() => (
           <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
         )}

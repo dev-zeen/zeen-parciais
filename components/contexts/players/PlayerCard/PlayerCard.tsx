@@ -12,12 +12,12 @@ interface PlayerCardProps {
   player: Player;
   club?: Club;
   position?: Position;
-  appreciation?: number;
+  valorization?: number;
   isPlayerOnMyLineup?: boolean;
 }
 
 export const PlayerCard = memo(
-  ({ player, club, position, appreciation, isPlayerOnMyLineup }: PlayerCardProps) => {
+  ({ player, club, position, valorization, isPlayerOnMyLineup }: PlayerCardProps) => {
     const colorTheme = useColorScheme();
 
     const { isAutheticated } = useContext(AuthContext);
@@ -87,24 +87,24 @@ export const PlayerCard = memo(
         </View>
         <View className={`justify-center items-end ${stylePlayerInMyLineup}`}>
           <View className={`flex-row items-center justify-center ${stylePlayerInMyLineup}`}>
-            {isAutheticated && appreciation ? (
+            {isAutheticated && valorization ? (
               <View
                 className={`flex-row items-center justify-end w-10 mr-0.5 ${stylePlayerInMyLineup}`}>
                 <Text
                   className={`text-xs font-semibold ${
-                    appreciation < 0
+                    valorization < 0
                       ? 'text-folly'
                       : colorTheme === 'dark'
                       ? 'text-blue-300'
                       : 'text-blue-500'
                   }`}>
-                  {numberToString(appreciation)}
+                  {numberToString(valorization)}
                 </Text>
-                {appreciation !== 0 ? (
+                {valorization !== 0 ? (
                   <Feather
-                    name={appreciation < 0 ? 'arrow-down' : 'arrow-up'}
+                    name={valorization < 0 ? 'arrow-down' : 'arrow-up'}
                     color={
-                      appreciation < 0 ? '#ef4444' : colorTheme === 'dark' ? '#93c5fd' : '#3b82f6'
+                      valorization < 0 ? '#ef4444' : colorTheme === 'dark' ? '#93c5fd' : '#3b82f6'
                     }
                   />
                 ) : (

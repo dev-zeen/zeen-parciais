@@ -72,6 +72,8 @@ export default () => {
   const { playerStats, onRefetchStats, isRefetchingPlayerStats } = usePlayerStats();
   const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
 
+  const [tabActive, setTabActive] = useState(0);
+
   const emptyPositions: Set<number> | undefined = useMemo(
     () => lineup && onGetEmptyPositions(lineup),
     [lineup]
@@ -107,10 +109,6 @@ export default () => {
     },
     [removePlayerFromLineup]
   );
-
-  const onRefetch = useCallback(() => {
-    Promise.all([onRefetchValorizations(), onRefetchStats(), onRefetchMatches()]);
-  }, [onRefetchMatches, onRefetchStats, onRefetchValorizations]);
 
   const isRefetching = useMemo(
     () => isRefetchingMatches || isRefetchingValorizations || isRefetchingPlayerStats,
@@ -190,9 +188,7 @@ export default () => {
 
       setTeamPlayers(newTeamPlayers as FullPlayerPartials[]);
 
-      setTimeout(() => {
-        setIsRendering(false);
-      }, 1);
+      setIsRendering(false);
     },
     [isMarketClose, market, playerStats]
   );
@@ -204,6 +200,7 @@ export default () => {
         ? (playerStats?.clubes[match?.home as number]?.nome as string)
         : (market?.clubes[match?.clube_casa_id as number]?.nome as string),
       onPress: () => {
+        setTabActive(0);
         setIsRendering(true);
         onGetTabPlayers(match?.clube_casa_id as number);
       },
@@ -214,11 +211,29 @@ export default () => {
         ? (playerStats?.clubes[match?.away as number]?.nome as string)
         : (market?.clubes[match?.clube_visitante_id as number]?.nome as string),
       onPress: () => {
+        setTabActive(1);
         setIsRendering(true);
         onGetTabPlayers(match?.clube_visitante_id as number);
       },
     },
   ];
+
+  const onRefetch = useCallback(() => {
+    Promise.all([onRefetchValorizations(), onRefetchStats(), onRefetchMatches()]).then(
+      (_response) => {
+        if (tabActive === 0) onGetTabPlayers(match.clube_casa_id);
+        else onGetTabPlayers(match.clube_visitante_id);
+      }
+    );
+  }, [
+    match.clube_casa_id,
+    match.clube_visitante_id,
+    onGetTabPlayers,
+    onRefetchMatches,
+    onRefetchStats,
+    onRefetchValorizations,
+    tabActive,
+  ]);
 
   useEffect(() => {
     onGetTabPlayers(match?.clube_casa_id as number);

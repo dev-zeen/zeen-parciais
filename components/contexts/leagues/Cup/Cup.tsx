@@ -15,6 +15,7 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
+import { useGetAppreciations } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 
 interface CupProps {
@@ -30,6 +31,8 @@ export function Cup({ league: cup }: CupProps) {
 
   const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
+  const { refetch: onRefetchValorizations } = useGetAppreciations(isMarketClose);
+
   const { isCupInProgress, totalTeamCup, currentTeamsCup, onRefetchLeague, isRefetchingLeague } =
     useLeague({
       slug: cup.liga.slug,
@@ -43,8 +46,8 @@ export function Cup({ league: cup }: CupProps) {
   );
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchLeague(), onRefetchStats()]);
-  }, [onRefetchLeague, onRefetchStats]);
+    await Promise.all([onRefetchLeague(), onRefetchStats(), onRefetchValorizations()]);
+  }, [onRefetchLeague, onRefetchStats, onRefetchValorizations]);
 
   const isRefetching = isRefetchingLeague;
 
@@ -58,7 +61,7 @@ export function Cup({ league: cup }: CupProps) {
           ItemSeparatorComponent={() => (
             <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
           )}
-          estimatedItemSize={16}
+          estimatedItemSize={100}
           renderItem={renderCupMatchCard}
           contentContainerStyle={{
             paddingTop: 8,

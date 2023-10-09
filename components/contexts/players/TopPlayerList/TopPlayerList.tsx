@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { Text, View } from '@/components/Themed';
 import { TopPlayerCard } from '@/components/contexts/utils/TopPlayerCard';

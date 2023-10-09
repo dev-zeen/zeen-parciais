@@ -1,13 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { Link, Tabs } from 'expo-router';
-import { Pressable, View, useColorScheme } from 'react-native';
+import { Platform, Pressable, View, useColorScheme } from 'react-native';
 
 import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useInvites from '@/hooks/useInvites';
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name']; color: string }) {
-  return <Feather size={24} style={{ marginBottom: -3 }} {...props} />;
+  return <Feather size={28} style={{ marginBottom: -4 }} {...props} />;
 }
 
 export default function TabLayout() {
@@ -24,8 +24,9 @@ export default function TabLayout() {
             colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         },
         tabBarStyle: {
-          backgroundColor:
-            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          // backgroundColor:
+          //   colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          ...(Platform.OS === 'android' ? { paddingBottom: 4 } : {}),
         },
       }}>
       <Tabs.Screen

@@ -74,7 +74,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
         const initialLineupMounted = fillLineupWithPlayers({
           lineupStart: res.data?.atletas as FullPlayer[],
           reserves: res.data?.reservas as FullPlayer[],
-          formationId: res.data?.esquema_id as number,
+          formationId: res.data?.time.esquema_id as number,
           playerStats,
           isMarketClose,
         });

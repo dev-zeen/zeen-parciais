@@ -130,6 +130,7 @@ export const onGetLeagueWithPartials = (
                 ? club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0)
                 : 0)
             : club.partial + (captain && isUsingCaptainScore ? captain.pontuacao * 0.5 : 0),
+        patrimonio: clubLeague.patrimonio,
       },
     };
 

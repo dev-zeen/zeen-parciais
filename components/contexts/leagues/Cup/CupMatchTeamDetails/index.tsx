@@ -31,22 +31,36 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
   const { refetch: onRefetchStats, isRefetching: isRefetchingPlayerStats } =
     useGetScoredPlayers(isMarketClose);
 
-  const { data: substitutions, isInitialLoading: isInitialLoadingSubstitutions } =
-    useGetMatchSubstitutions({
-      id: team?.time.time_id,
-      round: match.rodada_id,
-    });
+  const {
+    data: substitutions,
+    isInitialLoading: isInitialLoadingSubstitutions,
+    refetch: onRefetchSubstitutions,
+    isRefetching: isRefetchingSubstitutions,
+  } = useGetMatchSubstitutions({
+    id: team?.time.time_id,
+    round: match.rodada_id,
+  });
 
   const lineup = useMemo(() => {
     if (team)
       return onGetFillLineupDefaultPlayers({
         lineupStart: team.atletas,
         reserves: team.reservas,
-        formationId: team.esquema_id,
+        formationId: team.time.esquema_id,
         playerStats,
         isMarketClose,
       });
   }, [isMarketClose, playerStats, team]);
+
+  const onRefetch = useCallback(
+    () => Promise.all([onRefetchStats(), onRefetchSubstitutions()]),
+    [onRefetchStats, onRefetchSubstitutions]
+  );
+
+  const isRefetching = useMemo(
+    () => isRefetchingPlayerStats || isRefetchingSubstitutions,
+    [isRefetchingPlayerStats, isRefetchingSubstitutions]
+  );
 
   const onGetPlayersTab = (team: FullClubInfo) => {
     const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
@@ -122,9 +136,7 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
 
     <ScrollView
       showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
-      }>
+      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
       <View
         className="items-center justify-center pt-2 pb-2 mb-2"
         style={{

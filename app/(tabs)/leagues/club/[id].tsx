@@ -1,8 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, useColorScheme } from 'react-native';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
 import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';

@@ -1,7 +1,12 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useMemo, useState } from 'react';
-import { ListRenderItemInfo, RefreshControl, TextInput, useColorScheme } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  FlatList,
+  ListRenderItemInfo,
+  RefreshControl,
+  TextInput,
+  useColorScheme,
+} from 'react-native';
 
 import { onGetPlayersPlayed } from '@/app/(tabs)/players/players.helper';
 import { Text, View } from '@/components/Themed';
@@ -13,13 +18,14 @@ import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
 import useValorization from '@/hooks/useValorization';
+import { Appreciations } from '@/models/Player';
 import { Player, PlayerStats } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
 import { GRAY_OPACITY } from '@/styles/colors';
 import { normalizeQuery } from '@/utils/format';
 
 export interface ScorePlayersProps extends Player {
-  appreciation?: number;
+  valorization?: number;
 }
 
 export default () => {
@@ -58,18 +64,23 @@ export default () => {
             clube_id: item.clube_id,
             entrou_em_campo: item.entrou_em_campo,
             scout: playerStats?.atletas[item.atleta_id].scout,
-            appreciation: valorizations?.atletas?.[item.atleta_id]?.variacao_num,
+            valorization: valorizations?.atletas?.[item.atleta_id]?.variacao_num,
           };
         })
         .sort((a, b) => (b?.pontuacao as number) - (a?.pontuacao as number));
     }
-  }, [isMarketClose, market, playerStats?.atletas, valorizations]);
+  }, [isMarketClose, market, playerStats, valorizations]);
 
-  const filteredDataSource = useMemo(() => {
+  const [filteredData, setFilteredData] = useState<Player[]>();
+
+  useEffect(() => {
     const playersToFilter = isMarketClose
-      ? onGetPlayersPlayed(playerStats as PlayerStats, valorizations)
+      ? onGetPlayersPlayed(playerStats as PlayerStats, valorizations as Appreciations)
       : mainDataMarket;
-    return getFilteredData(playersToFilter, searchQuery);
+
+    const players = getFilteredData(playersToFilter, searchQuery);
+
+    setFilteredData(players);
   }, [getFilteredData, isMarketClose, mainDataMarket, playerStats, searchQuery, valorizations]);
 
   const onSearchFilter = useCallback(async (text: string) => {
@@ -77,8 +88,18 @@ export default () => {
   }, []);
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchValorizations(), onRefetchStats()]);
-  }, [onRefetchValorizations, onRefetchStats]);
+    await Promise.all([onRefetchValorizations(), onRefetchStats()]).then(
+      ([newValorizationsUpdated, newStatsUpdated]) => {
+        const playersToFilter = onGetPlayersPlayed(
+          (isMarketClose ? newStatsUpdated.data : playerStats) as PlayerStats,
+          valorizations &&
+            ((isMarketClose ? newValorizationsUpdated?.data : valorizations) as Appreciations)
+        );
+
+        setFilteredData(playersToFilter);
+      }
+    );
+  }, [onRefetchValorizations, onRefetchStats, isMarketClose, playerStats, valorizations]);
 
   const keyExtractor = useCallback((item: Player) => `${item?.foto} + ${item.id}`, []);
 
@@ -90,10 +111,10 @@ export default () => {
         player={player}
         club={playerStats?.clubes[String(player.clube_id)]}
         position={playerStats?.posicoes[player.posicao_id]}
-        appreciation={player.appreciation}
+        valorization={player.valorization}
       />
     ),
-    [playerStats?.clubes, playerStats?.posicoes]
+    [playerStats]
   );
 
   const isLoading = !marketStatus || isLoadingPlayerStats;
@@ -127,7 +148,6 @@ export default () => {
       <View
         className="flex-1 justify-center rounded-lg mx-2"
         style={{
-          gap: 8,
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
@@ -142,10 +162,10 @@ export default () => {
 
         <FlatList
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          data={filteredDataSource}
+          data={filteredData}
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={() => (
-            <View className={`h-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+            <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
           )}
           renderItem={renderItem}
           contentContainerStyle={{

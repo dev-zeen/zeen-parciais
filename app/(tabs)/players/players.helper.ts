@@ -3,7 +3,7 @@ import { Appreciations } from '@/models/Player';
 import { IPlayerStats, Player, PlayerStats } from '@/models/Stats';
 
 export function onGetPlayersPlayed(
-  playerStats?: PlayerStats,
+  playerStats: PlayerStats,
   appreciations?: Appreciations
 ): ScorePlayersProps[] {
   if (playerStats) {

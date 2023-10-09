@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
-import { ScrollView, useColorScheme } from 'react-native';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
 import { onGetDefaultLineupTeam, onGetFillLineupDefaultPlayers } from './team.helpers';
 
@@ -15,6 +14,8 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { FullClubInfo } from '@/models/Club';
+import { LineupPlayers } from '@/models/Formations';
 import { useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
@@ -59,25 +60,38 @@ export default () => {
     [isRefetchingMyClub, isRefetchingPlayerStats]
   );
 
-  useEffect(() => {
-    if (!lineup && myClub && !isRefetching) {
+  const mountLineup = useCallback(
+    (myTeam: FullClubInfo) => {
       const defaultLineup = onGetFillLineupDefaultPlayers({
-        lineupStart: myClub.atletas,
-        reserves: myClub.reservas,
-        formationId: myClub.time.esquema_id,
+        lineupStart: myTeam.atletas,
+        reserves: myTeam.reservas,
+        formationId: myTeam.time.esquema_id,
         playerStats,
         isMarketClose,
       });
 
-      updateLineup(defaultLineup);
+      return defaultLineup;
+    },
+    [isMarketClose, playerStats]
+  );
+
+  useEffect(() => {
+    if (!lineup && myClub && !isRefetching) {
+      const defaultLineup = mountLineup(myClub);
+      updateLineup(defaultLineup as LineupPlayers);
       updateCaptain(myClub.capitao_id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMarketClose, isRefetching, myClub, playerStats]);
 
   const onRefresh = useCallback(() => {
-    Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]);
-  }, [onRefetchMyClub, onRefetchPlayerStats]);
+    Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]).then(([_, { data: myTeamData }]) => {
+      const defaultLineup = mountLineup(myTeamData as FullClubInfo);
+      updateLineup(defaultLineup);
+      updateCaptain(myTeamData?.capitao_id as number);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMarketClose, onRefetchMyClub, onRefetchPlayerStats, playerStats]);
 
   if (!isAutheticated) {
     return <Login title="Para acessar o seu time, é necessário efetuar o login." />;
