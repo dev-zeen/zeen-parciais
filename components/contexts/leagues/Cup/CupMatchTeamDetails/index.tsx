@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ListRenderItemInfo, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
 import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/team.helpers';
@@ -24,12 +24,16 @@ type CupMatchTeamDetailsProps = {
 };
 
 export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDetailsProps) {
+  const isFirstRender = useRef(true);
+
   const colorTheme = useColorScheme();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
   const { refetch: onRefetchStats, isRefetching: isRefetchingPlayerStats } =
     useGetScoredPlayers(isMarketClose);
+
+  const [currentRound, setCurrentRound] = useState(0);
 
   const {
     data: substitutions,
@@ -46,11 +50,23 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
       return onGetFillLineupDefaultPlayers({
         lineupStart: team.atletas,
         reserves: team.reservas,
-        formationId: team.time.esquema_id,
+        formationId:
+          isMarketClose && currentRound === match.rodada_id
+            ? team.time.esquema_id
+            : team.esquema_id,
         playerStats,
         isMarketClose,
       });
-  }, [isMarketClose, playerStats, team]);
+  }, [currentRound, isMarketClose, match.rodada_id, playerStats, team]);
+
+  useEffect(() => {
+    if (marketStatus && isFirstRender.current) {
+      const round = isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1;
+      setCurrentRound(round);
+
+      isFirstRender.current = false;
+    }
+  }, [isMarketClose, marketStatus]);
 
   const onRefetch = useCallback(
     () => Promise.all([onRefetchStats(), onRefetchSubstitutions()]),

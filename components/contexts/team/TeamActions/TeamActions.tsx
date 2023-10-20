@@ -10,7 +10,6 @@ import {
   emptyLineupFormation,
   emptyReservePlayers,
   fillLineupOnChangeFormation,
-  fillLineupWithPlayers,
   fillPlayersInLineup,
   listDefaultLineups,
   onClearLineup,
@@ -36,9 +35,10 @@ import { onGetIsLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/u
 
 type TeamActionsProps = {
   initialLineupTeamFormation: string;
+  onRefresh?: () => void;
 };
 
-export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
+export function TeamActions({ initialLineupTeamFormation, onRefresh }: TeamActionsProps) {
   const colorTheme = useColorScheme();
 
   const isFirstRender = useRef(true);
@@ -49,7 +49,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
 
   const { data: myClub, refetch: onRefetchMyClub } = useGetMyClub();
 
-  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
+  const { data: playerStats } = useGetScoredPlayers(isMarketClose);
 
   const updateLineup = useTeamLineupStore((state) => state.updateLineup);
   const lineup = useTeamLineupStore((state) => state.lineup);
@@ -67,35 +67,12 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
   const [showModalPlayersToSell, setShowModalPlayersToSell] = useState(false);
   const [isLineupComplete, setIsLineupComplete] = useState(false);
 
-  const handleResetClub = useCallback(async () => {
-    await onRefetchMyClub().then((res) => {
-      updateFormation(initialLineupTeamFormation);
-      if (res.data) {
-        const initialLineupMounted = fillLineupWithPlayers({
-          lineupStart: res.data?.atletas as FullPlayer[],
-          reserves: res.data?.reservas as FullPlayer[],
-          formationId: res.data?.time.esquema_id as number,
-          playerStats,
-          isMarketClose,
-        });
-
-        const defaultPrice = onGetTeamPrice(initialLineupMounted.starting);
-        updatePrice(defaultPrice);
-
-        updateLineup(initialLineupMounted);
-        updateCaptain(res.data?.capitao_id as number);
-      }
-    });
-    await onRefetchStats();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialLineupTeamFormation, isMarketClose]);
-
   const onCloseSellPlayersModal = useCallback(() => {
     setShowModalPlayersToSell(false);
     updateFormation(initialLineupTeamFormation);
-    handleResetClub();
+    onRefresh && onRefresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleResetClub, initialLineupTeamFormation]);
+  }, [onRefresh, initialLineupTeamFormation]);
 
   const handleCloseSuccessSellPlayers = useCallback(
     (lineup: LineupPlayers) => {
@@ -277,13 +254,7 @@ export function TeamActions({ initialLineupTeamFormation }: TeamActionsProps) {
           iconName="trash"
           disabled={isMarketClose}
         />
-        <Button
-          onPress={handleResetClub}
-          variant="primary"
-          onlyIcon
-          hasIcon
-          iconName="refresh-cw"
-        />
+        <Button onPress={onRefresh} variant="primary" onlyIcon hasIcon iconName="refresh-cw" />
       </View>
 
       <View className="w-full flex-row items-center rounded-lg p-3 justify-between">

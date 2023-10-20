@@ -36,7 +36,11 @@ export function InviteCard({ invite }: InviteCardProps) {
   );
 
   return (
-    <View className="flex-row p-3 rounded-lg justify-between">
+    <View
+      className="flex p-3 rounded-lg"
+      style={{
+        gap: 8,
+      }}>
       <View
         className="flex-row items-center"
         style={{
@@ -50,7 +54,7 @@ export function InviteCard({ invite }: InviteCardProps) {
           alt={`Imagem da Liga ${invite.liga?.nome}`}
         />
 
-        <View className="">
+        <View>
           <Text className="text-sm font-bold">{invite.liga?.nome}</Text>
           <Text className="text-sm ">{invite.time.nome}</Text>
 
@@ -61,7 +65,7 @@ export function InviteCard({ invite }: InviteCardProps) {
       </View>
 
       <View
-        className="flex-row py-3"
+        className="flex-row justify-center items-center"
         style={{
           gap: 16,
         }}>

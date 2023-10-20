@@ -63,7 +63,7 @@ export default () => {
             posicao_id: item.posicao_id,
             clube_id: item.clube_id,
             entrou_em_campo: item.entrou_em_campo,
-            scout: playerStats?.atletas[item.atleta_id].scout,
+            scout: playerStats?.atletas[item.atleta_id]?.scout,
             valorization: valorizations?.atletas?.[item.atleta_id]?.variacao_num,
           };
         })
@@ -90,16 +90,17 @@ export default () => {
   const onRefetch = useCallback(async () => {
     await Promise.all([onRefetchValorizations(), onRefetchStats()]).then(
       ([newValorizationsUpdated, newStatsUpdated]) => {
-        const playersToFilter = onGetPlayersPlayed(
-          (isMarketClose ? newStatsUpdated.data : playerStats) as PlayerStats,
-          valorizations &&
-            ((isMarketClose ? newValorizationsUpdated?.data : valorizations) as Appreciations)
-        );
+        if (isMarketClose) {
+          const playersToFilter = onGetPlayersPlayed(
+            newStatsUpdated.data as PlayerStats,
+            newValorizationsUpdated?.data as Appreciations
+          );
 
-        setFilteredData(playersToFilter);
+          setFilteredData(playersToFilter);
+        }
       }
     );
-  }, [onRefetchValorizations, onRefetchStats, isMarketClose, playerStats, valorizations]);
+  }, [onRefetchValorizations, onRefetchStats, isMarketClose]);
 
   const keyExtractor = useCallback((item: Player) => `${item?.foto} + ${item.id}`, []);
 

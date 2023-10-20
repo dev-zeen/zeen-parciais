@@ -113,11 +113,12 @@ export default () => {
       return onGetFillLineupDefaultPlayers({
         lineupStart: team.atletas,
         reserves: team.reservas,
-        formationId: team.esquema_id,
+        formationId:
+          isMarketClose && currentRound === marketRound ? team.time.esquema_id : team.esquema_id,
         playerStats,
         isMarketClose,
       });
-  }, [isMarketClose, playerStats, team]);
+  }, [currentRound, isMarketClose, marketRound, playerStats, team]);
 
   useEffect(() => {
     if (marketStatus && isFirstRender.current) {

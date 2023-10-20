@@ -6,27 +6,15 @@ import { League, LeagueUserDetails } from '@/models/Leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 import { useFetch } from '@/utils/reactQuery';
 
-export interface Filter {
-  [key: string]: string;
-}
-
-export interface Config extends Filter {}
-
 export const useGetLeagues = (allowRequest?: boolean) =>
   useFetch<{ ligas: LeagueUserDetails[] }>(GET_ALL_LEAGUES, undefined, {
     enabled: !!allowRequest,
   });
 
-export const useGetLeague = (slug: string, allowRequest?: boolean, filters?: Filter) =>
-  useFetch<League>(
-    GET_LEAGUE_BY_SLUG.replace(':slug', slug),
-    {
-      ...filters,
-    },
-    {
-      enabled: !!slug && allowRequest,
-    }
-  );
+export const useGetLeague = (slug: string, allowRequest?: boolean) =>
+  useFetch<League>(GET_LEAGUE_BY_SLUG.replace(':slug', slug), undefined, {
+    enabled: !!slug && allowRequest,
+  });
 
 export const useGetClubsByLeagueId = (id?: number) => {
   return useFetch<ClubsByLeagueUtils>(

@@ -121,7 +121,10 @@ export default () => {
             colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
           }`}
           style={{ gap: 8 }}>
-          <TeamActions initialLineupTeamFormation={initialLineupTeamFormation} />
+          <TeamActions
+            initialLineupTeamFormation={initialLineupTeamFormation}
+            onRefresh={onRefresh}
+          />
 
           <SoccerField
             lineup={lineup}
