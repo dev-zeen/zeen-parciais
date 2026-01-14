@@ -4,7 +4,7 @@ import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 're
 import { View } from '@/components/Themed';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { Match } from '@/models/Matches';
@@ -43,7 +43,7 @@ export default () => {
   );
 
   if (isLoadingMatches || !matches) {
-    return <Loading />;
+    return <LoadingScreen />;
   }
 
   return (

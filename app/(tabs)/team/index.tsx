@@ -8,7 +8,7 @@ import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayer
 import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { TeamActions } from '@/components/contexts/team/TeamActions';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
@@ -108,7 +108,7 @@ export default () => {
     isLoadingPlayerStats ||
     !marketStatus
   ) {
-    return <Loading title="Carregando meu time" />;
+    return <LoadingScreen title="Carregando meu time" />;
   }
 
   return (

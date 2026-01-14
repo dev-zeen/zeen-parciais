@@ -9,7 +9,7 @@ import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayer
 import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -182,7 +182,7 @@ export default () => {
     isInitialLoadingSubstitutions ||
     !lineup
   ) {
-    return <Loading />;
+    return <LoadingScreen />;
   }
 
   const changeRoundDisabled = isMarketClose

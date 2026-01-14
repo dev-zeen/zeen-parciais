@@ -9,7 +9,7 @@ import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
@@ -161,7 +161,7 @@ export default ({
 
   const isLoading = !marketPlayers || !myClub || !market || !matches || !lineup || isFiltering;
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <SafeAreaViewContainer>

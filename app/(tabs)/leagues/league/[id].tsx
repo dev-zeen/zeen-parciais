@@ -7,7 +7,7 @@ import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { Cup } from '@/components/contexts/leagues/Cup';
 import { League as LeagueComponent } from '@/components/contexts/leagues/League';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
@@ -38,7 +38,7 @@ export default () => {
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  if (isLoadingLeague) return <Loading />;
+  if (isLoadingLeague) return <LoadingScreen />;
 
   return (
     <>

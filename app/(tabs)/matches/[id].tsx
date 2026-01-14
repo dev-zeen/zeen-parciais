@@ -13,7 +13,7 @@ import { View } from '@/components/Themed';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
@@ -246,7 +246,7 @@ export default () => {
   if (!isAutheticated) return <Redirect href="/(tabs)/matches" />;
 
   if (isLoading) {
-    return <Loading title="Carregando Partidas" />;
+    return <LoadingScreen title="Carregando Partidas" />;
   }
 
   return (

@@ -14,6 +14,9 @@ export function Providers({ children }: ProvidersProps): ReactNode {
         retry: 1,
         useErrorBoundary: true,
         refetchOnReconnect: true,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 5,
       },
     },
   });

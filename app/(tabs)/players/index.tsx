@@ -12,7 +12,7 @@ import { onGetPlayersPlayed } from '@/app/(tabs)/players/players.helper';
 import { Text, View } from '@/components/Themed';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -121,7 +121,7 @@ export default () => {
   const isLoading = !marketStatus || isLoadingPlayerStats;
 
   if (isLoading) {
-    return <Loading title="Carregando Pontuações" />;
+    return <LoadingScreen title="Carregando Pontuações" />;
   }
 
   if (!playerStats) {

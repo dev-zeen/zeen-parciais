@@ -5,7 +5,7 @@ import { Text, View } from '@/components/Themed';
 import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
 import { LeagueCard } from '@/components/contexts/leagues/LeagueCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
@@ -114,7 +114,7 @@ export default function () {
   }
 
   if (!leagues || !myClub || isLoadingInvites || !sectionLeaguesList) {
-    return <Loading title="Carregando minhas ligas" />;
+    return <LoadingScreen title="Carregando minhas ligas" />;
   }
 
   return (

@@ -9,7 +9,7 @@ import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { ReviewLikelyPlayers } from '@/components/contexts/utils/ReviewLikelyPlayers';
 import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
 import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
@@ -76,7 +76,7 @@ export default () => {
   }
 
   if (isLoading) {
-    return <Loading />;
+    return <LoadingScreen />;
   }
 
   return (

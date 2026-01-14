@@ -4,7 +4,7 @@ import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 're
 import { Text, View } from '@/components/Themed';
 import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
 import { InviteCard } from '@/components/contexts/leagues/InviteCard';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
 import useInvites from '@/hooks/useInvites';
 import { Invite } from '@/models/Invites';
@@ -28,7 +28,7 @@ export default () => {
     []
   );
 
-  if (isLoadingInvites) return <Loading title="Carregando Convites" />;
+  if (isLoadingInvites) return <LoadingScreen title="Carregando Convites" />;
 
   return (
     <View
