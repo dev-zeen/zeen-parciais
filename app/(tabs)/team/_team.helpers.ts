@@ -186,11 +186,11 @@ export function fillLineupWithPlayers({
 }: {
   lineupStart: FullPlayer[];
   reserves: FullPlayer[];
-  formationId: number;
+  formationId?: number;
   playerStats?: PlayerStats;
   isMarketClose?: boolean;
 }): LineupPlayers {
-  const formation = (LINEUPS_DEFAULT_OBJECT as any)[formationId];
+  const formation = (LINEUPS_DEFAULT_OBJECT as any)[formationId ?? 4];
   const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[formation]);
 
   fillPlayersInLineup({
@@ -287,16 +287,28 @@ export const onGetFillLineupDefaultPlayers = ({
 }: {
   lineupStart: FullPlayer[];
   reserves: FullPlayer[];
-  formationId: number;
+  formationId?: number;
   playerStats?: PlayerStats;
   isMarketClose?: boolean;
 }) => {
+  console.log('📝 onGetFillLineupDefaultPlayers params:', {
+    lineupStartCount: lineupStart?.length ?? 0,
+    reservesCount: reserves?.length ?? 0,
+    formationId,
+  });
+
   const defaultLineup = fillLineupWithPlayers({
     lineupStart,
     reserves,
-    formationId,
+    formationId: formationId ?? 4,
     playerStats,
     isMarketClose,
   });
+
+  console.log('📝 onGetFillLineupDefaultPlayers result:', {
+    startingCount: defaultLineup?.starting?.length ?? 0,
+    reservesCount: defaultLineup?.reserves?.length ?? 0,
+  });
+
   return defaultLineup;
 };

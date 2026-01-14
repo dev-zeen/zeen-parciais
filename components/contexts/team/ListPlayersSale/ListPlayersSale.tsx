@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import { Image, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
-import { PlayersToSell } from '@/app/(tabs)/team/team.helpers';
+import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
 import { Text, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';

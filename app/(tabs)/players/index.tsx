@@ -8,7 +8,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { onGetPlayersPlayed } from '@/app/(tabs)/players/players.helper';
+import { onGetPlayersPlayed } from '@/app/(tabs)/players/_players.helper';
 import { Text, View } from '@/components/Themed';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';

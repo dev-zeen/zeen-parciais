@@ -22,16 +22,8 @@ export function Providers({ children }: ProvidersProps): ReactNode {
   });
 
   return (
-    // <ErrorBoundary
-    //   FallbackComponent={(props) => (
-    //     <ErrorBoundaryComponent
-    //       error={props.error as AxiosError<Error>}
-    //       resetError={props.resetError}
-    //     />
-    //   )}>
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>{children}</AuthContextProvider>
     </QueryClientProvider>
-    // </ErrorBoundary>
   );
 }

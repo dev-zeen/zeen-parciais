@@ -2,13 +2,14 @@ import { useCallback, useMemo } from 'react';
 import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
 import { View } from '@/components/Themed';
-import { TopPlayerList } from '@/components/contexts/players/TopPlayerList';
+import { AlertsCard } from '@/components/contexts/home/AlertsCard';
+import { PlayerHighlightsCarousel } from '@/components/contexts/home/PlayerHighlightsCarousel';
+import { QuickActionsGrid } from '@/components/contexts/home/QuickActionsGrid';
+import { StatsOverviewCard } from '@/components/contexts/home/StatsOverviewCard';
+import { TeamSummaryCard } from '@/components/contexts/home/TeamSummaryCard';
 import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
-import { ReviewLikelyPlayers } from '@/components/contexts/utils/ReviewLikelyPlayers';
-import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
-import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
@@ -90,24 +91,29 @@ export default () => {
           style={{
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
-            flex: 1,
-            paddingBottom: 8,
           }}>
+          {/* Market Status Bar */}
           <MarketStatusCard />
-          
+
           {myClub ? (
             <>
-              <TeamBanner team={myClub} />
+              {/* Team Summary */}
+              <TeamSummaryCard team={myClub} />
 
-              <StatsClubCard team={myClub} round={marketStatus?.rodada_atual} />
+              {/* Quick Actions Grid */}
+              <QuickActionsGrid />
 
-              {lineupPlayersUnlikely && lineupPlayersUnlikely.length > 0 && (
-                <ReviewLikelyPlayers lineupPlayersUnlikely={lineupPlayersUnlikely} />
-              )}
+              {/* Stats Overview with Chart */}
+              <StatsOverviewCard />
 
+              {/* Captain Card - Only shows if captain exists */}
               <CaptainCard />
 
-              <TopPlayerList />
+              {/* Alerts & Notices */}
+              <AlertsCard lineupPlayersUnlikely={lineupPlayersUnlikely} />
+
+              {/* Player Highlights Carousel */}
+              <PlayerHighlightsCarousel />
             </>
           ) : (
             <Login />

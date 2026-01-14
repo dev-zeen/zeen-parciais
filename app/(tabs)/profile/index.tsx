@@ -3,9 +3,9 @@ import { useCallback, useContext, useMemo } from 'react';
 import { RefreshControl, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { TeamSummaryCard } from '@/components/contexts/home/TeamSummaryCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
-import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
@@ -116,7 +116,7 @@ export default () => {
             marginHorizontal: theme.Tokens.SPACING.xs,
           }}>
           <MarketStatusCard />
-          <TeamBanner team={myClub} />
+          <TeamSummaryCard team={myClub} />
           <View className={`flex-row gap-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
             <View className="flex-1 rounded-lg p-2 items-center justify-center gap-x-2 gap-y-1">
               <Text className="font-semibold">Total de Pontos</Text>

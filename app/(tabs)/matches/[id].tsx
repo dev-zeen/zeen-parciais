@@ -8,7 +8,7 @@ import {
   useColorScheme,
 } from 'react-native';
 
-import { onGetEmptyPositions } from '@/app/(tabs)/team/team.helpers';
+import { onGetEmptyPositions } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';

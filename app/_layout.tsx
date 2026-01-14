@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 
-import { Providers } from '@/app/providers';
+import { Providers } from '@/app/_providers';
 import Colors from '@/constants/Colors';
 
 export const unstable_settings = {

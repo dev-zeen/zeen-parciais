@@ -17,7 +17,7 @@ import {
   onGetEqualLineups,
   onGetPlayersOnChangePositionSell,
   onSuccessSavedTeam,
-} from '@/app/(tabs)/team/team.helpers';
+} from '@/app/(tabs)/team/_team.helpers';
 import { Text, View } from '@/components/Themed';
 import { ListPlayersSale } from '@/components/contexts/team/ListPlayersSale';
 import { Button } from '@/components/structure/Button';

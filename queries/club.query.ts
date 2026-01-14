@@ -19,6 +19,39 @@ interface SubstitutionsParams {
 export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
     enabled: !!allowRequest,
+    select: (data) => {
+      console.log('📊 useGetMyClub - Raw data:', JSON.stringify(data, null, 2));
+      console.log('📊 useGetMyClub - Has atletas?', !!data?.atletas);
+      console.log('📊 useGetMyClub - Has reservas?', !!data?.reservas);
+      
+      // Se não tem atletas (time não escalado), retorna dados com arrays vazios
+      if (!data?.atletas) {
+        console.log('⚠️ Time não escalado - retornando dados com arrays vazios');
+        return {
+          ...data,
+          atletas: [],
+          reservas: [],
+          capitao_id: data?.capitao_id ?? 0,
+          esquema_id: data?.esquema_id ?? 4, // esquema default
+        };
+      }
+      
+      const newData = {
+        ...data,
+        reservas:
+          data?.reservas && data.reservas.length > 0
+            ? data.reservas.sort((a, b) => a.posicao_id - b.posicao_id)
+            : [],
+        atletas: data.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
+      };
+
+      console.log('✅ useGetMyClub - Dados processados:', {
+        atletasCount: newData.atletas.length,
+        reservasCount: newData.reservas.length,
+      });
+
+      return newData;
+    },
   });
 
 export const usePrefetchMyClub = (allowRequest?: boolean) =>

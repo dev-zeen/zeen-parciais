@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
-import { onGetDefaultLineupTeam, onGetFillLineupDefaultPlayers } from './team.helpers';
+import { onGetDefaultLineupTeam, onGetFillLineupDefaultPlayers } from './_team.helpers';
 
 import { View } from '@/components/Themed';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
@@ -51,7 +51,7 @@ export default () => {
   const captain = useTeamLineupStore((state) => state.captain);
 
   const initialLineupTeamFormation = useMemo(
-    () => onGetDefaultLineupTeam(myClub?.time.esquema_id as number),
+    () => onGetDefaultLineupTeam(myClub?.time?.esquema_id ?? 4),
     [myClub]
   );
 
@@ -62,12 +62,27 @@ export default () => {
 
   const mountLineup = useCallback(
     (myTeam: FullClubInfo) => {
+      console.log('🔧 mountLineup called with:', {
+        hasAtletas: !!myTeam.atletas,
+        atletasCount: myTeam.atletas?.length ?? 0,
+        hasReservas: !!myTeam.reservas,
+        reservasCount: myTeam.reservas?.length ?? 0,
+        esquema_id: myTeam.time?.esquema_id,
+      });
+
       const defaultLineup = onGetFillLineupDefaultPlayers({
         lineupStart: myTeam.atletas ?? [],
         reserves: myTeam.reservas ?? [],
-        formationId: myTeam.time.esquema_id,
+        formationId: myTeam.time?.esquema_id ?? 4,
         playerStats,
         isMarketClose,
+      });
+
+      console.log('✅ mountLineup result:', {
+        hasStarting: !!defaultLineup.starting,
+        startingCount: defaultLineup.starting?.length ?? 0,
+        hasReserves: !!defaultLineup.reserves,
+        reservesCount: defaultLineup.reserves?.length ?? 0,
       });
 
       return defaultLineup;
@@ -76,10 +91,19 @@ export default () => {
   );
 
   useEffect(() => {
+    console.log('🔄 useEffect triggered:', {
+      hasLineup: !!lineup,
+      hasMyClub: !!myClub,
+      isRefetching,
+      isMarketClose,
+    });
+
     if (!lineup && myClub && !isRefetching) {
+      console.log('🎯 Mounting lineup...');
       const defaultLineup = mountLineup(myClub);
       updateLineup(defaultLineup as LineupPlayers);
       updateCaptain(myClub.capitao_id ?? 0);
+      console.log('✅ Lineup mounted!');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMarketClose, isRefetching, myClub, playerStats]);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ListRenderItemInfo, RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
-import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/team.helpers';
+import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
 import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';

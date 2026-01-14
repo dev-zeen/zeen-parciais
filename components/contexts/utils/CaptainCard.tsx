@@ -1,6 +1,8 @@
-import { Image } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { Image, useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import { IPositions } from '@/models/Stats';
@@ -9,60 +11,126 @@ import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
 
 export function CaptainCard() {
+  const colorTheme = useColorScheme();
   const { isMarketClose } = useMarketStatus();
-
   const { captain } = useMyClub();
-
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
-
   const { data: positions } = useGetPositions();
 
+  // Não mostrar se não tiver capitão
+  if (!captain) {
+    return null;
+  }
+
+  const position = (positions as IPositions)?.[captain.posicao_id];
+  const score = playerStats?.atletas[captain.atleta_id]?.pontuacao;
+  const captainScore = score ? score * 1.5 : 0;
+
+  const getPositionColor = (positionName?: string) => {
+    switch (positionName?.toLowerCase()) {
+      case 'goleiro':
+        return '#F59E0B'; // orange
+      case 'lateral':
+      case 'zagueiro':
+        return '#3B82F6'; // blue
+      case 'meia':
+        return '#22C55E'; // green
+      case 'atacante':
+        return '#EF4444'; // red
+      default:
+        return '#8B5CF6'; // purple
+    }
+  };
+
   return (
-    <View className="p-2 rounded-lg">
-      <Text className="text-base font-semibold mt-0.5 mx-1 mb-2">Meu Capitão</Text>
-      <View className="flex-row py-2 gap-x-1">
-        <Image
-          source={{
-            uri: captain?.foto?.replace('FORMATO', '220x220'),
-          }}
-          className="w-14 h-14 rounded-full"
-          alt={`Foto do ${captain?.apelido}`}
-        />
+    <AnimatedCard delay={300} variant="flat">
+      <View style={{ gap: 12, backgroundColor: 'transparent' }}>
+        {/* Header */}
+        <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
+          <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
+            <View
+              className="w-8 h-8 rounded-full items-center justify-center"
+              style={{
+                backgroundColor: colorTheme === 'dark' ? '#FCD34D40' : '#FCD34D30',
+              }}>
+              <Feather name="award" size={16} color="#F59E0B" />
+            </View>
+            <Text className="font-bold text-base">Seu Capitão</Text>
+          </View>
+          <View
+            className="px-3 py-1.5 rounded-full"
+            style={{
+              backgroundColor: colorTheme === 'dark' ? '#FCD34D30' : '#FEF3C7',
+            }}>
+            <Text className="text-yellow-600 dark:text-yellow-400 text-xs font-bold">
+              Dobra Pontos
+            </Text>
+          </View>
+        </View>
 
-        <View className=" flex-1 flex-row items-center justify-between">
-          <View>
-            <Text className="text-sm font-semibold">{captain?.apelido}</Text>
-
-            <View className="flex-row items-center">
-              <Text className="text-xs  uppercase">
-                {(positions as IPositions)[captain?.posicao_id as number]?.nome}
-              </Text>
+        {/* Player Info */}
+        <View className="flex-row items-center" style={{ gap: 12, backgroundColor: 'transparent' }}>
+          {/* Photo with Captain Badge */}
+          <View style={{ backgroundColor: 'transparent' }}>
+            <Image
+              source={{ uri: captain.foto?.replace('FORMATO', '220x220') }}
+              className="w-20 h-20 rounded-full"
+              style={{
+                borderWidth: 3,
+                borderColor: '#F59E0B',
+              }}
+              alt={captain.apelido}
+            />
+            <View
+              className="absolute -bottom-1 -right-1 rounded-full items-center justify-center"
+              style={{
+                width: 28,
+                height: 28,
+                backgroundColor: '#F59E0B',
+                borderWidth: 2,
+                borderColor: colorTheme === 'dark' ? '#1F2937' : '#FFFFFF',
+              }}>
+              <Text className="text-white text-sm font-bold">C</Text>
             </View>
           </View>
 
-          {isMarketClose && captain && playerStats && playerStats.atletas[captain?.atleta_id] ? (
-            <View className="items-center flex-row gap-x-2">
-              <View className="flex-row items-center">
-                <Text className="text-sm font-bold">
-                  {numberToString(playerStats.atletas[captain?.atleta_id]?.pontuacao)}
+          {/* Details */}
+          <View className="flex-1" style={{ gap: 6, backgroundColor: 'transparent' }}>
+            <Text className="font-bold text-lg" numberOfLines={1}>
+              {captain.apelido}
+            </Text>
+            <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
+              <View
+                className="px-2.5 py-1 rounded-md"
+                style={{ backgroundColor: `${getPositionColor(position?.nome)}25` }}>
+                <Text
+                  className="text-xs font-bold uppercase"
+                  style={{ color: getPositionColor(position?.nome) }}>
+                  {position?.abreviacao || 'N/A'}
                 </Text>
-                <Text className="text-xs font-semibold"> * 1.5</Text>
               </View>
-
-              <Text
-                className={`text-sm font-bold ${
-                  playerStats?.atletas[captain?.atleta_id]?.pontuacao * 1.5 > 0
-                    ? 'text-green-500'
-                    : 'text-red-500'
-                }`}>
-                {numberToString(playerStats?.atletas[captain?.atleta_id]?.pontuacao * 1.5)}
-              </Text>
+              {captain.preco_num && (
+                <Text className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                  C$ {numberToString(captain.preco_num)}
+                </Text>
+              )}
             </View>
-          ) : (
-            <></>
-          )}
+            {isMarketClose && score !== undefined && (
+              <View className="flex-row items-center" style={{ gap: 6, backgroundColor: 'transparent' }}>
+                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                  {numberToString(score)} × 1.5 =
+                </Text>
+                <Text
+                  className={`text-base font-bold ${
+                    captainScore > 0 ? 'text-green-500' : captainScore < 0 ? 'text-red-500' : 'text-gray-500'
+                  }`}>
+                  {numberToString(captainScore)} pts
+                </Text>
+              </View>
+            )}
+          </View>
         </View>
       </View>
-    </View>
+    </AnimatedCard>
   );
 }

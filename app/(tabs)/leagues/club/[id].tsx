@@ -3,7 +3,7 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 
-import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/team.helpers';
+import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';

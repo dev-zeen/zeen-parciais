@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
-import { onGetEmptyPositions } from '@/app/(tabs)/team/team.helpers';
+import { onGetEmptyPositions } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
