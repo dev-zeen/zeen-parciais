@@ -166,12 +166,14 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
         captain={team.capitao_id ?? 0}
         round={match.rodada_id}
         isViewOnly
+        onOpenMarket={() => {}}
       />
         <ListReservePlayers
           lineup={lineup}
           substitutions={substitutions}
           round={match.rodada_id}
           isViewOnly
+          onOpenMarket={() => {}}
         />
       </View>
     </ScrollView>

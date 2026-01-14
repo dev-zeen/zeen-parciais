@@ -32,3 +32,14 @@ export type Appreciations = {
     };
   };
 };
+
+export interface PlayerRoundStats {
+  pontos: number | null;
+  preco: number | null;
+  variacao: number | null;
+  media: number | null;
+  atleta_id: number;
+  rodada_id: number;
+}
+
+export type PlayerHistoryStats = PlayerRoundStats[];

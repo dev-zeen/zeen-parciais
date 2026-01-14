@@ -291,23 +291,12 @@ export const onGetFillLineupDefaultPlayers = ({
   playerStats?: PlayerStats;
   isMarketClose?: boolean;
 }) => {
-  console.log('📝 onGetFillLineupDefaultPlayers params:', {
-    lineupStartCount: lineupStart?.length ?? 0,
-    reservesCount: reserves?.length ?? 0,
-    formationId,
-  });
-
   const defaultLineup = fillLineupWithPlayers({
     lineupStart,
     reserves,
     formationId: formationId ?? 4,
     playerStats,
     isMarketClose,
-  });
-
-  console.log('📝 onGetFillLineupDefaultPlayers result:', {
-    startingCount: defaultLineup?.starting?.length ?? 0,
-    reservesCount: defaultLineup?.reserves?.length ?? 0,
   });
 
   return defaultLineup;

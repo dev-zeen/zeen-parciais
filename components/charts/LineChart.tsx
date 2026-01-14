@@ -1,5 +1,6 @@
 import { LineChart as RNLineChart } from 'react-native-chart-kit';
-import { Dimensions, useColorScheme } from 'react-native';
+import { Dimensions, useColorScheme, LayoutChangeEvent } from 'react-native';
+import { useState } from 'react';
 
 import { View } from '@/components/Themed';
 
@@ -8,11 +9,20 @@ type LineChartProps = {
   labels?: string[];
   height?: number;
   showGrid?: boolean;
+  width?: number;
 };
 
-export function LineChart({ data, labels, height = 100, showGrid = false }: LineChartProps) {
+export function LineChart({ data, labels, height = 100, showGrid = false, width }: LineChartProps) {
   const colorTheme = useColorScheme();
   const screenWidth = Dimensions.get('window').width;
+  const [containerWidth, setContainerWidth] = useState(width || screenWidth - 64);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width: layoutWidth } = event.nativeEvent.layout;
+    if (layoutWidth > 0 && !width) {
+      setContainerWidth(layoutWidth);
+    }
+  };
 
   const chartConfig = {
     backgroundColor: 'transparent',
@@ -48,10 +58,10 @@ export function LineChart({ data, labels, height = 100, showGrid = false }: Line
   };
 
   return (
-    <View>
+    <View onLayout={handleLayout} style={{ width: '100%' }}>
       <RNLineChart
         data={chartData}
-        width={screenWidth - 64} // Adjust for card padding
+        width={width || containerWidth}
         height={height}
         chartConfig={chartConfig}
         bezier
@@ -63,6 +73,7 @@ export function LineChart({ data, labels, height = 100, showGrid = false }: Line
         style={{
           marginVertical: 8,
           borderRadius: 16,
+          marginLeft: -16,
         }}
       />
     </View>

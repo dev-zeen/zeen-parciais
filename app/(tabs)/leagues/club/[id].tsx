@@ -256,12 +256,14 @@ export default () => {
           captain={team.capitao_id ?? 0}
           round={currentRound}
           isViewOnly
+          onOpenMarket={() => {}}
         />
           <ListReservePlayers
             lineup={lineup}
             substitutions={substitutions}
             round={currentRound}
             isViewOnly
+            onOpenMarket={() => {}}
           />
         </View>
       )}

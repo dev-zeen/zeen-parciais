@@ -1,12 +1,13 @@
 import {
   GET_APPRECIATIONS,
+  GET_PLAYER_STATS_BY_ID,
   GET_POSITIONS,
   GET_TOP_PLAYERS,
   GET_TOP_RANKED_PLAYERS,
   GET_TOP_RESERVE_PLAYERS,
 } from '@/constants/Endpoits';
 import { APPRECIATIONS } from '@/constants/Keys';
-import { Appreciations, TopPlayer } from '@/models/Player';
+import { Appreciations, PlayerHistoryStats, TopPlayer } from '@/models/Player';
 import { IPositions } from '@/models/Stats';
 import { onSaveStorage } from '@/utils/asyncStorage';
 import { useFetch } from '@/utils/reactQuery';
@@ -49,3 +50,13 @@ export const useGetAppreciations = (allowRequest: boolean) => {
     },
   });
 };
+
+export const useGetPlayerHistory = (playerId: number | null) =>
+  useFetch<PlayerHistoryStats>(
+    playerId ? GET_PLAYER_STATS_BY_ID.replace(':playerId', playerId.toString()) : null,
+    undefined,
+    {
+      enabled: !!playerId,
+      staleTime: 1000 * 60 * 5, // 5 minutos
+    }
+  );

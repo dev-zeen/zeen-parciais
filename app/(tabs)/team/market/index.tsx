@@ -10,7 +10,6 @@ import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
@@ -164,9 +163,8 @@ export default ({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <SafeAreaViewContainer>
-      <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-        <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
+    <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
+      <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
         <View
           className="flex-row items-center"
           style={{
@@ -213,7 +211,6 @@ export default ({
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}
       />
-      </View>
-    </SafeAreaViewContainer>
+    </View>
   );
 };

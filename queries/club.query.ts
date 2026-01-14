@@ -20,10 +20,6 @@ export const useGetMyClub = (allowRequest?: boolean) =>
   useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
     enabled: !!allowRequest,
     select: (data) => {
-      console.log('📊 useGetMyClub - Raw data:', JSON.stringify(data, null, 2));
-      console.log('📊 useGetMyClub - Has atletas?', !!data?.atletas);
-      console.log('📊 useGetMyClub - Has reservas?', !!data?.reservas);
-      
       // Se não tem atletas (time não escalado), retorna dados com arrays vazios
       if (!data?.atletas) {
         console.log('⚠️ Time não escalado - retornando dados com arrays vazios');
@@ -45,11 +41,6 @@ export const useGetMyClub = (allowRequest?: boolean) =>
         atletas: data.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
       };
 
-      console.log('✅ useGetMyClub - Dados processados:', {
-        atletasCount: newData.atletas.length,
-        reservasCount: newData.reservas.length,
-      });
-
       return newData;
     },
   });
@@ -70,10 +61,6 @@ export const useGetClub = (id?: number | string, round?: number) => {
   return useFetch<FullClubInfo>(round ? urlWithRound : url, undefined, {
     enabled: !!id,
     select: (data) => {
-      console.log('📊 useGetClub - Raw data:', JSON.stringify(data, null, 2));
-      console.log('📊 useGetClub - Has atletas?', !!data?.atletas);
-      console.log('📊 useGetClub - Has reservas?', !!data?.reservas);
-      
       // Se não tem atletas (time não escalado), retorna dados como vieram
       if (!data?.atletas) {
         console.log('⚠️ Time não escalado - retornando dados sem processamento');
@@ -92,11 +79,6 @@ export const useGetClub = (id?: number | string, round?: number) => {
             : [],
         atletas: data.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
       };
-
-      console.log('✅ useGetClub - Dados processados:', {
-        atletasCount: newData.atletas.length,
-        reservasCount: newData.reservas.length,
-      });
 
       return newData;
     },
