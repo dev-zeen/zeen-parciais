@@ -51,6 +51,7 @@ export default function () {
     }
 
     const { ligas } = leagues || {};
+    
     const { max_ligas_pro, max_ligas_free, max_ligas_matamata_pro, max_ligas_matamata_free } =
       marketStatus as MarketStatus;
 

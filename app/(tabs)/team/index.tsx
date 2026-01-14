@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 import type { BottomSheetRef } from '@/components/structure/BottomSheet';
 
@@ -21,7 +22,6 @@ import {
 
 import { View } from '@/components/Themed';
 import { BottomSheet } from '@/components/structure/BottomSheet';
-import { FAB } from '@/components/structure/FAB';
 import { Toast } from '@/components/structure/Toast';
 import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
 import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
@@ -48,6 +48,7 @@ export default () => {
   const colorTheme = useColorScheme();
   const isFirstRender = useRef(true);
   const marketSheetRef = useRef<BottomSheetRef>(null);
+  const tabBarHeight = useBottomTabBarHeight();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -91,6 +92,7 @@ export default () => {
   // Save button state
   const [isLineupComplete, setIsLineupComplete] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const showSaveBar = isLineupComplete && !isMarketClose;
 
   // Toast state
   const [showToast, setShowToast] = useState(false);
@@ -187,14 +189,28 @@ export default () => {
     // Force remount of BottomSheet to reset SafeAreaView
     setBottomSheetKey((prev) => prev + 1);
     
-    Promise.all([onRefetchPlayerStats(), onRefetchMyClub()]).then(([_, { data: myTeamData }]) => {
-      const defaultLineup = mountLineup(myTeamData as FullClubInfo);
-      const newPrice = onGetTeamPrice(defaultLineup.starting);
-      
-      updateLineup(defaultLineup);
-      updateCaptain(myTeamData?.capitao_id as number);
-      updatePrice(newPrice);
-    });
+    Promise.allSettled([onRefetchPlayerStats(), onRefetchMyClub()])
+      .then((results) => {
+        const myClubResult = results[1];
+        if (myClubResult.status !== 'fulfilled') {
+          console.log('⚠️ Falha ao atualizar meu time:', myClubResult.reason);
+          return;
+        }
+
+        const myTeamData = myClubResult.value.data;
+        if (!myTeamData) return;
+
+        const defaultLineup = mountLineup(myTeamData as FullClubInfo);
+        const newPrice = onGetTeamPrice(defaultLineup.starting);
+        
+        updateLineup(defaultLineup);
+        updateCaptain(myTeamData?.capitao_id as number);
+        updatePrice(newPrice);
+      })
+      .catch((err) => {
+        // Garantia extra: nunca deixar rejeição “vazar” e derrubar a screen
+        console.log('⚠️ Falha inesperada no refresh:', err);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMarketClose, onRefetchMyClub, onRefetchPlayerStats, playerStats]);
 
@@ -318,11 +334,13 @@ export default () => {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
         <ScrollView
           className="flex-1"
           refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={isRefetching} />}
-          contentContainerStyle={{ paddingBottom: 100 }}>
+          contentContainerStyle={{
+            paddingBottom: tabBarHeight + 16,
+          }}>
           <View
             className={`justify-center items-center pb-2 ${
               colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
@@ -342,6 +360,9 @@ export default () => {
               disabled={isMarketClose}
               formation={formation || initialLineupTeamFormation}
               onFormationChange={handleFormationChange}
+              showSaveTeam={isLineupComplete && !isMarketClose}
+              disableSaveTeam={!isLineupComplete || isMarketClose}
+              onSaveTeam={handleSaveTeam}
             />
 
             <SoccerField
@@ -362,14 +383,6 @@ export default () => {
             />
           </View>
         </ScrollView>
-
-        <FAB
-          visible={isLineupComplete && !isMarketClose}
-          onPress={handleSaveTeam}
-          disabled={!isLineupComplete || isMarketClose}
-          label="Salvar Time"
-          iconName="check"
-        />
 
         <BottomSheet key={bottomSheetKey} ref={marketSheetRef} snapPoints={['70%', '95%']}>
           <Market

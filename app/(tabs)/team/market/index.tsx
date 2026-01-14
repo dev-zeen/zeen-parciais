@@ -11,7 +11,7 @@ import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard'
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
-import { LineupPlayer, LineupPosition } from '@/models/Formations';
+import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
 import { FullPlayer, IPositions } from '@/models/Stats';
@@ -72,11 +72,24 @@ export default ({
         index: undefined,
         isReservePlayer: !!playerLowestPrice,
       });
-      // if (!!playerLowestPrice && handleCloseMarketModal) handleCloseMarketModal();
+      
+      // Obter estado atualizado do Zustand após adicionar jogador
+      const updatedLineup = useTeamLineupStore.getState().lineup;
+      
+      if (!updatedLineup) return;
+      
+      const updatedEmptyPositions = onGetEmptyPositions(updatedLineup);
+      
+      // Se há posição filtrada E ainda tem vagas, manter modal aberto
+      if (position && updatedEmptyPositions?.has(position.position)) {
+        return; // NÃO fecha o modal
+      }
+      
+      // Fechar modal em qualquer outro caso
       handleCloseMarketModal && handleCloseMarketModal();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerLowestPrice]
+    [playerLowestPrice, position, handleCloseMarketModal]
   );
 
   const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {

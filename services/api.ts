@@ -10,6 +10,8 @@ let onUnauthenticated: (() => void) | null = null;
 
 const api = axios.create({
   baseURL: EXPO_PUBLIC_API_URL,
+  // Evita quedas por timeout curto em redes móveis/instáveis
+  timeout: 20000,
 });
 
 // Função para registrar callback de desautenticação
@@ -21,7 +23,6 @@ api.interceptors.request.use(async (instance: InternalAxiosRequestConfig) => {
   const token = await getTokenFromStorage();
   if (token) {
     instance.headers.Authorization = `Bearer ${token}`;
-    instance.timeout = 10000;
     return instance;
   }
 

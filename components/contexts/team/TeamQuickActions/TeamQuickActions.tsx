@@ -12,6 +12,9 @@ type TeamQuickActionsProps = {
   disabled?: boolean;
   formation: string;
   onFormationChange: (formationIndex: number) => void;
+  onSaveTeam?: () => void;
+  showSaveTeam?: boolean;
+  disableSaveTeam?: boolean;
 };
 
 export function TeamQuickActions({
@@ -20,6 +23,9 @@ export function TeamQuickActions({
   disabled = false,
   formation,
   onFormationChange,
+  onSaveTeam,
+  showSaveTeam = false,
+  disableSaveTeam = false,
 }: TeamQuickActionsProps) {
   const colorTheme = useColorScheme();
 
@@ -183,6 +189,17 @@ export function TeamQuickActions({
           }}
         />
       </View>
+
+      {showSaveTeam && onSaveTeam && (
+        <Button
+          variant={disableSaveTeam ? 'disabled' : 'success'}
+          onPress={onSaveTeam}
+          disabled={disableSaveTeam}
+          onlyIcon
+          hasIcon
+          iconName="check"
+        />
+      )}
 
       <Button variant="primary" onPress={onRefresh} onlyIcon hasIcon iconName="refresh-cw" />
 
