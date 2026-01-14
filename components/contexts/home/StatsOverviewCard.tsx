@@ -54,16 +54,16 @@ export function StatsOverviewCard() {
   if (!stats) return null;
 
   return (
-    <AnimatedCard delay={300} variant="elevated">
-      <View style={{ gap: 16 }}>
+    <AnimatedCard delay={300} variant="flat">
+      <View style={{ gap: 12, backgroundColor: 'transparent' }}>
         {/* Stats Grid */}
-        <View className="flex-row" style={{ gap: 10 }}>
+        <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
           {stats.map((stat, index) => (
             <View 
               key={index}
               className="flex-1 rounded-xl p-3"
-              style={{ backgroundColor: colorTheme === 'dark' ? '#1F2937' : '#F3F4F6' }}>
-              <View className="flex-row items-center justify-between mb-2" style={{ backgroundColor: colorTheme === 'dark' ? '#1F2937' : '#F3F4F6' }}>
+              style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+              <View className="flex-row items-center justify-between mb-2" style={{ backgroundColor: 'transparent' }}>
                 <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
                   {stat.label}
                 </Text>
@@ -79,7 +79,7 @@ export function StatsOverviewCard() {
               </Text>
               
               {stat.variation !== 0 && (
-                <View className="flex-row items-center" style={{ gap: 2 }}>
+                <View className="flex-row items-center" style={{ gap: 2, backgroundColor: 'transparent' }}>
                   <Feather
                     name={stat.variation >= 0 ? 'arrow-up' : 'arrow-down'}
                     size={10}
@@ -99,7 +99,7 @@ export function StatsOverviewCard() {
 
         {/* Chart */}
         {historyClub && historyClub.length > 0 && (
-          <View>
+          <View style={{ backgroundColor: 'transparent' }}>
             <Text className="text-xs text-gray-500 dark:text-gray-400 mb-2">
               Evolução (últimas 5 rodadas)
             </Text>

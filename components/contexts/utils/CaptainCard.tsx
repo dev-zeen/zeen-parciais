@@ -17,15 +17,6 @@ export function CaptainCard() {
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
   const { data: positions } = useGetPositions();
 
-  // Não mostrar se não tiver capitão
-  if (!captain) {
-    return null;
-  }
-
-  const position = (positions as IPositions)?.[captain.posicao_id];
-  const score = playerStats?.atletas[captain.atleta_id]?.pontuacao;
-  const captainScore = score ? score * 1.5 : 0;
-
   const getPositionColor = (positionName?: string) => {
     switch (positionName?.toLowerCase()) {
       case 'goleiro':
@@ -41,6 +32,68 @@ export function CaptainCard() {
         return '#8B5CF6'; // purple
     }
   };
+
+  // Estado vazio - quando não tem capitão
+  if (!captain) {
+    return (
+      <AnimatedCard delay={300} variant="flat">
+        <View style={{ gap: 12, backgroundColor: 'transparent' }}>
+          {/* Header */}
+          <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
+            <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
+              <View
+                className="w-8 h-8 rounded-full items-center justify-center"
+                style={{
+                  backgroundColor: colorTheme === 'dark' ? '#F59E0B40' : '#FCD34D30',
+                }}>
+                <Feather name="alert-circle" size={16} color="#F59E0B" />
+              </View>
+              <Text className="font-bold text-base">Seu Capitão</Text>
+            </View>
+            <View
+              className="px-3 py-1.5 rounded-full"
+              style={{
+                backgroundColor: colorTheme === 'dark' ? '#FCD34D30' : '#FEF3C7',
+              }}>
+              <Text className="text-yellow-600 dark:text-yellow-400 text-xs font-bold">
+                x1.5
+              </Text>
+            </View>
+          </View>
+
+          {/* Empty State - Aviso */}
+          <View
+            className="flex-row items-center rounded-lg p-3"
+            style={{
+              gap: 12,
+              backgroundColor: colorTheme === 'dark' ? '#FCD34D20' : '#FEF3C7',
+            }}>
+            <View
+              className="w-12 h-12 rounded-full items-center justify-center"
+              style={{
+                backgroundColor: colorTheme === 'dark' ? '#FCD34D40' : '#FBBF24',
+              }}>
+              <Feather name="info" size={24} color={colorTheme === 'dark' ? '#FCD34D' : '#FFFFFF'} />
+            </View>
+
+            <View className="flex-1" style={{ gap: 2, backgroundColor: 'transparent' }}>
+              <Text className="font-semibold text-sm text-yellow-800 dark:text-yellow-300">
+                Capitão não definido
+              </Text>
+              <Text className="text-xs text-yellow-700 dark:text-yellow-400">
+                Selecione seu capitão ao escalar seu time
+              </Text>
+            </View>
+          </View>
+        </View>
+      </AnimatedCard>
+    );
+  }
+
+  // Estado com capitão selecionado
+  const position = (positions as IPositions)?.[captain.posicao_id];
+  const score = playerStats?.atletas[captain.atleta_id]?.pontuacao;
+  const captainScore = score ? score * 1.5 : 0;
 
   return (
     <AnimatedCard delay={300} variant="flat">
@@ -63,7 +116,7 @@ export function CaptainCard() {
               backgroundColor: colorTheme === 'dark' ? '#FCD34D30' : '#FEF3C7',
             }}>
             <Text className="text-yellow-600 dark:text-yellow-400 text-xs font-bold">
-              Dobra Pontos
+              x1.5
             </Text>
           </View>
         </View>

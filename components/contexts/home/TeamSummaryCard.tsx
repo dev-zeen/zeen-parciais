@@ -17,7 +17,7 @@ export function TeamSummaryCard({ team }: TeamSummaryCardProps) {
   return (
     <Link href="/(tabs)/profile" asChild>
       <Pressable>
-        <AnimatedCard delay={200}>
+        <AnimatedCard delay={200} variant="flat">
           <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
             <View className="flex-row items-center" style={{ gap: 12, backgroundColor: 'transparent' }}>
               <Image

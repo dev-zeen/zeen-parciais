@@ -95,20 +95,20 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
   }
 
   return (
-    <View style={{ gap: 8 }}>
+    <View style={{ gap: 8, backgroundColor: 'transparent' }}>
       {alerts.map((alert, index) => {
         const colors = getAlertColors(alert.type);
         return (
-          <AnimatedCard key={alert.id} delay={400 + index * 50} variant="elevated">
+          <AnimatedCard key={alert.id} delay={400 + index * 50} variant="flat">
             <View className={`rounded-xl p-3 border-l-4 ${colors.border}`} style={{ backgroundColor: colors.bg }}>
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center flex-1" style={{ gap: 10 }}>
+              <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
+                <View className="flex-row items-center flex-1" style={{ gap: 10, backgroundColor: 'transparent' }}>
                   <View 
                     className="w-8 h-8 rounded-full items-center justify-center"
                     style={{ backgroundColor: `${colors.icon}20` }}>
                     <Feather name={alert.icon} size={16} color={colors.icon} />
                   </View>
-                  <View className="flex-1">
+                  <View className="flex-1" style={{ backgroundColor: 'transparent' }}>
                     <Text className={`font-bold text-sm ${colors.text}`} numberOfLines={1}>
                       {alert.title}
                     </Text>

@@ -36,11 +36,10 @@ export function QuickActionsGrid() {
 
   const actions: QuickAction[] = [
     {
-      id: 'market',
-      label: 'Mercado',
-      icon: 'shopping-cart',
-      route: '/(tabs)/team/market',
-      badge: isMarketClose ? undefined : '•',
+      id: 'team',
+      label: 'Meu Time',
+      icon: 'shield',
+      route: '/(tabs)/team',
       color: '#8B5CF6',
     },
     {
@@ -67,7 +66,7 @@ export function QuickActionsGrid() {
   ];
 
   return (
-    <View className="flex-row" style={{ gap: 10 }}>
+    <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent'  }}>
       {actions.map((action, index) => (
         <Pressable
           key={action.id}
@@ -79,8 +78,9 @@ export function QuickActionsGrid() {
           })}>
           <AnimatedCard
             delay={100 + index * 50}
+            variant="flat"
             style={{ height: 100 }}>
-            <View className="items-center justify-center h-full" style={{ gap: 6 }}>
+            <View className="items-center justify-center h-full" style={{ gap: 6, backgroundColor: 'transparent' }}>
               <View
                 className="w-10 h-10 rounded-full items-center justify-center"
                 style={{ backgroundColor: `${action.color}25` }}>

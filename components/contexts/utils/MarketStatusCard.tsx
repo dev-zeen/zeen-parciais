@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Loading } from '@/components/structure/Loading';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -45,21 +46,25 @@ export function MarketStatusCard() {
     return <Loading />;
   }
 
+  const getBackgroundColor = () => {
+    if (marketStatus.status_mercado === MARKET_STATUS_NAME.ABERTO) {
+      return colorTheme === 'dark' ? '#15803d30' : '#dcfce7';
+    } else if (marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO) {
+      return colorTheme === 'dark' ? '#b9131330' : '#fee2e2';
+    } else {
+      return colorTheme === 'dark' ? '#ea580c30' : '#ffedd5';
+    }
+  };
+
   return (
-    <View
-      className={`w-full rounded-2xl px-4 py-3 ${
-        marketStatus.status_mercado === MARKET_STATUS_NAME.ABERTO
-          ? colorTheme === 'dark'
-            ? 'bg-green-900/20'
-            : 'bg-green-50'
-          : marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO
-          ? colorTheme === 'dark'
-            ? 'bg-red-900/20'
-            : 'bg-red-50'
-          : colorTheme === 'dark'
-          ? 'bg-orange-900/20'
-          : 'bg-orange-50'
-      }`}>
+    <AnimatedCard delay={100} variant="flat">
+      <View
+        style={{
+          backgroundColor: getBackgroundColor(),
+          borderRadius: 12,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+        }}>
       <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
         {/* Status Indicator */}
         <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
@@ -106,6 +111,7 @@ export function MarketStatusCard() {
           )}
         </View>
       )}
-    </View>
+      </View>
+    </AnimatedCard>
   );
 }
