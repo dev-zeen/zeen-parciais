@@ -4,6 +4,7 @@ import { FlatList, useColorScheme } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { sortedOptions } from '@/components/contexts/market/MarketFilters/filters.helper';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { FullPlayer } from '@/models/Stats';
 
 type OrderMarketProps = {
@@ -32,12 +33,9 @@ export function OrderMarket({ currentOrder, applyOrderMarket, handleClose }: Ord
   );
 
   return (
-    <View
-      className="flex-1 rounded-lg pt-20"
-      style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        flex: 1,
-      }}>
+    <SafeAreaViewContainer>
+      <View
+        className="flex-1 rounded-lg">
       <View
         className="items-center justify-between flex-row p-2 rounded-t-lg"
         style={{
@@ -83,6 +81,7 @@ export function OrderMarket({ currentOrder, applyOrderMarket, handleClose }: Ord
           keyExtractor={(item) => item.title}
         />
       </View>
-    </View>
+      </View>
+    </SafeAreaViewContainer>
   );
 }

@@ -4,14 +4,13 @@ import { Text, View } from '@/components/Themed';
 import { TopPlayerCard } from '@/components/contexts/utils/TopPlayerCard';
 import { ITab, Tabs } from '@/components/structure/Tabs';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useGetTopPlayers } from '@/queries/players.query';
+import { useGetTopPlayers, useGetTopReservePlayers } from '@/queries/players.query';
 
 export const TopPlayerList = memo(() => {
   const { allowRequest } = useMarketStatus();
 
-  // const [hasHighlights, setHighlights] = useState(false);
-
   const { data: topPlayers } = useGetTopPlayers(allowRequest);
+  const { data: topReservePlayers } = useGetTopReservePlayers(allowRequest);
 
   // useEffect(() => {
   //   if (topPlayers && topPlayers?.length > 0) setHighlights(true);
@@ -32,35 +31,21 @@ export const TopPlayerList = memo(() => {
           );
         },
       },
-
-      // {
-      //   id: 2,
-      //   title: 'Capitão',
-      //   content: () => {
-      //     return (
-      //       <View className="mt-1">
-      //         {bestPlayers?.capitaes?.map((item) => {
-      //           return <TopPlayerCard key={item.Atleta.atleta_id} player={item} />;
-      //         })}
-      //       </View>
-      //     );
-      //   },
-      // },
-      // {
-      //   id: 3,
-      //   title: 'Reservas',
-      //   content: () => {
-      //     return (
-      //       <View className="mt-1">
-      //         {bestPlayers?.reservas?.map((item) => {
-      //           return <TopPlayerCard key={item.Atleta.atleta_id} player={item} />;
-      //         })}
-      //       </View>
-      //     );
-      //   },
-      // },
+      {
+        id: 2,
+        title: 'Reservas',
+        content: () => {
+          return (
+            <View className="mt-1">
+              {topReservePlayers?.map((item) => {
+                return <TopPlayerCard key={item.Atleta.atleta_id} player={item} />;
+              })}
+            </View>
+          );
+        },
+      },
     ],
-    [topPlayers]
+    [topPlayers, topReservePlayers]
   );
 
   return (

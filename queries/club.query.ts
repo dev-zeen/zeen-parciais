@@ -37,14 +37,33 @@ export const useGetClub = (id?: number | string, round?: number) => {
   return useFetch<FullClubInfo>(round ? urlWithRound : url, undefined, {
     enabled: !!id,
     select: (data) => {
+      console.log('📊 useGetClub - Raw data:', JSON.stringify(data, null, 2));
+      console.log('📊 useGetClub - Has atletas?', !!data?.atletas);
+      console.log('📊 useGetClub - Has reservas?', !!data?.reservas);
+      
+      // Se não tem atletas (time não escalado), retorna dados como vieram
+      if (!data?.atletas) {
+        console.log('⚠️ Time não escalado - retornando dados sem processamento');
+        return {
+          ...data,
+          atletas: [],
+          reservas: [],
+        };
+      }
+      
       const newData = {
         ...data,
         reservas:
           data?.reservas && data.reservas.length > 0
-            ? data?.reservas.sort((a, b) => a.posicao_id - b.posicao_id)
+            ? data.reservas.sort((a, b) => a.posicao_id - b.posicao_id)
             : [],
-        atletas: data?.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
+        atletas: data.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
       };
+
+      console.log('✅ useGetClub - Dados processados:', {
+        atletasCount: newData.atletas.length,
+        reservasCount: newData.reservas.length,
+      });
 
       return newData;
     },

@@ -44,7 +44,7 @@ export default () => {
 
   const lineupPlayersUnlikely = useMemo(
     () =>
-      myClub?.atletas.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
+      myClub?.atletas?.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
     [myClub?.atletas]
   );
 

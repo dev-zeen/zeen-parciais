@@ -3,6 +3,7 @@ import { useCallback, useState } from 'react';
 import { FlatList, Switch, useColorScheme } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 
 type FilterMarketByStatusProps = {
   statusSelecteds: PlayerStatusFilter[];
@@ -44,11 +45,9 @@ export function FilterMarketByStatus({
   );
 
   return (
-    <View
-      className="flex-1 rounded-lg pt-20"
-      style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}>
+    <SafeAreaViewContainer>
+      <View
+        className="flex-1 rounded-lg">
       <View
         className="items-center justify-between flex-row p-2 rounded-t-lg"
         style={{
@@ -105,6 +104,7 @@ export function FilterMarketByStatus({
           <Text className="font-semibold text-sm text-white">Filtrar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </View>
+    </SafeAreaViewContainer>
   );
 }

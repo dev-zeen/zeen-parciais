@@ -86,19 +86,19 @@ export function StatsClubCard({ team, round }: StatsClubCardProps) {
           <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
             <Text className="font-semibold text-xs">Patrim.</Text>
             <Text className="font-semibold text-md text-blue-500">
-              {numberToString(team.patrimonio)}
+              {numberToString(team.patrimonio ?? 0)}
             </Text>
           </View>
           <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
             <Text className="font-semibold text-xs">Rodada</Text>
             <Text className="font-semibold text-md text-blue-500">
-              {numberToString(team.pontos)}
+              {numberToString(team.pontos ?? 0)}
             </Text>
           </View>
           <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
             <Text className="font-semibold text-xs">Total</Text>
             <Text className="font-semibold text-md text-blue-500">
-              {numberToString(team.pontos_campeonato)}
+              {numberToString(team.pontos_campeonato ?? 0)}
             </Text>
           </View>
         </View>

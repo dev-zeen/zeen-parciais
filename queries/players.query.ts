@@ -3,6 +3,7 @@ import {
   GET_POSITIONS,
   GET_TOP_PLAYERS,
   GET_TOP_RANKED_PLAYERS,
+  GET_TOP_RESERVE_PLAYERS,
 } from '@/constants/Endpoits';
 import { APPRECIATIONS } from '@/constants/Keys';
 import { Appreciations, TopPlayer } from '@/models/Player';
@@ -22,6 +23,12 @@ interface BestPlayers {
 
 export const useGetTopPlayers = (allowRequest?: boolean) =>
   useFetch<TopPlayer[]>(GET_TOP_RANKED_PLAYERS, undefined, {
+    enabled: !!allowRequest,
+    select: (data) => data?.slice(0, 5),
+  });
+
+export const useGetTopReservePlayers = (allowRequest?: boolean) =>
+  useFetch<TopPlayer[]>(GET_TOP_RESERVE_PLAYERS, undefined, {
     enabled: !!allowRequest,
     select: (data) => data?.slice(0, 5),
   });

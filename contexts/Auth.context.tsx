@@ -3,6 +3,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ReactNode, createContext, useCallback, useEffect, useState } from 'react';
 
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
+import { clearGloboidClientSettings } from '@/lib/core/auth';
+import { setUnauthenticatedCallback } from '@/services/api';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 
 type AuthContextProps = {
@@ -29,6 +31,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
 
   const handleUnautenticated = useCallback(async () => {
     await removeItem();
+    await clearGloboidClientSettings();
     setIsAutheticated(false);
   }, [removeItem]);
 
@@ -37,6 +40,14 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
     queryClient.clear();
     handleUnautenticated();
   }, [handleUnautenticated, queryClient, resetStore]);
+
+  // Registra callback de desautenticação no interceptor da API
+  useEffect(() => {
+    setUnauthenticatedCallback(() => {
+      console.log('🔒 Session expired - logging out');
+      handleLogout();
+    });
+  }, [handleLogout]);
 
   useEffect(() => {
     function handleGetToken() {

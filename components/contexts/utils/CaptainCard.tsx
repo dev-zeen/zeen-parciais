@@ -35,7 +35,7 @@ export function CaptainCard() {
 
             <View className="flex-row items-center">
               <Text className="text-xs  uppercase">
-                {(positions as IPositions)[captain?.posicao_id as number].nome}
+                {(positions as IPositions)[captain?.posicao_id as number]?.nome}
               </Text>
             </View>
           </View>

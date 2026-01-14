@@ -5,6 +5,7 @@ import { FlatList, ListRenderItemInfo, useColorScheme } from 'react-native';
 import { MatchCardFilter } from './MatchCardFilter';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { Market } from '@/models/Market';
 import { Match } from '@/models/Matches';
@@ -67,7 +68,7 @@ export function FilterMarketByTeam({
   const keyExtractor = useCallback((item: Match) => `${item.clube_casa_id}`, []);
 
   return (
-    <>
+    <SafeAreaViewContainer>
       <View
         className="mx-2"
         style={{
@@ -97,7 +98,7 @@ export function FilterMarketByTeam({
         </View>
 
         <View className="flex-row px-8 py-3 rounded-lg items-center justify-evenly">
-          <Text>Mandates</Text>
+          <Text>Mandantes</Text>
           <Text>Visitantes</Text>
         </View>
       </View>
@@ -147,6 +148,6 @@ export function FilterMarketByTeam({
           <Text className="font-semibold text-sm text-white">Filtrar</Text>
         </TouchableOpacity>
       </View>
-    </>
+    </SafeAreaViewContainer>
   );
 }

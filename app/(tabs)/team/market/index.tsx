@@ -10,6 +10,7 @@ import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { Loading } from '@/components/structure/Loading';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
@@ -61,7 +62,7 @@ export default ({
   const emptyPositions = useMemo(() => lineup && onGetEmptyPositions(lineup), [lineup]);
 
   const currentBalancePrice = useMemo(() => {
-    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
+    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio || 0, price);
     return 0;
   }, [myClub, price]);
 
@@ -104,7 +105,7 @@ export default ({
   );
 
   const handleCloseMarket = useCallback(
-    () => (handleCloseMarketModal ? handleCloseMarketModal() : router.push('/team/')),
+    () => (handleCloseMarketModal ? handleCloseMarketModal() : router.back()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -163,8 +164,9 @@ export default ({
   if (isLoading) return <Loading />;
 
   return (
-    <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-      <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
+    <SafeAreaViewContainer>
+      <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
+        <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
         <View
           className="flex-row items-center"
           style={{
@@ -203,7 +205,6 @@ export default ({
         data={marketPlayers}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        estimatedItemSize={100}
         ItemSeparatorComponent={() => (
           <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
         )}
@@ -212,6 +213,7 @@ export default ({
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}
       />
-    </View>
+      </View>
+    </SafeAreaViewContainer>
   );
 };

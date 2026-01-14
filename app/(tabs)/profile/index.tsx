@@ -42,27 +42,33 @@ export default () => {
   });
 
   const highestScore: TeamHistoryRound | undefined = useMemo(() => {
-    return historyClub
-      ?.filter((item) => item.pontos)
-      .reduce((acc, item) => {
-        if (item.pontos > acc.pontos) {
-          return (acc = item);
-        } else {
-          return acc;
-        }
-      });
+    const filtered = historyClub?.filter((item) => item.pontos) || [];
+    
+    if (filtered.length === 0) {
+      return undefined;
+    }
+    
+    return filtered.reduce((acc, item) => {
+      if (item.pontos > acc.pontos) {
+        return item;
+      }
+      return acc;
+    });
   }, [historyClub]);
 
   const lowestScore: TeamHistoryRound | undefined = useMemo(() => {
-    return historyClub
-      ?.filter((item) => item.pontos)
-      .reduce((acc, item) => {
-        if (item.pontos < acc.pontos) {
-          return (acc = item);
-        } else {
-          return acc;
-        }
-      });
+    const filtered = historyClub?.filter((item) => item.pontos) || [];
+    
+    if (filtered.length === 0) {
+      return undefined;
+    }
+    
+    return filtered.reduce((acc, item) => {
+      if (item.pontos < acc.pontos) {
+        return item;
+      }
+      return acc;
+    });
   }, [historyClub]);
 
   const totalScore = numberToString(

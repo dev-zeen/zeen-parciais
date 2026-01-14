@@ -61,7 +61,6 @@ export function Cup({ league: cup }: CupProps) {
           ItemSeparatorComponent={() => (
             <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
           )}
-          estimatedItemSize={100}
           renderItem={renderCupMatchCard}
           contentContainerStyle={{
             paddingTop: 8,
