@@ -1,15 +1,20 @@
 import { FullPlayer } from '@/models/Stats';
 
 interface IEmblem {
-  [key: string]: string;
+  '60x60': string;
+  '45x45': string;
+  '30x30': string;
 }
 
 export interface Club {
-  id: string;
+  id: number;
   nome: string;
   abreviacao: string;
-  escudos: IEmblem;
+  slug: string;
+  apelido: string;
   nome_fantasia: string;
+  escudos: IEmblem;
+  url_editoria?: string;
 }
 
 export interface IClub {

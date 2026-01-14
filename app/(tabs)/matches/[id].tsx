@@ -82,7 +82,7 @@ export default () => {
   const { isRefetching: isRefetchingMatches, refetch: onRefetchMatches } = useGetMatchs();
 
   const currentBalancePrice = useMemo(() => {
-    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
+    if (myClub && myClub.patrimonio !== undefined && price >= 0) return onBalancePrice(myClub.patrimonio, price);
     return 0;
   }, [myClub, price]);
 
@@ -122,12 +122,11 @@ export default () => {
           player={player}
           club={(playerStats as PlayerStats)?.clubes[String(player.clube_id)]}
           position={(playerStats as PlayerStats)?.posicoes[player.posicao_id]}
-          appreciation={(valorizations as Appreciations)?.atletas?.[player.id]?.variacao_num}
-          isPlayerOnMyLineup={myClub?.atletas.some((item) => String(item.atleta_id) === player.id)}
+          isPlayerOnMyLineup={myClub?.atletas?.some((item) => String(item.atleta_id) === player.id)}
         />
       );
     },
-    [valorizations, myClub?.atletas, playerStats]
+    [myClub, playerStats]
   );
 
   const renderItem = useCallback(

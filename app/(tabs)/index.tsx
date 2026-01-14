@@ -94,6 +94,7 @@ export default () => {
             paddingBottom: 8,
           }}>
           <MarketStatusCard />
+          
           {myClub ? (
             <>
               <TeamBanner team={myClub} />

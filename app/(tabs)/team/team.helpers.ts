@@ -218,7 +218,7 @@ export function isPlayersEqual(currentPlayers: number[], defaultPlayers: number[
 }
 
 export function onGetEqualLineups(lineup: LineupPlayers, club: FullClubInfo): boolean {
-  const defaultPlayersId = club?.atletas.map(({ atleta_id }) => atleta_id);
+  const defaultPlayersId = club?.atletas?.map(({ atleta_id }) => atleta_id) ?? [];
   const currentPlayersId = lineup.starting.map(({ player }) => player?.atleta_id);
 
   const isEqualLineupPlayers = isPlayersEqual(currentPlayersId as number[], defaultPlayersId);

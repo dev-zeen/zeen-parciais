@@ -68,7 +68,7 @@ export default function TabLayout() {
           headerTitle: 'Ligas',
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
           headerRight: () => (
-            <Link href="/leagues/invites/" asChild>
+            <Link href="/leagues/invites" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <View

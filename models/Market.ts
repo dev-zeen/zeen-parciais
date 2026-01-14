@@ -14,6 +14,8 @@ export interface MarketStatus {
   max_ligas_matamata_pro: number;
   max_ligas_patrocinadas_free: number;
   max_ligas_patrocinadas_pro_num: number;
+  max_atletas_favoritos_free: number;
+  max_atletas_favoritos_pro: number;
   game_over: boolean;
   temporada: number;
   reativar: boolean;
@@ -27,16 +29,30 @@ export interface MarketStatus {
     timestamp: number;
   };
   limites_competicao: {
-    total_confronto_pro: number;
-    total_confronto_free: number;
-    criacao_confronto_pro: number;
-    criacao_confronto_free: number;
+    total_confronto_pro?: number;
+    total_confronto_free?: number;
+    criacao_confronto_pro?: number;
+    criacao_confronto_free?: number;
+  };
+  limites_competicoes: {
+    pontos_corridos: {
+      free: {
+        criacao: number;
+        participacao: number;
+      };
+      pro: {
+        criacao: number;
+        participacao: number;
+      };
+    };
   };
   times_escalados: number;
   mercado_pos_rodada: boolean;
   novo_mes_ranking: boolean;
   degustacao_gatomestre: boolean;
+  bola_rolando: boolean;
   nome_rodada: string;
+  rodada_final: number;
 }
 
 export interface Market {

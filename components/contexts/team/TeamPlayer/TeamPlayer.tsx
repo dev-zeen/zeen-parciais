@@ -54,9 +54,8 @@ export function TeamPlayer({
 
   const partialScore = useMemo(() => {
     if (isPlayed) {
-      return isCaptain
-        ? (player as LineupPlayer)?.pontuacao * 1.5 ?? 0
-        : (player as LineupPlayer)?.pontuacao ?? 0;
+      const pontuacao = (player as LineupPlayer)?.pontuacao ?? 0;
+      return isCaptain ? pontuacao * 1.5 : pontuacao;
     }
   }, [isCaptain, isPlayed, player]);
 

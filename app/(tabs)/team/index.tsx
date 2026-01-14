@@ -63,8 +63,8 @@ export default () => {
   const mountLineup = useCallback(
     (myTeam: FullClubInfo) => {
       const defaultLineup = onGetFillLineupDefaultPlayers({
-        lineupStart: myTeam.atletas,
-        reserves: myTeam.reservas,
+        lineupStart: myTeam.atletas ?? [],
+        reserves: myTeam.reservas ?? [],
         formationId: myTeam.time.esquema_id,
         playerStats,
         isMarketClose,
@@ -79,7 +79,7 @@ export default () => {
     if (!lineup && myClub && !isRefetching) {
       const defaultLineup = mountLineup(myClub);
       updateLineup(defaultLineup as LineupPlayers);
-      updateCaptain(myClub.capitao_id);
+      updateCaptain(myClub.capitao_id ?? 0);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMarketClose, isRefetching, myClub, playerStats]);

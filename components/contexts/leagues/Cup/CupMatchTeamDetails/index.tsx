@@ -46,14 +46,14 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
   });
 
   const lineup = useMemo(() => {
-    if (team)
+    if (team && team.atletas && team.reservas)
       return onGetFillLineupDefaultPlayers({
         lineupStart: team.atletas,
         reserves: team.reservas,
         formationId:
           isMarketClose && currentRound === match.rodada_id
             ? team.time.esquema_id
-            : team.esquema_id,
+            : team.esquema_id ?? 1,
         playerStats,
         isMarketClose,
       });
@@ -160,13 +160,13 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
-        <SoccerField
-          lineup={lineup}
-          substitutions={substitutions}
-          captain={team.capitao_id}
-          round={match.rodada_id}
-          isViewOnly
-        />
+      <SoccerField
+        lineup={lineup}
+        substitutions={substitutions}
+        captain={team.capitao_id ?? 0}
+        round={match.rodada_id}
+        isViewOnly
+      />
         <ListReservePlayers
           lineup={lineup}
           substitutions={substitutions}

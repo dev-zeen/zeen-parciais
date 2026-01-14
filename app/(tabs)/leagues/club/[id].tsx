@@ -109,12 +109,12 @@ export default () => {
   // };
 
   const lineup = useMemo(() => {
-    if (team)
+    if (team && team.atletas && team.reservas)
       return onGetFillLineupDefaultPlayers({
         lineupStart: team.atletas,
         reserves: team.reservas,
         formationId:
-          isMarketClose && currentRound === marketRound ? team.time.esquema_id : team.esquema_id,
+          isMarketClose && currentRound === marketRound ? team.time.esquema_id : team.esquema_id ?? 1,
         playerStats,
         isMarketClose,
       });
@@ -250,13 +250,13 @@ export default () => {
             backgroundColor:
               colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           }}>
-          <SoccerField
-            lineup={lineup}
-            substitutions={substitutions}
-            captain={team.capitao_id}
-            round={currentRound}
-            isViewOnly
-          />
+        <SoccerField
+          lineup={lineup}
+          substitutions={substitutions}
+          captain={team.capitao_id ?? 0}
+          round={currentRound}
+          isViewOnly
+        />
           <ListReservePlayers
             lineup={lineup}
             substitutions={substitutions}

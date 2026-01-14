@@ -127,7 +127,7 @@ export function Login({ title }: LoginProps) {
       timeoutRef.current = setTimeout(() => {
         console.log('⏱️ Login timeout - fechando modal');
         setShowModalAuth(false);
-      }, 10 * 60 * 1000); // 10 minutos
+      }, 10 * 60 * 1000) as any; // 10 minutos
     }
 
     return () => {

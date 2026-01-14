@@ -46,7 +46,7 @@ export function ClubCard({
   const isOrderByPatrimonio = orderBy === OrderByOptions.PATRIMONIO;
 
   const captainPlayer = isLeagueAcceptCaptain
-    ? team?.atletas.find((item) => item.atleta_id === team.capitao_id)
+    ? team?.atletas?.find((item) => item.atleta_id === team.capitao_id)
     : null;
 
   const diffScore = !isOrderByPatrimonio
