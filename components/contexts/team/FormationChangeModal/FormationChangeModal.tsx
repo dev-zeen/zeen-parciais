@@ -1,8 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import {  Image, Modal, ScrollView } from 'react-native';
+import { Image, Modal, ScrollView } from 'react-native';
 
-import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { PlayersToSell } from '@/components/contexts/team/_team.helpers';
 import { Positions } from '@/constants/Formations';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
@@ -66,7 +66,9 @@ export function FormationChangeModal({
             <View
               className="flex-row items-center justify-between mb-2"
               style={{ backgroundColor: 'transparent' }}>
-              <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
+              <View
+                className="flex-row items-center"
+                style={{ gap: 8, backgroundColor: 'transparent' }}>
                 <Feather name="alert-circle" size={24} color="#f59e0b" />
                 <Text className="text-lg font-bold">Ajustar Escalação</Text>
               </View>
@@ -74,7 +76,9 @@ export function FormationChangeModal({
                 <Feather name="x" size={24} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
               </TouchableOpacity>
             </View>
-            <Text className="text-sm" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+            <Text
+              className="text-sm"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
               A nova formação não comporta todos os jogadores. Selecione quem deve ser removido:
             </Text>
           </View>
@@ -89,8 +93,8 @@ export function FormationChangeModal({
                 <Text
                   className="text-sm font-semibold mb-2"
                   style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-                  {getPositionName(positionData.position)} - Remover {positionData.quantityToSell} de{' '}
-                  {positionData.players.length}
+                  {getPositionName(positionData.position)} - Remover {positionData.quantityToSell}{' '}
+                  de {positionData.players.length}
                 </Text>
                 <View style={{ gap: 8, backgroundColor: 'transparent' }}>
                   {positionData.players.map((position) => {
@@ -108,14 +112,14 @@ export function FormationChangeModal({
                               ? '#ef444420'
                               : '#fee2e2'
                             : colorTheme === 'dark'
-                            ? '#374151'
-                            : '#f3f4f6',
+                              ? '#374151'
+                              : '#f3f4f6',
                           borderWidth: 2,
                           borderColor: isSelected
                             ? '#ef4444'
                             : colorTheme === 'dark'
-                            ? '#4b5563'
-                            : '#e5e7eb',
+                              ? '#4b5563'
+                              : '#e5e7eb',
                         }}>
                         <Image
                           source={{ uri: position.player.foto?.replace('FORMATO', '80x80') }}
@@ -151,7 +155,9 @@ export function FormationChangeModal({
           </ScrollView>
 
           {/* Footer */}
-          <View className="flex-row" style={{ gap: 12, backgroundColor: 'transparent', marginTop: 16 }}>
+          <View
+            className="flex-row"
+            style={{ gap: 12, backgroundColor: 'transparent', marginTop: 16 }}>
             <TouchableOpacity
               activeOpacity={0.7}
               onPress={onCancel}

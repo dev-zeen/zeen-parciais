@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
-import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
+import { onGetFillLineupDefaultPlayers } from '@/components/contexts/team/_team.helpers';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';

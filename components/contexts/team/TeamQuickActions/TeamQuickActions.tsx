@@ -1,9 +1,9 @@
 import { Feather } from '@expo/vector-icons';
-import {  Alert, Text } from 'react-native';
+import { Alert, Text } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 
-import { listDefaultLineups } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
+import { listDefaultLineups } from '@/components/contexts/team/_team.helpers';
 import { Button } from '@/components/structure/Button';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
@@ -71,8 +71,8 @@ export function TeamQuickActions({
                   backgroundColor: disabled
                     ? '#e5e7eb'
                     : colorTheme === 'dark'
-                    ? '#1e40af'
-                    : '#dbeafe',
+                      ? '#1e40af'
+                      : '#dbeafe',
                 }}>
                 <Feather
                   name={isOpened ? 'chevron-up' : 'chevron-down'}
@@ -123,8 +123,8 @@ export function TeamQuickActions({
                       backgroundColor: isSelected
                         ? '#3b82f6'
                         : colorTheme === 'dark'
-                        ? '#374151'
-                        : '#f3f4f6',
+                          ? '#374151'
+                          : '#f3f4f6',
                     }}>
                     <Feather name="grid" size={18} color={isSelected ? '#ffffff' : '#6b7280'} />
                   </View>
@@ -132,11 +132,7 @@ export function TeamQuickActions({
                     style={{
                       fontSize: 16,
                       fontWeight: isSelected ? '700' : '600',
-                      color: isSelected
-                        ? '#3b82f6'
-                        : colorTheme === 'dark'
-                        ? '#f3f4f6'
-                        : '#1f2937',
+                      color: isSelected ? '#3b82f6' : colorTheme === 'dark' ? '#f3f4f6' : '#1f2937',
                     }}>
                     {item}
                   </Text>
@@ -168,13 +164,14 @@ export function TeamQuickActions({
             borderRadius: 10,
             width: '100%',
             height: 48,
-            backgroundColor: colorTheme === 'dark'
-              ? disabled
-                ? '#374151'
-                : '#1f2937'
-              : disabled
-              ? '#f3f4f6'
-              : '#ffffff',
+            backgroundColor:
+              colorTheme === 'dark'
+                ? disabled
+                  ? '#374151'
+                  : '#1f2937'
+                : disabled
+                  ? '#f3f4f6'
+                  : '#ffffff',
             paddingHorizontal: 14,
             shadowColor: disabled ? 'transparent' : '#000',
             shadowOffset: { width: 0, height: 2 },

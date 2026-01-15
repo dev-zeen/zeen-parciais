@@ -8,7 +8,7 @@ type ProvidersProps = {
   children: ReactNode;
 };
 
-export function Providers({ children }: ProvidersProps): ReactNode {
+export default function Providers({ children }: ProvidersProps): ReactNode {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {

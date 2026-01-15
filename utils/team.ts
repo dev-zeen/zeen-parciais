@@ -1,4 +1,4 @@
-import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
+import { PlayersToSell } from '@/components/contexts/team/_team.helpers';
 import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';

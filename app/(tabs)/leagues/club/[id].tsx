@@ -3,10 +3,10 @@ import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
-import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
+import { onGetFillLineupDefaultPlayers } from '@/components/contexts/team/_team.helpers';
 import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';

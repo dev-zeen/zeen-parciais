@@ -1,14 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { 
-  FlatList,
-  ListRenderItemInfo,
-  RefreshControl,
-  TextInput } from 'react-native';
+import { FlatList, ListRenderItemInfo, RefreshControl, TextInput } from 'react-native';
 
-import { onGetPlayersPlayed } from '@/app/(tabs)/players/_players.helper';
 import { Text, View } from '@/components/Themed';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
+import { onGetPlayersPlayed } from '@/components/contexts/players/_players.helper';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';

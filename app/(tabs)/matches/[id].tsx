@@ -2,11 +2,11 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
 
-import { onGetEmptyPositions } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard';
+import { onGetEmptyPositions } from '@/components/contexts/team/_team.helpers';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { ITab, Tabs } from '@/components/structure/Tabs';

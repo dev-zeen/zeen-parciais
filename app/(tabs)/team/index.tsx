@@ -2,7 +2,7 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
-import type { PlayersToSell } from './_team.helpers';
+import type { PlayersToSell } from '../../../components/contexts/team/_team.helpers';
 import {
   emptyCaptain,
   emptyLineupFormation,
@@ -13,7 +13,7 @@ import {
   onGetEqualLineups,
   onGetFillLineupDefaultPlayers,
   onGetPlayersOnChangePositionSell,
-} from './_team.helpers';
+} from '../../../components/contexts/team/_team.helpers';
 
 import Market from '@/app/(tabs)/team/market';
 import { View } from '@/components/Themed';
