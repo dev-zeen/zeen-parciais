@@ -1,10 +1,10 @@
 <div align="center">
   <img src="assets/images/icon.png" alt="AFC Parciais Logo" width="200"/>
-  
-  # AFC Parciais
-  
+
+# AFC Parciais
+
   **Acompanhamento em tempo real do Cartola FC com interface moderna e intuitiva**
-  
+
   [![Version](https://img.shields.io/badge/version-0.6.8-blue.svg)](https://github.com/clizioguedes/afc-parciais)
   [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61dafb.svg)](https://reactnative.dev/)
   [![Expo](https://img.shields.io/badge/Expo-54.0.0-000020.svg)](https://expo.dev/)
@@ -41,6 +41,7 @@
 ## ✨ Funcionalidades
 
 ### 🏠 Dashboard Principal
+
 - Status do mercado em tempo real (aberto/fechado/manutenção)
 - Resumo do seu time com patrimônio e pontuação
 - Ações rápidas (escalar time, mercado, ligas, partidas)
@@ -50,6 +51,7 @@
 - Carrossel de destaques com melhores jogadores da rodada
 
 ### ⚽ Escalação de Time
+
 - Campo visual interativo com formações táticas (3-4-3, 4-3-3, 4-4-2, 4-5-1, 5-3-2, 5-4-1)
 - Seleção e troca de capitão com multiplicador de pontos
 - Gerenciamento de jogadores titulares e reservas
@@ -59,6 +61,7 @@
 - Validação de cartoletas e patrimônio
 
 ### 💼 Mercado
+
 - Listagem completa de jogadores disponíveis
 - Filtros avançados:
   - Por time (clubes da Série A)
@@ -74,6 +77,7 @@
 - Compra e venda integrada
 
 ### 🏆 Ligas
+
 - Visualização de todas as suas ligas
 - Suporte para 3 tipos de ligas:
   - **Clássicas**: Ranking simples por pontuação
@@ -87,12 +91,9 @@
   - Receber e aceitar convites
   - Enviar convites para outros cartoleiros
   - Notificações de convites pendentes
-- Criação de novas ligas:
-  - Configuração de tipo, privacidade e regras
-  - Upload de imagem personalizada
-  - Definição de capitão duplo
 
 ### 📊 Visualização de Clubes
+
 - Seletor de rodadas para análise histórica
 - Escalação do time adversário
 - Comparação de estatísticas:
@@ -103,6 +104,7 @@
 - Informações do cartoleiro
 
 ### ⚽ Partidas
+
 - Calendário completo de rodadas
 - Informações de cada partida:
   - Times, placar, data e horário
@@ -114,6 +116,7 @@
   - Scouts ao vivo
 
 ### 👤 Perfil
+
 - Informações do cartoleiro:
   - Nome, time, foto, escudo
   - Status PRO/Free
@@ -142,12 +145,14 @@
 ## 🛠 Tecnologias
 
 ### Core
+
 - **[React Native](https://reactnative.dev/)** `0.81.5` - Framework mobile
 - **[Expo](https://expo.dev/)** `54.0.0` - Plataforma de desenvolvimento
 - **[TypeScript](https://www.typescriptlang.org/)** `5.1.3` - Tipagem estática
 - **[Expo Router](https://expo.github.io/router/)** `6.0.0` - Roteamento file-based
 
 ### UI/UX
+
 - **[NativeWind](https://www.nativewind.dev/)** `2.0.11` - TailwindCSS para React Native
 - **[Nunito Font](https://fonts.google.com/specimen/Nunito)** - Fonte principal da aplicação
 - **[@expo/vector-icons](https://icons.expo.fyi/)** `15.0.3` - Biblioteca de ícones
@@ -155,24 +160,28 @@
 - **[react-native-svg](https://github.com/software-mansion/react-native-svg)** - Suporte a SVG
 
 ### Estado e Dados
+
 - **[@tanstack/react-query](https://tanstack.com/query)** `4.32.0` - Gerenciamento de estado assíncrono
 - **[Zustand](https://github.com/pmndrs/zustand)** `4.3.9` - Estado global
 - **[AsyncStorage](https://react-native-async-storage.github.io/async-storage/)** - Persistência local
 - **[Axios](https://axios-http.com/)** `1.4.0` - Cliente HTTP
 
 ### Navegação e Layout
+
 - **[@react-navigation/native](https://reactnavigation.org/)** `7.1.8` - Navegação
 - **[react-native-safe-area-context](https://github.com/th3rdwave/react-native-safe-area-context)** - Safe areas
 - **[react-native-screens](https://github.com/software-mansion/react-native-screens)** - Otimização de telas
 - **[@shopify/flash-list](https://shopify.github.io/flash-list/)** - Listas de alta performance
 
 ### Utilitários
+
 - **[date-fns](https://date-fns.org/)** `2.30.0` - Manipulação de datas
 - **[react-native-gesture-handler](https://docs.swmansion.com/react-native-gesture-handler/)** - Gestos
 - **[react-native-error-boundary](https://github.com/carloscuesta/react-native-error-boundary)** - Error boundaries
 - **[@react-native-community/netinfo](https://github.com/react-native-netinfo/react-native-netinfo)** - Status de rede
 
 ### Qualidade de Código
+
 - **[ESLint](https://eslint.org/)** - Linter
 - **[Prettier](https://prettier.io/)** - Formatador de código
 - **[Jest](https://jestjs.io/)** - Framework de testes
@@ -192,6 +201,7 @@ Antes de começar, certifique-se de ter instalado:
 - **[Git](https://git-scm.com/)**
 
 Para desenvolvimento mobile:
+
 - **[Android Studio](https://developer.android.com/studio)** (para Android)
 - **[Xcode](https://developer.apple.com/xcode/)** (para iOS - apenas macOS)
 
@@ -204,7 +214,7 @@ git clone https://github.com/clizioguedes/afc-parciais.git
 cd afc-parciais
 ```
 
-2. **Instale as dependências**
+1. **Instale as dependências**
 
 ```bash
 # Com Yarn (recomendado)
@@ -214,7 +224,7 @@ yarn install
 npm install
 ```
 
-3. **Inicie o projeto**
+1. **Inicie o projeto**
 
 ```bash
 # Modo desenvolvimento
@@ -224,7 +234,7 @@ yarn start
 npm start
 ```
 
-4. **Execute no dispositivo/emulador**
+1. **Execute no dispositivo/emulador**
 
 ```bash
 # Android
@@ -409,7 +419,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 
 function MyComponent() {
   const colorTheme = useThemeColor();
-  
+
   return (
     <View style={{
       backgroundColor: colorTheme === 'dark' ? '#1F2937' : '#FFFFFF'
@@ -434,68 +444,10 @@ function MyComponent() {
 
 ---
 
-## 🔌 API e Integração
-
-A aplicação consome a **API oficial do Cartola FC** (Globo.com):
-
-### Endpoints Principais
-
-```
-Base URL: https://api.cartola.globo.com
-```
-
-- `GET /auth/time` - Dados do time do usuário
-- `GET /atletas/mercado` - Mercado de jogadores
-- `GET /atletas/pontuados` - Pontuação dos jogadores
-- `GET /auth/ligas` - Ligas do usuário
-- `GET /auth/convites` - Convites de ligas
-- `GET /partidas/{rodada}` - Partidas da rodada
-- `POST /auth/time/salvar` - Salvar escalação
-
-### Autenticação
-
-```typescript
-// services/api.ts
-const api = axios.create({
-  baseURL: 'https://api.cartola.globo.com',
-  headers: {
-    'X-GLB-Token': token, // Token do Globo ID
-  }
-});
-```
-
----
-
-## 🧪 Testes
-
-### Executar Testes
-
-```bash
-# Todos os testes
-yarn test
-
-# Watch mode
-yarn test --watch
-
-# Com coverage
-yarn test --coverage
-```
-
-### Estrutura de Testes
-
-```
-__tests__/
-├── components/
-├── hooks/
-├── utils/
-└── integration/
-```
-
----
-
 ## 🎯 Roadmap
 
 ### Em Desenvolvimento
+
 - [ ] Notificações push para eventos importantes
 - [ ] Sistema de favoritos de jogadores
 - [ ] Comparação entre times de uma liga
@@ -503,6 +455,7 @@ __tests__/
 - [ ] Simulador de escalações
 
 ### Planejado
+
 - [ ] Widget para tela inicial (iOS/Android)
 - [ ] Apple Watch / WearOS support
 - [ ] Modo offline com cache
@@ -547,25 +500,6 @@ yarn start --clear
 
 ---
 
-## 🤝 Contribuindo
-
-Contribuições são bem-vindas! Para contribuir:
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
-
-### Diretrizes
-
-- Siga os padrões de código (ESLint + Prettier)
-- Escreva testes para novas funcionalidades
-- Atualize a documentação quando necessário
-- Use commits semânticos (feat, fix, docs, style, refactor, test, chore)
-
----
-
 ## 📄 Licença
 
 Este projeto é privado e não possui licença pública. Todos os direitos reservados.
@@ -590,19 +524,10 @@ Este projeto é privado e não possui licença pública. Todos os direitos reser
 
 ---
 
-## 📞 Suporte
-
-Para suporte e dúvidas:
-
-- 📧 Email: [seu-email@exemplo.com](mailto:seu-email@exemplo.com)
-- 🐛 Issues: [GitHub Issues](https://github.com/clizioguedes/afc-parciais/issues)
-
----
-
 <div align="center">
-  
+
   **Desenvolvido com ❤️ para cartoleiros apaixonados**
-  
+
   ⭐ Se este projeto te ajudou, considere dar uma estrela!
-  
+
 </div>
