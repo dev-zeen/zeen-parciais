@@ -9,7 +9,15 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Lato'],
+        sans: ['Nunito_400Regular'],
+        body: ['Nunito_400Regular'],
+        light: ['Nunito_300Light'],
+        regular: ['Nunito_400Regular'],
+        medium: ['Nunito_500Medium'],
+        semibold: ['Nunito_600SemiBold'],
+        bold: ['Nunito_700Bold'],
+        extrabold: ['Nunito_800ExtraBold'],
+        black: ['Nunito_900Black'],
       },
       colors: {
         folly: {
