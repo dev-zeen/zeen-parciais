@@ -1,17 +1,18 @@
-import { ActivityIndicator, useColorScheme } from 'react-native';
+import {  ActivityIndicator } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type LoadingScreenProps = {
   title?: string;
 };
 
 export function LoadingScreen({ title }: LoadingScreenProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <View
         className={`flex-1 items-center justify-center ${
           colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
@@ -19,8 +20,17 @@ export function LoadingScreen({ title }: LoadingScreenProps) {
         style={{
           gap: 8,
         }}>
-        <ActivityIndicator size="large" />
-        {title && <Text className="font-medium text-sm">{title}</Text>}
+        <ActivityIndicator 
+          size="large" 
+          color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'}
+        />
+        {title && (
+          <Text 
+            className="font-medium text-sm"
+            style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+            {title}
+          </Text>
+        )}
       </View>
     </SafeAreaViewContainer>
   );

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Animated, useColorScheme } from 'react-native';
+import {  Animated } from 'react-native';
 
 import { View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type SkeletonLoaderProps = {
   width?: number | string;
@@ -17,7 +18,7 @@ export function SkeletonLoader({
   className = '',
 }: SkeletonLoaderProps) {
   const pulseAnim = useRef(new Animated.Value(0.3)).current;
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   useEffect(() => {
     const animation = Animated.loop(

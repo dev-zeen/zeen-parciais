@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback } from 'react';
-import { Image, StyleSheet, TouchableOpacity, useColorScheme } from 'react-native';
+import {  Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
@@ -10,6 +10,7 @@ import { ClubByLeague } from '@/models/Leagues';
 import theme from '@/styles/theme';
 import { OrderByOptions } from '@/utils/leagues';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface ClubCardProps {
   score: number;
@@ -32,7 +33,7 @@ export function ClubCard({
   diffScore,
   variation,
 }: ClubCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   // const { partialValorization } = usePartialScore({
   //   teamId: club.time_id,
@@ -75,7 +76,7 @@ export function ClubCard({
               {!isMarketClose && orderBy !== 'rodada' ? (
                 <View className="flex-row items-center" style={containerMyTeamStyle}>
                   {renderVariationIcon(variation ?? 0)}
-                  <Text className="text-xs">
+                  <Text className="text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                     {variation ? variation : ''}
                   </Text>
                 </View>
@@ -104,7 +105,7 @@ export function ClubCard({
                   ...containerMyTeamStyle,
                   gap: 4,
                 }}>
-                <Text className="text-xs capitalize">{club.nome_cartola}</Text>
+                <Text className="text-xs capitalize" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{club.nome_cartola}</Text>
               </View>
               <View className="flex-row items-center" style={containerMyTeamStyle}>
                 <Text className="text-xs" numberOfLines={1}>
@@ -143,7 +144,7 @@ export function ClubCard({
 
               {isMarketClose && club.playersHavePlayed !== undefined ? (
                 <>
-                  <Text className="text-xs font-medium">{club.playersHavePlayed}/12</Text>
+                  <Text className="text-xs font-medium" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{club.playersHavePlayed}/12</Text>
                 </>
               ) : (
                 <></>
@@ -169,7 +170,7 @@ export function ClubCard({
                   {isMarketClose && club.playersHavePlayed !== undefined ? (
                     <>
                       <View className="rounded-full bg-gray-300 h-1 w-1 mx-1" />
-                      <Text className="text-xs font-medium">{club.playersHavePlayed}/12</Text>
+                      <Text className="text-xs font-medium" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{club.playersHavePlayed}/12</Text>
                     </>
                   ) : (
                     <></>

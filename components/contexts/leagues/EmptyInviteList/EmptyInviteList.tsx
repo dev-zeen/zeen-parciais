@@ -1,12 +1,13 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import noData from '@/assets/images/noData.png';
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function EmptyInviteList() {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <View

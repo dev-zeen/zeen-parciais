@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
+import { 
   ActivityIndicator,
   FlatList,
   ListRenderItemInfo,
-  RefreshControl,
-  useColorScheme,
-} from 'react-native';
+  RefreshControl } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
@@ -21,6 +19,7 @@ import { useGetMarket } from '@/queries/market.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { OrderByOptions, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface LeagueProps {
   league: LeagueModel;
@@ -28,7 +27,7 @@ interface LeagueProps {
 }
 
 export function League({ league, clubsByLeague }: LeagueProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
 

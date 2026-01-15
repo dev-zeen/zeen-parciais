@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { AlertsCard } from '@/components/contexts/home/AlertsCard';
@@ -17,13 +17,14 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const {
     marketStatus,

@@ -1,8 +1,9 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Modal, useColorScheme, View } from 'react-native';
+import {  Modal,  View  } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type BottomSheetProps = {
   children: React.ReactNode;
@@ -18,7 +19,7 @@ export type BottomSheetRef = {
 
 export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
   ({ children, onClose }, ref) => {
-    const colorTheme = useColorScheme();
+    const colorTheme = useThemeColor();
     const [visible, setVisible] = useState(false);
 
     useImperativeHandle(ref, () => ({

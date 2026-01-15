@@ -1,13 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import {  Pressable } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type QuickAction = {
   id: string;
@@ -20,7 +21,7 @@ type QuickAction = {
 
 export function QuickActionsGrid() {
   const router = useRouter();
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { myClub } = useMyClub();
   const { isMarketClose } = useMarketStatus();
 

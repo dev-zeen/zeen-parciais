@@ -1,12 +1,10 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import {
+import { 
   ActivityIndicator,
   FlatList,
   ListRenderItemInfo,
-  RefreshControl,
-  useColorScheme,
-} from 'react-native';
+  RefreshControl } from 'react-native';
 
 import { onGetEmptyPositions } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
@@ -32,6 +30,7 @@ import { useGetMatchs } from '@/queries/matches.query';
 import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { onBalancePrice } from '@/utils/team';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface IMatch extends Match {
   home?: number;
@@ -50,7 +49,7 @@ interface FullPlayerPartials extends FullPlayer {
 }
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -249,13 +248,12 @@ export default () => {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <View
-        className="mx-2 rounded-lg mb-2"
+        className="mx-2 mb-2"
         style={{
           gap: 8,
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          backgroundColor: 'transparent',
         }}>
         <MatchCard
           match={match as Match}
@@ -272,19 +270,30 @@ export default () => {
         />
       </View>
       <Tabs tabs={tabs} />
-      <View className={`flex-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
+      <View 
+        className="flex-1"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        }}>
         {isRendering ? (
-          <View className="flex-1 mx-2 items-center justify-center mt-2 rounded-lg">
-            <ActivityIndicator />
+          <View 
+            className="flex-1 mx-2 items-center justify-center mt-2 rounded-lg"
+            style={{
+              backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
+              borderWidth: 1,
+              borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+            }}>
+            <ActivityIndicator color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'} size="large" />
           </View>
         ) : (
           <FlatList
             style={{
               paddingHorizontal: 8,
+              backgroundColor: 'transparent',
             }}
             refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
             contentContainerStyle={{
-              gap: 4,
+              gap: 8,
               paddingVertical: 8,
             }}
             data={teamPlayers}

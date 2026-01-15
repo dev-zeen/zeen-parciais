@@ -1,15 +1,16 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { TouchableOpacity, useColorScheme } from 'react-native';
+import {  TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useInvites from '@/hooks/useInvites';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function InvitesAlert() {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { invites } = useInvites();
   const { invites: pointsInvites } = usePointsCompetitionInvites();

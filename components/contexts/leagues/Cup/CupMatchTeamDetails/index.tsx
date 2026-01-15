@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ListRenderItemInfo, RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import {  ListRenderItemInfo, RefreshControl, ScrollView } from 'react-native';
 
 import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
@@ -16,6 +16,7 @@ import { FullPlayer, PlayerStats } from '@/models/Stats';
 import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type CupMatchTeamDetailsProps = {
   match: CupMatch;
@@ -26,7 +27,7 @@ type CupMatchTeamDetailsProps = {
 export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDetailsProps) {
   const isFirstRender = useRef(true);
 
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 

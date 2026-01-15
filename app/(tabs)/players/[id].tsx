@@ -7,7 +7,7 @@ export default () => {
   const { id } = useLocalSearchParams();
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <View className="items-center justify-center flex-1">
         <Text> Página do jogador {id} </Text>
       </View>

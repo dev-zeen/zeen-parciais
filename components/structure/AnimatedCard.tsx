@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Pressable, useColorScheme, ViewStyle } from 'react-native';
+import {  Animated, Pressable,  ViewStyle  } from 'react-native';
 
 import { View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type AnimatedCardProps = {
   children: React.ReactNode;
@@ -24,7 +25,7 @@ export function AnimatedCard({
 }: AnimatedCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   useEffect(() => {
     Animated.parallel([

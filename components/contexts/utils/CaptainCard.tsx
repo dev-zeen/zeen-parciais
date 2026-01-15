@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
@@ -9,9 +9,10 @@ import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function CaptainCard() {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { isMarketClose } = useMarketStatus();
   const { captain } = useMyClub();
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
@@ -49,14 +50,20 @@ export function CaptainCard() {
                 }}>
                 <Feather name="alert-circle" size={16} color="#F59E0B" />
               </View>
-              <Text className="font-bold text-base">Seu Capitão</Text>
+              <Text 
+                className="font-bold text-base"
+                style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+                Seu Capitão
+              </Text>
             </View>
             <View
               className="px-3 py-1.5 rounded-full"
               style={{
                 backgroundColor: colorTheme === 'dark' ? '#FCD34D30' : '#FEF3C7',
               }}>
-              <Text className="text-yellow-600 dark:text-yellow-400 text-xs font-bold">
+              <Text 
+                className="text-xs font-bold"
+                style={{ color: colorTheme === 'dark' ? '#fcd34d' : '#d97706' }}>
                 x1.5
               </Text>
             </View>
@@ -78,10 +85,14 @@ export function CaptainCard() {
             </View>
 
             <View className="flex-1" style={{ gap: 2, backgroundColor: 'transparent' }}>
-              <Text className="font-semibold text-sm text-yellow-800 dark:text-yellow-300">
+              <Text 
+                className="font-semibold text-sm"
+                style={{ color: colorTheme === 'dark' ? '#fcd34d' : '#92400e' }}>
                 Capitão não definido
               </Text>
-              <Text className="text-xs text-yellow-700 dark:text-yellow-400">
+              <Text 
+                className="text-xs"
+                style={{ color: colorTheme === 'dark' ? '#fbbf24' : '#a16207' }}>
                 Selecione seu capitão ao escalar seu time
               </Text>
             </View>
@@ -112,7 +123,11 @@ export function CaptainCard() {
               <Feather name="award" size={16} color="#F59E0B" />
             </View>
             <View style={{ backgroundColor: 'transparent' }}>
-              <Text className="font-bold text-base">Seu Capitão</Text>
+              <Text 
+                className="font-bold text-base"
+                style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+                Seu Capitão
+              </Text>
             </View>
           </View>
           <View
@@ -120,7 +135,9 @@ export function CaptainCard() {
             style={{
               backgroundColor: colorTheme === 'dark' ? '#FCD34D30' : '#FEF3C7',
             }}>
-            <Text className="text-yellow-600 dark:text-yellow-400 text-xs font-bold">
+            <Text 
+              className="text-xs font-bold"
+              style={{ color: colorTheme === 'dark' ? '#fcd34d' : '#d97706' }}>
               x1.5
             </Text>
           </View>
@@ -154,7 +171,10 @@ export function CaptainCard() {
 
           {/* Details */}
           <View className="flex-1" style={{ gap: 8, backgroundColor: 'transparent' }}>
-            <Text className="font-bold" numberOfLines={1}>
+            <Text 
+              className="font-bold text-lg"
+              style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}
+              numberOfLines={1}>
               {captain.apelido}
             </Text>
             {!!club?.nome_fantasia && (
@@ -168,7 +188,10 @@ export function CaptainCard() {
                     alt={club.nome_fantasia}
                   />
                 )}
-                <Text className="text-xs font-semibold text-gray-600 dark:text-gray-400" numberOfLines={1}>
+                <Text 
+                  className="text-xs font-semibold"
+                  style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}
+                  numberOfLines={1}>
                   {club.nome_fantasia}
                 </Text>
               </View>
@@ -184,20 +207,29 @@ export function CaptainCard() {
                 </Text>
               </View>
               {captain.preco_num && (
-                <Text className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+                <Text 
+                  className="text-xs font-semibold"
+                  style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                   C$ {numberToString(captain.preco_num)}
                 </Text>
               )}
             </View>
             {isMarketClose && score !== undefined && (
               <View className="flex-row items-center" style={{ gap: 6, backgroundColor: 'transparent' }}>
-                <Text className="text-xs text-gray-500 dark:text-gray-400">
+                <Text 
+                  className="text-xs"
+                  style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                   {numberToString(score)} × 1.5 =
                 </Text>
                 <Text
-                  className={`text-base font-bold ${
-                    captainScore > 0 ? 'text-green-500' : captainScore < 0 ? 'text-red-500' : 'text-gray-500'
-                  }`}>
+                  className="text-base font-bold"
+                  style={{
+                    color: captainScore > 0 
+                      ? '#22c55e' 
+                      : captainScore < 0 
+                      ? '#ef4444' 
+                      : (colorTheme === 'dark' ? '#6b7280' : '#9ca3af')
+                  }}>
                   {numberToString(captainScore)} pts
                 </Text>
               </View>

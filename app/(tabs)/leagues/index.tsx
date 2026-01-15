@@ -1,14 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import {
+import { 
   ListRenderItemInfo,
   RefreshControl,
   SectionList,
   TouchableOpacity,
-  TextInput,
-  useColorScheme,
-} from 'react-native';
+  TextInput } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
@@ -28,6 +26,7 @@ import { useGetMyClub } from '@/queries/club.query';
 import { useGetPointsCompetitions } from '@/queries/competitions.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 import { PointsCompetitionCard } from '@/components/contexts/leagues/PointsCompetitionCard';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type SectionLeagueProps = {
   title: string;
@@ -36,7 +35,7 @@ type SectionLeagueProps = {
 };
 
 export default function () {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { isAutheticated } = useContext(AuthContext);
 

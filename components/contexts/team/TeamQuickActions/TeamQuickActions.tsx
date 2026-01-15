@@ -1,10 +1,11 @@
 import { Feather } from '@expo/vector-icons';
-import { Alert, Text, useColorScheme } from 'react-native';
+import {  Alert, Text } from 'react-native';
 import SelectDropdown from 'react-native-select-dropdown';
 
 import { listDefaultLineups } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
 import { Button } from '@/components/structure/Button';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type TeamQuickActionsProps = {
   onRefresh: () => void;
@@ -27,7 +28,7 @@ export function TeamQuickActions({
   showSaveTeam = false,
   disableSaveTeam = false,
 }: TeamQuickActionsProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const handleClearAll = () => {
     Alert.alert(

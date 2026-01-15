@@ -1,4 +1,4 @@
-import { Image, ScrollView, useColorScheme } from 'react-native';
+import {  Image, ScrollView } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 
 import maintenanceImage from '@/assets/images/manutencao.png';
@@ -7,13 +7,14 @@ import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { useGetMarketStatus } from '@/queries/market.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type MaintenanceMarketProps = {
   hasHeader?: boolean;
 };
 
 export function MaintenanceMarket({ hasHeader }: MaintenanceMarketProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { refetch, isRefetching } = useGetMarketStatus();
 
@@ -48,7 +49,7 @@ export function MaintenanceMarket({ hasHeader }: MaintenanceMarketProps) {
           </View>
         </View>
       ) : (
-        <SafeAreaViewContainer>
+        <SafeAreaViewContainer edges={['top']}>
           <View
             className="mx-2 rounded-lg"
             style={{

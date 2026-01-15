@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
+import {  FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
@@ -10,9 +10,10 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { Match } from '@/models/Matches';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetMatchs } from '@/queries/matches.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { allowRequest } = useMarketStatus();
 
@@ -47,7 +48,7 @@ export default () => {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <View
         className={`mx-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
         style={{

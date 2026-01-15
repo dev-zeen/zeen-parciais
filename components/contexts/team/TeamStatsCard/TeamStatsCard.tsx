@@ -1,7 +1,7 @@
-import { useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type TeamStatsCardProps = {
   patrimonio: number;
@@ -18,7 +18,7 @@ export function TeamStatsCard({
   reservesCount,
   totalReserves,
 }: TeamStatsCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <View

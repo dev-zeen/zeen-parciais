@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback } from 'react';
-import { Image, ScrollView, useColorScheme } from 'react-native';
+import {  Image, ScrollView } from 'react-native';
 
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
@@ -14,6 +14,7 @@ import { useGetMarket } from '@/queries/market.query';
 import { useGetPlayerHistory, useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type TeamPlayerCardProps = {
   player: LineupPlayer;
@@ -22,7 +23,7 @@ type TeamPlayerCardProps = {
 };
 
 export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const captain = useTeamLineupStore((state) => state.captain);
   const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);

@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import type { PointsCompetitionListItem } from '@/models/Competition';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type Props = {
   competition: PointsCompetitionListItem;
@@ -11,7 +12,7 @@ type Props = {
 };
 
 export function PointsCompetitionCard({ competition, myTeamId }: Props) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const privacyLabel = competition.privacidade === 'A' ? 'Aberta' : 'Fechada';
   const meta = `${privacyLabel} · ${competition.quantidade_participantes} / ${competition.quantidade_times} times`;

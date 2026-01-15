@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import { TouchableOpacity, useColorScheme } from 'react-native';
+import {  TouchableOpacity } from 'react-native';
 
 import { Text } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface ButtonProps {
   onPress?: () => void;
@@ -23,7 +24,7 @@ export function Button({
   onlyIcon,
   disabled,
 }: ButtonProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const variants = {
     primary: 'bg-blue-500',

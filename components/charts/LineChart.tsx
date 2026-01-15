@@ -1,8 +1,9 @@
 import { LineChart as RNLineChart } from 'react-native-chart-kit';
-import { Dimensions, useColorScheme, LayoutChangeEvent } from 'react-native';
+import {  Dimensions,  LayoutChangeEvent  } from 'react-native';
 import { useState } from 'react';
 
 import { View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type LineChartProps = {
   data: number[];
@@ -13,7 +14,7 @@ type LineChartProps = {
 };
 
 export function LineChart({ data, labels, height = 100, showGrid = false, width }: LineChartProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const screenWidth = Dimensions.get('window').width;
   const [containerWidth, setContainerWidth] = useState(width || screenWidth - 64);
 

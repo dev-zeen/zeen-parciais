@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback } from 'react';
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import { PlayerClub } from '@/app/(tabs)/leagues/club/[id]';
 import captainImage from '@/assets/images/letter-c.png';
@@ -13,6 +13,7 @@ import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ClubPlayerCardProps = {
   player: PlayerClub;
@@ -34,7 +35,7 @@ export function ClubPlayerCard({
   isCaptain,
   isReplacePlayer,
 }: ClubPlayerCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
@@ -91,9 +92,9 @@ export function ClubPlayerCard({
             </View>
 
             <View className="flex-row items-center gap-x-1">
-              <Text className="text-xs capitalize">{positions?.[player.posicao_id]?.nome}</Text>
+              <Text className="text-xs capitalize" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{positions?.[player.posicao_id]?.nome}</Text>
               <View className="rounded-full bg-gray-300 h-1 w-1" />
-              <Text className="text-xs capitalize">{market?.clubes[player.clube_id]?.nome}</Text>
+              <Text className="text-xs capitalize" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{market?.clubes[player.clube_id]?.nome}</Text>
             </View>
           </View>
 

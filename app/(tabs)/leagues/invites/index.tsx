@@ -1,13 +1,11 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import {
+import { 
   ListRenderItemInfo,
   RefreshControl,
   SectionList,
-  TouchableOpacity,
-  useColorScheme,
-} from 'react-native';
+  TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
@@ -20,6 +18,7 @@ import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import type { PointsCompetitionInvite } from '@/models/Competition';
 import { Invite } from '@/models/Invites';
 import { useGetLeagues } from '@/queries/leagues.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type InviteRow =
   | { kind: 'league'; invite: Invite }
@@ -31,7 +30,7 @@ type InviteSection = {
 };
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const {
     invites: leagueInvites,

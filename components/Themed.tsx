@@ -7,10 +7,10 @@ import {
   Text as DefaultText,
   TouchableOpacity as DefaultTouchableOpacity,
   View as DefaultView,
-  useColorScheme,
 } from 'react-native';
 
 import Colors from '@/constants/Colors';
+import { useThemeColor as useAppThemeColor } from '@/hooks/useThemeColor';
 
 type ThemeProps = {
   lightColor?: string;
@@ -25,7 +25,7 @@ export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme() ?? 'light';
+  const theme = useAppThemeColor();
   const colorFromProps = props[theme];
 
   if (colorFromProps) {

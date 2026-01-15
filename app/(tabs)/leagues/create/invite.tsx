@@ -1,15 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import {
+import { 
   Alert,
   FlatList,
   Image,
   ListRenderItemInfo,
   TextInput,
-  TouchableOpacity,
-  useColorScheme,
-} from 'react-native';
+  TouchableOpacity } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { Text, View } from '@/components/Themed';
@@ -25,11 +23,12 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { invitePointsCompetition } from '@/queries/competitions.mutations';
 import { inviteLeague } from '@/queries/leagues.mutations';
 import { SearchTeamItem, useSearchTeams } from '@/queries/teams.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type InviteType = 'classic' | 'matamata' | 'points';
 
 export default function () {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { isAutheticated } = useContext(AuthContext);
   const { allowRequest } = useMarketStatus();
   const params = useLocalSearchParams();

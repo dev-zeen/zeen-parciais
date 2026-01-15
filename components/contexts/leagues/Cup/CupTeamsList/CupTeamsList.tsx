@@ -1,17 +1,18 @@
 import { useCallback } from 'react';
-import { FlatList, Image, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
+import {  FlatList, Image, ListRenderItemInfo, RefreshControl } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useLeague, { TeamCup } from '@/hooks/useLeague';
 import { League } from '@/models/Leagues';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type CupTeamsListProps = {
   cup: League;
 };
 
 export function CupTeamsList({ cup }: CupTeamsListProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const teamDefaultBackground = colorTheme === 'dark' ? '#047857' : '#dbeafe';
   const pedingInviteBackground = colorTheme === 'dark' ? '#ca8a04' : '#fef08a';

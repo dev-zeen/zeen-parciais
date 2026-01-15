@@ -1,12 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import {  Pressable } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullPlayer } from '@/models/Stats';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type Alert = {
   id: string;
@@ -23,7 +24,7 @@ type AlertsCardProps = {
 
 export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { marketStatus, currentRoundInfo } = useMarketStatus();
 
   const alerts: Alert[] = useMemo(() => {

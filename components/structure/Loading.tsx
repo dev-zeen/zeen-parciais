@@ -1,13 +1,14 @@
-import { ActivityIndicator, useColorScheme } from 'react-native';
+import {  ActivityIndicator } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type LoadingProps = {
   title?: string;
 };
 
 export function Loading({ title }: LoadingProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <View
@@ -17,8 +18,16 @@ export function Loading({ title }: LoadingProps) {
       style={{
         gap: 8,
       }}>
-      <ActivityIndicator />
-      {title && <Text className="font-medium text-sm">{title}</Text>}
+      <ActivityIndicator 
+        color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'}
+      />
+      {title && (
+        <Text 
+          className="font-medium text-sm"
+          style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+          {title}
+        </Text>
+      )}
     </View>
   );
 }

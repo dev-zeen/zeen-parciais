@@ -1,7 +1,6 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMemo } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
@@ -9,10 +8,11 @@ import { Loading } from '@/components/structure/Loading';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function MarketStatusCard() {
   const { marketStatus, isBallRolling, currentRoundInfo } = useMarketStatus();
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const MARKET_STATUS_COLOR_NAMED = {
     1: 'bg-green-500',

@@ -2,7 +2,7 @@ import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCallback, useMemo } from 'react';
-import { RefreshControl, useColorScheme } from 'react-native';
+import {  RefreshControl } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
@@ -16,13 +16,14 @@ import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetAppreciations } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface CupProps {
   league: League;
 }
 
 export function Cup({ league: cup }: CupProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 

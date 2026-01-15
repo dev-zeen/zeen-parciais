@@ -1,6 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
@@ -15,9 +14,10 @@ import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
 import { PlayerStats } from '@/models/Stats';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { slug, chaveId } = useLocalSearchParams();
   const leagueSlug = typeof slug === 'string' ? slug : '';

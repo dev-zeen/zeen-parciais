@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
-import { FlatList, ListRenderItemInfo, useColorScheme } from 'react-native';
+import {  FlatList, ListRenderItemInfo } from 'react-native';
 
 import { MatchCardFilter } from './MatchCardFilter';
 
@@ -11,6 +11,7 @@ import { Market } from '@/models/Market';
 import { Match } from '@/models/Matches';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetMatchs } from '@/queries/matches.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type FilterMarketByTeamProps = {
   applyFilter: (teams: number[]) => void;
@@ -25,7 +26,7 @@ export function FilterMarketByTeam({
   defaultFilters,
   selectedTeams,
 }: FilterMarketByTeamProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { data: market } = useGetMarket();
 
   const { data: matches } = useGetMatchs();
@@ -77,29 +78,47 @@ export function FilterMarketByTeam({
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <View
-          className="rounded-lg"
+          className="rounded-lg p-4"
           style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
           }}>
           <View
-            className="items-center justify-between flex-row p-2 rounded-lg"
+            className="items-center justify-between flex-row"
             style={{
               gap: 16,
+              backgroundColor: 'transparent',
             }}>
-            <Text className="font-semibold text-lg">Filtrar Por Time</Text>
+            <Text 
+              className="font-semibold text-lg"
+              style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+              Filtrar Por Time
+            </Text>
 
             <TouchableOpacity
               activeOpacity={0.6}
               onPress={handleClose}
-              className="p-2 rounded-full border border-red-400 bg-red-300">
-              <Feather name="x" color="#525252" size={24} />
+              className="p-2 rounded-full"
+              style={{
+                backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#dc2626' : '#fca5a5',
+              }}>
+              <Feather name="x" size={20} color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} />
             </TouchableOpacity>
           </View>
         </View>
 
-        <View className="flex-row px-8 py-3 rounded-lg items-center justify-evenly">
-          <Text>Mandantes</Text>
-          <Text>Visitantes</Text>
+        <View 
+          className="flex-row px-8 py-3 rounded-lg items-center justify-evenly"
+          style={{
+            backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+          }}>
+          <Text style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>Mandantes</Text>
+          <Text style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>Visitantes</Text>
         </View>
       </View>
 
@@ -119,31 +138,42 @@ export function FilterMarketByTeam({
       />
 
       <View
-        className="flex-row items-center justify-center pt-4"
+        className="flex-row items-center justify-center pt-4 pb-2"
         style={{
-          gap: 16,
+          gap: 12,
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <TouchableOpacity
           onPress={defaultFilters}
-          activeOpacity={0.6}
-          className="w-32 mx-2 p-4 rounded-lg items-center justify-center bg-orange-400"
+          activeOpacity={0.7}
+          className="flex-1 mx-2 p-4 rounded-lg items-center justify-center"
           style={{
-            gap: 16,
+            backgroundColor: colorTheme === 'dark' ? '#92400e' : '#fed7aa',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#f59e0b' : '#fb923c',
           }}>
-          <Text className="font-semibold text-sm text-white">Limpar Filtros</Text>
+          <Text 
+            className="font-semibold text-sm"
+            style={{ color: colorTheme === 'dark' ? '#fef3c7' : '#78350f' }}>
+            Limpar Filtros
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           disabled={selectedsTeams.length === 0}
           onPress={handlePressFilter}
-          activeOpacity={0.6}
-          className={`w-32 mx-2 p-4 rounded-lg items-center justify-center  ${
-            selectedsTeams.length === 0 ? 'bg-gray-300' : 'bg-blue-500'
-          }`}
+          activeOpacity={0.7}
+          className="flex-1 mx-2 p-4 rounded-lg items-center justify-center"
           style={{
-            gap: 16,
+            backgroundColor: selectedsTeams.length === 0 
+              ? (colorTheme === 'dark' ? '#374151' : '#e5e7eb')
+              : (colorTheme === 'dark' ? '#1e40af' : '#3b82f6'),
+            borderWidth: 1,
+            borderColor: selectedsTeams.length === 0
+              ? (colorTheme === 'dark' ? '#4b5563' : '#d1d5db')
+              : (colorTheme === 'dark' ? '#3b82f6' : '#2563eb'),
+            opacity: selectedsTeams.length === 0 ? 0.5 : 1,
           }}>
           <Text className="font-semibold text-sm text-white">Filtrar</Text>
         </TouchableOpacity>

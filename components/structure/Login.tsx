@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Image, Modal, Platform, useColorScheme } from 'react-native';
+import {  Image, Modal, Platform } from 'react-native';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import enterImage from '@/assets/images/auth.png';
@@ -11,6 +11,7 @@ import Colors from '@/constants/Colors';
 import { EXPO_PUBLIC_AUTH_URL } from '@/constants/Endpoits';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { AuthContext } from '@/contexts/Auth.context';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { fetchGloboidClientSettings } from '@/lib/core/auth';
 
 const INJECT_AUTH_LOGIN = `
@@ -100,7 +101,7 @@ type LoginProps = {
 };
 
 export function Login({ title }: LoginProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { handleSuccessAuth } = useContext(AuthContext);
 
@@ -213,7 +214,7 @@ export function Login({ title }: LoginProps) {
       </View>
 
       {showModalAuth && (
-        <SafeAreaViewContainer>
+        <SafeAreaViewContainer edges={['top']}>
           <View className="items-center justify-center m-32">
             <Modal
               animationType="slide"

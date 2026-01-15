@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, StyleSheet, useColorScheme } from 'react-native';
+import {  Image, StyleSheet } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { Loading } from '@/components/structure/Loading';
@@ -10,6 +10,7 @@ import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
 import { FullPlayer, IPositions } from '@/models/Stats';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type MarketPlayerCardProps = {
   player: FullPlayer;
@@ -32,7 +33,7 @@ export function MarketPlayerCard({
   isButtonDisabled,
   isSellPlayer,
 }: MarketPlayerCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { isMarketClose } = useMarketStatus();
 
@@ -46,11 +47,18 @@ export function MarketPlayerCard({
   }
 
   return (
-    <View className="rounded-lg flex-row items-center justify-between p-1.5">
+    <View 
+      className="rounded-lg flex-row items-center justify-between p-3"
+      style={{
+        backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+        borderWidth: 1,
+        borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+      }}>
       <View
         className="flex-row items-center"
         style={{
-          gap: 8,
+          gap: 10,
+          backgroundColor: 'transparent',
         }}>
         <Image
           source={{
@@ -84,38 +92,63 @@ export function MarketPlayerCard({
           className="items-start justify-center"
           style={{
             gap: 6,
+            backgroundColor: 'transparent',
           }}>
           <View
             className="flex-row items-center"
             style={{
               gap: 4,
+              backgroundColor: 'transparent',
             }}>
-            <Text className="flex-row text-base font-bold">{player.apelido_abreviado}</Text>
-            <View className="rounded-full bg-gray-300 h-1 w-1" />
-            <Text className="flex-row text-xs font-medium">{player.jogos_num} Jogos</Text>
+            <Text 
+              className="flex-row text-base font-bold"
+              style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+              {player.apelido_abreviado}
+            </Text>
+            <View 
+              className="rounded-full h-1 w-1"
+              style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }} 
+            />
+            <Text 
+              className="flex-row text-xs font-medium" 
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              {player.jogos_num} Jogos
+            </Text>
           </View>
 
           <View
             className="flex-row items-center justify-start"
             style={{
               gap: 4,
+              backgroundColor: 'transparent',
             }}>
-            <Text className="font-medium uppercase text-xs">
+            <Text 
+              className="font-medium uppercase text-xs" 
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
               {positions?.[player.posicao_id].abreviacao}
             </Text>
 
-            <View className="rounded-full bg-gray-300 h-1 w-1" />
+            <View 
+              className="rounded-full h-1 w-1"
+              style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }} 
+            />
 
-            <Text className="font-medium uppercase text-xs">
+            <Text 
+              className="font-medium uppercase text-xs" 
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
               {market?.clubes[player.clube_id].abreviacao}
             </Text>
 
-            <View className="rounded-full bg-gray-300 h-1 w-1" />
+            <View 
+              className="rounded-full h-1 w-1"
+              style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }} 
+            />
 
             <View
               className="flex-row items-center"
               style={{
                 gap: 2,
+                backgroundColor: 'transparent',
               }}>
               <Image
                 source={{
@@ -128,7 +161,7 @@ export function MarketPlayerCard({
               <Feather
                 name="x"
                 size={12}
-                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+                color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
               />
 
               <Image
@@ -145,9 +178,16 @@ export function MarketPlayerCard({
             className="flex-row items-start justify-start"
             style={{
               gap: 8,
+              backgroundColor: 'transparent',
             }}>
-            <View className="items-center justify-center">
-              <Text className="text-xs">Média</Text>
+            <View 
+              className="items-center justify-center"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text 
+                className="text-xs" 
+                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+                Média
+              </Text>
               <Text
                 className="font-bold text-xs"
                 style={{
@@ -157,8 +197,14 @@ export function MarketPlayerCard({
               </Text>
             </View>
 
-            <View className="items-center justify-center">
-              <Text className="text-xs">Última</Text>
+            <View 
+              className="items-center justify-center"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text 
+                className="text-xs" 
+                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+                Última
+              </Text>
               <Text
                 className="font-bold text-xs"
                 style={{
@@ -168,9 +214,17 @@ export function MarketPlayerCard({
               </Text>
             </View>
 
-            <View className="items-center justify-center">
-              <Text className="text-xs">Min. Val.</Text>
-              <Text className="font-bold text-xs">
+            <View 
+              className="items-center justify-center"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text 
+                className="text-xs" 
+                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+                Min. Val.
+              </Text>
+              <Text 
+                className="font-bold text-xs" 
+                style={{ color: colorTheme === 'dark' ? '#60a5fa' : '#3b82f6' }}>
                 {player.minimo_para_valorizar === null
                   ? '-'
                   : numberToString(player.minimo_para_valorizar)}
@@ -239,8 +293,8 @@ export function MarketPlayerCard({
 
 const styles = StyleSheet.create({
   playerButton: {
-    width: 100,
-    height: 75,
+    width: 90,
+    height: 70,
     borderRadius: 8,
     paddingVertical: 8,
     flexDirection: 'column',
@@ -248,12 +302,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   purchasePlayerButtonDisabled: {
-    backgroundColor: '#9ca3af',
+    backgroundColor: '#6b7280',
   },
   purchasePlayerButtonActived: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#2563eb',
   },
   sellPlayerButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: '#dc2626',
   },
 });

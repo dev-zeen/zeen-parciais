@@ -1,12 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { ScrollView, useColorScheme } from 'react-native';
+import {  ScrollView } from 'react-native';
 
 import { BarChart } from '@/components/charts/BarChart';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Text, View } from '@/components/Themed';
 import { PlayerHistoryStats } from '@/models/Player';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type PlayerStatsViewProps = {
   stats: PlayerHistoryStats | undefined;
@@ -14,7 +15,7 @@ type PlayerStatsViewProps = {
 };
 
 export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const processedStats = useMemo(() => {
     if (!stats || stats.length === 0) {

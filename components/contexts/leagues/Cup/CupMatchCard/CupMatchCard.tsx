@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { TouchableOpacity, useColorScheme } from 'react-native';
+import {  TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { TeamCupMatch } from '@/components/contexts/leagues/Cup/TeamCupMatch/TeamCupMatch';
@@ -10,6 +10,7 @@ import Colors from '@/constants/Colors';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface CupMatchProps {
   match: CupMatchModel;
@@ -37,7 +38,7 @@ export function CupMatchCard({
   isMarketClose,
   partialsByTeamId,
 }: CupMatchProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const homeTeamId = match.time_mandante_id ?? 0;
   const awayTeamId = match.time_visitante_id ?? 0;

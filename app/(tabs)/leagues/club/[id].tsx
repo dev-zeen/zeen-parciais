@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import {  RefreshControl, ScrollView } from 'react-native';
 
 import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
@@ -21,6 +21,7 @@ import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 const TYPE_VIEW = {
   FIELD: 'FIELD',
@@ -34,7 +35,7 @@ export interface PlayerClub extends FullPlayer {
 }
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { isAutheticated } = useContext(AuthContext);
 

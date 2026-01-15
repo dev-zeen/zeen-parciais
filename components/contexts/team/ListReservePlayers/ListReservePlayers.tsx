@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Alert, useColorScheme } from 'react-native';
+import {  Alert } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
@@ -9,6 +9,7 @@ import usePlayerStats from '@/hooks/usePlayerStats';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { onGetPlayerLowestPrice } from '@/utils/team';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
@@ -25,7 +26,7 @@ export function ListReservePlayers({
   round,
   onOpenMarket,
 }: ListReservePlayersProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const alertToStartingsPlayerPositionNotFilled = useCallback(
     () =>
       Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [

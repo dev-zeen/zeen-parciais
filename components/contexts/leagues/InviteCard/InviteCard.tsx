@@ -1,8 +1,9 @@
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Button } from '@/components/structure/Button';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type InviteCardProps = {
   title?: string;
@@ -14,7 +15,7 @@ type InviteCardProps = {
 };
 
 export function InviteCard({ title, subtitle, imageUrl, teamName, onAccept, onDecline }: InviteCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <AnimatedCard variant="flat" className="p-0">

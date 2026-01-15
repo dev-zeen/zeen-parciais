@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, useColorScheme } from 'react-native';
+import {  Image, Pressable, ScrollView } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
@@ -9,10 +9,11 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { TopPlayer } from '@/models/Player';
 import { useGetTopPlayers, useGetTopReservePlayers } from '@/queries/players.query';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function PlayerHighlightsCarousel() {
   const router = useRouter();
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { allowRequest } = useMarketStatus();
   const { data: topPlayers } = useGetTopPlayers(allowRequest);
   const { data: topReservePlayers } = useGetTopReservePlayers(allowRequest);
@@ -93,7 +94,7 @@ export function PlayerHighlightsCarousel() {
 }
 
 function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: number }) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <Pressable>

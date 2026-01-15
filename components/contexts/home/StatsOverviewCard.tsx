@@ -1,6 +1,5 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { LineChart } from '@/components/charts/LineChart';
@@ -9,9 +8,10 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function StatsOverviewCard() {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { myClub, historyClub } = useMyClub();
   const { isMarketClose } = useMarketStatus();
 

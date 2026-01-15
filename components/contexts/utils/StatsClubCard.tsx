@@ -1,6 +1,5 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
@@ -8,6 +7,7 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import usePartialScore from '@/hooks/usePartialScore';
 import { FullClubInfo } from '@/models/Club';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type StatsClubCardProps = {
   team: FullClubInfo;
@@ -24,7 +24,7 @@ type StatItem = {
 };
 
 export function StatsClubCard({ team, round }: StatsClubCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { isMarketClose, marketStatus } = useMarketStatus();
 

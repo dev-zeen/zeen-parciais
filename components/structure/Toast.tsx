@@ -1,8 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
-import { Animated, Platform, StyleSheet, useColorScheme } from 'react-native';
+import {  Animated, Platform, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ToastProps = {
   visible: boolean;
@@ -13,7 +14,7 @@ type ToastProps = {
 };
 
 export function Toast({ visible, message, type = 'success', onHide, duration = 3000 }: ToastProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const translateY = useRef(new Animated.Value(-100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 

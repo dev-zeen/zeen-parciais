@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { LeagueUserDetails } from '@/models/Leagues';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface CardLeagueStatsProps {
   league: LeagueUserDetails;
@@ -18,7 +19,7 @@ export const typeLeague = {
 };
 
 export function LeagueCard({ league, myTeamId }: CardLeagueStatsProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const privacyLabel = typeLeague[league.tipo];
   const participantsInfo = league.mata_mata && league.quantidade_times

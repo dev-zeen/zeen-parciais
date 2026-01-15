@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
-import { Image, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
+import {  Image, ScrollView, TouchableOpacity } from 'react-native';
 
 import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
 import { Text, View } from '@/components/Themed';
@@ -13,6 +13,7 @@ import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 import { onRemovePlayerFromLineup, onRemovePlayerFromSellPlayers } from '@/utils/team';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ListPlayersSaleProps = {
   players: PlayersToSell[];
@@ -25,7 +26,7 @@ export function ListPlayersSale({
   handleClose,
   handleCloseSuccessSellPlayers,
 }: ListPlayersSaleProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: positions } = useGetPositions();
 
@@ -139,7 +140,7 @@ export function ListPlayersSale({
                                   </Text>
 
                                   <View className="flex-row" style={{ gap: 4 }}>
-                                    <Text className="font-medium text-xs">
+                                    <Text className="font-medium text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                                       {
                                         OBJECT_STATUS_MARKET_PLAYER[(player as any)?.status_id]
                                           ?.name
@@ -187,7 +188,7 @@ export function ListPlayersSale({
                                           }}>
                                           Média
                                         </Text>
-                                        <Text className="font-semibold text-xs">
+                                        <Text className="font-semibold text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                                           {numberToString(player?.media_num)}
                                         </Text>
                                       </View>
@@ -200,7 +201,7 @@ export function ListPlayersSale({
                                           }}>
                                           Última
                                         </Text>
-                                        <Text className="font-semibold text-xs">
+                                        <Text className="font-semibold text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                                           {numberToString(player?.pontos_num)}
                                         </Text>
                                       </View>
@@ -213,7 +214,7 @@ export function ListPlayersSale({
                                           }}>
                                           Min P/ Val
                                         </Text>
-                                        <Text className="font-semibold text-xs">
+                                        <Text className="font-semibold text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                                           {numberToString(player?.minimo_para_valorizar)}
                                         </Text>
                                       </View>

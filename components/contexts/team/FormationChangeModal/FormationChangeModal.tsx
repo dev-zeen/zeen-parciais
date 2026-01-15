@@ -1,9 +1,10 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, Modal, ScrollView, useColorScheme } from 'react-native';
+import {  Image, Modal, ScrollView } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { Positions } from '@/constants/Formations';
 import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type FormationChangeModalProps = {
   visible: boolean;
@@ -42,7 +43,7 @@ export function FormationChangeModal({
   onConfirm,
   onCancel,
 }: FormationChangeModalProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>

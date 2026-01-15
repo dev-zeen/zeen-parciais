@@ -1,18 +1,19 @@
 import { Feather } from '@expo/vector-icons';
 import { Link } from 'expo-router';
-import { Image, Pressable, useColorScheme } from 'react-native';
+import {  Image, Pressable } from 'react-native';
 
 import proImage from '@/assets/images/pro.png';
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { FullClubInfo } from '@/models/Club';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type TeamSummaryCardProps = {
   team: FullClubInfo;
 };
 
 export function TeamSummaryCard({ team }: TeamSummaryCardProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   return (
     <Link href="/(tabs)/profile" asChild>

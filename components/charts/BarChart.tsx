@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { LayoutChangeEvent, TouchableOpacity, useColorScheme } from 'react-native';
+import {  LayoutChangeEvent, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type BarChartProps = {
   data: number[];
@@ -11,7 +12,7 @@ type BarChartProps = {
 };
 
 export function BarChart({ data, labels, height = 180 }: BarChartProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -52,7 +53,7 @@ export function BarChart({ data, labels, height = 180 }: BarChartProps) {
             shadowRadius: 3.84,
             elevation: 5,
           }}>
-          <Text className="text-xs font-medium text-gray-500 text-center">
+          <Text className="text-xs font-medium text-gray-500 text-center" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
             {chartLabels[selectedIndex]}
           </Text>
           <Text className="text-base font-bold text-blue-600 text-center">

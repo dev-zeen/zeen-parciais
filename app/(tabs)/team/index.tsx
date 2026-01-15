@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import {  RefreshControl, ScrollView } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 import type { BottomSheetRef } from '@/components/structure/BottomSheet';
@@ -40,9 +40,10 @@ import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/c
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { onGetIsLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const isFirstRender = useRef(true);
   const marketSheetRef = useRef<BottomSheetRef>(null);
   const tabBarHeight = useBottomTabBarHeight();

@@ -2,7 +2,6 @@ import { Feather } from '@expo/vector-icons';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useColorScheme } from 'react-native';
 
 import { onGetEmptyPositions } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
@@ -23,6 +22,7 @@ import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { filterAndSortPlayersFromMarket } from '@/utils/market';
 import { numberToString } from '@/utils/parseTo';
 import { onBalancePrice } from '@/utils/team';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type MarketProps = {
   position?: LineupPosition;
@@ -39,7 +39,7 @@ export default ({
 }: MarketProps) => {
   const isFirstRender = useRef(true);
 
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: myClub } = useGetMyClub();
 
@@ -176,20 +176,39 @@ export default ({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-      <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
+    <View 
+      className="flex-1 px-2"
+      style={{
+        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+      }}>
+      <View 
+        className="justify-between items-center flex-row rounded-lg mb-2 py-3 px-4"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+          borderWidth: 1,
+          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+        }}>
         <View
           className="flex-row items-center"
           style={{
             gap: 16,
+            backgroundColor: 'transparent',
           }}>
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">Valor atual</Text>
+          <View className="justify-center items-center gap-1" style={{ backgroundColor: 'transparent' }}>
+            <Text 
+              className="text-xs"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              Valor atual
+            </Text>
             <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
           </View>
 
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">Restante</Text>
+          <View className="justify-center items-center gap-1" style={{ backgroundColor: 'transparent' }}>
+            <Text 
+              className="text-xs"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              Restante
+            </Text>
             <Text className="font-bold text-xs text-green-500">
               {numberToString(currentBalancePrice)}
             </Text>
@@ -199,8 +218,13 @@ export default ({
         <TouchableOpacity
           activeOpacity={0.6}
           onPress={handleCloseMarket}
-          className="p-2 rounded-full border border-red-400 bg-red-300">
-          <Feather name="x" color="#525252" size={24} />
+          className="p-2 rounded-full"
+          style={{
+            backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#dc2626' : '#fca5a5',
+          }}>
+          <Feather name="x" size={20} color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} />
         </TouchableOpacity>
       </View>
 
@@ -217,9 +241,15 @@ export default ({
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         ItemSeparatorComponent={() => (
-          <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+          <View 
+            style={{ 
+              height: 8,
+              backgroundColor: 'transparent',
+            }} 
+          />
         )}
         contentContainerStyle={{
+          paddingVertical: 8,
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}

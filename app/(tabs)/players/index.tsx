@@ -1,12 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
+import { 
   FlatList,
   ListRenderItemInfo,
   RefreshControl,
-  TextInput,
-  useColorScheme,
-} from 'react-native';
+  TextInput } from 'react-native';
 
 import { onGetPlayersPlayed } from '@/app/(tabs)/players/_players.helper';
 import { Text, View } from '@/components/Themed';
@@ -23,13 +21,14 @@ import { Player, PlayerStats } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
 import { GRAY_OPACITY } from '@/styles/colors';
 import { normalizeQuery } from '@/utils/format';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export interface ScorePlayersProps extends Player {
   valorization?: number;
 }
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -126,7 +125,7 @@ export default () => {
 
   if (!playerStats) {
     return (
-      <SafeAreaViewContainer>
+      <SafeAreaViewContainer edges={['top']}>
         <View className="mx-2 rounded-lg">
           <MarketStatusCard />
         </View>
@@ -145,7 +144,7 @@ export default () => {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <View
         className="flex-1 justify-center rounded-lg mx-2"
         style={{

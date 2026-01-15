@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useContext, useMemo } from 'react';
-import { FlatList, Image, ListRenderItemInfo, TouchableOpacity, useColorScheme } from 'react-native';
+import {  FlatList, Image, ListRenderItemInfo, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
@@ -11,9 +11,10 @@ import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPointsCompetitionBySlug } from '@/queries/competitions.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function () {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
   const { isAutheticated } = useContext(AuthContext);
   const { allowRequest } = useMarketStatus();
   const params = useLocalSearchParams();

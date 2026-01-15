@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
-import { FlatList, ListRenderItemInfo, RefreshControl, useColorScheme } from 'react-native';
+import {  FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
@@ -10,9 +10,10 @@ import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { Invite } from '@/models/Invites';
 import { useGetLeague } from '@/queries/leagues.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { id: slug } = useLocalSearchParams();
 

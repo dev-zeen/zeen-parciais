@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { Image, TouchableOpacity, useColorScheme } from 'react-native';
+import {  Image, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
@@ -13,6 +13,7 @@ import { FullPlayer } from '@/models/Stats';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetPartialScoreTeamByMatch } from '@/utils/match';
 import { numberToString } from '@/utils/parseTo';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface MatchCardProps {
   match: Match;
@@ -30,7 +31,7 @@ export function MatchCard({
   isDisabled = false,
 }: MatchCardProps) {
   const router = useRouter();
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: playerStats } = useGetScoredPlayers();
 
@@ -76,8 +77,16 @@ export function MatchCard({
 
   return (
     <TouchableOpacity disabled={isDisabled} activeOpacity={0.6} onPress={onPressHandler}>
-      <View className="p-2 rounded-lg">
-        <Text className="font-medium text-xs text-center">
+      <View 
+        className="p-4 rounded-lg"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
+          borderWidth: 1,
+          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+        }}>
+        <Text 
+          className="font-medium text-xs text-center mb-2"
+          style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
           {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
             locale: ptBR,
           })}
@@ -89,10 +98,15 @@ export function MatchCard({
           }`}
           style={{
             gap: 24,
+            backgroundColor: 'transparent',
           }}>
-          <View className="items-center justify-center" style={{ gap: 4 }}>
+          <View className="items-center justify-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
             {showTeamScore ? (
-              <Text className="font-semibold">{numberToString(homeTeamPartials)}</Text>
+              <Text 
+                className="font-semibold"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+                {numberToString(homeTeamPartials)}
+              </Text>
             ) : (
               <></>
             )}
@@ -105,7 +119,9 @@ export function MatchCard({
               alt={`Escudo do ${homeClub?.nome}`}
             />
 
-            <Text className="font-semibold">
+            <Text 
+              className="font-semibold"
+              style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
               {homeClub?.abreviacao} {`${match.clube_casa_posicao}º`}
             </Text>
 
@@ -133,35 +149,49 @@ export function MatchCard({
             className="items-center justify-center"
             style={{
               gap: 4,
+              backgroundColor: 'transparent',
             }}>
             <View
-              className={`flex-row justify-center items-center border rounded ${
-                colorTheme === 'dark' ? 'border-gray-400' : 'border-gray-300'
-              } px-4 py-2`}
+              className="flex-row justify-center items-center rounded-lg px-4 py-2"
               style={{
                 gap: 8,
+                backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#ffffff',
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Text className="font-semibold text-base">
+              <Text 
+                className="font-semibold text-base"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {match.placar_oficial_mandante ?? '-'}
               </Text>
 
               <Feather
                 name="x"
                 size={16}
-                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+                color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
               />
 
-              <Text className="font-semibold text-base ">
+              <Text 
+                className="font-semibold text-base"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {match.placar_oficial_visitante ?? '-'}
               </Text>
             </View>
 
-            <Text className="text-xs">{match.local}</Text>
+            <Text 
+              className="text-xs"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              {match.local}
+            </Text>
           </View>
 
-          <View className="justify-center items-center" style={{ gap: 4 }}>
+          <View className="justify-center items-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
             {showTeamScore ? (
-              <Text className="font-semibold">{numberToString(awayTeamPartials)}</Text>
+              <Text 
+                className="font-semibold"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+                {numberToString(awayTeamPartials)}
+              </Text>
             ) : (
               <></>
             )}
@@ -173,7 +203,9 @@ export function MatchCard({
               className="w-12 h-12"
               alt={`Escudo do ${awayClub?.nome}`}
             />
-            <Text className="font-semibold">
+            <Text 
+              className="font-semibold"
+              style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
               {awayClub?.abreviacao} {`${match.clube_visitante_posicao}º`}
             </Text>
 
