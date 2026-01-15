@@ -12,7 +12,6 @@ import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { FullClubInfo } from '@/models/Club';
 import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetAppreciations } from '@/queries/players.query';
@@ -29,24 +28,62 @@ export function Cup({ league: cup }: CupProps) {
 
   const { data: myClub, isLoading: isLoadingMyClub } = useGetMyClub();
 
-  const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
+  const { data: playerStats, refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const { refetch: onRefetchValorizations } = useGetAppreciations(isMarketClose);
 
-  const { isCupInProgress, totalTeamCup, currentTeamsCup, onRefetchLeague, isRefetchingLeague } =
+  const { isCupInProgress, totalTeamCup, currentTeamsCup, clubsByLeague, onRefetchLeague, isRefetchingLeague } =
     useLeague({
       slug: cup.liga.slug,
     });
 
+  const partialsByTeamId = useMemo(() => {
+    if (!isMarketClose || !playerStats?.atletas || !clubsByLeague) return {};
+
+    const useCaptainScore = !cup.liga.sem_capitao;
+    const result: Record<number, { partialScore: number; playersPlayed: number }> = {};
+
+    Object.entries(clubsByLeague).forEach(([teamIdStr, data]) => {
+      const teamId = Number(teamIdStr);
+      const athletes = data?.atletas ?? [];
+      const captainId = data?.capitao ? Number(data.capitao) : 0;
+
+      const points = athletes.reduce((acc, athleteId) => {
+        const p = playerStats.atletas[String(athleteId)];
+        return acc + (p?.pontuacao ?? 0);
+      }, 0);
+
+      const captainPoints = playerStats.atletas[String(captainId)]?.pontuacao ?? 0;
+      const total = points + (useCaptainScore ? captainPoints * 0.5 : 0);
+
+      const playersPlayed = athletes.reduce((acc, athleteId) => {
+        return acc + (playerStats.atletas[String(athleteId)] ? 1 : 0);
+      }, 0);
+
+      result[teamId] = { partialScore: total, playersPlayed };
+    });
+
+    return result;
+  }, [clubsByLeague, cup.liga.sem_capitao, isMarketClose, playerStats?.atletas]);
+
   const renderCupMatchCard = useCallback(
     ({ item }: ListRenderItemInfo<CupMatch>) => {
-      return <CupMatchCard match={item} myTeam={myClub as FullClubInfo} />;
+      return (
+        <CupMatchCard
+          match={item}
+          myTeam={myClub}
+          leagueSlug={cup.liga.slug}
+          currentRound={marketStatus?.rodada_atual}
+          isMarketClose={isMarketClose}
+          partialsByTeamId={partialsByTeamId}
+        />
+      );
     },
-    [myClub]
+    [cup.liga.slug, isMarketClose, marketStatus?.rodada_atual, myClub, partialsByTeamId]
   );
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchLeague(), onRefetchStats(), onRefetchValorizations()]);
+    await Promise.allSettled([onRefetchLeague(), onRefetchStats(), onRefetchValorizations()]);
   }, [onRefetchLeague, onRefetchStats, onRefetchValorizations]);
 
   const isRefetching = isRefetchingLeague;

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { ScrollView, useColorScheme } from 'react-native';
 
 import { BarChart } from '@/components/charts/BarChart';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Text, View } from '@/components/Themed';
 import { PlayerHistoryStats } from '@/models/Player';
 import { numberToString } from '@/utils/parseTo';
@@ -47,7 +48,11 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center p-8">
-        <Text className="text-base text-gray-500">Carregando estatísticas...</Text>
+        <Text 
+          className="text-base"
+          style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+          Carregando estatísticas...
+        </Text>
       </View>
     );
   }
@@ -55,8 +60,10 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
   if (!stats || stats.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-8">
-        <Feather name="bar-chart-2" size={48} color="#9ca3af" />
-        <Text className="text-base text-gray-500 mt-4 text-center">
+        <Feather name="bar-chart-2" size={48} color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'} />
+        <Text 
+          className="text-base mt-4 text-center"
+          style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
           Nenhuma estatística disponível
         </Text>
       </View>
@@ -64,106 +71,135 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
   }
 
   return (
-    <View className="flex-1" style={{ gap: 10 }}>
+    <View className="flex-1 bg-transparent" style={{ gap: 12 }}>
       {/* Header */}
-      <View className="items-center justify-center" style={{ gap: 2 }}>
-        <Feather name="trending-up" size={20} color="#3b82f6" />
-        <Text className="text-base font-bold">Estatísticas por Rodada</Text>
+      <View className="items-center justify-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
+        <Feather name="trending-up" size={24} color="#3b82f6" />
+        <Text className="text-lg font-bold">Estatísticas por Rodada</Text>
       </View>
 
-        {/* Summary Cards */}
-        <View
-          className="flex-row flex-wrap justify-between"
-          style={{ gap: 6 }}>
+      {/* Summary Cards */}
+      <AnimatedCard variant="elevated" className="p-0" delay={0}>
+        <View style={{ gap: 8, backgroundColor: 'transparent' }}>
           <View
-            className={`flex-1 min-w-[45%] p-2.5 rounded-lg ${
-              colorTheme === 'dark' ? 'bg-green-900/30' : 'bg-green-50'
-            }`}
-            style={{
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#166534' : '#86efac',
-            }}>
-            <View
-              className="flex-row items-center justify-between"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text className="text-xs font-medium text-green-600">Melhor</Text>
-              <Feather name="arrow-up" size={14} color="#16a34a" />
-            </View>
-            <Text className="text-xl font-bold text-green-700 mt-0.5">
-              {numberToString(processedStats.bestScore)}
-            </Text>
+            className="flex-row items-center pb-2"
+            style={{ gap: 6, backgroundColor: 'transparent', borderBottomWidth: 1, borderBottomColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb' }}>
+            <Feather name="activity" size={16} color="#3b82f6" />
+            <Text className="text-sm font-semibold">Resumo de Desempenho</Text>
           </View>
-
+          
           <View
-            className={`flex-1 min-w-[45%] p-2.5 rounded-lg ${
-              colorTheme === 'dark' ? 'bg-red-900/30' : 'bg-red-50'
-            }`}
-            style={{
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#991b1b' : '#fca5a5',
-            }}>
+            className="flex-row flex-wrap justify-between"
+            style={{ gap: 8, backgroundColor: 'transparent' }}>
             <View
-              className="flex-row items-center justify-between"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text className="text-xs font-medium text-red-600">Pior</Text>
-              <Feather name="arrow-down" size={14} color="#dc2626" />
+              className={`flex-1 min-w-[45%] p-3 rounded-lg ${
+                colorTheme === 'dark' ? 'bg-green-900/30' : 'bg-green-50'
+              }`}
+              style={{
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#166534' : '#86efac',
+              }}>
+              <View
+                className="flex-row items-center justify-between"
+                style={{ backgroundColor: 'transparent' }}>
+                <Text 
+                  className="text-xs font-medium"
+                  style={{ color: colorTheme === 'dark' ? '#4ade80' : '#16a34a' }}>
+                  Melhor
+                </Text>
+                <Feather name="arrow-up" size={14} color={colorTheme === 'dark' ? '#4ade80' : '#16a34a'} />
+              </View>
+              <Text 
+                className="text-xl font-bold mt-1"
+                style={{ color: colorTheme === 'dark' ? '#22c55e' : '#15803d' }}>
+                {numberToString(processedStats.bestScore)}
+              </Text>
             </View>
-            <Text className="text-xl font-bold text-red-700 mt-0.5">
-              {numberToString(processedStats.worstScore)}
-            </Text>
-          </View>
 
-          <View
-            className={`flex-1 min-w-[45%] p-2.5 rounded-lg ${
-              colorTheme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-50'
-            }`}
-            style={{
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#1e3a8a' : '#93c5fd',
-            }}>
             <View
-              className="flex-row items-center justify-between"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text className="text-xs font-medium text-blue-600">Total</Text>
-              <Feather name="award" size={14} color="#2563eb" />
+              className={`flex-1 min-w-[45%] p-3 rounded-lg ${
+                colorTheme === 'dark' ? 'bg-red-900/30' : 'bg-red-50'
+              }`}
+              style={{
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#991b1b' : '#fca5a5',
+              }}>
+              <View
+                className="flex-row items-center justify-between"
+                style={{ backgroundColor: 'transparent' }}>
+                <Text 
+                  className="text-xs font-medium"
+                  style={{ color: colorTheme === 'dark' ? '#f87171' : '#dc2626' }}>
+                  Pior
+                </Text>
+                <Feather name="arrow-down" size={14} color={colorTheme === 'dark' ? '#f87171' : '#dc2626'} />
+              </View>
+              <Text 
+                className="text-xl font-bold mt-1"
+                style={{ color: colorTheme === 'dark' ? '#ef4444' : '#b91c1c' }}>
+                {numberToString(processedStats.worstScore)}
+              </Text>
             </View>
-            <Text className="text-xl font-bold text-blue-700 mt-0.5">
-              {numberToString(processedStats.totalPoints)}
-            </Text>
-          </View>
 
-          <View
-            className={`flex-1 min-w-[45%] p-2.5 rounded-lg ${
-              colorTheme === 'dark' ? 'bg-purple-900/30' : 'bg-purple-50'
-            }`}
-            style={{
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#581c87' : '#d8b4fe',
-            }}>
             <View
-              className="flex-row items-center justify-between"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text className="text-xs font-medium text-purple-600">Jogos</Text>
-              <Feather name="check-circle" size={14} color="#9333ea" />
+              className={`flex-1 min-w-[45%] p-3 rounded-lg ${
+                colorTheme === 'dark' ? 'bg-blue-900/30' : 'bg-blue-50'
+              }`}
+              style={{
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#1e3a8a' : '#93c5fd',
+              }}>
+              <View
+                className="flex-row items-center justify-between"
+                style={{ backgroundColor: 'transparent' }}>
+                <Text 
+                  className="text-xs font-medium"
+                  style={{ color: colorTheme === 'dark' ? '#60a5fa' : '#2563eb' }}>
+                  Total
+                </Text>
+                <Feather name="award" size={14} color={colorTheme === 'dark' ? '#60a5fa' : '#2563eb'} />
+              </View>
+              <Text 
+                className="text-xl font-bold mt-1"
+                style={{ color: colorTheme === 'dark' ? '#3b82f6' : '#1d4ed8' }}>
+                {numberToString(processedStats.totalPoints)}
+              </Text>
             </View>
-            <Text className="text-xl font-bold text-purple-700 mt-0.5">
-              {processedStats.gamesPlayed}/{processedStats.totalRounds}
-            </Text>
+
+            <View
+              className={`flex-1 min-w-[45%] p-3 rounded-lg ${
+                colorTheme === 'dark' ? 'bg-purple-900/30' : 'bg-purple-50'
+              }`}
+              style={{
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#581c87' : '#d8b4fe',
+              }}>
+              <View
+                className="flex-row items-center justify-between"
+                style={{ backgroundColor: 'transparent' }}>
+                <Text 
+                  className="text-xs font-medium"
+                  style={{ color: colorTheme === 'dark' ? '#c084fc' : '#9333ea' }}>
+                  Jogos
+                </Text>
+                <Feather name="check-circle" size={14} color={colorTheme === 'dark' ? '#c084fc' : '#9333ea'} />
+              </View>
+              <Text 
+                className="text-xl font-bold mt-1"
+                style={{ color: colorTheme === 'dark' ? '#a855f7' : '#7e22ce' }}>
+                {processedStats.gamesPlayed}/{processedStats.totalRounds}
+              </Text>
+            </View>
           </View>
         </View>
+      </AnimatedCard>
 
-        {/* Chart */}
-        {processedStats.chartData.length > 0 && (
-          <View
-            className={`p-3 rounded-lg ${
-              colorTheme === 'dark' ? 'bg-gray-800' : 'bg-white'
-            }`}
-            style={{
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-            }}>
+      {/* Chart */}
+      {processedStats.chartData.length > 0 && (
+        <AnimatedCard variant="elevated" className="p-0" delay={100}>
+          <View style={{ gap: 8, backgroundColor: 'transparent' }}>
             <View
-              className="flex-row items-center mb-1"
+              className="flex-row items-center"
               style={{ gap: 6, backgroundColor: 'transparent' }}>
               <Feather name="bar-chart-2" size={16} color="#3b82f6" />
               <Text className="text-sm font-semibold">Pontos por Rodada</Text>
@@ -174,25 +210,20 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               height={140}
             />
           </View>
-        )}
+        </AnimatedCard>
+      )}
 
-        {/* Detailed Rounds List */}
-        <View
-          className={`p-3 rounded-lg ${
-            colorTheme === 'dark' ? 'bg-gray-800' : 'bg-white'
-          }`}
-          style={{
-            borderWidth: 1,
-            borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-          }}>
+      {/* Detailed Rounds List */}
+      <AnimatedCard variant="elevated" className="p-0" delay={200}>
+        <View style={{ gap: 10, backgroundColor: 'transparent' }}>
           <View
-            className="flex-row items-center mb-2"
+            className="flex-row items-center"
             style={{ gap: 6, backgroundColor: 'transparent' }}>
             <Feather name="list" size={16} color="#3b82f6" />
             <Text className="text-sm font-semibold">Rodadas Detalhadas</Text>
           </View>
 
-          <View style={{ gap: 6, backgroundColor: 'transparent' }}>
+          <View style={{ gap: 8, backgroundColor: 'transparent' }}>
             {processedStats.validStats.map((stat, index) => {
               const hasData = stat.pontos !== null;
               const isPositive = hasData && stat.pontos! > 0;
@@ -201,19 +232,18 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               return (
                 <View
                   key={`round-${stat.rodada_id}`}
-                  className={`flex-row items-center justify-between p-2 rounded-lg ${
+                  className={`flex-row items-center justify-between p-3 rounded-lg ${
                     colorTheme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'
                   }`}
                   style={{
                     borderWidth: 1,
                     borderColor: colorTheme === 'dark' ? '#4b5563' : '#e5e7eb',
-                    backgroundColor: 'transparent',
                   }}>
                   <View
                     className="flex-row items-center"
-                    style={{ gap: 8, backgroundColor: 'transparent' }}>
+                    style={{ gap: 10, backgroundColor: 'transparent' }}>
                     <View
-                      className={`w-8 h-8 rounded-full items-center justify-center ${
+                      className={`w-10 h-10 rounded-full items-center justify-center ${
                         hasData
                           ? isPositive
                             ? 'bg-green-500/20'
@@ -223,31 +253,37 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                           : 'bg-gray-500/20'
                       }`}>
                       <Text
-                        className={`text-xs font-bold ${
-                          hasData
+                        className="text-xs font-bold"
+                        style={{
+                          color: hasData
                             ? isPositive
-                              ? 'text-green-600'
+                              ? colorTheme === 'dark' ? '#4ade80' : '#16a34a'
                               : isNegative
-                              ? 'text-red-600'
-                              : 'text-gray-600'
-                            : 'text-gray-500'
-                        }`}>
+                              ? colorTheme === 'dark' ? '#f87171' : '#dc2626'
+                              : colorTheme === 'dark' ? '#9ca3af' : '#6b7280'
+                            : colorTheme === 'dark' ? '#6b7280' : '#9ca3af'
+                        }}>
                         R{stat.rodada_id}
                       </Text>
                     </View>
 
                     <View style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 font-medium">Pontuação</Text>
+                      <Text 
+                        className="text-xs font-medium"
+                        style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+                        Pontuação
+                      </Text>
                       <Text
-                        className={`text-sm font-bold ${
-                          hasData
+                        className="text-sm font-bold"
+                        style={{
+                          color: hasData
                             ? isPositive
-                              ? 'text-green-600'
+                              ? colorTheme === 'dark' ? '#4ade80' : '#16a34a'
                               : isNegative
-                              ? 'text-red-600'
-                              : 'text-gray-700'
-                            : 'text-gray-500'
-                        }`}>
+                              ? colorTheme === 'dark' ? '#f87171' : '#dc2626'
+                              : colorTheme === 'dark' ? '#d1d5db' : '#374151'
+                            : colorTheme === 'dark' ? '#6b7280' : '#9ca3af'
+                        }}>
                         {hasData ? `${numberToString(stat.pontos!)} pts` : '—'}
                       </Text>
                     </View>
@@ -256,8 +292,14 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                   <View
                     className="items-end"
                     style={{ backgroundColor: 'transparent' }}>
-                    <Text className="text-xs text-gray-500 font-medium">Preço</Text>
-                    <Text className="text-sm font-bold text-gray-700">
+                    <Text 
+                      className="text-xs font-medium"
+                      style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+                      Preço
+                    </Text>
+                    <Text 
+                      className="text-sm font-bold"
+                      style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                       {hasData && stat.preco ? `C$ ${numberToString(stat.preco)}` : '—'}
                     </Text>
                   </View>
@@ -266,6 +308,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
             })}
           </View>
         </View>
+      </AnimatedCard>
     </View>
   );
 }

@@ -8,6 +8,8 @@ import { CupMatchTeamDetails } from '@/components/contexts/leagues/Cup/CupMatchT
 import { Loading } from '@/components/structure/Loading';
 import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
+import useLeague from '@/hooks/useLeague';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
 import useTeam from '@/hooks/useTeam';
 import { FullClubInfo } from '@/models/Club';
@@ -17,11 +19,27 @@ import { PlayerStats } from '@/models/Stats';
 export default () => {
   const colorTheme = useColorScheme();
 
-  const { match } = useLocalSearchParams();
+  const { slug, chaveId } = useLocalSearchParams();
+  const leagueSlug = typeof slug === 'string' ? slug : '';
+  const chaveIdNum = typeof chaveId === 'string' ? Number(chaveId) : NaN;
 
-  const cupMatch: CupMatch = useMemo(() => JSON.parse(match as string), [match]);
+  const { league } = useLeague({ slug: leagueSlug });
+  const { marketStatus, isMarketClose } = useMarketStatus();
+
+  const cupMatch = useMemo(() => {
+    if (!league?.chaves_mata_mata || !Number.isFinite(chaveIdNum)) return null;
+    const rounds = Object.keys(league.chaves_mata_mata);
+    for (const round of rounds) {
+      const matches = league.chaves_mata_mata[round] ?? [];
+      const found = matches.find((m) => m.chave_id === chaveIdNum);
+      if (found) return found;
+    }
+    return null;
+  }, [chaveIdNum, league?.chaves_mata_mata]);
 
   const { playerStats } = usePlayerStats();
+
+  if (!cupMatch || !leagueSlug || !marketStatus) return <Loading />;
 
   const { team: homeTeam } = useTeam({
     teamId: cupMatch.time_mandante_id ?? 0,
@@ -33,36 +51,23 @@ export default () => {
     round: cupMatch.rodada_id,
   });
 
-  const tabs: ITab[] = [
-    {
-      id: 1,
-      title: homeTeam?.time.nome as string,
-      content: () => {
-        return (
-          <CupMatchTeamDetails
-            match={cupMatch}
-            team={homeTeam as FullClubInfo}
-            playerStats={playerStats as PlayerStats}
-          />
-        );
+  const tabs: ITab[] = useMemo(() => {
+    if (!homeTeam || !awayTeam || !playerStats) return [];
+    return [
+      {
+        id: 1,
+        title: homeTeam.time.nome,
+        content: () => <CupMatchTeamDetails match={cupMatch} team={homeTeam} playerStats={playerStats} />,
       },
-    },
-    {
-      id: 2,
-      title: awayTeam?.time.nome as string,
-      content: () => {
-        return (
-          <CupMatchTeamDetails
-            match={cupMatch}
-            team={awayTeam as FullClubInfo}
-            playerStats={playerStats as PlayerStats}
-          />
-        );
+      {
+        id: 2,
+        title: awayTeam.time.nome,
+        content: () => <CupMatchTeamDetails match={cupMatch} team={awayTeam} playerStats={playerStats} />,
       },
-    },
-  ];
+    ];
+  }, [awayTeam, cupMatch, homeTeam, playerStats]);
 
-  if (!homeTeam || !awayTeam) return <Loading />;
+  if (!homeTeam || !awayTeam || !playerStats) return <Loading />;
 
   return (
     <View
@@ -79,7 +84,12 @@ export default () => {
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
-        <CupMatchCard match={cupMatch} />
+        <CupMatchCard
+          match={cupMatch}
+          leagueSlug={leagueSlug}
+          currentRound={marketStatus.rodada_atual}
+          isMarketClose={isMarketClose}
+        />
       </View>
 
       <Tabs tabs={tabs} />

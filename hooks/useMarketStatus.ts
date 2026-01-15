@@ -53,17 +53,20 @@ const useMarketStatus = () => {
 
   const leagueLimits = useMemo(() => {
     if (!marketStatus) return null;
-    
-    // Check if user is PRO (would need to be determined from user context)
-    // For now, returning both free and pro limits
+
+    const pontosCorridos =
+      marketStatus.pontos_corridos ?? marketStatus.limites_competicoes?.pontos_corridos;
+
+    if (!pontosCorridos) return null;
+
     return {
       free: {
-        criacao: marketStatus.limites_competicoes.pontos_corridos.free.criacao,
-        participacao: marketStatus.limites_competicoes.pontos_corridos.free.participacao,
+        criacao: pontosCorridos.free.criacao,
+        participacao: pontosCorridos.free.participacao,
       },
       pro: {
-        criacao: marketStatus.limites_competicoes.pontos_corridos.pro.criacao,
-        participacao: marketStatus.limites_competicoes.pontos_corridos.pro.participacao,
+        criacao: pontosCorridos.pro.criacao,
+        participacao: pontosCorridos.pro.participacao,
       },
     };
   }, [marketStatus]);

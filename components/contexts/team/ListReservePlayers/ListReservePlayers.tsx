@@ -62,7 +62,7 @@ export function ListReservePlayers({
   const totalReserves = lineup?.reserves?.length || 0;
 
   return (
-    <AnimatedCard variant="flat" className="mx-2">
+    <AnimatedCard variant="flat">
       <View style={{ backgroundColor: 'transparent', gap: 12 }}>
         <View
           className="flex-row justify-between items-center"

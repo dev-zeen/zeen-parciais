@@ -30,6 +30,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
+      // Hide native splash immediately and show custom animated splash
       SplashScreen.hideAsync();
     }
   }, [loaded]);
@@ -38,7 +39,7 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return <RootLayoutNav />
 }
 
 function RootLayoutNav() {

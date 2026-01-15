@@ -66,11 +66,11 @@ export function AnimatedCard({
           opacity: fadeAnim,
           transform: [{ scale: scaleAnim }],
           width: '100%',
-          backgroundColor: 'white',
+          backgroundColor: 'transparent',
         },
         style,
       ]}>
-      <View className={`rounded-xl p-4 ${getVariantStyles()} ${className}`}>
+      <View className={`rounded-lg p-4 ${getVariantStyles()} ${className}`}>
         {children}
       </View>
     </Animated.View>

@@ -6,7 +6,6 @@ import { Image, StyleSheet, TouchableOpacity, useColorScheme } from 'react-nativ
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import useTeam from '@/hooks/useTeam';
 import { ClubByLeague } from '@/models/Leagues';
 import theme from '@/styles/theme';
 import { OrderByOptions } from '@/utils/leagues';
@@ -14,11 +13,11 @@ import { numberToString } from '@/utils/parseTo';
 
 interface ClubCardProps {
   score: number;
-  club: ClubByLeague;
+  diffScore: number;
+  variation?: number;
+  club: ClubByLeague & { captainName?: string };
   orderBy: string;
   position: number;
-  highestScoringTeam: number;
-  isLeagueAcceptCaptain: boolean;
   isMarketClose: boolean;
   isMyTeam: boolean;
 }
@@ -28,30 +27,18 @@ export function ClubCard({
   club,
   orderBy,
   position,
-  highestScoringTeam,
-  isLeagueAcceptCaptain,
   isMarketClose,
   isMyTeam,
+  diffScore,
+  variation,
 }: ClubCardProps) {
   const colorTheme = useColorScheme();
-
-  const { team } = useTeam({
-    teamId: club.time_id,
-  });
 
   // const { partialValorization } = usePartialScore({
   //   teamId: club.time_id,
   // })
 
   const isOrderByPatrimonio = orderBy === OrderByOptions.PATRIMONIO;
-
-  const captainPlayer = isLeagueAcceptCaptain
-    ? team?.atletas?.find((item) => item.atleta_id === team.capitao_id)
-    : null;
-
-  const diffScore = !isOrderByPatrimonio
-    ? (club.pontos as any)[orderBy] - highestScoringTeam
-    : (club?.patrimonio ?? 0) - highestScoringTeam;
 
   const renderVariationIcon = useCallback((variation: number) => {
     const iconName = variation >= 1 ? 'arrow-up' : 'arrow-down';
@@ -87,9 +74,9 @@ export function ClubCard({
 
               {!isMarketClose && orderBy !== 'rodada' ? (
                 <View className="flex-row items-center" style={containerMyTeamStyle}>
-                  {renderVariationIcon((club.variacao as any)[orderBy])}
+                  {renderVariationIcon(variation ?? 0)}
                   <Text className="text-xs">
-                    {(club.variacao as any)[orderBy] ? (club.variacao as any)[orderBy] : ''}
+                    {variation ? variation : ''}
                   </Text>
                 </View>
               ) : (
@@ -98,7 +85,7 @@ export function ClubCard({
             </View>
             <Image
               source={{
-                uri: team?.time.url_escudo_png,
+                uri: club.url_escudo_png,
               }}
               className="w-10 h-10"
               alt={`Imagem do time do ${club.nome_cartola}`}
@@ -119,25 +106,20 @@ export function ClubCard({
                 }}>
                 <Text className="text-xs capitalize">{club.nome_cartola}</Text>
               </View>
-              {isLeagueAcceptCaptain ? (
-                <>
-                  <View className="flex-row items-center" style={containerMyTeamStyle}>
-                    <Text className="text-xs">{captainPlayer?.apelido}</Text>
-
-                    <Image
-                      source={captainIcon}
-                      style={{
-                        width: 14,
-                        height: 14,
-                        marginLeft: 4,
-                      }}
-                      alt={'Liga com Capitão'}
-                    />
-                  </View>
-                </>
-              ) : (
-                <></>
-              )}
+              <View className="flex-row items-center" style={containerMyTeamStyle}>
+                <Text className="text-xs" numberOfLines={1}>
+                  {club.captainName ?? '-'}
+                </Text>
+                <Image
+                  source={captainIcon}
+                  style={{
+                    width: 14,
+                    height: 14,
+                    marginLeft: 4,
+                  }}
+                  alt={'Capitão'}
+                />
+              </View>
             </View>
           </View>
 
@@ -156,7 +138,7 @@ export function ClubCard({
 
             <View className="items-end" style={containerMyTeamStyle}>
               <Text className="text-xs font-normal">
-                {diffScore < 0 && numberToString(diffScore)}
+                {diffScore < 0 ? numberToString(diffScore) : ''}
               </Text>
 
               {isMarketClose && club.playersHavePlayed !== undefined ? (

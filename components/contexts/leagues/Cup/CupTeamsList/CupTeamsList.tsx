@@ -26,49 +26,52 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
     slug: cup.liga.slug,
   });
 
+  // Se a copa já está em andamento, essa lista não é usada (a UI mostra as chaves).
+  // Evita renderizar células vazias e desperdiçar processamento.
+  if (isCupInProgress) {
+    return null;
+  }
+
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<TeamCup>) => {
-      if (!isCupInProgress) {
-        return (
+      return (
+        <View
+          className="flex-1 rounded-lg items-center justify-center p-2 mx-2 mb-1"
+          style={{
+            backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
+            gap: 4,
+          }}>
           <View
-            className="flex-1 rounded-lg items-center justify-center p-2 mx-2 mb-1"
+            className="flex-row items-center justify-center"
             style={{
-              backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
               gap: 4,
+              backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
             }}>
-            <View
-              className="flex-row items-center justify-center"
+            <Image
+              source={{
+                uri: item.url_escudo_png,
+              }}
               style={{
-                gap: 4,
-                backgroundColor: item.isPending ? pedingInviteBackground : teamDefaultBackground,
-              }}>
-              <Image
-                source={{
-                  uri: item.url_escudo_png,
-                }}
-                style={{
-                  margin: 2,
-                }}
-                className="w-12 h-12"
-                alt={`Imagem do time do ${item.nome_cartola}`}
-              />
-            </View>
-
-            <Text
-              className="font-semibold"
-              style={{
-                fontSize: 14,
-                lineHeight: 14,
-              }}>
-              {item.nome}
-            </Text>
-            <Text className=" capitalize">{item.nome_cartola}</Text>
+                margin: 2,
+              }}
+              className="w-12 h-12"
+              alt={`Imagem do time do ${item.nome_cartola}`}
+            />
           </View>
-        );
-      }
-      return <></>;
+
+          <Text
+            className="font-semibold"
+            style={{
+              fontSize: 14,
+              lineHeight: 14,
+            }}>
+            {item.nome}
+          </Text>
+          <Text className=" capitalize">{item.nome_cartola}</Text>
+        </View>
+      );
     },
-    [isCupInProgress, pedingInviteBackground, teamDefaultBackground]
+    [pedingInviteBackground, teamDefaultBackground]
   );
 
   const keyExtractor = useCallback((item: TeamCup) => `${item.time_id}`, []);

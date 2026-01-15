@@ -39,6 +39,40 @@ export default function StackLayout() {
           headerShown: false,
         }}
       />
+
+      {/* Pontos Corridos */}
+      <Stack.Screen
+        name="points/[slug]"
+        options={{
+          headerShown: false,
+        }}
+      />
+
+      {/* Create flows */}
+      <Stack.Screen
+        name="create/classic"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="create/matamata"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="create/points"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="create/invite"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

@@ -1,0 +1,1 @@
+export { PointsCompetitionCard } from './PointsCompetitionCard';

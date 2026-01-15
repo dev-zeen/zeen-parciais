@@ -267,9 +267,6 @@ export const emptyLineupFormation = () =>
     },
   ]);
 
-export const onSuccessSavedTeam = () =>
-  Alert.alert('Boa cartoleiro!', 'Time escalado com sucesso.', [{ text: 'OK' }]);
-
 export const onGetEmptyPositions = (lineup: LineupPlayers) => {
   const emptyPositionsUpdated = new Set(
     (lineup?.starting || []).filter(({ player }) => !player).map(({ position }) => position)

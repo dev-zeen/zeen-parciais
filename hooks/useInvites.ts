@@ -1,11 +1,14 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
+import { GET_ALL_LEAGUES, INVITES, INVITES_POINTS_COMPETITIONS } from '@/constants/Endpoits';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { onAcceptInvite, onDeclineInvitation, useGetInvites } from '@/queries/invites.query';
 
 const useInvites = () => {
   const { allowRequest } = useMarketStatus();
+  const queryClient = useQueryClient();
 
   const {
     data: invites,
@@ -24,8 +27,12 @@ const useInvites = () => {
   };
 
   const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchInvites()]);
-  }, [onRefetchInvites]);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: [INVITES] }),
+      queryClient.invalidateQueries({ queryKey: [INVITES_POINTS_COMPETITIONS] }),
+      queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] }),
+    ]);
+  }, [queryClient]);
 
   const handleAcceptInvite = useCallback(
     async (messageId: number) => {

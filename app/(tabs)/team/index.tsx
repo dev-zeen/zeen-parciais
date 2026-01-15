@@ -3,21 +3,18 @@ import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 
 import type { BottomSheetRef } from '@/components/structure/BottomSheet';
+import type { PlayersToSell } from './_team.helpers';
 
 import {
-  clearLineup,
   emptyCaptain,
   emptyLineupFormation,
   emptyReservePlayers,
   fillLineupOnChangeFormation,
-  listDefaultLineups,
   onClearLineup,
   onGetDefaultLineupTeam,
   onGetEqualLineups,
   onGetFillLineupDefaultPlayers,
   onGetPlayersOnChangePositionSell,
-  onSuccessSavedTeam,
-  PlayersToSell,
 } from './_team.helpers';
 
 import { View } from '@/components/Themed';
@@ -27,6 +24,7 @@ import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
 import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
+import { FormationChangeModal } from '@/components/contexts/team/FormationChangeModal';
 import Market from '@/app/(tabs)/team/market';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
@@ -38,7 +36,6 @@ import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayers, LineupPosition } from '@/models/Formations';
-import { FullPlayer } from '@/models/Stats';
 import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
@@ -88,6 +85,11 @@ export default () => {
   const [playerIndex, setPlayerIndex] = useState(0);
   const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
 
+  // Formation change state
+  const [playersToSellData, setPlayersToSellData] = useState<PlayersToSell[]>([]);
+  const [selectedPlayersToRemove, setSelectedPlayersToRemove] = useState<Set<number>>(new Set());
+  const [pendingFormation, setPendingFormation] = useState<string | null>(null);
+  const [showFormationModal, setShowFormationModal] = useState(false);
 
   // Save button state
   const [isLineupComplete, setIsLineupComplete] = useState(false);
@@ -175,7 +177,6 @@ export default () => {
 
   useEffect(() => {
     if (isSuccessSaveTeam) {
-      onSuccessSavedTeam();
       onRefetchMyClub && onRefetchMyClub();
       setHasChanges(false);
       setToastMessage('Time salvo com sucesso!');
@@ -200,6 +201,10 @@ export default () => {
         const myTeamData = myClubResult.value.data;
         if (!myTeamData) return;
 
+        // Restaura a formação original do time
+        const originalFormation = onGetDefaultLineupTeam(myTeamData.time?.esquema_id ?? 4);
+        updateFormation(originalFormation);
+
         const defaultLineup = mountLineup(myTeamData as FullClubInfo);
         const newPrice = onGetTeamPrice(defaultLineup.starting);
         
@@ -208,7 +213,7 @@ export default () => {
         updatePrice(newPrice);
       })
       .catch((err) => {
-        // Garantia extra: nunca deixar rejeição “vazar” e derrubar a screen
+        // Garantia extra: nunca deixar rejeição "vazar" e derrubar a screen
         console.log('⚠️ Falha inesperada no refresh:', err);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -235,13 +240,13 @@ export default () => {
 
   const handleClearAll = useCallback(() => {
     if (!lineup) return;
-    const emptyLineup = clearLineup(lineup?.starting);
-    const emptyReserves = clearLineup(lineup?.reserves);
+    
+    // Restaura a formação original do time
+    const originalFormation = initialLineupTeamFormation;
+    updateFormation(originalFormation);
 
-    const lineupWithoutPlayers: LineupPlayers = {
-      starting: [...emptyLineup],
-      reserves: [...emptyReserves],
-    };
+    // Limpa todos os jogadores com a formação original
+    const lineupWithoutPlayers: LineupPlayers = onClearLineup(FORMATIONS[originalFormation]);
 
     // Recalculate price for empty lineup (should be 0)
     const newPrice = onGetTeamPrice(lineupWithoutPlayers.starting);
@@ -251,17 +256,17 @@ export default () => {
     updatePrice(newPrice);
     setHasChanges(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineup, updateLineup, updateCaptain, updatePrice]);
+  }, [lineup, initialLineupTeamFormation, updateFormation, updateLineup, updateCaptain, updatePrice]);
 
   const handleFormationChange = useCallback(
     (formationIndex: number) => {
       const newFormation = onGetDefaultLineupTeam(formationIndex);
-      updateFormation(newFormation);
 
       if (!lineup) return;
 
       const isExistsPlayerOnLineup = lineup.starting.some((item) => item.player);
       if (!isExistsPlayerOnLineup) {
+        updateFormation(newFormation);
         const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[newFormation]);
         updateLineup(lineupUpdated);
         return;
@@ -269,18 +274,109 @@ export default () => {
 
       const playersToSell = onGetPlayersOnChangePositionSell(lineup as LineupPlayers, newFormation);
 
-      if (!playersToSell.length) {
-        const lineupUpdated = fillLineupOnChangeFormation(
-          lineup,
-          newFormation,
-          playerStats,
-          isMarketClose
-        );
-        updateLineup(lineupUpdated);
+      // Se houver jogadores que não cabem na nova formação, mostra o modal
+      if (playersToSell.length > 0) {
+        setPlayersToSellData(playersToSell);
+        setPendingFormation(newFormation);
+        setSelectedPlayersToRemove(new Set());
+        setShowFormationModal(true);
+        return;
       }
+
+      // Se não houver conflitos, aplica a formação diretamente
+      updateFormation(newFormation);
+      const lineupUpdated = fillLineupOnChangeFormation(
+        lineup,
+        newFormation,
+        playerStats,
+        isMarketClose
+      );
+      updateLineup(lineupUpdated);
+
+      const newPrice = onGetTeamPrice(lineupUpdated.starting);
+      updatePrice(newPrice);
     },
-    [lineup, playerStats, isMarketClose, updateFormation, updateLineup]
+    [lineup, playerStats, isMarketClose, updateFormation, updateLineup, updatePrice]
   );
+
+  const handleTogglePlayerToRemove = useCallback((atletaId: number) => {
+    setSelectedPlayersToRemove((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(atletaId)) {
+        newSet.delete(atletaId);
+      } else {
+        newSet.add(atletaId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const handleConfirmFormationChange = useCallback(() => {
+    if (!pendingFormation || !lineup) return;
+
+    // Verifica se a quantidade correta de jogadores foi selecionada
+    const totalToRemove = playersToSellData.reduce((sum, pos) => sum + pos.quantityToSell, 0);
+    if (selectedPlayersToRemove.size !== totalToRemove) {
+      setToastMessage(`Você deve selecionar exatamente ${totalToRemove} jogador(es) para remover`);
+      setToastType('error');
+      setShowToast(true);
+      return;
+    }
+
+    // Remove os jogadores selecionados
+    const updatedStarting = lineup.starting.map((position) => {
+      if (position.player && selectedPlayersToRemove.has(position.player.atleta_id)) {
+        return { ...position, player: undefined };
+      }
+      return position;
+    });
+
+    const updatedLineup: LineupPlayers = {
+      starting: updatedStarting,
+      reserves: lineup.reserves,
+    };
+
+    // Aplica a nova formação
+    updateFormation(pendingFormation);
+    const lineupWithNewFormation = fillLineupOnChangeFormation(
+      updatedLineup,
+      pendingFormation,
+      playerStats,
+      isMarketClose
+    );
+    updateLineup(lineupWithNewFormation);
+
+    // Recalcula o preço
+    const newPrice = onGetTeamPrice(lineupWithNewFormation.starting);
+    updatePrice(newPrice);
+
+    // Fecha o modal e limpa os estados
+    setShowFormationModal(false);
+    setPlayersToSellData([]);
+    setPendingFormation(null);
+    setSelectedPlayersToRemove(new Set());
+
+    setToastMessage('Formação alterada com sucesso!');
+    setToastType('success');
+    setShowToast(true);
+  }, [
+    pendingFormation,
+    lineup,
+    playersToSellData,
+    selectedPlayersToRemove,
+    playerStats,
+    isMarketClose,
+    updateFormation,
+    updateLineup,
+    updatePrice,
+  ]);
+
+  const handleCancelFormationChange = useCallback(() => {
+    setShowFormationModal(false);
+    setPlayersToSellData([]);
+    setPendingFormation(null);
+    setSelectedPlayersToRemove(new Set());
+  }, []);
 
   const handleSaveTeam = useCallback(() => {
     if (!formation) {
@@ -336,7 +432,7 @@ export default () => {
   return (
     <SafeAreaViewContainer edges={['top']}>
         <ScrollView
-          className="flex-1"
+          className="flex-1 px-2"
           refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={isRefetching} />}
           contentContainerStyle={{
             paddingBottom: tabBarHeight + 16,
@@ -392,6 +488,15 @@ export default () => {
             playerLowestPrice={playerLowestPrice?.player}
           />
         </BottomSheet>
+
+        <FormationChangeModal
+          visible={showFormationModal}
+          playersToSellData={playersToSellData}
+          selectedPlayersToRemove={selectedPlayersToRemove}
+          onTogglePlayer={handleTogglePlayerToRemove}
+          onConfirm={handleConfirmFormationChange}
+          onCancel={handleCancelFormationChange}
+        />
 
         <Toast
           visible={showToast}

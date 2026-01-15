@@ -58,13 +58,6 @@ export function MarketStatusCard() {
 
   return (
     <AnimatedCard delay={100} variant="flat">
-      <View
-        style={{
-          backgroundColor: getBackgroundColor(),
-          borderRadius: 12,
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-        }}>
       <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
         {/* Status Indicator */}
         <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
@@ -111,7 +104,6 @@ export function MarketStatusCard() {
           )}
         </View>
       )}
-      </View>
     </AnimatedCard>
   );
 }

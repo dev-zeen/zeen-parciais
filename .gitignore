@@ -48,3 +48,5 @@ ios/certs/*
 .env
 
 .tool-versions
+
+ios

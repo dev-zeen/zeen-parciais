@@ -65,34 +65,8 @@ export default function TabLayout() {
         name="leagues"
         options={{
           tabBarLabel: 'Ligas',
-          headerTitle: 'Ligas',
+          headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
-          headerRight: () => (
-            <Link href="/leagues/invites" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <View
-                    className="flex-row items-center justify-center"
-                    style={{
-                      gap: 4,
-                    }}>
-                    {invites && invites.convites && invites?.convites?.length > 0 && (
-                      <View className="w-6 h-6 bg-violet-600 items-center justify-center rounded-full">
-                        <Text className="text-neutral-100">{invites?.convites?.length}</Text>
-                      </View>
-                    )}
-
-                    <Feather
-                      name="inbox"
-                      size={24}
-                      color={Colors[colorScheme ?? 'light'].text}
-                      style={{ marginRight: 15, opacity: pressed ? 0.6 : 1 }}
-                    />
-                  </View>
-                )}
-              </Pressable>
-            </Link>
-          ),
         }}
       />
       <Tabs.Screen

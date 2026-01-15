@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Link, Redirect, useLocalSearchParams } from 'expo-router';
 import { useContext } from 'react';
-import { Image, Pressable, useColorScheme } from 'react-native';
+import { Image, Pressable, TouchableOpacity, useColorScheme } from 'react-native';
 
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
@@ -11,9 +11,13 @@ import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { League } from '@/models/Leagues';
+import { useGetMyClub } from '@/queries/club.query';
 import theme from '@/styles/theme';
 import { ClubsByLeagueUtils } from '@/utils/partials';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { router } from 'expo-router';
 
 export default () => {
   const colorTheme = useColorScheme();
@@ -23,6 +27,9 @@ export default () => {
   // const [modalVisible, setModalVisible] = useState(false);
 
   const { id: slug } = useLocalSearchParams();
+
+  const { allowRequest } = useMarketStatus();
+  const { data: myClub } = useGetMyClub(allowRequest);
 
   // const { league, clubsByLeague, isLoadingLeague, onRefetchLeague } = useLeague({
   //   slug: slug as string,
@@ -40,15 +47,38 @@ export default () => {
 
   if (isLoadingLeague) return <LoadingScreen />;
 
+  const isOwner =
+    !!league?.liga?.time_dono_id && (myClub?.time?.time_id ?? 0) === league.liga.time_dono_id;
+
   return (
-    <>
+    <SafeAreaViewContainer edges={['top']}>
       <View
-        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'} pb-2 flex-row px-2`}
+        className={`${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'} pb-2 px-4 pt-3`}
         style={{
-          gap: 4,
+          gap: 10,
         }}>
-        <View className="flex-1 flex-row justify-between items-center py-2 px-4 rounded-lg">
-          <View className="flex-row justify-center items-center">
+        <View
+          className="flex-row items-center justify-between"
+          style={{ backgroundColor: 'transparent' }}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            activeOpacity={0.7}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+              borderWidth: 1,
+              borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
+            }}>
+            <Feather name="chevron-left" size={20} color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'} />
+          </TouchableOpacity>
+
+          <View
+            className="flex-row items-center flex-1"
+            style={{ paddingHorizontal: 12, backgroundColor: 'transparent' }}>
             <Image
               source={{
                 uri: league?.liga.mata_mata
@@ -81,17 +111,32 @@ export default () => {
               />
             )}
           </View>
-          {/* <TouchableOpacity
-            onPress={onRefetch}
-            activeOpacity={0.6}
-            className="p-3 rounded-full"
-            style={{
-              backgroundColor: colorTheme === 'dark' ? '#1e40af' : '#3b82f6',
-              borderColor: colorTheme === 'dark' ? '#1e3a8a' : '#60a5fa',
-              borderWidth: 1,
-            }}>
-            <Feather name="refresh-ccw" size={14} color="white" />
-          </TouchableOpacity> */}
+
+          {isOwner && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() =>
+                router.push({
+                  pathname: '/leagues/create/invite',
+                  params: {
+                    type: league?.liga?.mata_mata ? 'matamata' : 'classic',
+                    slug: league?.liga?.slug,
+                  },
+                })
+              }
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#22c55e20',
+                borderWidth: 1,
+                borderColor: '#22c55e',
+              }}>
+              <Feather name="user-plus" size={18} color="#22c55e" />
+            </TouchableOpacity>
+          )}
         </View>
 
         {league?.pedidos && league.pedidos?.length > 0 && (
@@ -103,7 +148,7 @@ export default () => {
                 params: {
                   id: slug as string,
                 },
-              } as never
+              }
             }>
             <Pressable
               className="flex-row justify-center items-center p-2 rounded-lg border-2 border-blue-500"
@@ -166,7 +211,7 @@ export default () => {
           </TouchableOpacity>
         </View>
       </Modal> */}
-    </>
+    </SafeAreaViewContainer>
   );
 };
 

@@ -1,4 +1,3 @@
-import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -14,14 +13,13 @@ import { DialogComponent } from '@/components/structure/Dialog';
 import { Loading } from '@/components/structure/Loading';
 import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
-import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { ClubByLeague, League as LeagueModel, TeamLeague } from '@/models/Leagues';
-import { MarketStatus } from '@/models/Market';
-import { PlayerStats } from '@/models/Stats';
+import { ClubByLeague, League as LeagueModel } from '@/models/Leagues';
+import { FullPlayer } from '@/models/Stats';
 import { useGetLeague } from '@/queries/leagues.query';
+import { useGetMarket } from '@/queries/market.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
-import { OrderByOptions, mergeSort, onGetLeagueWithPartials } from '@/utils/leagues';
+import { OrderByOptions, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
 
 interface LeagueProps {
@@ -35,6 +33,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
 
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { data: market } = useGetMarket();
 
   const { refetch: onRefetchLeague, isRefetching: isRefetchingLeague } = useGetLeague(
     league.liga.slug,
@@ -42,69 +41,17 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   );
 
   const [isSortingClubs, setIsSortingClubs] = useState(false);
-  const [orderBy, setOrderBy] = useState(OrderByOptions.RODADA);
-  const [clubs, setClubs] = useState<TeamLeague[] | ClubByLeague[]>();
+  const [orderBy, setOrderBy] = useState<OrderByOptions>(OrderByOptions.RODADA);
   const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
 
-  const { getItem } = useAsyncStorage(CLUBS_BY_LEAGUE_KEY_STORAGE(`${league?.liga.liga_id}`));
-
-  const onGetClubsByLeagueFromStorage = useCallback(async () => {
-    const fromStorage = await getItem();
-    const data: ClubsByLeagueUtils | null = fromStorage ? JSON.parse(fromStorage) : null;
-    return data;
-  }, [getItem]);
-
-  const handleOrderByPatrimony = useCallback(() => {
-    const newOrderBy =
-      league &&
-      league.times.sort((a: TeamLeague, b: TeamLeague) => {
-        return (b.patrimonio as number) - (a.patrimonio as number);
-      });
-
-    return newOrderBy;
-  }, [league]);
-
-  const sortClubs = useCallback(
-    async (sortBy: string) => {
-      const clubsByLeague = await onGetClubsByLeagueFromStorage();
-
-      const compareFn = (a: ClubByLeague, b: ClubByLeague) =>
-        ((b.pontos as any)[sortBy] as number) - ((a.pontos as any)[sortBy] as number);
-
-      if (isMarketClose && clubsByLeague && league) {
-        const leagueWithPartials = onGetLeagueWithPartials(
-          league,
-          clubsByLeague,
-          playerStats as PlayerStats,
-          marketStatus as MarketStatus
-        );
-        const sortedClubs = mergeSort(leagueWithPartials, compareFn);
-        setClubs(sortedClubs);
-      } else {
-        const sortedClubs = league?.times?.sort((a, b) => compareFn(a, b));
-        setClubs(sortedClubs);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [clubsByLeague, isMarketClose, league, playerStats, marketStatus]
-  );
-
   const handleOnPressOrderBy = useCallback(
-    async (sortProp: string) => {
-      setOrderBy(sortProp as OrderByOptions);
-
-      if (sortProp === OrderByOptions.PATRIMONIO) {
-        const clubsSortedByPatrimony = handleOrderByPatrimony();
-        setClubs(clubsSortedByPatrimony);
-        setIsSortingClubs(false);
-        return;
-      }
-
-      await sortClubs(sortProp);
-
-      setIsSortingClubs(false);
+    (sortProp: OrderByOptions) => {
+      setIsSortingClubs(true);
+      setOrderBy(sortProp);
+      // cálculo é memoizado; só usamos esse flag pra UX (spinner rápido)
+      requestAnimationFrame(() => setIsSortingClubs(false));
     },
-    [handleOrderByPatrimony, sortClubs]
+    []
   );
 
   const tabs: ITab[] = useMemo(
@@ -113,7 +60,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 1,
         title: 'Rodada',
         onPress() {
-          setIsSortingClubs(true);
           handleOnPressOrderBy(OrderByOptions.RODADA);
         },
       },
@@ -121,7 +67,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 2,
         title: 'Total',
         onPress() {
-          setIsSortingClubs(true);
           handleOnPressOrderBy(OrderByOptions.CAMPEONATO);
         },
       },
@@ -129,7 +74,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 3,
         title: 'Turno',
         onPress() {
-          setIsSortingClubs(true);
           handleOnPressOrderBy(OrderByOptions.TURNO);
         },
       },
@@ -137,7 +81,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 4,
         title: 'Mês',
         onPress() {
-          setIsSortingClubs(true);
           handleOnPressOrderBy(OrderByOptions.MES);
         },
       },
@@ -145,7 +88,6 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         id: 5,
         title: 'C$',
         onPress() {
-          setIsSortingClubs(true);
           handleOnPressOrderBy(OrderByOptions.PATRIMONIO);
         },
       },
@@ -153,43 +95,120 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     [handleOnPressOrderBy]
   );
 
-  const keyExtractor = useCallback((item: TeamLeague) => `${item.time_id}`, []);
+  type ClubWithCaptain = ClubByLeague & { captainId?: number; captainName?: string; captainPhoto?: string };
+
+  const playerById = useMemo(() => {
+    const map = new Map<number, FullPlayer>();
+    (market?.atletas ?? []).forEach((p) => map.set(p.atleta_id, p));
+    return map;
+  }, [market?.atletas]);
+
+  const baseClubs: ClubByLeague[] = useMemo(() => {
+    // Quando mercado fechado e temos clubsByLeague + playerStats, podemos calcular parciais ao vivo sem fetch por item.
+    if (isMarketClose && clubsByLeague && playerStats && marketStatus && league) {
+      return onGetLeagueWithPartials(league, clubsByLeague, playerStats, marketStatus);
+    }
+
+    // Mercado aberto: usar dados “mínimos” já presentes em league.times
+    return (league?.times ?? []).map((t) => ({
+      ...t,
+      pontos: t.pontos,
+      variacao: t.variacao,
+      patrimonio: t.patrimonio,
+    }));
+  }, [clubsByLeague, isMarketClose, league, marketStatus, playerStats]);
+
+  const clubsWithCaptain: ClubWithCaptain[] = useMemo(() => {
+    return baseClubs.map((club) => {
+      const meta = clubsByLeague?.[String(club.time_id)];
+      const captainId = meta?.capitao ? Number(meta.capitao) : undefined;
+      const captainPlayer = captainId ? playerById.get(captainId) : undefined;
+
+      return {
+        ...club,
+        captainId,
+        captainName:
+          captainPlayer?.apelido ??
+          captainPlayer?.apelido_abreviado ??
+          (captainId ? `#${captainId}` : undefined),
+        captainPhoto: captainPlayer?.foto,
+      };
+    });
+  }, [baseClubs, clubsByLeague, playerById]);
+
+  const getSortValue = useCallback(
+    (club: ClubByLeague) => {
+      switch (orderBy) {
+        case OrderByOptions.PATRIMONIO:
+          return club.patrimonio ?? 0;
+        case OrderByOptions.CAMPEONATO:
+          return club.pontos?.campeonato ?? 0;
+        case OrderByOptions.MES:
+          return club.pontos?.mes ?? 0;
+        case OrderByOptions.TURNO:
+          return club.pontos?.turno ?? 0;
+        case OrderByOptions.CAPITAO:
+          return club.pontos?.capitao ?? 0;
+        case OrderByOptions.RODADA:
+        default:
+          return club.pontos?.rodada ?? 0;
+      }
+    },
+    [orderBy]
+  );
+
+  const sortedClubs: ClubWithCaptain[] = useMemo(() => {
+    const copy = [...clubsWithCaptain];
+    copy.sort((a, b) => getSortValue(b) - getSortValue(a));
+    return copy;
+  }, [clubsWithCaptain, getSortValue]);
+
+  const highestScoringTeam = useMemo(() => (sortedClubs[0] ? getSortValue(sortedClubs[0]) : 0), [getSortValue, sortedClubs]);
+
+  const keyExtractor = useCallback((item: ClubWithCaptain) => `${item.time_id}`, []);
 
   const renderItem = useCallback(
-    ({ item, index }: ListRenderItemInfo<TeamLeague>) => {
+    ({ item, index }: ListRenderItemInfo<ClubWithCaptain>) => {
+      const score = getSortValue(item);
+      const diffScore = score - highestScoringTeam;
+      const variation =
+        !isMarketClose && orderBy !== OrderByOptions.RODADA && orderBy !== OrderByOptions.PATRIMONIO
+          ? (() => {
+              const v = item.variacao;
+              switch (orderBy) {
+                case OrderByOptions.CAMPEONATO:
+                  return v?.campeonato;
+                case OrderByOptions.MES:
+                  return v?.mes;
+                case OrderByOptions.TURNO:
+                  return v?.turno;
+                case OrderByOptions.CAPITAO:
+                  return v?.capitao;
+                default:
+                  return undefined;
+              }
+            })()
+          : undefined;
+
       return (
         <ClubCard
-          score={
-            !isMarketClose && orderBy === OrderByOptions.PATRIMONIO
-              ? item.patrimonio
-              : (item.pontos as any)[orderBy]
-          }
+          score={score}
+          diffScore={diffScore}
+          variation={variation}
           club={item}
           orderBy={orderBy}
           position={index + 1}
-          highestScoringTeam={
-            orderBy !== 'patrimonio' ? (clubs?.[0].pontos as any)[orderBy] : clubs?.[0].patrimonio
-          }
-          isLeagueAcceptCaptain={!league.liga.sem_capitao}
           isMarketClose={isMarketClose}
           isMyTeam={league?.time_usuario?.time_id === item.time_id}
         />
       );
     },
-    [clubs, isMarketClose, league.liga.sem_capitao, league?.time_usuario?.time_id, orderBy]
+    [getSortValue, highestScoringTeam, isMarketClose, league?.time_usuario?.time_id, orderBy]
   );
 
   const onRefetch = useCallback(async () => {
-    await onRefetchLeague().then((response) => {
-      sortClubs(orderBy);
-    });
-  }, [onRefetchLeague, orderBy, sortClubs]);
-
-  const isLoading = useMemo(() => !clubs, [clubs]);
-
-  useEffect(() => {
-    sortClubs(orderBy);
-  }, [orderBy, sortClubs]);
+    await onRefetchLeague();
+  }, [onRefetchLeague]);
 
   useEffect(() => {
     if (league && !league?.liga.time_dono_id) {
@@ -197,7 +216,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     }
   }, [league]);
 
-  if (isLoading || !renderItem) {
+  if (!renderItem) {
     return <Loading />;
   }
 
@@ -230,7 +249,7 @@ export function League({ league, clubsByLeague }: LeagueProps) {
         <FlatList
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
-          data={clubs}
+          data={sortedClubs}
           keyExtractor={keyExtractor}
           ItemSeparatorComponent={() => (
             <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />

@@ -86,7 +86,7 @@ export function SoccerField({
   );
 
   return (
-    <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2">
+    <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2 bg-transparent">
       <ImageBackground
         source={footballField}
         style={{

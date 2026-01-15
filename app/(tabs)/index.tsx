@@ -8,6 +8,7 @@ import { QuickActionsGrid } from '@/components/contexts/home/QuickActionsGrid';
 import { StatsOverviewCard } from '@/components/contexts/home/StatsOverviewCard';
 import { TeamSummaryCard } from '@/components/contexts/home/TeamSummaryCard';
 import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
+import { InvitesAlert } from '@/components/contexts/utils/InvitesAlert';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
@@ -81,7 +82,7 @@ export default () => {
   }
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingMyClub} />}
@@ -94,6 +95,9 @@ export default () => {
           }}>
           {/* Market Status Bar */}
           <MarketStatusCard />
+
+          {/* Invites Alert */}
+          <InvitesAlert />
 
           {myClub ? (
             <>

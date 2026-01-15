@@ -22,7 +22,7 @@ export function TeamStatsCard({
 
   return (
     <View
-      className={`w-full flex-row items-center justify-around py-2 px-2 ${
+      className={`w-full flex-row items-center justify-around py-2 px-2 rounded-lg ${
         colorTheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
       }`}
       style={{ gap: 8 }}>

@@ -1,6 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useMemo, useState } from 'react';
 import { Image, Modal, TouchableOpacity } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
@@ -41,8 +42,9 @@ export function TeamPlayer({
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const handleModalPlayerCard = useCallback(() => {
+    if (!player) return;
     setActivePlayerCard((previous) => !previous);
-  }, []);
+  }, [player]);
 
   const handleRemovePlayerFromLayout = useCallback(
     (player: LineupPlayer | FullPlayer) => {
@@ -197,11 +199,19 @@ export function TeamPlayer({
           transparent
           visible={activePlayerCard}
           onRequestClose={() => setActivePlayerCard(false)}>
-          <TeamPlayerCard
-            player={player as LineupPlayer}
-            onClose={handleModalPlayerCard}
-            isReservePlayer={isReservePlayer}
-          />
+          <SafeAreaProvider>
+            <SafeAreaView
+              style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+              edges={['top', 'bottom']}>
+              {player ? (
+                <TeamPlayerCard
+                  player={player}
+                  onClose={handleModalPlayerCard}
+                  isReservePlayer={isReservePlayer}
+                />
+              ) : null}
+            </SafeAreaView>
+          </SafeAreaProvider>
         </Modal>
       )}
     </View>

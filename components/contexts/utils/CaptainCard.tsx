@@ -5,7 +5,7 @@ import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
-import { IPositions } from '@/models/Stats';
+import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
@@ -15,6 +15,7 @@ export function CaptainCard() {
   const { isMarketClose } = useMarketStatus();
   const { captain } = useMyClub();
   const { data: playerStats } = useGetScoredPlayers(isMarketClose);
+  const { data: market } = useGetMarket();
   const { data: positions } = useGetPositions();
 
   const getPositionColor = (positionName?: string) => {
@@ -36,7 +37,7 @@ export function CaptainCard() {
   // Estado vazio - quando não tem capitão
   if (!captain) {
     return (
-      <AnimatedCard delay={300} variant="flat">
+      <AnimatedCard delay={300} variant="flat" >
         <View style={{ gap: 12, backgroundColor: 'transparent' }}>
           {/* Header */}
           <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
@@ -91,8 +92,10 @@ export function CaptainCard() {
   }
 
   // Estado com capitão selecionado
-  const position = (positions as IPositions)?.[captain.posicao_id];
-  const score = playerStats?.atletas[captain.atleta_id]?.pontuacao;
+  const position = positions?.[String(captain.posicao_id)];
+  const club =
+    market?.clubes?.[String(captain.clube_id)] ?? playerStats?.clubes?.[String(captain.clube_id)];
+  const score = playerStats?.atletas?.[String(captain.atleta_id)]?.pontuacao;
   const captainScore = score ? score * 1.5 : 0;
 
   return (
@@ -108,7 +111,9 @@ export function CaptainCard() {
               }}>
               <Feather name="award" size={16} color="#F59E0B" />
             </View>
-            <Text className="font-bold text-base">Seu Capitão</Text>
+            <View style={{ backgroundColor: 'transparent' }}>
+              <Text className="font-bold text-base">Seu Capitão</Text>
+            </View>
           </View>
           <View
             className="px-3 py-1.5 rounded-full"
@@ -148,10 +153,26 @@ export function CaptainCard() {
           </View>
 
           {/* Details */}
-          <View className="flex-1" style={{ gap: 6, backgroundColor: 'transparent' }}>
-            <Text className="font-bold text-lg" numberOfLines={1}>
+          <View className="flex-1" style={{ gap: 8, backgroundColor: 'transparent' }}>
+            <Text className="font-bold" numberOfLines={1}>
               {captain.apelido}
             </Text>
+            {!!club?.nome_fantasia && (
+              <View
+                className="flex-row items-center"
+                style={{ gap: 8, backgroundColor: 'transparent' }}>
+                {!!club?.escudos?.['30x30'] && (
+                  <Image
+                    source={{ uri: club.escudos['30x30'] }}
+                    style={{ width: 18, height: 18, borderRadius: 9 }}
+                    alt={club.nome_fantasia}
+                  />
+                )}
+                <Text className="text-xs font-semibold text-gray-600 dark:text-gray-400" numberOfLines={1}>
+                  {club.nome_fantasia}
+                </Text>
+              </View>
+            )}
             <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
               <View
                 className="px-2.5 py-1 rounded-md"

@@ -49,12 +49,13 @@ export function TeamQuickActions({
 
   return (
     <View
-      className={`w-full flex-row items-center justify-between px-2 py-2 ${
+      className={`w-full flex-row items-center justify-between px-2 py-2 rounded-lg ${
         colorTheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
       }`}
       style={{ gap: 8 }}>
       <View style={{ flex: 1, backgroundColor: 'transparent' }}>
         <SelectDropdown
+          key={formation}
           disabled={disabled}
           dropdownIconPosition="right"
           renderDropdownIcon={(isOpened) => {

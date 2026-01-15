@@ -1,7 +1,9 @@
 import { Feather } from '@expo/vector-icons';
+import { useMemo } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePartialScore from '@/hooks/usePartialScore';
 import { FullClubInfo } from '@/models/Club';
@@ -10,6 +12,15 @@ import { numberToString } from '@/utils/parseTo';
 type StatsClubCardProps = {
   team: FullClubInfo;
   round?: number;
+};
+
+type StatItem = {
+  label: string;
+  value: number;
+  variation?: number;
+  icon: 'dollar-sign' | 'zap' | 'award' | 'users';
+  color: string;
+  suffix?: string;
 };
 
 export function StatsClubCard({ team, round }: StatsClubCardProps) {
@@ -27,82 +38,120 @@ export function StatsClubCard({ team, round }: StatsClubCardProps) {
     teamId: team.time.time_id,
   });
 
+  const stats: StatItem[] = useMemo(() => {
+    const isCurrentRound = isMarketClose && round === marketStatus?.rodada_atual;
+
+    if (isCurrentRound) {
+      return [
+        {
+          label: 'Patrimônio',
+          value: totalPartialValorization ?? 0,
+          variation: partialValorization,
+          icon: 'dollar-sign' as const,
+          color: '#3B82F6',
+        },
+        {
+          label: 'Parcial',
+          value: partialScore ?? 0,
+          icon: 'zap' as const,
+          color: '#22C55E',
+        },
+        {
+          label: 'Total',
+          value: totalPartialScore ?? 0,
+          icon: 'award' as const,
+          color: '#F59E0B',
+        },
+        {
+          label: 'Pontuados',
+          value: playersHaveAlreadyPlayed || 0,
+          icon: 'users' as const,
+          color: '#8B5CF6',
+          suffix: '/12',
+        },
+      ];
+    }
+
+    return [
+      {
+        label: 'Patrimônio',
+        value: team.patrimonio ?? 0,
+        icon: 'dollar-sign' as const,
+        color: '#3B82F6',
+      },
+      {
+        label: 'Rodada',
+        value: team.pontos ?? 0,
+        icon: 'zap' as const,
+        color: '#22C55E',
+      },
+      {
+        label: 'Total',
+        value: team.pontos_campeonato ?? 0,
+        icon: 'award' as const,
+        color: '#F59E0B',
+      },
+    ];
+  }, [
+    isMarketClose,
+    round,
+    marketStatus?.rodada_atual,
+    totalPartialValorization,
+    partialValorization,
+    partialScore,
+    totalPartialScore,
+    playersHaveAlreadyPlayed,
+    team.patrimonio,
+    team.pontos,
+    team.pontos_campeonato,
+  ]);
+
   return (
-    <>
-      {isMarketClose && round === marketStatus?.rodada_atual ? (
-        <View
-          className={`flex-row justify-between items-center gap-2 ${
-            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
-          }`}>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <View className="flex-row">
-              <Text className="font-semibold text-xs">Patr.</Text>
-              <View className="flex-row pl-1 justify-center items-center">
-                <Text className="font-semibold text-xs">{numberToString(partialValorization)}</Text>
-                <Feather
-                  size={12}
-                  name={partialValorization && partialValorization < 0 ? 'arrow-down' : 'arrow-up'}
-                  color={
-                    (partialValorization ?? 0) > 0
-                      ? '#22c55e'
-                      : (partialValorization ?? 0) < 0
-                      ? '#ef4444'
-                      : '#fafafa'
-                  }
-                />
+    <AnimatedCard variant="flat" className="p-0">
+      <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
+        {stats.map((stat, index) => (
+          <View
+            key={index}
+            className="flex-1 rounded-xl p-3"
+            style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+            <View
+              className="flex-row items-center justify-between mb-2"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                {stat.label}
+              </Text>
+              <View
+                className="w-6 h-6 rounded-full items-center justify-center"
+                style={{ backgroundColor: `${stat.color}20` }}>
+                <Feather name={stat.icon} size={12} color={stat.color} />
               </View>
             </View>
 
-            <Text className="font-semibold text-md text-green-500">
-              {numberToString(totalPartialValorization)}
+            <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+              {numberToString(stat.value)}
+              {stat.suffix && (
+                <Text className="text-sm text-gray-500">{stat.suffix}</Text>
+              )}
             </Text>
-          </View>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <Text className="font-semibold text-xs">Parcial</Text>
-            <Text className="font-semibold text-md text-green-500">
-              {numberToString(partialScore)}
-            </Text>
-          </View>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <Text className="font-semibold text-xs">Total</Text>
 
-            <Text className="font-semibold text-md text-green-500">
-              {numberToString(totalPartialScore)}
-            </Text>
+            {stat.variation !== undefined && stat.variation !== null && stat.variation !== 0 && (
+              <View className="flex-row items-center" style={{ gap: 2, backgroundColor: 'transparent' }}>
+                <Feather
+                  name={stat.variation >= 0 ? 'arrow-up' : 'arrow-down'}
+                  size={10}
+                  color={stat.variation >= 0 ? '#22C55E' : '#EF4444'}
+                />
+                <Text
+                  className={`text-xs font-semibold ${
+                    stat.variation >= 0 ? 'text-green-500' : 'text-red-500'
+                  }`}>
+                  {numberToString(Math.abs(stat.variation))}
+                </Text>
+              </View>
+            )}
           </View>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <Text className="font-semibold text-xs">Pontuados</Text>
-
-            <Text className="font-semibold text-md text-green-500">
-              {`${playersHaveAlreadyPlayed || '0'}/12`}
-            </Text>
-          </View>
-        </View>
-      ) : (
-        <View
-          className={`flex-row justify-between items-center gap-2 ${
-            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
-          }`}>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <Text className="font-semibold text-xs">Patrim.</Text>
-            <Text className="font-semibold text-md text-blue-500">
-              {numberToString(team.patrimonio ?? 0)}
-            </Text>
-          </View>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <Text className="font-semibold text-xs">Rodada</Text>
-            <Text className="font-semibold text-md text-blue-500">
-              {numberToString(team.pontos ?? 0)}
-            </Text>
-          </View>
-          <View className="flex-1 rounded-lg px-2 py-4 items-center justify-center">
-            <Text className="font-semibold text-xs">Total</Text>
-            <Text className="font-semibold text-md text-blue-500">
-              {numberToString(team.pontos_campeonato ?? 0)}
-            </Text>
-          </View>
-        </View>
-      )}
-    </>
+        ))}
+      </View>
+    </AnimatedCard>
   );
 }

@@ -46,6 +46,20 @@ export interface MarketStatus {
       };
     };
   };
+  /**
+   * Alguns payloads expõem `pontos_corridos` diretamente no root do /mercado/status.
+   * Mantemos opcional para compatibilidade e fazemos fallback em runtime.
+   */
+  pontos_corridos?: {
+    free: {
+      criacao: number;
+      participacao: number;
+    };
+    pro: {
+      criacao: number;
+      participacao: number;
+    };
+  };
   times_escalados: number;
   mercado_pos_rodada: boolean;
   novo_mes_ranking: boolean;
