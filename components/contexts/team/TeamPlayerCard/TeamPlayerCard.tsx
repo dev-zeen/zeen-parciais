@@ -1,20 +1,18 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback } from 'react';
-import {  Image, ScrollView } from 'react-native';
+import { Image, ScrollView } from 'react-native';
 
-import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
-import { Loading } from '@/components/structure/Loading';
 import { PlayerStatsView } from '@/components/contexts/team/PlayerStatsView';
-import Colors from '@/constants/Colors';
+import { Loading } from '@/components/structure/Loading';
 import { Positions } from '@/constants/Formations';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer } from '@/models/Formations';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetPlayerHistory, useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type TeamPlayerCardProps = {
   player: LineupPlayer;
@@ -68,14 +66,14 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
           <Text className="text-lg font-bold" numberOfLines={1}>
             {player.apelido}
           </Text>
-          <Text 
+          <Text
             className="text-xs font-medium"
             numberOfLines={1}
             style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
             {positions?.[player.posicao_id].nome}
           </Text>
         </View>
-        
+
         <TouchableOpacity
           activeOpacity={0.6}
           onPress={onClose}
@@ -115,54 +113,54 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
                 gap: 2,
                 backgroundColor: 'transparent',
               }}>
-          {!isMarketClose && (
-            <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
-              {!isCaptain && !isReservePlayer && player.posicao_id !== Positions.TECNICO && (
-                <TouchableOpacity
-                  onPress={handleSelectCaptain}
-                  disabled={isCaptain}
-                  activeOpacity={0.6}
-                  className="flex-1 py-3 rounded-lg"
-                  style={{
-                    backgroundColor: colorTheme === 'dark' ? '#7c3aed' : '#ddd6fe',
-                    borderWidth: 1.5,
-                    borderColor: colorTheme === 'dark' ? '#8b5cf6' : '#a78bfa',
-                  }}>
-                  <Text
-                    className="text-center font-semibold text-sm"
+              {!isMarketClose && (
+                <View
+                  className="flex-row items-center"
+                  style={{ gap: 8, backgroundColor: 'transparent' }}>
+                  {!isCaptain && !isReservePlayer && player.posicao_id !== Positions.TECNICO && (
+                    <TouchableOpacity
+                      onPress={handleSelectCaptain}
+                      disabled={isCaptain}
+                      activeOpacity={0.6}
+                      className="flex-1 py-3 rounded-lg"
+                      style={{
+                        backgroundColor: colorTheme === 'dark' ? '#7c3aed' : '#ddd6fe',
+                        borderWidth: 1.5,
+                        borderColor: colorTheme === 'dark' ? '#8b5cf6' : '#a78bfa',
+                      }}>
+                      <Text
+                        className="text-center font-semibold text-sm"
+                        style={{
+                          color: colorTheme === 'dark' ? '#ffffff' : '#6d28d9',
+                        }}>
+                        Tornar Capitão
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+
+                  <TouchableOpacity
+                    onPress={handleRemovePlayerFromLineup}
+                    activeOpacity={0.6}
+                    className={`${!isCaptain && !isReservePlayer && player.posicao_id !== Positions.TECNICO ? 'flex-1' : 'flex-1'} py-3 rounded-lg`}
                     style={{
-                      color: colorTheme === 'dark' ? '#ffffff' : '#6d28d9',
+                      backgroundColor: colorTheme === 'dark' ? '#dc2626' : '#fee2e2',
+                      borderWidth: 1.5,
+                      borderColor: colorTheme === 'dark' ? '#ef4444' : '#fca5a5',
                     }}>
-                    Tornar Capitão
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      className="text-center font-semibold text-sm"
+                      style={{
+                        color: colorTheme === 'dark' ? '#ffffff' : '#991b1b',
+                      }}>
+                      Vender
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               )}
-
-              <TouchableOpacity
-                onPress={handleRemovePlayerFromLineup}
-                activeOpacity={0.6}
-                className={`${!isCaptain && !isReservePlayer && player.posicao_id !== Positions.TECNICO ? 'flex-1' : 'flex-1'} py-3 rounded-lg`}
-                style={{
-                  backgroundColor: colorTheme === 'dark' ? '#dc2626' : '#fee2e2',
-                  borderWidth: 1.5,
-                  borderColor: colorTheme === 'dark' ? '#ef4444' : '#fca5a5',
-                }}>
-                <Text
-                  className="text-center font-semibold text-sm"
-                  style={{
-                    color: colorTheme === 'dark' ? '#ffffff' : '#991b1b',
-                  }}>
-                  Vender
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
             </View>
           </View>
 
           {/* Action Buttons */}
-
 
           {/* Basic Stats */}
           <View
@@ -173,8 +171,10 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               borderWidth: 1,
               borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
             }}>
-            <View className="items-center justify-center flex-1" style={{ backgroundColor: 'transparent' }}>
-              <Text 
+            <View
+              className="items-center justify-center flex-1"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text
                 className="text-xs font-medium"
                 style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 Jogos
@@ -182,8 +182,10 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               <Text className="text-base font-bold mt-0.5">{player.jogos_num}</Text>
             </View>
 
-            <View className="items-center justify-center flex-1" style={{ backgroundColor: 'transparent' }}>
-              <Text 
+            <View
+              className="items-center justify-center flex-1"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text
                 className="text-xs font-medium"
                 style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 Média
@@ -191,8 +193,10 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               <Text className="text-base font-bold mt-0.5">{numberToString(player.media_num)}</Text>
             </View>
 
-            <View className="items-center justify-center flex-1" style={{ backgroundColor: 'transparent' }}>
-              <Text 
+            <View
+              className="items-center justify-center flex-1"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text
                 className="text-xs font-medium"
                 style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 Min
@@ -202,15 +206,15 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               </Text>
             </View>
 
-            <View className="items-center justify-center flex-1" style={{ backgroundColor: 'transparent' }}>
-              <Text 
+            <View
+              className="items-center justify-center flex-1"
+              style={{ backgroundColor: 'transparent' }}>
+              <Text
                 className="text-xs font-medium"
                 style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 Preço
               </Text>
-              <Text 
-                className="text-base font-bold mt-0.5"
-                style={{ color: '#3b82f6' }}>
+              <Text className="text-base font-bold mt-0.5" style={{ color: '#3b82f6' }}>
                 {numberToString(player.preco_num)}
               </Text>
             </View>
@@ -219,10 +223,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
           {/* Statistics Section */}
           {playerHistory && playerHistory.length > 0 && (
             <View style={{ backgroundColor: 'transparent' }}>
-              <PlayerStatsView 
-                stats={playerHistory} 
-                isLoading={false}
-              />
+              <PlayerStatsView stats={playerHistory} isLoading={false} />
             </View>
           )}
         </View>

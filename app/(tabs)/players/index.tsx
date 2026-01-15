@@ -15,13 +15,13 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import useValorization from '@/hooks/useValorization';
 import { Appreciations } from '@/models/Player';
 import { Player, PlayerStats } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
 import { GRAY_OPACITY } from '@/styles/colors';
 import { normalizeQuery } from '@/utils/format';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export interface ScorePlayersProps extends Player {
   valorization?: number;

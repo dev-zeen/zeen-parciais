@@ -3,8 +3,8 @@ import {  Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import type { PointsCompetitionListItem } from '@/models/Competition';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import type { PointsCompetitionListItem } from '@/models/Competition';
 
 type Props = {
   competition: PointsCompetitionListItem;

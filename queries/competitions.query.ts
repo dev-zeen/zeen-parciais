@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+
 import {
   GET_POINTS_COMPETITIONS,
   GET_POINTS_COMPETITION_BY_SLUG,
@@ -7,7 +9,6 @@ import type {
   PointsCompetitionListItem,
 } from '@/models/Competition';
 import api from '@/services/api';
-import { useQuery } from '@tanstack/react-query';
 import { useFetch } from '@/utils/reactQuery';
 
 type UnknownListResponse =

@@ -1,13 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import {  Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
-import useMarketStatus from '@/hooks/useMarketStatus';
-import useMyClub from '@/hooks/useMyClub';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 type QuickAction = {
@@ -22,18 +18,6 @@ type QuickAction = {
 export function QuickActionsGrid() {
   const router = useRouter();
   const colorTheme = useThemeColor();
-  const { myClub } = useMyClub();
-  const { isMarketClose } = useMarketStatus();
-
-  const unlikelyPlayersCount = useMemo(() => {
-    return myClub?.atletas?.filter(
-      (player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL
-    ).length || 0;
-  }, [myClub?.atletas]);
-
-  const hasTeam = useMemo(() => {
-    return myClub && myClub.atletas && myClub.atletas.length > 0;
-  }, [myClub]);
 
   const actions: QuickAction[] = [
     {
@@ -67,7 +51,7 @@ export function QuickActionsGrid() {
   ];
 
   return (
-    <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent'  }}>
+    <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
       {actions.map((action, index) => (
         <Pressable
           key={action.id}
@@ -77,18 +61,17 @@ export function QuickActionsGrid() {
             opacity: pressed ? 0.7 : 1,
             transform: [{ scale: pressed ? 0.95 : 1 }],
           })}>
-          <AnimatedCard
-            delay={100 + index * 50}
-            variant="flat"
-            style={{ height: 100 }}>
-            <View className="items-center justify-center h-full" style={{ gap: 6, backgroundColor: 'transparent' }}>
+          <AnimatedCard delay={100 + index * 50} variant="flat" style={{ height: 100 }}>
+            <View
+              className="items-center justify-center h-full"
+              style={{ gap: 6, backgroundColor: 'transparent' }}>
               <View
                 className="w-10 h-10 rounded-full items-center justify-center"
                 style={{ backgroundColor: `${action.color}25` }}>
                 <Feather name={action.icon} size={20} color={action.color} />
               </View>
-              <Text 
-                className="font-semibold text-xs text-center" 
+              <Text
+                className="font-semibold text-xs text-center"
                 numberOfLines={1}
                 style={{ color: colorTheme === 'dark' ? '#F3F4F6' : '#1F2937' }}>
                 {action.label}

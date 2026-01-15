@@ -7,12 +7,9 @@ import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Loading } from '@/components/structure/Loading';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function MarketStatusCard() {
   const { marketStatus, isBallRolling, currentRoundInfo } = useMarketStatus();
-  const colorTheme = useThemeColor();
 
   const MARKET_STATUS_COLOR_NAMED = {
     1: 'bg-green-500',
@@ -46,19 +43,11 @@ export function MarketStatusCard() {
     return <Loading />;
   }
 
-  const getBackgroundColor = () => {
-    if (marketStatus.status_mercado === MARKET_STATUS_NAME.ABERTO) {
-      return colorTheme === 'dark' ? '#15803d30' : '#dcfce7';
-    } else if (marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO) {
-      return colorTheme === 'dark' ? '#b9131330' : '#fee2e2';
-    } else {
-      return colorTheme === 'dark' ? '#ea580c30' : '#ffedd5';
-    }
-  };
-
   return (
     <AnimatedCard delay={100} variant="flat">
-      <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
+      <View
+        className="flex-row items-center justify-between"
+        style={{ backgroundColor: 'transparent' }}>
         {/* Status Indicator */}
         <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
           <View
@@ -66,15 +55,15 @@ export function MarketStatusCard() {
               MARKET_STATUS_COLOR_NAMED[marketStatus.status_mercado]
             }`}
           />
-        
+
           <Text className="font-semibold text-sm">
             {marketStatus.status_mercado === MARKET_STATUS_NAME.ABERTO
               ? 'Mercado Aberto'
               : marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO
-              ? isBallRolling
-                ? 'Bola Rolando'
-                : 'Mercado Fechado'
-              : MARKET_STATUS_NAMED[marketStatus.status_mercado]}
+                ? isBallRolling
+                  ? 'Bola Rolando'
+                  : 'Mercado Fechado'
+                : MARKET_STATUS_NAMED[marketStatus.status_mercado]}
           </Text>
         </View>
 
@@ -88,9 +77,13 @@ export function MarketStatusCard() {
 
       {/* Additional Info Row */}
       {(isBallRolling || isFinalRound) && (
-        <View className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-gray-700" style={{ backgroundColor: 'transparent' }}>
+        <View
+          className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-gray-700"
+          style={{ backgroundColor: 'transparent' }}>
           {isBallRolling && (
-            <View className="flex-row items-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
+            <View
+              className="flex-row items-center"
+              style={{ gap: 4, backgroundColor: 'transparent' }}>
               <View className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
               <Text className="text-xs text-gray-600 dark:text-gray-400">
                 Atualização em tempo real

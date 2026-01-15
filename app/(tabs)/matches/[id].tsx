@@ -1,10 +1,6 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { 
-  ActivityIndicator,
-  FlatList,
-  ListRenderItemInfo,
-  RefreshControl } from 'react-native';
+import { ActivityIndicator, FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
 
 import { onGetEmptyPositions } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
@@ -19,10 +15,10 @@ import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import useValorization from '@/hooks/useValorization';
 import { Market } from '@/models/Market';
 import { Match, Matches } from '@/models/Matches';
-import { Appreciations } from '@/models/Player';
 import { FullPlayer, IPositions, IScout, PlayerStats } from '@/models/Stats';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetMarket } from '@/queries/market.query';
@@ -30,7 +26,6 @@ import { useGetMatchs } from '@/queries/matches.query';
 import { useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { onBalancePrice } from '@/utils/team';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface IMatch extends Match {
   home?: number;
@@ -81,7 +76,8 @@ export default () => {
   const { isRefetching: isRefetchingMatches, refetch: onRefetchMatches } = useGetMatchs();
 
   const currentBalancePrice = useMemo(() => {
-    if (myClub && myClub.patrimonio !== undefined && price >= 0) return onBalancePrice(myClub.patrimonio, price);
+    if (myClub && myClub.patrimonio !== undefined && price >= 0)
+      return onBalancePrice(myClub.patrimonio, price);
     return 0;
   }, [myClub, price]);
 
@@ -270,13 +266,14 @@ export default () => {
         />
       </View>
       <Tabs tabs={tabs} />
-      <View 
+      <View
         className="flex-1"
         style={{
-          backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+          backgroundColor:
+            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         {isRendering ? (
-          <View 
+          <View
             className="flex-1 mx-2 items-center justify-center mt-2 rounded-lg"
             style={{
               backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',

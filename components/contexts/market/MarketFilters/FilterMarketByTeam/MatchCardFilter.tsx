@@ -1,11 +1,10 @@
 import { Feather } from '@expo/vector-icons';
-import {  Image } from 'react-native';
+import { Image } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
-import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Market } from '@/models/Market';
 import { Match } from '@/models/Matches';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type MatchCardFilterProps = {
   market: Market;
@@ -23,7 +22,7 @@ export function MatchCardFilter({
   const colorTheme = useThemeColor();
 
   return (
-    <View 
+    <View
       className="flex-row px-8 py-3 rounded-lg items-center justify-evenly"
       style={{
         backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
@@ -35,7 +34,7 @@ export function MatchCardFilter({
         style={{ gap: 8, backgroundColor: 'transparent' }}
         activeOpacity={0.7}
         onPress={() => handlePressTeam(match.clube_casa_id)}>
-        <Text 
+        <Text
           className="font-semibold w-7 text-center"
           style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
           {`${match.clube_casa_posicao}º`}
@@ -47,9 +46,13 @@ export function MatchCardFilter({
             height: 40,
             borderRadius: 8,
             borderWidth: selecteds?.includes(match.clube_casa_id) ? 2 : 1,
-            borderColor: selecteds?.includes(match.clube_casa_id) 
-              ? (colorTheme === 'dark' ? '#3b82f6' : '#2563eb')
-              : (colorTheme === 'dark' ? '#374151' : '#e5e7eb'),
+            borderColor: selecteds?.includes(match.clube_casa_id)
+              ? colorTheme === 'dark'
+                ? '#3b82f6'
+                : '#2563eb'
+              : colorTheme === 'dark'
+                ? '#374151'
+                : '#e5e7eb',
             padding: 4,
             backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f9fafb',
           }}>
@@ -67,11 +70,7 @@ export function MatchCardFilter({
         </View>
       </TouchableOpacity>
 
-      <Feather
-        name="x"
-        size={16}
-        color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
-      />
+      <Feather name="x" size={16} color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'} />
 
       <TouchableOpacity
         className="flex-row items-center justify-center"
@@ -84,9 +83,13 @@ export function MatchCardFilter({
             height: 40,
             borderRadius: 8,
             borderWidth: selecteds?.includes(match.clube_visitante_id) ? 2 : 1,
-            borderColor: selecteds?.includes(match.clube_visitante_id) 
-              ? (colorTheme === 'dark' ? '#3b82f6' : '#2563eb')
-              : (colorTheme === 'dark' ? '#374151' : '#e5e7eb'),
+            borderColor: selecteds?.includes(match.clube_visitante_id)
+              ? colorTheme === 'dark'
+                ? '#3b82f6'
+                : '#2563eb'
+              : colorTheme === 'dark'
+                ? '#374151'
+                : '#e5e7eb',
             padding: 4,
             backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f9fafb',
           }}>
@@ -103,7 +106,7 @@ export function MatchCardFilter({
           />
         </View>
 
-        <Text 
+        <Text
           className="font-semibold w-7 text-center"
           style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
           {`${match.clube_visitante_posicao}º`}

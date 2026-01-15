@@ -1,11 +1,11 @@
 import { useCallback } from 'react';
-import {  FlatList, Image, ListRenderItemInfo, RefreshControl } from 'react-native';
+import { FlatList, Image, ListRenderItemInfo, RefreshControl } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useLeague, { TeamCup } from '@/hooks/useLeague';
-import { League } from '@/models/Leagues';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { League } from '@/models/Leagues';
 
 type CupTeamsListProps = {
   cup: League;
@@ -26,12 +26,6 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
   } = useLeague({
     slug: cup.liga.slug,
   });
-
-  // Se a copa já está em andamento, essa lista não é usada (a UI mostra as chaves).
-  // Evita renderizar células vazias e desperdiçar processamento.
-  if (isCupInProgress) {
-    return null;
-  }
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<TeamCup>) => {
@@ -76,6 +70,12 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
   );
 
   const keyExtractor = useCallback((item: TeamCup) => `${item.time_id}`, []);
+
+  // Se a copa já está em andamento, essa lista não é usada (a UI mostra as chaves).
+  // Evita renderizar células vazias e desperdiçar processamento.
+  if (isCupInProgress) {
+    return null;
+  }
 
   return (
     <FlatList

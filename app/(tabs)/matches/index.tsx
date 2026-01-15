@@ -7,10 +7,10 @@ import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Match } from '@/models/Matches';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetMatchs } from '@/queries/matches.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
   const colorTheme = useThemeColor();

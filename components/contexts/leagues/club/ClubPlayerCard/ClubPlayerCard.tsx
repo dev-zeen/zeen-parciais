@@ -7,13 +7,13 @@ import captainImage from '@/assets/images/letter-c.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { MarketStatus } from '@/models/Market';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ClubPlayerCardProps = {
   player: PlayerClub;

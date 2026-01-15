@@ -6,8 +6,8 @@ import { Text, View } from '@/components/Themed';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
-import { useGetMarketStatus } from '@/queries/market.query';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useGetMarketStatus } from '@/queries/market.query';
 
 type MaintenanceMarketProps = {
   hasHeader?: boolean;

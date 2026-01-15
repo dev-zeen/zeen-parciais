@@ -1,6 +1,6 @@
-import { LineChart as RNLineChart } from 'react-native-chart-kit';
-import {  Dimensions,  LayoutChangeEvent  } from 'react-native';
 import { useState } from 'react';
+import {  Dimensions,  LayoutChangeEvent  } from 'react-native';
+import { LineChart as RNLineChart } from 'react-native-chart-kit';
 
 import { View } from '@/components/Themed';
 import { useThemeColor } from '@/hooks/useThemeColor';

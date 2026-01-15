@@ -9,9 +9,9 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPointsCompetitionBySlug } from '@/queries/competitions.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default function () {
   const colorTheme = useThemeColor();

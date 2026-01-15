@@ -1,7 +1,7 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import {  RefreshControl, ScrollView } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 
 import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
@@ -10,18 +10,17 @@ import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useTeam from '@/hooks/useTeam';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import useValorization from '@/hooks/useValorization';
-import { FullClubInfo } from '@/models/Club';
 import { FullPlayer } from '@/models/Stats';
 import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 const TYPE_VIEW = {
   FIELD: 'FIELD',
@@ -46,8 +45,6 @@ export default () => {
   const { marketStatus, isLoadingMarketStatus, isMarketClose } = useMarketStatus();
 
   const typeViewDefault = TYPE_VIEW.FIELD;
-
-  const [view, setView] = useState(typeViewDefault);
 
   // const onChangeViewField = useCallback(() => {
   //   setView(TYPE_VIEW.FIELD);
@@ -79,7 +76,6 @@ export default () => {
 
   const {
     data: substitutions,
-    isInitialLoading: isInitialLoadingSubstitutions,
     refetch: onRefetchSubstitutions,
     isRefetching: isRefetchingSubstitutions,
   } = useGetMatchSubstitutions({
@@ -115,7 +111,7 @@ export default () => {
 
     const formationIdCandidate =
       isMarketClose && currentRound === marketRound
-        ? team.time?.esquema_id ?? team.esquema_id
+        ? (team.time?.esquema_id ?? team.esquema_id)
         : team.esquema_id;
 
     return onGetFillLineupDefaultPlayers({
@@ -131,7 +127,9 @@ export default () => {
     if (marketStatus && isFirstRender.current) {
       // Mercado aberto costuma mostrar a rodada anterior, mas na 1ª rodada isso vira 0 e
       // deixa a tela em loading infinito. Garante mínimo 1.
-      const roundCandidate = isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1;
+      const roundCandidate = isMarketClose
+        ? marketStatus.rodada_atual
+        : marketStatus.rodada_atual - 1;
       const round = Math.max(1, roundCandidate);
       setCurrentRound(round);
 
@@ -140,7 +138,11 @@ export default () => {
   }, [isMarketClose, marketStatus]);
 
   const onRefetch = useCallback(async () => {
-    await Promise.allSettled([onRefetchStats(), onRefetchValorizations(), onRefetchSubstitutions()]);
+    await Promise.allSettled([
+      onRefetchStats(),
+      onRefetchValorizations(),
+      onRefetchSubstitutions(),
+    ]);
   }, [onRefetchStats, onRefetchSubstitutions, onRefetchValorizations]);
 
   const isRefetching = useMemo(
@@ -189,10 +191,10 @@ export default () => {
   }
 
   // Rodada máxima disponível para visualização
-  const maxAvailableRound = isMarketClose 
-    ? marketStatus.rodada_atual 
+  const maxAvailableRound = isMarketClose
+    ? marketStatus.rodada_atual
     : marketStatus.rodada_atual - 1;
-  
+
   // Botão de próxima rodada só habilitado se currentRound < maxAvailableRound
   const nextRoundDisabled = currentRound >= maxAvailableRound;
 
@@ -201,14 +203,16 @@ export default () => {
       <View
         style={{
           flex: 1,
-          backgroundColor: colorTheme === 'dark' ? BACKGROUND_DEFAULT_DARK : BACKGROUND_DEFAULT_LIGHT,
+          backgroundColor:
+            colorTheme === 'dark' ? BACKGROUND_DEFAULT_DARK : BACKGROUND_DEFAULT_LIGHT,
         }}>
         {/* Header */}
         <View
           className="px-4 pt-3 pb-3"
           style={{
             gap: 12,
-            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           }}>
           <View
             className="flex-row items-center justify-between"
@@ -226,7 +230,11 @@ export default () => {
                 borderWidth: 1,
                 borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Feather name="chevron-left" size={20} color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'} />
+              <Feather
+                name="chevron-left"
+                size={20}
+                color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'}
+              />
             </TouchableOpacity>
 
             <View style={{ flex: 1, paddingHorizontal: 12, backgroundColor: 'transparent' }}>
@@ -248,8 +256,7 @@ export default () => {
             paddingBottom: 16,
             gap: 12,
           }}>
-
-        <StatsClubCard team={team} round={currentRound} />
+          <StatsClubCard team={team} round={currentRound} />
 
           {/* Seletor de Rodada */}
           <AnimatedCard variant="flat" className="p-0">
@@ -266,9 +273,19 @@ export default () => {
                   borderRadius: 16,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: currentRound === 1 ? (colorTheme === 'dark' ? '#1f2937' : '#f3f4f6') : '#3b82f620',
+                  backgroundColor:
+                    currentRound === 1
+                      ? colorTheme === 'dark'
+                        ? '#1f2937'
+                        : '#f3f4f6'
+                      : '#3b82f620',
                   borderWidth: 1,
-                  borderColor: currentRound === 1 ? (colorTheme === 'dark' ? '#374151' : '#e5e7eb') : '#3b82f6',
+                  borderColor:
+                    currentRound === 1
+                      ? colorTheme === 'dark'
+                        ? '#374151'
+                        : '#e5e7eb'
+                      : '#3b82f6',
                 }}>
                 <Feather
                   name="chevron-left"
@@ -292,9 +309,17 @@ export default () => {
                   borderRadius: 16,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  backgroundColor: nextRoundDisabled ? (colorTheme === 'dark' ? '#1f2937' : '#f3f4f6') : '#3b82f620',
+                  backgroundColor: nextRoundDisabled
+                    ? colorTheme === 'dark'
+                      ? '#1f2937'
+                      : '#f3f4f6'
+                    : '#3b82f620',
                   borderWidth: 1,
-                  borderColor: nextRoundDisabled ? (colorTheme === 'dark' ? '#374151' : '#e5e7eb') : '#3b82f6',
+                  borderColor: nextRoundDisabled
+                    ? colorTheme === 'dark'
+                      ? '#374151'
+                      : '#e5e7eb'
+                    : '#3b82f6',
                 }}>
                 <Feather
                   name="chevron-right"
@@ -306,7 +331,7 @@ export default () => {
           </AnimatedCard>
 
           {/* Campo e Reservas */}
-          {view === TYPE_VIEW.FIELD && (
+          {typeViewDefault === TYPE_VIEW.FIELD && (
             <View style={{ gap: 12, backgroundColor: 'transparent' }}>
               <SoccerField
                 lineup={lineup}
@@ -325,7 +350,6 @@ export default () => {
               />
             </View>
           )}
-
         </ScrollView>
       </View>
     </SafeAreaViewContainer>

@@ -7,8 +7,8 @@ import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
-import { numberToString } from '@/utils/parseTo';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { numberToString } from '@/utils/parseTo';
 
 export function StatsOverviewCard() {
   const colorTheme = useThemeColor();

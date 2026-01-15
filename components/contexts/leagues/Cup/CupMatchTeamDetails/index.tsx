@@ -1,22 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {  ListRenderItemInfo, RefreshControl, ScrollView } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 
 import { onGetFillLineupDefaultPlayers } from '@/app/(tabs)/team/_team.helpers';
 import { View } from '@/components/Themed';
-import { ClubPlayerCard } from '@/components/contexts/leagues/club/ClubPlayerCard';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
-import { MarketStatus } from '@/models/Market';
-import { FullPlayer, PlayerStats } from '@/models/Stats';
+import { PlayerStats } from '@/models/Stats';
 import { useGetMatchSubstitutions } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
-import { onUpdateTeamWithSubstitutedPlayers } from '@/utils/partials';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type CupMatchTeamDetailsProps = {
   match: CupMatch;
@@ -54,7 +51,7 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
         formationId:
           isMarketClose && currentRound === match.rodada_id
             ? team.time.esquema_id
-            : team.esquema_id ?? 1,
+            : (team.esquema_id ?? 1),
         playerStats,
         isMarketClose,
       });
@@ -79,78 +76,11 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
     [isRefetchingPlayerStats, isRefetchingSubstitutions]
   );
 
-  const onGetPlayersTab = (team: FullClubInfo) => {
-    const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
-      team,
-      substitutions
-    );
-
-    return [
-      {
-        title: 'Titulares',
-        data: playersUpdated as FullPlayer[],
-      },
-      {
-        title: 'Reservas',
-        data: reservesUpdated as FullPlayer[],
-      },
-    ];
-  };
-
-  const renderItem = useCallback(
-    ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
-      return (
-        <ClubPlayerCard
-          key={player.atleta_id}
-          player={player}
-          isCaptain={team?.capitao_id === player.atleta_id}
-          currentRound={match.rodada_id}
-          marketStatus={marketStatus as MarketStatus}
-          isReplacePlayer={substitutions?.some(
-            (item) =>
-              item.entrou.atleta_id === player.atleta_id || item.saiu.atleta_id === player.atleta_id
-          )}
-        />
-      );
-    },
-    [marketStatus, match.rodada_id, substitutions, team?.capitao_id]
-  );
-
-  const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
-
   if (isInitialLoadingSubstitutions || !lineup) {
     return <Loading />;
   }
 
   return (
-    // <SectionList
-    //   refreshControl={
-    //     <RefreshControl onRefresh={onRefetchStats} refreshing={isRefetchingPlayerStats} />
-    //   }
-    //   sections={onGetPlayersTab(team as FullClubInfo)}
-    //   ListEmptyComponent={() => <Text>Sem dados para mostrar</Text>}
-    //   keyExtractor={keyExtractor}
-    //   renderItem={renderItem}
-    //   showsVerticalScrollIndicator={false}
-    //   stickyHeaderHiddenOnScroll
-    //   contentContainerStyle={{
-    //     paddingHorizontal: 8,
-    //     gap: 8,
-    //     backgroundColor:
-    //       colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-    //   }}
-    //   renderSectionHeader={({ section: { title } }) => (
-    //     <View
-    //       className="p-2 mx-2 rounded"
-    //       style={{
-    //         backgroundColor:
-    //           colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-    //       }}>
-    //       <Text className="font-bold text-base text-center items-center">{title}</Text>
-    //     </View>
-    //   )}
-    // />
-
     <ScrollView
       showsVerticalScrollIndicator={false}
       refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
@@ -161,14 +91,14 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
-      <SoccerField
-        lineup={lineup}
-        substitutions={substitutions}
-        captain={team.capitao_id ?? 0}
-        round={match.rodada_id}
-        isViewOnly
-        onOpenMarket={() => {}}
-      />
+        <SoccerField
+          lineup={lineup}
+          substitutions={substitutions}
+          captain={team.capitao_id ?? 0}
+          round={match.rodada_id}
+          isViewOnly
+          onOpenMarket={() => {}}
+        />
         <ListReservePlayers
           lineup={lineup}
           substitutions={substitutions}

@@ -1,10 +1,8 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import {  RefreshControl, ScrollView } from 'react-native';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { RefreshControl, ScrollView } from 'react-native';
 
-import type { BottomSheetRef } from '@/components/structure/BottomSheet';
 import type { PlayersToSell } from './_team.helpers';
-
 import {
   emptyCaptain,
   emptyLineupFormation,
@@ -17,30 +15,31 @@ import {
   onGetPlayersOnChangePositionSell,
 } from './_team.helpers';
 
+import Market from '@/app/(tabs)/team/market';
 import { View } from '@/components/Themed';
-import { BottomSheet } from '@/components/structure/BottomSheet';
-import { Toast } from '@/components/structure/Toast';
-import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
-import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
+import { FormationChangeModal } from '@/components/contexts/team/FormationChangeModal';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
-import { FormationChangeModal } from '@/components/contexts/team/FormationChangeModal';
-import Market from '@/app/(tabs)/team/market';
+import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
+import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
+import type { BottomSheetRef } from '@/components/structure/BottomSheet';
+import { BottomSheet } from '@/components/structure/BottomSheet';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
+import { Toast } from '@/components/structure/Toast';
+import { FORMATIONS } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayers, LineupPosition } from '@/models/Formations';
 import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { onGetIsLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
   const colorTheme = useThemeColor();
@@ -94,14 +93,11 @@ export default () => {
 
   // Save button state
   const [isLineupComplete, setIsLineupComplete] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const showSaveBar = isLineupComplete && !isMarketClose;
-
   // Toast state
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
-  
+
   // Key to force remount of BottomSheet after refresh
   const [bottomSheetKey, setBottomSheetKey] = useState(0);
 
@@ -146,7 +142,6 @@ export default () => {
       const isEqualLineups = onGetEqualLineups(lineup, myClub);
       const isSameCaptain = myClub.capitao_id === captain;
       const hasLineupChanges = !isSameCaptain || !isEqualLineups;
-      setHasChanges(hasLineupChanges);
 
       const isFilledLineup = onGetIsLineupComplete(lineup);
       setIsLineupComplete(hasLineupChanges && isFilledLineup);
@@ -179,7 +174,6 @@ export default () => {
   useEffect(() => {
     if (isSuccessSaveTeam) {
       onRefetchMyClub && onRefetchMyClub();
-      setHasChanges(false);
       setToastMessage('Time salvo com sucesso!');
       setToastType('success');
       setShowToast(true);
@@ -190,7 +184,7 @@ export default () => {
   const onRefresh = useCallback(() => {
     // Force remount of BottomSheet to reset SafeAreaView
     setBottomSheetKey((prev) => prev + 1);
-    
+
     Promise.allSettled([onRefetchPlayerStats(), onRefetchMyClub()])
       .then((results) => {
         const myClubResult = results[1];
@@ -208,7 +202,7 @@ export default () => {
 
         const defaultLineup = mountLineup(myTeamData as FullClubInfo);
         const newPrice = onGetTeamPrice(defaultLineup.starting);
-        
+
         updateLineup(defaultLineup);
         updateCaptain(myTeamData?.capitao_id as number);
         updatePrice(newPrice);
@@ -241,7 +235,7 @@ export default () => {
 
   const handleClearAll = useCallback(() => {
     if (!lineup) return;
-    
+
     // Restaura a formação original do time
     const originalFormation = initialLineupTeamFormation;
     updateFormation(originalFormation);
@@ -255,9 +249,15 @@ export default () => {
     updateLineup(lineupWithoutPlayers);
     updateCaptain(0);
     updatePrice(newPrice);
-    setHasChanges(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineup, initialLineupTeamFormation, updateFormation, updateLineup, updateCaptain, updatePrice]);
+  }, [
+    lineup,
+    initialLineupTeamFormation,
+    updateFormation,
+    updateLineup,
+    updateCaptain,
+    updatePrice,
+  ]);
 
   const handleFormationChange = useCallback(
     (formationIndex: number) => {
@@ -432,79 +432,79 @@ export default () => {
 
   return (
     <SafeAreaViewContainer edges={['top']}>
-        <ScrollView
-          className="flex-1 px-2"
-          refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={isRefetching} />}
-          contentContainerStyle={{
-            paddingBottom: tabBarHeight + 16,
-          }}>
-          <View
-            className={`justify-center items-center pb-2 ${
-              colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
-            }`}
-            style={{ gap: 8 }}>
-            <TeamStatsCard
-              patrimonio={myClub?.patrimonio ?? 0}
-              price={price ?? 0}
-              balance={balance}
-              reservesCount={reservesCount}
-              totalReserves={lineup?.reserves?.length || 0}
-            />
-
-            <TeamQuickActions
-              onRefresh={onRefresh}
-              onClearAll={handleClearAll}
-              disabled={isMarketClose}
-              formation={formation || initialLineupTeamFormation}
-              onFormationChange={handleFormationChange}
-              showSaveTeam={isLineupComplete && !isMarketClose}
-              disableSaveTeam={!isLineupComplete || isMarketClose}
-              onSaveTeam={handleSaveTeam}
-            />
-
-            <SoccerField
-              lineup={lineup}
-              captain={captain}
-              substitutions={substitutions}
-              round={marketStatus?.rodada_atual}
-              isViewOnly={isMarketClose}
-              onOpenMarket={handleOpenMarket}
-            />
-
-            <ListReservePlayers
-              lineup={lineup}
-              substitutions={substitutions}
-              round={marketStatus?.rodada_atual}
-              isViewOnly={isMarketClose}
-              onOpenMarket={handleOpenMarket}
-            />
-          </View>
-        </ScrollView>
-
-        <BottomSheet key={bottomSheetKey} ref={marketSheetRef} snapPoints={['70%', '95%']}>
-          <Market
-            position={positionMarketSearch}
-            handleCloseMarketModal={handleCloseMarket}
-            playerIndex={playerIndex}
-            playerLowestPrice={playerLowestPrice?.player}
+      <ScrollView
+        className="flex-1 px-2"
+        refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={isRefetching} />}
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight + 16,
+        }}>
+        <View
+          className={`justify-center items-center pb-2 ${
+            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
+          }`}
+          style={{ gap: 8 }}>
+          <TeamStatsCard
+            patrimonio={myClub?.patrimonio ?? 0}
+            price={price ?? 0}
+            balance={balance}
+            reservesCount={reservesCount}
+            totalReserves={lineup?.reserves?.length || 0}
           />
-        </BottomSheet>
 
-        <FormationChangeModal
-          visible={showFormationModal}
-          playersToSellData={playersToSellData}
-          selectedPlayersToRemove={selectedPlayersToRemove}
-          onTogglePlayer={handleTogglePlayerToRemove}
-          onConfirm={handleConfirmFormationChange}
-          onCancel={handleCancelFormationChange}
-        />
+          <TeamQuickActions
+            onRefresh={onRefresh}
+            onClearAll={handleClearAll}
+            disabled={isMarketClose}
+            formation={formation || initialLineupTeamFormation}
+            onFormationChange={handleFormationChange}
+            showSaveTeam={isLineupComplete && !isMarketClose}
+            disableSaveTeam={!isLineupComplete || isMarketClose}
+            onSaveTeam={handleSaveTeam}
+          />
 
-        <Toast
-          visible={showToast}
-          message={toastMessage}
-          type={toastType}
-          onHide={() => setShowToast(false)}
+          <SoccerField
+            lineup={lineup}
+            captain={captain}
+            substitutions={substitutions}
+            round={marketStatus?.rodada_atual}
+            isViewOnly={isMarketClose}
+            onOpenMarket={handleOpenMarket}
+          />
+
+          <ListReservePlayers
+            lineup={lineup}
+            substitutions={substitutions}
+            round={marketStatus?.rodada_atual}
+            isViewOnly={isMarketClose}
+            onOpenMarket={handleOpenMarket}
+          />
+        </View>
+      </ScrollView>
+
+      <BottomSheet key={bottomSheetKey} ref={marketSheetRef} snapPoints={['70%', '95%']}>
+        <Market
+          position={positionMarketSearch}
+          handleCloseMarketModal={handleCloseMarket}
+          playerIndex={playerIndex}
+          playerLowestPrice={playerLowestPrice?.player}
         />
-      </SafeAreaViewContainer>
+      </BottomSheet>
+
+      <FormationChangeModal
+        visible={showFormationModal}
+        playersToSellData={playersToSellData}
+        selectedPlayersToRemove={selectedPlayersToRemove}
+        onTogglePlayer={handleTogglePlayerToRemove}
+        onConfirm={handleConfirmFormationChange}
+        onCancel={handleCancelFormationChange}
+      />
+
+      <Toast
+        visible={showToast}
+        message={toastMessage}
+        type={toastType}
+        onHide={() => setShowToast(false)}
+      />
+    </SafeAreaViewContainer>
   );
 };

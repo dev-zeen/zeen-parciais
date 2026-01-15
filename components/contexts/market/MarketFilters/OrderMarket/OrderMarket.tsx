@@ -5,8 +5,8 @@ import {  FlatList } from 'react-native';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { sortedOptions } from '@/components/contexts/market/MarketFilters/filters.helper';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { FullPlayer } from '@/models/Stats';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { FullPlayer } from '@/models/Stats';
 
 type OrderMarketProps = {
   currentOrder: OrderSelectedProps;

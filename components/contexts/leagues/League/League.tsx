@@ -12,6 +12,7 @@ import { Loading } from '@/components/structure/Loading';
 import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { ClubByLeague, League as LeagueModel } from '@/models/Leagues';
 import { FullPlayer } from '@/models/Stats';
 import { useGetLeague } from '@/queries/leagues.query';
@@ -19,7 +20,6 @@ import { useGetMarket } from '@/queries/market.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { OrderByOptions, onGetLeagueWithPartials } from '@/utils/leagues';
 import { ClubsByLeagueUtils } from '@/utils/partials';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface LeagueProps {
   league: LeagueModel;

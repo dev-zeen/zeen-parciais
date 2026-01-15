@@ -12,11 +12,11 @@ import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetAppreciations } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface CupProps {
   league: League;

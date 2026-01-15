@@ -1,10 +1,8 @@
 import { Feather } from '@expo/vector-icons';
-import { Link, Tabs } from 'expo-router';
-import {  Platform, Pressable, View } from 'react-native';
+import { Tabs } from 'expo-router';
+import { Platform } from 'react-native';
 
-import { Text } from '@/components/Themed';
 import Colors from '@/constants/Colors';
-import useInvites from '@/hooks/useInvites';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name']; color: string }) {
@@ -14,22 +12,23 @@ function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name'];
 export default function TabLayout() {
   const colorScheme = useThemeColor();
 
-  const { invites } = useInvites();
+  // Ensure colorScheme is valid
+  const validColorScheme = (colorScheme === 'dark' || colorScheme === 'light') ? colorScheme : 'light';
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarInactiveTintColor: colorScheme === 'dark' ? '#9ca3af' : '#6b7280',
+        tabBarActiveTintColor: Colors[validColorScheme].tint,
+        tabBarInactiveTintColor: validColorScheme === 'dark' ? '#9ca3af' : '#6b7280',
         headerStyle: {
           backgroundColor:
-            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+            validColorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         },
         tabBarStyle: {
           backgroundColor:
-            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+            validColorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           borderTopWidth: 1,
-          borderTopColor: colorScheme === 'dark' ? '#1f2937' : '#e5e7eb',
+          borderTopColor: validColorScheme === 'dark' ? '#1f2937' : '#e5e7eb',
           ...(Platform.OS === 'android' ? { paddingBottom: 4 } : {}),
         },
       }}>

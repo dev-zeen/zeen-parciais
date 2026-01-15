@@ -4,8 +4,8 @@ import {  Image } from 'react-native';
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import { LeagueUserDetails } from '@/models/Leagues';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { LeagueUserDetails } from '@/models/Leagues';
 
 interface CardLeagueStatsProps {
   league: LeagueUserDetails;

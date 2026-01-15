@@ -1,24 +1,23 @@
 import { Feather } from '@expo/vector-icons';
-import { Link, Redirect, useLocalSearchParams } from 'expo-router';
+import { Link, Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useContext } from 'react';
-import {  Image, Pressable, TouchableOpacity } from 'react-native';
+import { Image, Pressable, TouchableOpacity } from 'react-native';
 
 import captainIcon from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { Cup } from '@/components/contexts/leagues/Cup';
 import { League as LeagueComponent } from '@/components/contexts/leagues/League';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import theme from '@/styles/theme';
 import { ClubsByLeagueUtils } from '@/utils/partials';
-import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { router } from 'expo-router';
 
 export default () => {
   const colorTheme = useThemeColor();

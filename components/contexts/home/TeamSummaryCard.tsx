@@ -5,8 +5,8 @@ import {  Image, Pressable } from 'react-native';
 import proImage from '@/assets/images/pro.png';
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import { FullClubInfo } from '@/models/Club';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { FullClubInfo } from '@/models/Club';
 
 type TeamSummaryCardProps = {
   team: FullClubInfo;

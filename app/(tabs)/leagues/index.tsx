@@ -11,6 +11,7 @@ import {
 import { Text, View } from '@/components/Themed';
 import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
 import { LeagueCard } from '@/components/contexts/leagues/LeagueCard';
+import { PointsCompetitionCard } from '@/components/contexts/leagues/PointsCompetitionCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
@@ -21,12 +22,11 @@ import { AuthContext } from '@/contexts/Auth.context';
 import useInvites from '@/hooks/useInvites';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPointsCompetitions } from '@/queries/competitions.query';
 import { useGetLeagues } from '@/queries/leagues.query';
-import { PointsCompetitionCard } from '@/components/contexts/leagues/PointsCompetitionCard';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type SectionLeagueProps = {
   title: string;

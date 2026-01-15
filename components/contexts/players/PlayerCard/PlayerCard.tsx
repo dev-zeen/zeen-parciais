@@ -4,10 +4,10 @@ import {  Image } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { AuthContext } from '@/contexts/Auth.context';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Club } from '@/models/Club';
 import { Player, Position } from '@/models/Stats';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface PlayerCardProps {
   player: Player;

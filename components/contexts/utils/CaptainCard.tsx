@@ -5,11 +5,11 @@ import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function CaptainCard() {
   const colorTheme = useThemeColor();

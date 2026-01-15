@@ -11,9 +11,9 @@ import { sortedOptions, statusPlayerOptions } from './filters.helper';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { FilterMarketByTeam } from '@/components/contexts/market/MarketFilters/FilterMarketByTeam';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullPlayer } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type MarketFilterProps = {
   applyFilter: (players: FullPlayer[]) => void;

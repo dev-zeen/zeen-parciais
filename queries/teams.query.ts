@@ -1,6 +1,7 @@
+import { useQuery } from '@tanstack/react-query';
+
 import { SEARCH_TEAMS } from '@/constants/Endpoits';
 import api from '@/services/api';
-import { useQuery } from '@tanstack/react-query';
 
 export type SearchTeamItem = {
   time_id: number;

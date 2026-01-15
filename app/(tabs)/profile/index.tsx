@@ -12,10 +12,9 @@ import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import { tintColorDark } from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
-import { ThemeMode, useTheme } from '@/contexts/Theme.context';
+import { useTheme } from '@/contexts/Theme.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
@@ -47,11 +46,11 @@ export default () => {
 
   const highestScore: TeamHistoryRound | undefined = useMemo(() => {
     const filtered = historyClub?.filter((item) => item.pontos) || [];
-    
+
     if (filtered.length === 0) {
       return undefined;
     }
-    
+
     return filtered.reduce((acc, item) => {
       if (item.pontos > acc.pontos) {
         return item;
@@ -62,11 +61,11 @@ export default () => {
 
   const lowestScore: TeamHistoryRound | undefined = useMemo(() => {
     const filtered = historyClub?.filter((item) => item.pontos) || [];
-    
+
     if (filtered.length === 0) {
       return undefined;
     }
-    
+
     return filtered.reduce((acc, item) => {
       if (item.pontos < acc.pontos) {
         return item;
@@ -91,8 +90,7 @@ export default () => {
     if (validRounds.length < 2) return 0;
     const mean = averageScore;
     const variance =
-      validRounds.reduce((acc, h) => acc + Math.pow(h.pontos - mean, 2), 0) /
-      validRounds.length;
+      validRounds.reduce((acc, h) => acc + Math.pow(h.pontos - mean, 2), 0) / validRounds.length;
     return Math.sqrt(variance);
   }, [historyClub, averageScore]);
 
@@ -308,13 +306,25 @@ export default () => {
                             rankingVariation > 0
                               ? '#22C55E20'
                               : rankingVariation < 0
-                              ? '#EF444420'
-                              : '#6B728020',
+                                ? '#EF444420'
+                                : '#6B728020',
                         }}>
                         <Feather
-                          name={rankingVariation > 0 ? 'arrow-up' : rankingVariation < 0 ? 'arrow-down' : 'minus'}
+                          name={
+                            rankingVariation > 0
+                              ? 'arrow-up'
+                              : rankingVariation < 0
+                                ? 'arrow-down'
+                                : 'minus'
+                          }
                           size={12}
-                          color={rankingVariation > 0 ? '#22C55E' : rankingVariation < 0 ? '#EF4444' : '#6B7280'}
+                          color={
+                            rankingVariation > 0
+                              ? '#22C55E'
+                              : rankingVariation < 0
+                                ? '#EF4444'
+                                : '#6B7280'
+                          }
                         />
                       </View>
                     </View>
@@ -325,10 +335,10 @@ export default () => {
                           rankingVariation > 0
                             ? '#22C55E'
                             : rankingVariation < 0
-                            ? '#EF4444'
-                            : colorTheme === 'dark'
-                            ? '#d1d5db'
-                            : '#374151',
+                              ? '#EF4444'
+                              : colorTheme === 'dark'
+                                ? '#d1d5db'
+                                : '#374151',
                       }}
                       numberOfLines={1}>
                       {rankingVariation > 0 ? '+' : ''}
@@ -392,7 +402,10 @@ export default () => {
                         <Feather name="trending-up" size={12} color="#22C55E" />
                       </View>
                     </View>
-                    <Text className="font-bold text-lg mb-1" style={{ color: '#22C55E' }} numberOfLines={1}>
+                    <Text
+                      className="font-bold text-lg mb-1"
+                      style={{ color: '#22C55E' }}
+                      numberOfLines={1}>
                       {numberToString(highestScore?.pontos as number)}
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">
@@ -416,7 +429,10 @@ export default () => {
                         <Feather name="trending-down" size={12} color="#EF4444" />
                       </View>
                     </View>
-                    <Text className="font-bold text-lg mb-1" style={{ color: '#EF4444' }} numberOfLines={1}>
+                    <Text
+                      className="font-bold text-lg mb-1"
+                      style={{ color: '#EF4444' }}
+                      numberOfLines={1}>
                       {numberToString(lowestScore?.pontos as number)}
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">
@@ -507,7 +523,9 @@ export default () => {
                 <View
                   className="flex-row items-center justify-between"
                   style={{ backgroundColor: 'transparent' }}>
-                  <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
+                  <View
+                    className="flex-row items-center"
+                    style={{ gap: 8, backgroundColor: 'transparent' }}>
                     <Feather name="users" size={20} color="#22c55e" />
                     <Text className="text-base font-bold">Participação em Ligas</Text>
                   </View>
@@ -573,11 +591,16 @@ export default () => {
                 <Feather name="user" size={20} color="#8b5cf6" />
                 <Text className="text-base font-bold">Informações do Cartoleiro</Text>
               </View>
-              <View className="flex-row flex-wrap" style={{ gap: 8, backgroundColor: 'transparent' }}>
+              <View
+                className="flex-row flex-wrap"
+                style={{ gap: 8, backgroundColor: 'transparent' }}>
                 {/* Year Started */}
                 <View
                   className="flex-row items-center px-3 py-2 rounded-full"
-                  style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6', gap: 6 }}>
+                  style={{
+                    backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                    gap: 6,
+                  }}>
                   <Feather name="calendar" size={14} color="#3B82F6" />
                   <Text className="text-sm font-semibold">
                     Desde {myClub?.time.temporada_inicial ?? '—'}
@@ -591,8 +614,8 @@ export default () => {
                     backgroundColor: myClub?.time.assinante
                       ? '#fbbf2420'
                       : colorTheme === 'dark'
-                      ? '#1F293730'
-                      : '#F3F4F6',
+                        ? '#1F293730'
+                        : '#F3F4F6',
                     gap: 6,
                   }}>
                   <Feather
@@ -602,10 +625,12 @@ export default () => {
                   />
                   <Text
                     className="text-sm font-semibold"
-                    style={{ 
-                      color: myClub?.time.assinante 
-                        ? '#fbbf24' 
-                        : (colorTheme === 'dark' ? '#6b7280' : '#9ca3af')
+                    style={{
+                      color: myClub?.time.assinante
+                        ? '#fbbf24'
+                        : colorTheme === 'dark'
+                          ? '#6b7280'
+                          : '#9ca3af',
                     }}>
                     {myClub?.time.assinante ? 'PRO' : 'Free'}
                   </Text>
@@ -772,11 +797,7 @@ export default () => {
           elevation: 8,
         }}
         onPress={handleLogout}>
-        <Feather 
-          name="log-out" 
-          size={24} 
-          color={colorTheme === 'dark' ? '#ef4444' : '#dc2626'} 
-        />
+        <Feather name="log-out" size={24} color={colorTheme === 'dark' ? '#ef4444' : '#dc2626'} />
       </TouchableOpacity>
     </SafeAreaViewContainer>
   );

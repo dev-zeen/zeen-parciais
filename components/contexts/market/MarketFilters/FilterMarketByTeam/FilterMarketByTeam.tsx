@@ -7,11 +7,11 @@ import { MatchCardFilter } from './MatchCardFilter';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Market } from '@/models/Market';
 import { Match } from '@/models/Matches';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetMatchs } from '@/queries/matches.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type FilterMarketByTeamProps = {
   applyFilter: (teams: number[]) => void;

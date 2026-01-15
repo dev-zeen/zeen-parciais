@@ -1,31 +1,27 @@
-import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import {  Image, Pressable, ScrollView } from 'react-native';
+import { Image, Pressable, ScrollView } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { TopPlayer } from '@/models/Player';
 import { useGetTopPlayers, useGetTopReservePlayers } from '@/queries/players.query';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export function PlayerHighlightsCarousel() {
-  const router = useRouter();
   const colorTheme = useThemeColor();
   const { allowRequest } = useMarketStatus();
   const { data: topPlayers } = useGetTopPlayers(allowRequest);
   const { data: topReservePlayers } = useGetTopReservePlayers(allowRequest);
   const [selectedTab, setSelectedTab] = useState<'titulares' | 'reservas'>('titulares');
 
-  if ((!topPlayers || topPlayers.length === 0) && (!topReservePlayers || topReservePlayers.length === 0)) {
+  if (
+    (!topPlayers || topPlayers.length === 0) &&
+    (!topReservePlayers || topReservePlayers.length === 0)
+  ) {
     return null;
   }
-
-  const handleViewAll = () => {
-    router.push('/(tabs)/players');
-  };
 
   const displayPlayers = selectedTab === 'titulares' ? topPlayers : topReservePlayers;
 
@@ -33,7 +29,9 @@ export function PlayerHighlightsCarousel() {
     <AnimatedCard delay={500} variant="flat">
       <View className="gap-3" style={{ backgroundColor: 'transparent' }}>
         {/* Header */}
-        <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
+        <View
+          className="flex-row items-center justify-between"
+          style={{ backgroundColor: 'transparent' }}>
           <Text className="font-bold text-base">Mais Escalados</Text>
         </View>
 
@@ -47,8 +45,8 @@ export function PlayerHighlightsCarousel() {
                     ? 'bg-blue-500'
                     : 'bg-blue-500'
                   : colorTheme === 'dark'
-                  ? 'bg-gray-800'
-                  : 'bg-gray-200'
+                    ? 'bg-gray-800'
+                    : 'bg-gray-200'
               }`}>
               <Text
                 className={`text-center text-sm font-semibold ${
@@ -66,8 +64,8 @@ export function PlayerHighlightsCarousel() {
                     ? 'bg-blue-500'
                     : 'bg-blue-500'
                   : colorTheme === 'dark'
-                  ? 'bg-gray-800'
-                  : 'bg-gray-200'
+                    ? 'bg-gray-800'
+                    : 'bg-gray-200'
               }`}>
               <Text
                 className={`text-center text-sm font-semibold ${
@@ -99,9 +97,7 @@ function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: numb
   return (
     <Pressable>
       <View
-        className={`w-32 rounded-xl p-3 ${
-          colorTheme === 'dark' ? 'bg-gray-800' : 'bg-white'
-        }`}
+        className={`w-32 rounded-xl p-3 ${colorTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
         style={{
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
@@ -122,9 +118,7 @@ function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: numb
             <Text className="font-semibold text-xs text-center" numberOfLines={1}>
               {player.Atleta.apelido_abreviado}
             </Text>
-            <View
-              className="px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: '#3B82F620' }}>
+            <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#3B82F620' }}>
               <Text className="text-blue-500 text-xs font-bold">
                 {player.posicao_abreviacao.toUpperCase()}
               </Text>
@@ -132,7 +126,9 @@ function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: numb
           </View>
 
           {/* Stats */}
-          <View className="w-full items-center pt-1 border-t border-gray-200 dark:border-gray-700" style={{ gap: 4, backgroundColor: 'transparent' }}>
+          <View
+            className="w-full items-center pt-1 border-t border-gray-200 dark:border-gray-700"
+            style={{ gap: 4, backgroundColor: 'transparent' }}>
             <Text className="text-xs text-gray-500 dark:text-gray-400">Escalações</Text>
             <Text className="font-bold text-sm">{numberToString(player.escalacoes)}</Text>
           </View>

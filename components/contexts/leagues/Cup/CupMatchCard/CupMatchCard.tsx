@@ -7,10 +7,10 @@ import { Text, View } from '@/components/Themed';
 import { TeamCupMatch } from '@/components/contexts/leagues/Cup/TeamCupMatch/TeamCupMatch';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface CupMatchProps {
   match: CupMatchModel;

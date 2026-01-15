@@ -1,7 +1,7 @@
 
 import { Text, View } from '@/components/Themed';
-import { numberToString } from '@/utils/parseTo';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { numberToString } from '@/utils/parseTo';
 
 type TeamStatsCardProps = {
   patrimonio: number;

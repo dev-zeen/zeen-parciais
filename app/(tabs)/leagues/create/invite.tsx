@@ -1,29 +1,27 @@
 import { Feather } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { 
+import {
   Alert,
   FlatList,
   Image,
   ListRenderItemInfo,
   TextInput,
-  TouchableOpacity } from 'react-native';
-import { useQueryClient } from '@tanstack/react-query';
+  TouchableOpacity,
+} from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
-import {
-  GET_LEAGUE_BY_SLUG,
-  GET_POINTS_COMPETITION_BY_SLUG,
-} from '@/constants/Endpoits';
+import { GET_LEAGUE_BY_SLUG, GET_POINTS_COMPETITION_BY_SLUG } from '@/constants/Endpoits';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { invitePointsCompetition } from '@/queries/competitions.mutations';
 import { inviteLeague } from '@/queries/leagues.mutations';
 import { SearchTeamItem, useSearchTeams } from '@/queries/teams.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type InviteType = 'classic' | 'matamata' | 'points';
 
@@ -94,7 +92,8 @@ export default function () {
 
   const onSubmit = useCallback(async () => {
     if (!slug) return;
-    const hasSelection = type === 'points' ? selectedTeamIds.length > 0 : selectedTeamSlugs.length > 0;
+    const hasSelection =
+      type === 'points' ? selectedTeamIds.length > 0 : selectedTeamSlugs.length > 0;
 
     if (!hasSelection) {
       Alert.alert('Selecione times', 'Escolha pelo menos 1 time para convidar.');
@@ -136,7 +135,8 @@ export default function () {
 
   const renderItem = useCallback(
     ({ item }: ListRenderItemInfo<SearchTeamItem>) => {
-      const isSelected = type === 'points' ? !!selectedIds[item.time_id] : !!selectedSlugs[item.slug];
+      const isSelected =
+        type === 'points' ? !!selectedIds[item.time_id] : !!selectedSlugs[item.slug];
       return (
         <TouchableOpacity
           activeOpacity={0.8}
@@ -217,13 +217,18 @@ export default function () {
                 borderWidth: 1,
                 borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Feather name="chevron-left" size={20} color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'} />
+              <Feather
+                name="chevron-left"
+                size={20}
+                color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'}
+              />
             </TouchableOpacity>
 
             <View style={{ flex: 1, paddingHorizontal: 12, backgroundColor: 'transparent' }}>
               <Text className="text-xl font-extrabold">{title}</Text>
               <Text className="text-xs text-gray-500">
-                {type === 'points' ? selectedTeamIds.length : selectedTeamSlugs.length} selecionado(s)
+                {type === 'points' ? selectedTeamIds.length : selectedTeamSlugs.length}{' '}
+                selecionado(s)
               </Text>
             </View>
           </View>
@@ -237,7 +242,11 @@ export default function () {
               borderWidth: 1,
               borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
             }}>
-            <Feather name="search" size={18} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
+            <Feather
+              name="search"
+              size={18}
+              color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
+            />
             <TextInput
               value={q}
               onChangeText={setQ}
@@ -290,7 +299,8 @@ export default function () {
             right: 0,
             paddingHorizontal: 16,
             paddingVertical: 12,
-            backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+            backgroundColor:
+              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
             borderTopWidth: 1,
             borderTopColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
             shadowColor: '#000',
@@ -311,7 +321,9 @@ export default function () {
                 justifyContent: 'center',
                 backgroundColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Text className="font-semibold" style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+              <Text
+                className="font-semibold"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 Cancelar
               </Text>
             </TouchableOpacity>
@@ -331,8 +343,12 @@ export default function () {
                 justifyContent: 'center',
                 backgroundColor:
                   isSubmitting ||
-                  (type === 'points' ? selectedTeamIds.length === 0 : selectedTeamSlugs.length === 0)
-                    ? colorTheme === 'dark' ? '#1f2937' : '#f3f4f6'
+                  (type === 'points'
+                    ? selectedTeamIds.length === 0
+                    : selectedTeamSlugs.length === 0)
+                    ? colorTheme === 'dark'
+                      ? '#1f2937'
+                      : '#f3f4f6'
                     : '#22c55e',
                 flexDirection: 'row',
                 gap: 8,
@@ -359,7 +375,9 @@ export default function () {
                 style={{
                   color:
                     isSubmitting ||
-                    (type === 'points' ? selectedTeamIds.length === 0 : selectedTeamSlugs.length === 0)
+                    (type === 'points'
+                      ? selectedTeamIds.length === 0
+                      : selectedTeamSlugs.length === 0)
                       ? '#9ca3af'
                       : '#ffffff',
                 }}>
@@ -372,4 +390,3 @@ export default function () {
     </SafeAreaViewContainer>
   );
 }
-

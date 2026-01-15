@@ -10,7 +10,8 @@ import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard'
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
-import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
 import { FullPlayer, IPositions } from '@/models/Stats';
@@ -22,7 +23,6 @@ import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { filterAndSortPlayersFromMarket } from '@/utils/market';
 import { numberToString } from '@/utils/parseTo';
 import { onBalancePrice } from '@/utils/team';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type MarketProps = {
   position?: LineupPosition;
@@ -72,19 +72,19 @@ export default ({
         index: undefined,
         isReservePlayer: !!playerLowestPrice,
       });
-      
+
       // Obter estado atualizado do Zustand após adicionar jogador
       const updatedLineup = useTeamLineupStore.getState().lineup;
-      
+
       if (!updatedLineup) return;
-      
+
       const updatedEmptyPositions = onGetEmptyPositions(updatedLineup);
-      
+
       // Se há posição filtrada E ainda tem vagas, manter modal aberto
       if (position && updatedEmptyPositions?.has(position.position)) {
         return; // NÃO fecha o modal
       }
-      
+
       // Fechar modal em qualquer outro caso
       handleCloseMarketModal && handleCloseMarketModal();
     },
@@ -176,12 +176,13 @@ export default ({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <View 
+    <View
       className="flex-1 px-2"
       style={{
-        backgroundColor: colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}>
-      <View 
+      <View
         className="justify-between items-center flex-row rounded-lg mb-2 py-3 px-4"
         style={{
           backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
@@ -194,8 +195,10 @@ export default ({
             gap: 16,
             backgroundColor: 'transparent',
           }}>
-          <View className="justify-center items-center gap-1" style={{ backgroundColor: 'transparent' }}>
-            <Text 
+          <View
+            className="justify-center items-center gap-1"
+            style={{ backgroundColor: 'transparent' }}>
+            <Text
               className="text-xs"
               style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
               Valor atual
@@ -203,8 +206,10 @@ export default ({
             <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
           </View>
 
-          <View className="justify-center items-center gap-1" style={{ backgroundColor: 'transparent' }}>
-            <Text 
+          <View
+            className="justify-center items-center gap-1"
+            style={{ backgroundColor: 'transparent' }}>
+            <Text
               className="text-xs"
               style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
               Restante
@@ -241,11 +246,11 @@ export default ({
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         ItemSeparatorComponent={() => (
-          <View 
-            style={{ 
+          <View
+            style={{
               height: 8,
               backgroundColor: 'transparent',
-            }} 
+            }}
           />
         )}
         contentContainerStyle={{

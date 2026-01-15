@@ -5,9 +5,9 @@ import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePartialScore from '@/hooks/usePartialScore';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullClubInfo } from '@/models/Club';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type StatsClubCardProps = {
   team: FullClubInfo;

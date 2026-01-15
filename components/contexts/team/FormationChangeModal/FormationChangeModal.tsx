@@ -1,9 +1,9 @@
 import { Feather } from '@expo/vector-icons';
 import {  Image, Modal, ScrollView } from 'react-native';
 
+import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { Positions } from '@/constants/Formations';
-import { PlayersToSell } from '@/app/(tabs)/team/_team.helpers';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 type FormationChangeModalProps = {

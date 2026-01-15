@@ -1,13 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo } from 'react';
-import {  ScrollView } from 'react-native';
 
+import { Text, View } from '@/components/Themed';
 import { BarChart } from '@/components/charts/BarChart';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import { Text, View } from '@/components/Themed';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { PlayerHistoryStats } from '@/models/Player';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type PlayerStatsViewProps = {
   stats: PlayerHistoryStats | undefined;
@@ -49,7 +48,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
   if (isLoading) {
     return (
       <View className="flex-1 items-center justify-center p-8">
-        <Text 
+        <Text
           className="text-base"
           style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
           Carregando estatísticas...
@@ -61,8 +60,12 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
   if (!stats || stats.length === 0) {
     return (
       <View className="flex-1 items-center justify-center p-8">
-        <Feather name="bar-chart-2" size={48} color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'} />
-        <Text 
+        <Feather
+          name="bar-chart-2"
+          size={48}
+          color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
+        />
+        <Text
           className="text-base mt-4 text-center"
           style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
           Nenhuma estatística disponível
@@ -74,7 +77,9 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
   return (
     <View className="flex-1 bg-transparent" style={{ gap: 12 }}>
       {/* Header */}
-      <View className="items-center justify-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
+      <View
+        className="items-center justify-center"
+        style={{ gap: 4, backgroundColor: 'transparent' }}>
         <Feather name="trending-up" size={24} color="#3b82f6" />
         <Text className="text-lg font-bold">Estatísticas por Rodada</Text>
       </View>
@@ -84,11 +89,16 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
         <View style={{ gap: 8, backgroundColor: 'transparent' }}>
           <View
             className="flex-row items-center pb-2"
-            style={{ gap: 6, backgroundColor: 'transparent', borderBottomWidth: 1, borderBottomColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb' }}>
+            style={{
+              gap: 6,
+              backgroundColor: 'transparent',
+              borderBottomWidth: 1,
+              borderBottomColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
+            }}>
             <Feather name="activity" size={16} color="#3b82f6" />
             <Text className="text-sm font-semibold">Resumo de Desempenho</Text>
           </View>
-          
+
           <View
             className="flex-row flex-wrap justify-between"
             style={{ gap: 8, backgroundColor: 'transparent' }}>
@@ -103,14 +113,18 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               <View
                 className="flex-row items-center justify-between"
                 style={{ backgroundColor: 'transparent' }}>
-                <Text 
+                <Text
                   className="text-xs font-medium"
                   style={{ color: colorTheme === 'dark' ? '#4ade80' : '#16a34a' }}>
                   Melhor
                 </Text>
-                <Feather name="arrow-up" size={14} color={colorTheme === 'dark' ? '#4ade80' : '#16a34a'} />
+                <Feather
+                  name="arrow-up"
+                  size={14}
+                  color={colorTheme === 'dark' ? '#4ade80' : '#16a34a'}
+                />
               </View>
-              <Text 
+              <Text
                 className="text-xl font-bold mt-1"
                 style={{ color: colorTheme === 'dark' ? '#22c55e' : '#15803d' }}>
                 {numberToString(processedStats.bestScore)}
@@ -128,14 +142,18 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               <View
                 className="flex-row items-center justify-between"
                 style={{ backgroundColor: 'transparent' }}>
-                <Text 
+                <Text
                   className="text-xs font-medium"
                   style={{ color: colorTheme === 'dark' ? '#f87171' : '#dc2626' }}>
                   Pior
                 </Text>
-                <Feather name="arrow-down" size={14} color={colorTheme === 'dark' ? '#f87171' : '#dc2626'} />
+                <Feather
+                  name="arrow-down"
+                  size={14}
+                  color={colorTheme === 'dark' ? '#f87171' : '#dc2626'}
+                />
               </View>
-              <Text 
+              <Text
                 className="text-xl font-bold mt-1"
                 style={{ color: colorTheme === 'dark' ? '#ef4444' : '#b91c1c' }}>
                 {numberToString(processedStats.worstScore)}
@@ -153,14 +171,18 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               <View
                 className="flex-row items-center justify-between"
                 style={{ backgroundColor: 'transparent' }}>
-                <Text 
+                <Text
                   className="text-xs font-medium"
                   style={{ color: colorTheme === 'dark' ? '#60a5fa' : '#2563eb' }}>
                   Total
                 </Text>
-                <Feather name="award" size={14} color={colorTheme === 'dark' ? '#60a5fa' : '#2563eb'} />
+                <Feather
+                  name="award"
+                  size={14}
+                  color={colorTheme === 'dark' ? '#60a5fa' : '#2563eb'}
+                />
               </View>
-              <Text 
+              <Text
                 className="text-xl font-bold mt-1"
                 style={{ color: colorTheme === 'dark' ? '#3b82f6' : '#1d4ed8' }}>
                 {numberToString(processedStats.totalPoints)}
@@ -178,14 +200,18 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               <View
                 className="flex-row items-center justify-between"
                 style={{ backgroundColor: 'transparent' }}>
-                <Text 
+                <Text
                   className="text-xs font-medium"
                   style={{ color: colorTheme === 'dark' ? '#c084fc' : '#9333ea' }}>
                   Jogos
                 </Text>
-                <Feather name="check-circle" size={14} color={colorTheme === 'dark' ? '#c084fc' : '#9333ea'} />
+                <Feather
+                  name="check-circle"
+                  size={14}
+                  color={colorTheme === 'dark' ? '#c084fc' : '#9333ea'}
+                />
               </View>
-              <Text 
+              <Text
                 className="text-xl font-bold mt-1"
                 style={{ color: colorTheme === 'dark' ? '#a855f7' : '#7e22ce' }}>
                 {processedStats.gamesPlayed}/{processedStats.totalRounds}
@@ -205,8 +231,8 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               <Feather name="bar-chart-2" size={16} color="#3b82f6" />
               <Text className="text-sm font-semibold">Pontos por Rodada</Text>
             </View>
-            <BarChart 
-              data={processedStats.chartData} 
+            <BarChart
+              data={processedStats.chartData}
               labels={processedStats.chartLabels}
               height={140}
             />
@@ -249,8 +275,8 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                           ? isPositive
                             ? 'bg-green-500/20'
                             : isNegative
-                            ? 'bg-red-500/20'
-                            : 'bg-gray-500/20'
+                              ? 'bg-red-500/20'
+                              : 'bg-gray-500/20'
                           : 'bg-gray-500/20'
                       }`}>
                       <Text
@@ -258,18 +284,26 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                         style={{
                           color: hasData
                             ? isPositive
-                              ? colorTheme === 'dark' ? '#4ade80' : '#16a34a'
+                              ? colorTheme === 'dark'
+                                ? '#4ade80'
+                                : '#16a34a'
                               : isNegative
-                              ? colorTheme === 'dark' ? '#f87171' : '#dc2626'
-                              : colorTheme === 'dark' ? '#9ca3af' : '#6b7280'
-                            : colorTheme === 'dark' ? '#6b7280' : '#9ca3af'
+                                ? colorTheme === 'dark'
+                                  ? '#f87171'
+                                  : '#dc2626'
+                                : colorTheme === 'dark'
+                                  ? '#9ca3af'
+                                  : '#6b7280'
+                            : colorTheme === 'dark'
+                              ? '#6b7280'
+                              : '#9ca3af',
                         }}>
                         R{stat.rodada_id}
                       </Text>
                     </View>
 
                     <View style={{ backgroundColor: 'transparent' }}>
-                      <Text 
+                      <Text
                         className="text-xs font-medium"
                         style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                         Pontuação
@@ -279,26 +313,32 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                         style={{
                           color: hasData
                             ? isPositive
-                              ? colorTheme === 'dark' ? '#4ade80' : '#16a34a'
+                              ? colorTheme === 'dark'
+                                ? '#4ade80'
+                                : '#16a34a'
                               : isNegative
-                              ? colorTheme === 'dark' ? '#f87171' : '#dc2626'
-                              : colorTheme === 'dark' ? '#d1d5db' : '#374151'
-                            : colorTheme === 'dark' ? '#6b7280' : '#9ca3af'
+                                ? colorTheme === 'dark'
+                                  ? '#f87171'
+                                  : '#dc2626'
+                                : colorTheme === 'dark'
+                                  ? '#d1d5db'
+                                  : '#374151'
+                            : colorTheme === 'dark'
+                              ? '#6b7280'
+                              : '#9ca3af',
                         }}>
                         {hasData ? `${numberToString(stat.pontos!)} pts` : '—'}
                       </Text>
                     </View>
                   </View>
 
-                  <View
-                    className="items-end"
-                    style={{ backgroundColor: 'transparent' }}>
-                    <Text 
+                  <View className="items-end" style={{ backgroundColor: 'transparent' }}>
+                    <Text
                       className="text-xs font-medium"
                       style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                       Preço
                     </Text>
-                    <Text 
+                    <Text
                       className="text-sm font-bold"
                       style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                       {hasData && stat.preco ? `C$ ${numberToString(stat.preco)}` : '—'}

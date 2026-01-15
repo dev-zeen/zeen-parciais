@@ -1,5 +1,3 @@
-import { TeamLeague } from '@/models/Leagues';
-
 export type CompetitionPrivacy = 'A' | 'F';
 
 export type PointsCompetitionTeam = {
@@ -99,4 +97,3 @@ export type RespondCompetitionInviteInput = {
   messageId: number;
   decision: 'accept' | 'decline';
 };
-

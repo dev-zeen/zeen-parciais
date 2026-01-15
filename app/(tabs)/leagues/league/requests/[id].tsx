@@ -8,9 +8,9 @@ import { RequestCard } from '@/components/contexts/leagues/RequestCard';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Invite } from '@/models/Invites';
 import { useGetLeague } from '@/queries/leagues.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
   const colorTheme = useThemeColor();

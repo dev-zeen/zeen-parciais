@@ -3,17 +3,16 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import {  Image, TouchableOpacity } from 'react-native';
+import { Image, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Club } from '@/models/Club';
 import { Match } from '@/models/Matches';
 import { FullPlayer } from '@/models/Stats';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { onGetPartialScoreTeamByMatch } from '@/utils/match';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 interface MatchCardProps {
   match: Match;
@@ -77,14 +76,14 @@ export function MatchCard({
 
   return (
     <TouchableOpacity disabled={isDisabled} activeOpacity={0.6} onPress={onPressHandler}>
-      <View 
+      <View
         className="p-4 rounded-lg"
         style={{
           backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
           borderWidth: 1,
           borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
         }}>
-        <Text 
+        <Text
           className="font-medium text-xs text-center mb-2"
           style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
           {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
@@ -100,9 +99,11 @@ export function MatchCard({
             gap: 24,
             backgroundColor: 'transparent',
           }}>
-          <View className="items-center justify-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
+          <View
+            className="items-center justify-center"
+            style={{ gap: 4, backgroundColor: 'transparent' }}>
             {showTeamScore ? (
-              <Text 
+              <Text
                 className="font-semibold"
                 style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {numberToString(homeTeamPartials)}
@@ -119,7 +120,7 @@ export function MatchCard({
               alt={`Escudo do ${homeClub?.nome}`}
             />
 
-            <Text 
+            <Text
               className="font-semibold"
               style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
               {homeClub?.abreviacao} {`${match.clube_casa_posicao}º`}
@@ -159,35 +160,33 @@ export function MatchCard({
                 borderWidth: 1,
                 borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Text 
+              <Text
                 className="font-semibold text-base"
                 style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {match.placar_oficial_mandante ?? '-'}
               </Text>
 
-              <Feather
-                name="x"
-                size={16}
-                color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
-              />
+              <Feather name="x" size={16} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
 
-              <Text 
+              <Text
                 className="font-semibold text-base"
                 style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {match.placar_oficial_visitante ?? '-'}
               </Text>
             </View>
 
-            <Text 
+            <Text
               className="text-xs"
               style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
               {match.local}
             </Text>
           </View>
 
-          <View className="justify-center items-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
+          <View
+            className="justify-center items-center"
+            style={{ gap: 4, backgroundColor: 'transparent' }}>
             {showTeamScore ? (
-              <Text 
+              <Text
                 className="font-semibold"
                 style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {numberToString(awayTeamPartials)}
@@ -203,7 +202,7 @@ export function MatchCard({
               className="w-12 h-12"
               alt={`Escudo do ${awayClub?.nome}`}
             />
-            <Text 
+            <Text
               className="font-semibold"
               style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
               {awayClub?.abreviacao} {`${match.clube_visitante_posicao}º`}

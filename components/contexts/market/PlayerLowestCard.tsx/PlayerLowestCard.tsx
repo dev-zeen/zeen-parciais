@@ -3,11 +3,11 @@ import { Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer } from '@/models/Formations';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
 import { numberToString } from '@/utils/parseTo';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type PlayerLowestCardProps = {
   player: LineupPlayer;

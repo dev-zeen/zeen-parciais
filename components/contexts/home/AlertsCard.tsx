@@ -1,13 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import {  Pressable } from 'react-native';
+import { Pressable } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { FullPlayer } from '@/models/Stats';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { FullPlayer } from '@/models/Stats';
 
 type Alert = {
   id: string;
@@ -57,9 +56,8 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
       });
     }
 
-
     return alertsList.filter((alert) => !dismissedAlerts.includes(alert.id));
-  }, [marketStatus, currentRoundInfo, lineupPlayersUnlikely, hasNoCaptain, dismissedAlerts]);
+  }, [marketStatus, currentRoundInfo, lineupPlayersUnlikely, dismissedAlerts]);
 
   const handleDismiss = (alertId: string) => {
     setDismissedAlerts((prev) => [...prev, alertId]);
@@ -101,10 +99,16 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
         const colors = getAlertColors(alert.type);
         return (
           <AnimatedCard key={alert.id} delay={400 + index * 50} variant="flat">
-            <View className={`rounded-xl p-3 border-l-4 ${colors.border}`} style={{ backgroundColor: colors.bg }}>
-              <View className="flex-row items-center justify-between" style={{ backgroundColor: 'transparent' }}>
-                <View className="flex-row items-center flex-1" style={{ gap: 10, backgroundColor: 'transparent' }}>
-                  <View 
+            <View
+              className={`rounded-xl p-3 border-l-4 ${colors.border}`}
+              style={{ backgroundColor: colors.bg }}>
+              <View
+                className="flex-row items-center justify-between"
+                style={{ backgroundColor: 'transparent' }}>
+                <View
+                  className="flex-row items-center flex-1"
+                  style={{ gap: 10, backgroundColor: 'transparent' }}>
+                  <View
                     className="w-8 h-8 rounded-full items-center justify-center"
                     style={{ backgroundColor: `${colors.icon}20` }}>
                     <Feather name={alert.icon} size={16} color={colors.icon} />
@@ -113,15 +117,14 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
                     <Text className={`font-bold text-sm ${colors.text}`} numberOfLines={1}>
                       {alert.title}
                     </Text>
-                    <Text className="text-xs text-gray-600 dark:text-gray-400 mt-0.5" numberOfLines={2}>
+                    <Text
+                      className="text-xs text-gray-600 dark:text-gray-400 mt-0.5"
+                      numberOfLines={2}>
                       {alert.message}
                     </Text>
                   </View>
                 </View>
-                <Pressable 
-                  onPress={() => handleDismiss(alert.id)} 
-                  hitSlop={12}
-                  className="ml-2">
+                <Pressable onPress={() => handleDismiss(alert.id)} hitSlop={12} className="ml-2">
                   <Feather
                     name="x"
                     size={18}

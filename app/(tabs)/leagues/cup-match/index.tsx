@@ -11,9 +11,6 @@ import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
 import useTeam from '@/hooks/useTeam';
-import { FullClubInfo } from '@/models/Club';
-import { CupMatch } from '@/models/Leagues';
-import { PlayerStats } from '@/models/Stats';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export default () => {
@@ -57,12 +54,16 @@ export default () => {
       {
         id: 1,
         title: homeTeam.time.nome,
-        content: () => <CupMatchTeamDetails match={cupMatch} team={homeTeam} playerStats={playerStats} />,
+        content: () => (
+          <CupMatchTeamDetails match={cupMatch} team={homeTeam} playerStats={playerStats} />
+        ),
       },
       {
         id: 2,
         title: awayTeam.time.nome,
-        content: () => <CupMatchTeamDetails match={cupMatch} team={awayTeam} playerStats={playerStats} />,
+        content: () => (
+          <CupMatchTeamDetails match={cupMatch} team={awayTeam} playerStats={playerStats} />
+        ),
       },
     ];
   }, [awayTeam, cupMatch, homeTeam, playerStats]);

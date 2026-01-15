@@ -15,10 +15,10 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import useInvites from '@/hooks/useInvites';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import type { PointsCompetitionInvite } from '@/models/Competition';
 import { Invite } from '@/models/Invites';
 import { useGetLeagues } from '@/queries/leagues.query';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type InviteRow =
   | { kind: 'league'; invite: Invite }

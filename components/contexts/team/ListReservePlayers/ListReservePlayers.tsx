@@ -2,14 +2,14 @@ import { useCallback } from 'react';
 import {  Alert } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import usePlayerStats from '@/hooks/usePlayerStats';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { onGetPlayerLowestPrice } from '@/utils/team';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
