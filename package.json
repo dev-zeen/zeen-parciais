@@ -10,7 +10,17 @@
     "test": "jest --watchAll",
     "lint": "eslint --ext .ts --ext .tsx ./",
     "rebuild": "npx expo prebuild --clean",
-    "rebuild-test": "npx expo prebuild --clean && npm run ios"
+    "rebuild-test": "npx expo prebuild --clean && npm run ios",
+    "build:preview:android": "eas build --platform android --profile preview",
+    "build:preview:ios": "eas build --platform ios --profile preview",
+    "build:prod:android": "eas build --platform android --profile production",
+    "build:prod:ios": "eas build --platform ios --profile production",
+    "build:prod:all": "eas build --platform all --profile production",
+    "submit:android": "eas submit --platform android --latest",
+    "submit:ios": "eas submit --platform ios --latest",
+    "update:prod": "eas update --branch production --message",
+    "credentials:ios": "eas credentials --platform ios",
+    "credentials:android": "eas credentials --platform android"
   },
   "jest": {
     "preset": "jest-expo"
