@@ -12,7 +12,7 @@ type ThemeContextProps = {
   isLoading: boolean;
 };
 
-const THEME_STORAGE_KEY = '@parciais-fc:theme';
+const THEME_STORAGE_KEY = '@parciais:theme';
 
 export const ThemeContext = createContext<ThemeContextProps>({} as ThemeContextProps);
 

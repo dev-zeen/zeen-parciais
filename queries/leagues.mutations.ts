@@ -41,7 +41,9 @@ export type CreateMataMataLeaguePayload = {
   inicio_rodada: number;
 };
 
-export const createClassicLeague = async (payload: Omit<CreateClassicLeaguePayload, 'mata_mata'>) => {
+export const createClassicLeague = async (
+  payload: Omit<CreateClassicLeaguePayload, 'mata_mata'>
+) => {
   const body: CreateClassicLeaguePayload = { ...payload, mata_mata: false };
   const res = await api.post<CreateLeagueResponse>(CREATE_LEAGUE, body);
   return res.data;
@@ -61,4 +63,3 @@ export const inviteLeague = async (slug: string, teamSlugs: string[]) => {
   const res = await api.post(INVITE_LEAGUE.replace(':slug', slug), teamSlugs);
   return res.data;
 };
-

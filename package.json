@@ -1,5 +1,5 @@
 {
-  "name": "parciais-fc",
+  "name": "parciais",
   "main": "expo-router/entry",
   "version": "0.7.0",
   "scripts": {

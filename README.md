@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="assets/images/icon.png" alt="Parciais FC Logo" width="200"/>
+  <img src="assets/images/icon.png" alt="Parciais Logo" width="200"/>
 
-# Parciais FC
+# Parciais
 
   **Acompanhamento em tempo real do Cartola FC com interface moderna e intuitiva**
 
-  [![Version](https://img.shields.io/badge/version-0.6.8-blue.svg)](https://github.com/clizioguedes/parciais-fc)
+  [![Version](https://img.shields.io/badge/version-0.6.8-blue.svg)](https://github.com/clizioguedes/parciais)
   [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61dafb.svg)](https://reactnative.dev/)
   [![Expo](https://img.shields.io/badge/Expo-54.0.0-000020.svg)](https://expo.dev/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-3178c6.svg)](https://www.typescriptlang.org/)
@@ -24,7 +24,7 @@
 
 ## 📖 Sobre
 
-**Parciais FC** é uma aplicação mobile multiplataforma (iOS e Android) desenvolvida para cartoleiros que desejam acompanhar o desempenho de seus times no Cartola FC em tempo real. Com uma interface moderna e intuitiva, a aplicação oferece informações detalhadas sobre parciais de jogadores, estatísticas, mercado, ligas e muito mais.
+**App Parciais** é uma aplicação mobile multiplataforma (iOS e Android) desenvolvida para cartoleiros que desejam acompanhar o desempenho de seus times no Cartola FC em tempo real. Com uma interface moderna e intuitiva, a aplicação oferece informações detalhadas sobre parciais de jogadores, estatísticas, mercado, ligas e muito mais.
 
 ### 🎯 Diferenciais
 
@@ -210,8 +210,8 @@ Para desenvolvimento mobile:
 1. **Clone o repositório**
 
 ```bash
-git clone https://github.com/clizioguedes/parciais-fc.git
-cd parciais-fc
+git clone https://github.com/clizioguedes/parciais.git
+cd parciais
 ```
 
 1. **Instale as dependências**
@@ -296,7 +296,7 @@ A aplicação utiliza autenticação via **Globo ID**:
 ## 📁 Estrutura do Projeto
 
 ```
-parciais-fc/
+parciais/
 ├── app/                          # Screens e rotas (Expo Router)
 │   ├── (tabs)/                  # Navegação por tabs
 │   │   ├── index.tsx           # 🏠 Home/Dashboard

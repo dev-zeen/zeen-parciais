@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Parciais FC",
-    "slug": "parciais-fc",
+    "name": "Parciais",
+    "slug": "parciais",
     "version": "0.6.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,16 +15,16 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.clizioguedes.meucartola",
-      "buildNumber": "27"
+      "bundleIdentifier": "com.clizioguedes.parciais",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#479AFF"
       },
-      "package": "com.clizioguedes.meucartola",
-      "versionCode": 30
+      "package": "com.clizioguedes.parciais",
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
