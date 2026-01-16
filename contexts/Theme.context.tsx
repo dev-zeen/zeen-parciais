@@ -12,7 +12,7 @@ type ThemeContextProps = {
   isLoading: boolean;
 };
 
-const THEME_STORAGE_KEY = '@afc-parciais:theme';
+const THEME_STORAGE_KEY = '@parciais-fc:theme';
 
 export const ThemeContext = createContext<ThemeContextProps>({} as ThemeContextProps);
 
@@ -26,7 +26,10 @@ export function ThemeContextProvider({ children }: { children: ReactNode }): Rea
     const loadTheme = async () => {
       try {
         const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-        if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto')) {
+        if (
+          savedTheme &&
+          (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'auto')
+        ) {
           setThemeModeState(savedTheme as ThemeMode);
         }
       } catch (error) {
@@ -51,9 +54,7 @@ export function ThemeContextProvider({ children }: { children: ReactNode }): Rea
 
   // Determine the actual color scheme to use
   const colorScheme: ColorScheme =
-    themeMode === 'auto'
-      ? (systemColorScheme ?? 'light')
-      : themeMode;
+    themeMode === 'auto' ? (systemColorScheme ?? 'light') : themeMode;
 
   return (
     <ThemeContext.Provider
