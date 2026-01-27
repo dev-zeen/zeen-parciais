@@ -5,45 +5,16 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "ios": {
-        "simulator": true
-      },
-      "channel": "development"
+      "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal",
-      "ios": {
-        "simulator": false
-      },
-      "android": {
-        "buildType": "apk"
-      },
-      "channel": "preview"
+      "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true,
-      "ios": {
-        "resourceClass": "m-medium",
-        "simulator": false
-      },
-      "android": {
-        "buildType": "aab"
-      },
-      "channel": "production"
+      "autoIncrement": true
     }
   },
   "submit": {
-    "production": {
-      "ios": {
-        "appleId": "seu-email@example.com",
-        "ascAppId": "INSIRA_O_APP_STORE_CONNECT_ID",
-        "appleTeamId": "INSIRA_SEU_TEAM_ID"
-      },
-      "android": {
-        "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "internal"
-      }
-    }
+    "production": {}
   }
 }

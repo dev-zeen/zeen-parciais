@@ -45,6 +45,7 @@ export default () => {
   const colorTheme = useThemeColor();
   const isFirstRender = useRef(true);
   const marketSheetRef = useRef<BottomSheetRef>(null);
+  const formationModalRef = useRef<BottomSheetRef>(null);
   const tabBarHeight = useBottomTabBarHeight();
 
   const { isAutheticated } = useContext(AuthContext);
@@ -89,7 +90,6 @@ export default () => {
   const [playersToSellData, setPlayersToSellData] = useState<PlayersToSell[]>([]);
   const [selectedPlayersToRemove, setSelectedPlayersToRemove] = useState<Set<number>>(new Set());
   const [pendingFormation, setPendingFormation] = useState<string | null>(null);
-  const [showFormationModal, setShowFormationModal] = useState(false);
 
   // Save button state
   const [isLineupComplete, setIsLineupComplete] = useState(false);
@@ -280,7 +280,7 @@ export default () => {
         setPlayersToSellData(playersToSell);
         setPendingFormation(newFormation);
         setSelectedPlayersToRemove(new Set());
-        setShowFormationModal(true);
+        formationModalRef.current?.snapToIndex(0);
         return;
       }
 
@@ -351,8 +351,7 @@ export default () => {
     const newPrice = onGetTeamPrice(lineupWithNewFormation.starting);
     updatePrice(newPrice);
 
-    // Fecha o modal e limpa os estados
-    setShowFormationModal(false);
+    // Limpa os estados (o componente fecha automaticamente)
     setPlayersToSellData([]);
     setPendingFormation(null);
     setSelectedPlayersToRemove(new Set());
@@ -372,8 +371,7 @@ export default () => {
     updatePrice,
   ]);
 
-  const handleCancelFormationChange = useCallback(() => {
-    setShowFormationModal(false);
+  const handleFormationModalClose = useCallback(() => {
     setPlayersToSellData([]);
     setPendingFormation(null);
     setSelectedPlayersToRemove(new Set());
@@ -490,14 +488,15 @@ export default () => {
         />
       </BottomSheet>
 
-      <FormationChangeModal
-        visible={showFormationModal}
-        playersToSellData={playersToSellData}
-        selectedPlayersToRemove={selectedPlayersToRemove}
-        onTogglePlayer={handleTogglePlayerToRemove}
-        onConfirm={handleConfirmFormationChange}
-        onCancel={handleCancelFormationChange}
-      />
+      <BottomSheet ref={formationModalRef} onClose={handleFormationModalClose}>
+        <FormationChangeModal
+          playersToSellData={playersToSellData}
+          selectedPlayersToRemove={selectedPlayersToRemove}
+          onTogglePlayer={handleTogglePlayerToRemove}
+          onConfirm={handleConfirmFormationChange}
+          onClose={() => formationModalRef.current?.close()}
+        />
+      </BottomSheet>
 
       <Toast
         visible={showToast}

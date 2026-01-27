@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Parciais FC",
-    "slug": "parciais-fc",
+    "slug": "zeen-parciais-parciais-do-cartola-fc",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -41,7 +41,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "4dde8b0d-5092-497c-97b6-9a300283c760"
+        "projectId": "ffc94ff1-f7c4-4f3e-b053-56a4ebb95c07"
       }
     },
     "owner": "clizioguedes"
