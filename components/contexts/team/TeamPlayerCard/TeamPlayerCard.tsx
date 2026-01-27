@@ -49,9 +49,9 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
   return (
     <View
-      className="flex-1 mx-4 rounded-2xl overflow-hidden"
       style={{
         backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#ffffff',
+        maxHeight: '100%',
       }}>
       {/* Header */}
       <View
@@ -87,9 +87,10 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
       {/* Single ScrollView with all content */}
       <ScrollView
-        className="flex-1"
         style={{ backgroundColor: 'transparent' }}
-        showsVerticalScrollIndicator={false}>
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled={true}>
         <View className="px-4 py-3" style={{ gap: 12, backgroundColor: 'transparent' }}>
           {/* Player Info Section */}
           <View

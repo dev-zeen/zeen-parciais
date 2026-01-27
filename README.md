@@ -3,21 +3,22 @@
 
 # Parciais
 
-  **Acompanhamento em tempo real do Cartola FC com interface moderna e intuitiva**
+**Acompanhamento em tempo real do Cartola FC com interface moderna e intuitiva**
 
-  [![Version](https://img.shields.io/badge/version-0.6.8-blue.svg)](https://github.com/clizioguedes/parciais)
-  [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61dafb.svg)](https://reactnative.dev/)
-  [![Expo](https://img.shields.io/badge/Expo-54.0.0-000020.svg)](https://expo.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-3178c6.svg)](https://www.typescriptlang.org/)
-  [![License](https://img.shields.io/badge/license-Private-red.svg)]()
+[![Version](https://img.shields.io/badge/version-0.6.8-blue.svg)](https://github.com/clizioguedes/parciais)
+[![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61dafb.svg)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-54.0.0-000020.svg)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.1.3-3178c6.svg)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/license-Private-red.svg)]()
 
-  [Sobre](#-sobre) •
-  [Funcionalidades](#-funcionalidades) •
-  [Tecnologias](#-tecnologias) •
-  [Instalação](#-instalação) •
-  [Uso](#-uso) •
-  [Estrutura](#-estrutura-do-projeto) •
-  [Contribuindo](#-contribuindo)
+[Sobre](#-sobre) •
+[Funcionalidades](#-funcionalidades) •
+[Tecnologias](#-tecnologias) •
+[Instalação](#-instalação) •
+[Uso](#-uso) •
+[Estrutura](#-estrutura-do-projeto) •
+[Contribuindo](#-contribuindo)
+
 </div>
 
 ---
@@ -526,8 +527,8 @@ Este projeto é privado e não possui licença pública. Todos os direitos reser
 
 <div align="center">
 
-  **Desenvolvido com ❤️ para cartoleiros apaixonados**
+**Desenvolvido com ❤️ para cartoleiros apaixonados**
 
-  ⭐ Se este projeto te ajudou, considere dar uma estrela!
+⭐ Se este projeto te ajudou, considere dar uma estrela!
 
 </div>

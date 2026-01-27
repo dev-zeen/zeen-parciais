@@ -1,4 +1,4 @@
-import {  Image, ScrollView } from 'react-native';
+import { Image, ScrollView } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 
 import maintenanceImage from '@/assets/images/manutencao.png';

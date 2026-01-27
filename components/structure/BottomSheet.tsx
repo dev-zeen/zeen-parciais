@@ -1,6 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Modal } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { Modal, Pressable, StyleSheet } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -34,33 +33,59 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
       },
     }));
 
-    if (!visible) return null;
-
     return (
       <Modal
         animationType="slide"
-        transparent={false}
+        transparent={true}
         visible={visible}
-        presentationStyle="fullScreen"
         statusBarTranslucent={false}
         onRequestClose={() => {
           setVisible(false);
           if (onClose) onClose();
         }}>
-        <SafeAreaProvider>
-          <SafeAreaView
-            style={{
-              flex: 1,
-              backgroundColor:
-                colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-            }}
-            edges={['top', 'bottom']}>
+        <Pressable
+          style={styles.overlay}
+          onPress={() => {
+            setVisible(false);
+            if (onClose) onClose();
+          }}>
+          <Pressable
+            style={[
+              styles.container,
+              {
+                backgroundColor:
+                  colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+              },
+            ]}
+            onPress={(e) => e.stopPropagation()}>
             {children}
-          </SafeAreaView>
-        </SafeAreaProvider>
+          </Pressable>
+        </Pressable>
       </Modal>
     );
   }
 );
 
 BottomSheet.displayName = 'BottomSheet';
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  container: {
+    maxHeight: '90%',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -3,
+    },
+    shadowOpacity: 0.27,
+    shadowRadius: 4.65,
+    elevation: 6,
+  },
+});

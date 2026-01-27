@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Image, Modal, ScrollView } from 'react-native';
+import { ActivityIndicator, Animated, Image, Modal, Platform, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
 import enterImage from '@/assets/images/auth.png';
@@ -123,6 +124,7 @@ const FEATURES = [
 export function Login({ title }: LoginProps) {
   const colorTheme = useThemeColor();
   const isDark = colorTheme === 'dark';
+  const insets = useSafeAreaInsets();
 
   const { handleSuccessAuth } = useContext(AuthContext);
   const { setItem } = useAsyncStorage(ACCESS_TOKEN_KEY_STORAGE);
@@ -484,11 +486,12 @@ export function Login({ title }: LoginProps) {
       {/* Modal de Autenticação */}
       {showModalAuth && (
         <Modal animationType="slide" visible={showModalAuth} presentationStyle="fullScreen">
-          <View className="flex-1">
+          <View className="flex-1" style={{ position: 'relative' }}>
             {/* Header da Modal */}
             <View
               className="px-4 py-3 border-b"
               style={{
+                paddingTop: Platform.OS === 'ios' ? insets.top + 12 : 12,
                 backgroundColor: isDark ? Colors.dark.background : Colors.light.background,
                 borderBottomColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 flexDirection: 'row',
@@ -535,55 +538,6 @@ export function Login({ title }: LoginProps) {
               </TouchableOpacity>
             </View>
 
-            {/* Loading Overlay durante autenticação */}
-            {isAuthenticating && (
-              <View
-                className="absolute inset-0 items-center justify-center"
-                style={{
-                  backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-                  zIndex: 10,
-                }}>
-                <ActivityIndicator
-                  size="large"
-                  color={Colors.light.tint}
-                  style={{ marginBottom: 16 }}
-                />
-                <Text
-                  className="text-lg font-semibold mb-2"
-                  style={{
-                    fontFamily: 'Nunito_600SemiBold',
-                  }}>
-                  Autenticando...
-                </Text>
-                <Text
-                  className="text-sm opacity-60"
-                  style={{
-                    fontFamily: 'Nunito_400Regular',
-                  }}>
-                  Aguarde um momento
-                </Text>
-              </View>
-            )}
-
-            {/* Loading inicial da WebView */}
-            {webViewLoading && !isAuthenticating && (
-              <View
-                className="absolute inset-0 items-center justify-center"
-                style={{
-                  backgroundColor: isDark ? Colors.dark.background : Colors.light.background,
-                  zIndex: 5,
-                }}>
-                <ActivityIndicator size="large" color={Colors.light.tint} />
-                <Text
-                  className="text-sm opacity-60 mt-4"
-                  style={{
-                    fontFamily: 'Nunito_400Regular',
-                  }}>
-                  Carregando página de login...
-                </Text>
-              </View>
-            )}
-
             {/* WebView */}
             <WebView
               style={{
@@ -614,6 +568,63 @@ export function Login({ title }: LoginProps) {
               sharedCookiesEnabled={false}
               cacheEnabled={false}
             />
+
+            {/* Loading Overlay durante autenticação */}
+            {isAuthenticating && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 10,
+                }}>
+                <ActivityIndicator size="large" color={Colors.light.tint} />
+                <Text
+                  className="text-lg font-semibold mt-4 mb-2"
+                  style={{
+                    fontFamily: 'Nunito_600SemiBold',
+                  }}>
+                  Autenticando...
+                </Text>
+                <Text
+                  className="text-sm opacity-60"
+                  style={{
+                    fontFamily: 'Nunito_400Regular',
+                  }}>
+                  Aguarde um momento
+                </Text>
+              </View>
+            )}
+
+            {/* Loading inicial da WebView */}
+            {webViewLoading && !isAuthenticating && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  backgroundColor: isDark ? Colors.dark.background : Colors.light.background,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 5,
+                }}>
+                <ActivityIndicator size="large" color={Colors.light.tint} />
+                <Text
+                  className="text-sm opacity-60 mt-4"
+                  style={{
+                    fontFamily: 'Nunito_400Regular',
+                  }}>
+                  Carregando página de login...
+                </Text>
+              </View>
+            )}
           </View>
         </Modal>
       )}
