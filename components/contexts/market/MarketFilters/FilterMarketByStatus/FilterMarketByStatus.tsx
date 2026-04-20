@@ -94,11 +94,11 @@ export function FilterMarketByStatus({
                 className="flex-row justify-between p-4 rounded-lg items-center"
                 style={{
                   backgroundColor: item.selected
-                    ? (colorTheme === 'dark' ? '#1e3a8a' : '#dbeafe')
+                    ? (colorTheme === 'dark' ? '#0A1F4A' : '#DDEEFF')
                     : (colorTheme === 'dark' ? '#1f2937' : '#f9fafb'),
                   borderWidth: 1,
                   borderColor: item.selected
-                    ? (colorTheme === 'dark' ? '#3b82f6' : '#93c5fd')
+                    ? (colorTheme === 'dark' ? '#0057FF' : '#5B8EFF')
                     : (colorTheme === 'dark' ? '#374151' : '#e5e7eb'),
                 }}>
                 <Text 
@@ -109,9 +109,9 @@ export function FilterMarketByStatus({
                 <Switch
                   trackColor={{ 
                     false: colorTheme === 'dark' ? '#374151' : '#d1d5db', 
-                    true: colorTheme === 'dark' ? '#60a5fa' : '#93c5fd' 
+                    true: colorTheme === 'dark' ? '#5B8EFF' : '#5B8EFF' 
                   }}
-                  thumbColor={item.selected ? '#3b82f6' : '#f3f4f6'}
+                  thumbColor={item.selected ? '#0057FF' : '#f3f4f6'}
                   ios_backgroundColor={colorTheme === 'dark' ? '#374151' : '#d1d5db'}
                   onValueChange={() => handleChangeFilter(item)}
                   value={item.selected}
@@ -130,11 +130,11 @@ export function FilterMarketByStatus({
           style={{
             backgroundColor: isFiltersEmpty 
               ? (colorTheme === 'dark' ? '#374151' : '#e5e7eb')
-              : (colorTheme === 'dark' ? '#1e40af' : '#3b82f6'),
+              : (colorTheme === 'dark' ? '#1e40af' : '#0057FF'),
             borderWidth: 1,
             borderColor: isFiltersEmpty
               ? (colorTheme === 'dark' ? '#4b5563' : '#d1d5db')
-              : (colorTheme === 'dark' ? '#3b82f6' : '#2563eb'),
+              : (colorTheme === 'dark' ? '#0057FF' : '#0057FF'),
             opacity: isFiltersEmpty ? 0.5 : 1,
           }}>
           <Text className="font-semibold text-sm text-white">Filtrar</Text>

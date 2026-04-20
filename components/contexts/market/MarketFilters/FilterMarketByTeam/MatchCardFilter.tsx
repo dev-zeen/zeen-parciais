@@ -48,8 +48,8 @@ export function MatchCardFilter({
             borderWidth: selecteds?.includes(match.clube_casa_id) ? 2 : 1,
             borderColor: selecteds?.includes(match.clube_casa_id)
               ? colorTheme === 'dark'
-                ? '#3b82f6'
-                : '#2563eb'
+                ? '#0057FF'
+                : '#0057FF'
               : colorTheme === 'dark'
                 ? '#374151'
                 : '#e5e7eb',
@@ -85,8 +85,8 @@ export function MatchCardFilter({
             borderWidth: selecteds?.includes(match.clube_visitante_id) ? 2 : 1,
             borderColor: selecteds?.includes(match.clube_visitante_id)
               ? colorTheme === 'dark'
-                ? '#3b82f6'
-                : '#2563eb'
+                ? '#0057FF'
+                : '#0057FF'
               : colorTheme === 'dark'
                 ? '#374151'
                 : '#e5e7eb',

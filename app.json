@@ -1,29 +1,29 @@
 {
   "expo": {
-    "name": "Parciais FC",
-    "slug": "zeen-parciais-parciais-do-cartola-fc",
+    "name": "Zeen Parciais FC",
+    "slug": "zeenparciaisfc",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "zeenparciaisfc",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash-v2.png",
+      "image": "./assets/images/splashscreen.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0F1E3A"
+      "backgroundColor": "#0D1117"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.clizioguedes.parciais-fc",
+      "bundleIdentifier": "com.zeenparciaisfc",
       "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#479AFF"
+        "backgroundColor": "#FF8A00"
       },
-      "package": "com.clizioguedes.parciais-fc",
+      "package": "com.zeenparciaisfc",
       "versionCode": 1
     },
     "web": {

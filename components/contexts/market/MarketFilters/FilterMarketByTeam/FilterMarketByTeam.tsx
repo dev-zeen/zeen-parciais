@@ -168,11 +168,11 @@ export function FilterMarketByTeam({
           style={{
             backgroundColor: selectedsTeams.length === 0 
               ? (colorTheme === 'dark' ? '#374151' : '#e5e7eb')
-              : (colorTheme === 'dark' ? '#1e40af' : '#3b82f6'),
+              : (colorTheme === 'dark' ? '#1e40af' : '#0057FF'),
             borderWidth: 1,
             borderColor: selectedsTeams.length === 0
               ? (colorTheme === 'dark' ? '#4b5563' : '#d1d5db')
-              : (colorTheme === 'dark' ? '#3b82f6' : '#2563eb'),
+              : (colorTheme === 'dark' ? '#0057FF' : '#0057FF'),
             opacity: selectedsTeams.length === 0 ? 0.5 : 1,
           }}>
           <Text className="font-semibold text-sm text-white">Filtrar</Text>

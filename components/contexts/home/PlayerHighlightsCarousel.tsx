@@ -118,7 +118,7 @@ function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: numb
             <Text className="font-semibold text-xs text-center" numberOfLines={1}>
               {player.Atleta.apelido_abreviado}
             </Text>
-            <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#3B82F620' }}>
+            <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#0057FF20' }}>
               <Text className="text-blue-500 text-xs font-bold">
                 {player.posicao_abreviacao.toUpperCase()}
               </Text>

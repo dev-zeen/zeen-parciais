@@ -179,7 +179,7 @@ export function TeamPlayer({
             style={{
               bottom: -2,
               right: 30,
-              backgroundColor: isReplaced ? '#ef4444' : '#22c55e',
+              backgroundColor: isReplaced ? '#ef4444' : '#00E094',
             }}>
             <Feather name={isReplaced ? 'arrow-down' : 'arrow-up'} color={'#fafafa'} size={14} />
           </View>

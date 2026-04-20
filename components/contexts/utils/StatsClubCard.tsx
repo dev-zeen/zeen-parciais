@@ -18,9 +18,10 @@ type StatItem = {
   label: string;
   value: number;
   variation?: number;
-  icon: 'dollar-sign' | 'zap' | 'award' | 'users';
-  color: string;
+  icon?: 'dollar-sign' | 'zap' | 'award' | 'users';
+  color?: string;
   suffix?: string;
+  int?: boolean;
 };
 
 export function StatsClubCard({ team, round }: StatsClubCardProps) {
@@ -47,27 +48,20 @@ export function StatsClubCard({ team, round }: StatsClubCardProps) {
           label: 'Patrimônio',
           value: totalPartialValorization ?? 0,
           variation: partialValorization,
-          icon: 'dollar-sign' as const,
-          color: '#3B82F6',
         },
         {
           label: 'Parcial',
           value: partialScore ?? 0,
-          icon: 'zap' as const,
-          color: '#22C55E',
         },
         {
           label: 'Total',
           value: totalPartialScore ?? 0,
-          icon: 'award' as const,
-          color: '#F59E0B',
         },
         {
           label: 'Pontuados',
           value: playersHaveAlreadyPlayed || 0,
-          icon: 'users' as const,
-          color: '#8B5CF6',
           suffix: '/12',
+          int: true,
         },
       ];
     }
@@ -77,13 +71,13 @@ export function StatsClubCard({ team, round }: StatsClubCardProps) {
         label: 'Patrimônio',
         value: team.patrimonio ?? 0,
         icon: 'dollar-sign' as const,
-        color: '#3B82F6',
+        color: '#0057FF',
       },
       {
         label: 'Rodada',
         value: team.pontos ?? 0,
         icon: 'zap' as const,
-        color: '#22C55E',
+        color: '#00E094',
       },
       {
         label: 'Total',
@@ -127,19 +121,19 @@ export function StatsClubCard({ team, round }: StatsClubCardProps) {
               </View>
             </View>
 
-            <Text className="font-bold text-lg mb-1" numberOfLines={1}>
-              {numberToString(stat.value)}
-              {stat.suffix && (
-                <Text className="text-sm text-gray-500">{stat.suffix}</Text>
-              )}
+            <Text className="font-bold text-sm mb-1" numberOfLines={1}>
+              {stat.int ? Math.round(stat.value) : numberToString(stat.value)}
+              {stat.suffix && <Text className="text-sm text-gray-500">{stat.suffix}</Text>}
             </Text>
 
             {stat.variation !== undefined && stat.variation !== null && stat.variation !== 0 && (
-              <View className="flex-row items-center" style={{ gap: 2, backgroundColor: 'transparent' }}>
+              <View
+                className="flex-row items-center"
+                style={{ gap: 2, backgroundColor: 'transparent' }}>
                 <Feather
                   name={stat.variation >= 0 ? 'arrow-up' : 'arrow-down'}
                   size={10}
-                  color={stat.variation >= 0 ? '#22C55E' : '#EF4444'}
+                  color={stat.variation >= 0 ? '#00E094' : '#EF4444'}
                 />
                 <Text
                   className={`text-xs font-semibold ${

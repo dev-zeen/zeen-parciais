@@ -81,10 +81,10 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
         };
       default:
         return {
-          bg: colorTheme === 'dark' ? '#1E3A8A' : '#DBEAFE',
-          border: 'border-blue-500',
+          bg: colorTheme === 'dark' ? '#0A1F4A' : '#DDEEFF',
+          border: 'border-secondary',
           text: 'text-blue-700 dark:text-blue-300',
-          icon: '#3B82F6',
+          icon: '#0057FF',
         };
     }
   };

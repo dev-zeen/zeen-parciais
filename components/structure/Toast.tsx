@@ -61,11 +61,11 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 3
   const getToastColor = () => {
     switch (type) {
       case 'success':
-        return '#22c55e';
+        return '#00E094';
       case 'error':
         return '#ef4444';
       case 'info':
-        return '#3b82f6';
+        return '#0057FF';
       default:
         return '#22c55e';
     }

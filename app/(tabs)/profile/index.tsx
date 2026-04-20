@@ -154,11 +154,11 @@ export default () => {
           <TeamSummaryCard team={myClub} />
 
           {/* General Statistics - 2x2 Grid */}
-          <AnimatedCard delay={100} variant="flat" className="p-0">
-            <View style={{ gap: 8, backgroundColor: 'transparent', padding: 12 }}>
+          <AnimatedCard delay={100} variant="flat">
+            <View style={{ gap: 16, backgroundColor: 'transparent' }}>
               <View
                 className="flex-row items-center"
-                style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
+                style={{ gap: 8, backgroundColor: 'transparent' }}>
                 <Feather name="bar-chart-2" size={20} color="#3b82f6" />
                 <Text className="text-base font-bold">Estatísticas Gerais</Text>
               </View>
@@ -166,20 +166,23 @@ export default () => {
                 {/* Total Points */}
                 <View
                   className="flex-1 rounded-xl p-3"
-                  style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                  style={{ 
+                    backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                    minHeight: 88,
+                  }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
                     style={{ backgroundColor: 'transparent' }}>
-                    <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                    <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                       Total
                     </Text>
                     <View
-                      className="w-6 h-6 rounded-full items-center justify-center"
+                      className="w-7 h-7 rounded-full items-center justify-center"
                       style={{ backgroundColor: '#3B82F620' }}>
-                      <Feather name="award" size={12} color="#3B82F6" />
+                      <Feather name="award" size={14} color="#3B82F6" />
                     </View>
                   </View>
-                  <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+                  <Text className="font-bold text-xl mb-1" numberOfLines={1}>
                     {totalScore}
                   </Text>
                   <Text className="text-xs text-gray-500 dark:text-gray-400">Pts</Text>
@@ -188,20 +191,23 @@ export default () => {
                 {/* Patrimony */}
                 <View
                   className="flex-1 rounded-xl p-3"
-                  style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                  style={{ 
+                    backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                    minHeight: 88,
+                  }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
                     style={{ backgroundColor: 'transparent' }}>
-                    <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                    <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                       Patrimônio
                     </Text>
                     <View
-                      className="w-6 h-6 rounded-full items-center justify-center"
+                      className="w-7 h-7 rounded-full items-center justify-center"
                       style={{ backgroundColor: '#22C55E20' }}>
-                      <Feather name="dollar-sign" size={12} color="#22C55E" />
+                      <Feather name="dollar-sign" size={14} color="#22C55E" />
                     </View>
                   </View>
-                  <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+                  <Text className="font-bold text-xl mb-1" numberOfLines={1}>
                     {totalPatrimony}
                   </Text>
                   <Text className="text-xs text-gray-500 dark:text-gray-400">C$</Text>
@@ -212,20 +218,23 @@ export default () => {
                 {/* Average Score */}
                 <View
                   className="flex-1 rounded-xl p-3"
-                  style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                  style={{ 
+                    backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                    minHeight: 88,
+                  }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
                     style={{ backgroundColor: 'transparent' }}>
-                    <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                    <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                       Média/Rod
                     </Text>
                     <View
-                      className="w-6 h-6 rounded-full items-center justify-center"
+                      className="w-7 h-7 rounded-full items-center justify-center"
                       style={{ backgroundColor: '#F59E0B20' }}>
-                      <Feather name="trending-up" size={12} color="#F59E0B" />
+                      <Feather name="trending-up" size={14} color="#F59E0B" />
                     </View>
                   </View>
-                  <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+                  <Text className="font-bold text-xl mb-1" numberOfLines={1}>
                     {numberToString(averageScore)}
                   </Text>
                   <Text className="text-xs text-gray-500 dark:text-gray-400">Pts</Text>
@@ -234,20 +243,23 @@ export default () => {
                 {/* Rounds Played */}
                 <View
                   className="flex-1 rounded-xl p-3"
-                  style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                  style={{ 
+                    backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                    minHeight: 88,
+                  }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
                     style={{ backgroundColor: 'transparent' }}>
-                    <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                    <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                       Rodadas
                     </Text>
                     <View
-                      className="w-6 h-6 rounded-full items-center justify-center"
+                      className="w-7 h-7 rounded-full items-center justify-center"
                       style={{ backgroundColor: '#8B5CF620' }}>
-                      <Feather name="calendar" size={12} color="#8B5CF6" />
+                      <Feather name="calendar" size={14} color="#8B5CF6" />
                     </View>
                   </View>
-                  <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+                  <Text className="font-bold text-xl mb-1" numberOfLines={1}>
                     {roundsPlayed}
                   </Text>
                   <Text className="text-xs text-gray-500 dark:text-gray-400">Jogadas</Text>
@@ -258,11 +270,11 @@ export default () => {
 
           {/* Rankings Card */}
           {myClub?.ranking && (
-            <AnimatedCard delay={200} variant="flat" className="p-0">
-              <View style={{ gap: 8, backgroundColor: 'transparent', padding: 12 }}>
+            <AnimatedCard delay={200} variant="flat">
+              <View style={{ gap: 16, backgroundColor: 'transparent' }}>
                 <View
                   className="flex-row items-center"
-                  style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
+                  style={{ gap: 8, backgroundColor: 'transparent' }}>
                   <Feather name="trending-up" size={20} color="#22c55e" />
                   <Text className="text-base font-bold">Rankings</Text>
                 </View>
@@ -270,21 +282,29 @@ export default () => {
                   {/* Current Position */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Posição
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#3B82F620' }}>
-                        <Feather name="hash" size={12} color="#3B82F6" />
+                        <Feather name="hash" size={14} color="#3B82F6" />
                       </View>
                     </View>
-                    <Text className="font-bold text-lg mb-1" numberOfLines={1}>
-                      {numberToString(myClub.ranking.atual.posicao)}
+                    <Text 
+                      className="font-bold mb-1" 
+                      style={{ fontSize: 18 }}
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                      minimumFontScale={0.7}>
+                      {myClub.ranking.atual.posicao.toLocaleString('pt-BR')}º
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">Atual</Text>
                   </View>
@@ -292,15 +312,18 @@ export default () => {
                   {/* Variation */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Variação
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{
                           backgroundColor:
                             rankingVariation > 0
@@ -312,12 +335,12 @@ export default () => {
                         <Feather
                           name={
                             rankingVariation > 0
-                              ? 'arrow-up'
+                              ? 'trending-up'
                               : rankingVariation < 0
-                                ? 'arrow-down'
+                                ? 'trending-down'
                                 : 'minus'
                           }
-                          size={12}
+                          size={14}
                           color={
                             rankingVariation > 0
                               ? '#22C55E'
@@ -329,8 +352,9 @@ export default () => {
                       </View>
                     </View>
                     <Text
-                      className="font-bold text-lg mb-1"
+                      className="font-bold mb-1"
                       style={{
+                        fontSize: 18,
                         color:
                           rankingVariation > 0
                             ? '#22C55E'
@@ -340,9 +364,11 @@ export default () => {
                                 ? '#d1d5db'
                                 : '#374151',
                       }}
-                      numberOfLines={1}>
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                      minimumFontScale={0.7}>
                       {rankingVariation > 0 ? '+' : ''}
-                      {numberToString(rankingVariation)}
+                      {Math.abs(rankingVariation).toLocaleString('pt-BR')}
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">
                       {rankingVariation > 0 ? 'Subiu' : rankingVariation < 0 ? 'Caiu' : 'Estável'}
@@ -352,21 +378,29 @@ export default () => {
                   {/* Best Position */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Melhor
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#F59E0B20' }}>
-                        <Feather name="star" size={12} color="#F59E0B" />
+                        <Feather name="star" size={14} color="#F59E0B" />
                       </View>
                     </View>
-                    <Text className="font-bold text-lg mb-1" numberOfLines={1}>
-                      {numberToString(myClub.ranking.melhor_ranking_id)}
+                    <Text 
+                      className="font-bold mb-1" 
+                      style={{ fontSize: 18 }}
+                      adjustsFontSizeToFit
+                      numberOfLines={1}
+                      minimumFontScale={0.7}>
+                      {myClub.ranking.melhor_ranking_id.toLocaleString('pt-BR')}º
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">Posição</Text>
                   </View>
@@ -377,11 +411,11 @@ export default () => {
 
           {/* Performance by Round - 2x2 Grid */}
           {historyClub && historyClub.length > 0 && (
-            <AnimatedCard delay={300} variant="flat" className="p-0">
-              <View style={{ gap: 8, backgroundColor: 'transparent', padding: 12 }}>
+            <AnimatedCard delay={300} variant="flat">
+              <View style={{ gap: 16, backgroundColor: 'transparent' }}>
                 <View
                   className="flex-row items-center"
-                  style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
+                  style={{ gap: 8, backgroundColor: 'transparent' }}>
                   <Feather name="zap" size={20} color="#f59e0b" />
                   <Text className="text-base font-bold">Desempenho por Rodada</Text>
                 </View>
@@ -389,21 +423,24 @@ export default () => {
                   {/* Highest Score */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Maior
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#22C55E20' }}>
-                        <Feather name="trending-up" size={12} color="#22C55E" />
+                        <Feather name="trending-up" size={14} color="#22C55E" />
                       </View>
                     </View>
                     <Text
-                      className="font-bold text-lg mb-1"
+                      className="font-bold text-xl mb-1"
                       style={{ color: '#22C55E' }}
                       numberOfLines={1}>
                       {numberToString(highestScore?.pontos as number)}
@@ -416,21 +453,24 @@ export default () => {
                   {/* Lowest Score */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Menor
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#EF444420' }}>
-                        <Feather name="trending-down" size={12} color="#EF4444" />
+                        <Feather name="trending-down" size={14} color="#EF4444" />
                       </View>
                     </View>
                     <Text
-                      className="font-bold text-lg mb-1"
+                      className="font-bold text-xl mb-1"
                       style={{ color: '#EF4444' }}
                       numberOfLines={1}>
                       {numberToString(lowestScore?.pontos as number)}
@@ -445,20 +485,23 @@ export default () => {
                   {/* Average General */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Média
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#3B82F620' }}>
-                        <Feather name="activity" size={12} color="#3B82F6" />
+                        <Feather name="activity" size={14} color="#3B82F6" />
                       </View>
                     </View>
-                    <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+                    <Text className="font-bold text-xl mb-1" numberOfLines={1}>
                       {numberToString(averageScore)}
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">Pts</Text>
@@ -467,20 +510,23 @@ export default () => {
                   {/* Consistency */}
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Consistência
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#8B5CF620' }}>
-                        <Feather name="bar-chart" size={12} color="#8B5CF6" />
+                        <Feather name="bar-chart" size={14} color="#8B5CF6" />
                       </View>
                     </View>
-                    <Text className="font-bold text-lg mb-1" numberOfLines={1}>
+                    <Text className="font-bold text-xl mb-1" numberOfLines={1}>
                       ±{numberToString(consistency)}
                     </Text>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">Desvio</Text>
@@ -492,34 +538,64 @@ export default () => {
 
           {/* Evolution Chart */}
           {historyClub && historyClub.length > 0 && (
-            <AnimatedCard delay={400} variant="flat" className="p-0">
-              <View style={{ gap: 8, backgroundColor: 'transparent', padding: 12 }}>
+            <AnimatedCard delay={400} variant="flat">
+              <View style={{ gap: 16, backgroundColor: 'transparent' }}>
                 <View
-                  className="flex-row items-center"
-                  style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
-                  <Feather name="bar-chart-2" size={20} color="#3b82f6" />
-                  <Text className="text-base font-bold">Evolução</Text>
+                  className="flex-row items-center justify-between"
+                  style={{ backgroundColor: 'transparent' }}>
+                  <View style={{ backgroundColor: 'transparent' }}>
+                    <View
+                      className="flex-row items-center"
+                      style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
+                      <Feather name="trending-up" size={20} color="#3b82f6" />
+                      <Text className="text-base font-bold">Histórico de Pontuação</Text>
+                    </View>
+                    <Text className="text-xs text-gray-500 dark:text-gray-400">
+                      {historyClub.filter((h) => h.pontos !== null && h.pontos > 0).length === 1
+                        ? '1 rodada disputada'
+                        : `${historyClub.filter((h) => h.pontos !== null && h.pontos > 0).length} rodadas disputadas`}
+                    </Text>
+                  </View>
+                  <View
+                    className="w-8 h-8 rounded-full items-center justify-center"
+                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    <Feather
+                      name="bar-chart-2"
+                      size={16}
+                      color={colorTheme === 'dark' ? '#9CA3AF' : '#6B7280'}
+                    />
+                  </View>
                 </View>
-                <Text className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                  Pontos das últimas 10 rodadas
-                </Text>
-                <LineChart
-                  data={historyClub.slice(-10).map((h) => h.pontos ?? 0)}
-                  labels={historyClub.slice(-10).map((h) => `R${h.rodada_id}`)}
-                  height={100}
-                  showGrid={true}
-                />
+
+                <View
+                  className="rounded-xl overflow-hidden"
+                  style={{
+                    backgroundColor: colorTheme === 'dark' ? '#111827' : '#F9FAFB',
+                    marginHorizontal: -16,
+                  }}>
+                  <LineChart
+                    data={historyClub
+                      .filter((h) => h.pontos !== null && h.pontos > 0)
+                      .slice(-5)
+                      .map((h) => h.pontos ?? 0)}
+                    labels={historyClub
+                      .filter((h) => h.pontos !== null && h.pontos > 0)
+                      .slice(-5)
+                      .map((h) => `R${h.rodada_id}`)}
+                    height={220}
+                    showGrid={false}
+                  />
+                </View>
               </View>
             </AnimatedCard>
           )}
 
           {/* League Participation */}
-          <AnimatedCard delay={500} variant="flat" className="p-0">
+          <AnimatedCard delay={500} variant="flat">
             <TouchableOpacity
               activeOpacity={0.7}
-              onPress={() => router.push('/leagues')}
-              style={{ padding: 12 }}>
-              <View style={{ gap: 8, backgroundColor: 'transparent' }}>
+              onPress={() => router.push('/leagues')}>
+              <View style={{ gap: 16, backgroundColor: 'transparent' }}>
                 <View
                   className="flex-row items-center justify-between"
                   style={{ backgroundColor: 'transparent' }}>
@@ -538,17 +614,20 @@ export default () => {
                 <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Clássicas
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#3B82F620' }}>
-                        <Feather name="flag" size={12} color="#3B82F6" />
+                        <Feather name="flag" size={14} color="#3B82F6" />
                       </View>
                     </View>
                     <Text className="font-bold text-xl mb-1" numberOfLines={1}>
@@ -559,17 +638,20 @@ export default () => {
 
                   <View
                     className="flex-1 rounded-xl p-3"
-                    style={{ backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6' }}>
+                    style={{ 
+                      backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
+                      minHeight: 88,
+                    }}>
                     <View
                       className="flex-row items-center justify-between mb-2"
                       style={{ backgroundColor: 'transparent' }}>
-                      <Text className="text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+                      <Text className="text-xs font-medium text-gray-500 dark:text-gray-400" numberOfLines={1}>
                         Mata-mata
                       </Text>
                       <View
-                        className="w-6 h-6 rounded-full items-center justify-center"
+                        className="w-7 h-7 rounded-full items-center justify-center"
                         style={{ backgroundColor: '#F59E0B20' }}>
-                        <Feather name="target" size={12} color="#F59E0B" />
+                        <Feather name="target" size={14} color="#F59E0B" />
                       </View>
                     </View>
                     <Text className="font-bold text-xl mb-1" numberOfLines={1}>
@@ -583,11 +665,11 @@ export default () => {
           </AnimatedCard>
 
           {/* Cartoleiro Info */}
-          <AnimatedCard delay={600} variant="flat" className="p-0">
-            <View style={{ gap: 8, backgroundColor: 'transparent', padding: 12 }}>
+          <AnimatedCard delay={600} variant="flat">
+            <View style={{ gap: 16, backgroundColor: 'transparent' }}>
               <View
                 className="flex-row items-center"
-                style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
+                style={{ gap: 8, backgroundColor: 'transparent' }}>
                 <Feather name="user" size={20} color="#8b5cf6" />
                 <Text className="text-base font-bold">Informações do Cartoleiro</Text>
               </View>
@@ -653,11 +735,11 @@ export default () => {
           </AnimatedCard>
 
           {/* Theme Settings */}
-          <AnimatedCard delay={700} variant="flat" className="p-0">
-            <View style={{ gap: 8, backgroundColor: 'transparent', padding: 12 }}>
+          <AnimatedCard delay={700} variant="flat">
+            <View style={{ gap: 16, backgroundColor: 'transparent' }}>
               <View
                 className="flex-row items-center"
-                style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
+                style={{ gap: 8, backgroundColor: 'transparent' }}>
                 <Feather name="moon" size={20} color="#3b82f6" />
                 <Text className="text-base font-bold">Tema do Aplicativo</Text>
               </View>

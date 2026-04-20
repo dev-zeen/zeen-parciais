@@ -85,11 +85,11 @@ export function OrderMarket({ currentOrder, applyOrderMarket, handleClose }: Ord
                 className="p-4 rounded-lg items-center justify-center"
                 style={{
                   backgroundColor: isSelected
-                    ? (colorTheme === 'dark' ? '#1e40af' : '#3b82f6')
+                    ? (colorTheme === 'dark' ? '#1e40af' : '#0057FF')
                     : (colorTheme === 'dark' ? '#1f2937' : '#f9fafb'),
                   borderWidth: 1,
                   borderColor: isSelected
-                    ? (colorTheme === 'dark' ? '#3b82f6' : '#2563eb')
+                    ? (colorTheme === 'dark' ? '#0057FF' : '#0057FF')
                     : (colorTheme === 'dark' ? '#374151' : '#e5e7eb'),
                 }}>
                 <Text 

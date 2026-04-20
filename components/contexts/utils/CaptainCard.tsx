@@ -25,9 +25,9 @@ export function CaptainCard() {
         return '#F59E0B'; // orange
       case 'lateral':
       case 'zagueiro':
-        return '#3B82F6'; // blue
+        return '#0057FF'; // blue
       case 'meia':
-        return '#22C55E'; // green
+        return '#00E094'; // green
       case 'atacante':
         return '#EF4444'; // red
       default:
@@ -225,7 +225,7 @@ export function CaptainCard() {
                   className="text-base font-bold"
                   style={{
                     color: captainScore > 0 
-                      ? '#22c55e' 
+                      ? '#00E094' 
                       : captainScore < 0 
                       ? '#ef4444' 
                       : (colorTheme === 'dark' ? '#6b7280' : '#9ca3af')

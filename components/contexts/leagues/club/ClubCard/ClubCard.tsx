@@ -40,7 +40,7 @@ export function ClubCard({
 
   const renderVariationIcon = useCallback((variation: number) => {
     const iconName = variation >= 1 ? 'arrow-up' : 'arrow-down';
-    const iconColor = variation >= 1 ? '#4ade80' : '#f87171';
+    const iconColor = variation >= 1 ? '#00E094' : '#f87171';
     return (
       <MaterialCommunityIcons
         name={variation !== 0 ? iconName : 'equal'}
@@ -133,7 +133,7 @@ export function ClubCard({
                 className="text-sm font-semibold"
                 style={{
                   color: isMarketClose
-                    ? '#22c55e'
+                    ? '#00E094'
                     : Colors[colorTheme === 'dark' ? 'dark' : 'light'].text,
                 }}>
                 {numberToString(score)}
@@ -164,7 +164,7 @@ export function ClubCard({
                       style={{
                         color:
                           (partialValorization ?? 0) > 0
-                            ? '#22c55e'
+                            ? '#00E094'
                             : (partialValorization ?? 0) < 0
                             ? '#ef4444'
                             : '#fafafa',
@@ -193,9 +193,9 @@ export function ClubCard({
 
 const styles = StyleSheet.create({
   myTeamContainerLight: {
-    backgroundColor: '#bfdbfe',
+    backgroundColor: '#AACCFF',
   },
   myTeamContainerDark: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0057FF',
   },
 });

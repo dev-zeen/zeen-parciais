@@ -61,7 +61,7 @@ export function PointsCompetitionCard({ competition, myTeamId }: Props) {
             <View
               className="px-2 py-1 rounded-full"
               style={{ backgroundColor: colorTheme === 'dark' ? '#111827' : '#e5e7eb' }}>
-              <Text className="text-[11px] font-semibold" style={{ color: '#22c55e' }}>
+              <Text className="text-[11px] font-semibold" style={{ color: '#00E094' }}>
                 Pontos Corridos
               </Text>
             </View>
@@ -69,7 +69,7 @@ export function PointsCompetitionCard({ competition, myTeamId }: Props) {
               <View
                 className="px-2 py-1 rounded-full"
                 style={{ backgroundColor: colorTheme === 'dark' ? '#111827' : '#e5e7eb' }}>
-                <Text className="text-[11px] font-semibold" style={{ color: '#22c55e' }}>
+                <Text className="text-[11px] font-semibold" style={{ color: '#00E094' }}>
                   Você participa
                 </Text>
               </View>

@@ -1,13 +1,3 @@
-import {
-  Nunito_300Light,
-  Nunito_400Regular,
-  Nunito_500Medium,
-  Nunito_600SemiBold,
-  Nunito_700Bold,
-  Nunito_800ExtraBold,
-  Nunito_900Black,
-} from '@expo-google-fonts/nunito';
-// eslint-disable-next-line import/order
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -30,13 +20,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    Nunito_300Light,
-    Nunito_400Regular,
-    Nunito_500Medium,
-    Nunito_600SemiBold,
-    Nunito_700Bold,
-    Nunito_800ExtraBold,
-    Nunito_900Black,
+    'Satoshi-Variable': require('../assets/fonts/Satoshi-Variable.ttf'),
+    'Satoshi-VariableItalic': require('../assets/fonts/Satoshi-VariableItalic.ttf'),
     ...FontAwesome.font,
   });
 
@@ -47,7 +32,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      // Hide native splash immediately and show custom animated splash
       SplashScreen.hideAsync();
     }
   }, [loaded]);

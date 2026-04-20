@@ -158,7 +158,7 @@ export const FormationChangeModal = ({
             onClose?.();
           }}
           className="flex-1 py-3 rounded-lg items-center justify-center"
-          style={{ backgroundColor: '#22c55e' }}>
+          style={{ backgroundColor: '#00E094' }}>
           <Text className="font-semibold" style={{ color: '#ffffff' }}>
             Confirmar
           </Text>

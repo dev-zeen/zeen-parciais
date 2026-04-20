@@ -20,9 +20,9 @@ export function LoadingScreen({ title }: LoadingScreenProps) {
         style={{
           gap: 8,
         }}>
-        <ActivityIndicator 
-          size="large" 
-          color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'}
+        <ActivityIndicator
+          size="large"
+          color="#FF8A00"
         />
         {title && (
           <Text 

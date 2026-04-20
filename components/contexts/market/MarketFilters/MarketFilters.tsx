@@ -177,7 +177,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
           }}>
           <Feather 
             name="bar-chart" 
-            color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'} 
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
             size={18}
           />
           <Text 
@@ -200,7 +200,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
           onPress={() => setShowFilterByStatusMarket(true)}>
           <Feather 
             name="user-check" 
-            color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'} 
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
             size={18} 
           />
           <Text 
@@ -223,7 +223,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
           onPress={() => setShowFilterMarketByTeam(true)}>
           <Feather 
             name="filter" 
-            color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'} 
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
             size={18} 
           />
           <Text 

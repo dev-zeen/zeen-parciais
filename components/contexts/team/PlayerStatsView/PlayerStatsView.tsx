@@ -80,7 +80,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
       <View
         className="items-center justify-center"
         style={{ gap: 4, backgroundColor: 'transparent' }}>
-        <Feather name="trending-up" size={24} color="#3b82f6" />
+        <Feather name="trending-up" size={24} color="#0057FF" />
         <Text className="text-lg font-bold">Estatísticas por Rodada</Text>
       </View>
 
@@ -95,7 +95,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               borderBottomWidth: 1,
               borderBottomColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
             }}>
-            <Feather name="activity" size={16} color="#3b82f6" />
+            <Feather name="activity" size={16} color="#0057FF" />
             <Text className="text-sm font-semibold">Resumo de Desempenho</Text>
           </View>
 
@@ -115,18 +115,18 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                 style={{ backgroundColor: 'transparent' }}>
                 <Text
                   className="text-xs font-medium"
-                  style={{ color: colorTheme === 'dark' ? '#4ade80' : '#16a34a' }}>
+                  style={{ color: colorTheme === 'dark' ? '#00E094' : '#16a34a' }}>
                   Melhor
                 </Text>
                 <Feather
                   name="arrow-up"
                   size={14}
-                  color={colorTheme === 'dark' ? '#4ade80' : '#16a34a'}
+                  color={colorTheme === 'dark' ? '#00E094' : '#16a34a'}
                 />
               </View>
               <Text
                 className="text-xl font-bold mt-1"
-                style={{ color: colorTheme === 'dark' ? '#22c55e' : '#15803d' }}>
+                style={{ color: colorTheme === 'dark' ? '#00E094' : '#15803d' }}>
                 {numberToString(processedStats.bestScore)}
               </Text>
             </View>
@@ -166,25 +166,25 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               }`}
               style={{
                 borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#1e3a8a' : '#93c5fd',
+                borderColor: colorTheme === 'dark' ? '#0A1F4A' : '#5B8EFF',
               }}>
               <View
                 className="flex-row items-center justify-between"
                 style={{ backgroundColor: 'transparent' }}>
                 <Text
                   className="text-xs font-medium"
-                  style={{ color: colorTheme === 'dark' ? '#60a5fa' : '#2563eb' }}>
+                  style={{ color: colorTheme === 'dark' ? '#5B8EFF' : '#0057FF' }}>
                   Total
                 </Text>
                 <Feather
                   name="award"
                   size={14}
-                  color={colorTheme === 'dark' ? '#60a5fa' : '#2563eb'}
+                  color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'}
                 />
               </View>
               <Text
                 className="text-xl font-bold mt-1"
-                style={{ color: colorTheme === 'dark' ? '#3b82f6' : '#1d4ed8' }}>
+                style={{ color: colorTheme === 'dark' ? '#0057FF' : '#0057FF' }}>
                 {numberToString(processedStats.totalPoints)}
               </Text>
             </View>
@@ -228,7 +228,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
             <View
               className="flex-row items-center"
               style={{ gap: 6, backgroundColor: 'transparent' }}>
-              <Feather name="bar-chart-2" size={16} color="#3b82f6" />
+              <Feather name="bar-chart-2" size={16} color="#0057FF" />
               <Text className="text-sm font-semibold">Pontos por Rodada</Text>
             </View>
             <BarChart
@@ -246,7 +246,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
           <View
             className="flex-row items-center"
             style={{ gap: 6, backgroundColor: 'transparent' }}>
-            <Feather name="list" size={16} color="#3b82f6" />
+            <Feather name="list" size={16} color="#0057FF" />
             <Text className="text-sm font-semibold">Rodadas Detalhadas</Text>
           </View>
 
@@ -285,7 +285,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                           color: hasData
                             ? isPositive
                               ? colorTheme === 'dark'
-                                ? '#4ade80'
+                                ? '#00E094'
                                 : '#16a34a'
                               : isNegative
                                 ? colorTheme === 'dark'
@@ -314,7 +314,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
                           color: hasData
                             ? isPositive
                               ? colorTheme === 'dark'
-                                ? '#4ade80'
+                                ? '#00E094'
                                 : '#16a34a'
                               : isNegative
                                 ? colorTheme === 'dark'

@@ -186,7 +186,7 @@ export function MarketPlayerCard({
               <Text
                 className="font-bold text-xs"
                 style={{
-                  color: player.media_num > 0 ? '#22c55e' : '#ef4444',
+                  color: player.media_num > 0 ? '#00E094' : '#ef4444',
                 }}>
                 {numberToString(player.media_num)}
               </Text>
@@ -203,7 +203,7 @@ export function MarketPlayerCard({
               <Text
                 className="font-bold text-xs"
                 style={{
-                  color: player.pontos_num > 0 ? '#22c55e' : '#ef4444',
+                  color: player.pontos_num > 0 ? '#00E094' : '#ef4444',
                 }}>
                 {numberToString(player.pontos_num)}
               </Text>
@@ -219,7 +219,7 @@ export function MarketPlayerCard({
               </Text>
               <Text
                 className="font-bold text-xs"
-                style={{ color: colorTheme === 'dark' ? '#60a5fa' : '#3b82f6' }}>
+                style={{ color: colorTheme === 'dark' ? '#5B8EFF' : '#0057FF' }}>
                 {player.minimo_para_valorizar === null
                   ? '-'
                   : numberToString(player.minimo_para_valorizar)}
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#6b7280',
   },
   purchasePlayerButtonActived: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#0057FF',
   },
   sellPlayerButton: {
     backgroundColor: '#dc2626',

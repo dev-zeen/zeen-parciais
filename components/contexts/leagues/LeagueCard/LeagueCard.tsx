@@ -73,7 +73,7 @@ export function LeagueCard({ league, myTeamId }: CardLeagueStatsProps) {
               <View
                 className="px-2 py-1 rounded-full"
                 style={{ backgroundColor: colorTheme === 'dark' ? '#111827' : '#e5e7eb' }}>
-                <Text className="text-[11px] font-semibold" style={{ color: '#3b82f6' }}>
+                <Text className="text-[11px] font-semibold" style={{ color: '#0057FF' }}>
                   Mata-mata
                 </Text>
               </View>

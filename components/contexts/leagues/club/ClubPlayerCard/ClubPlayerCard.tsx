@@ -118,7 +118,7 @@ export function ClubPlayerCard({
                   {appreciation ? numberToString(appreciation) : null}
                   <Feather
                     name={appreciation && appreciation < 0 ? 'arrow-down' : 'arrow-up'}
-                    color={appreciation && appreciation < 0 ? '#ef4444' : '#4ade80'}
+                    color={appreciation && appreciation < 0 ? '#ef4444' : '#00E094'}
                   />
                 </Text>
               ) : (
@@ -136,7 +136,7 @@ export function ClubPlayerCard({
                           player.variacao_num && player.variacao_num < 0 ? 'arrow-down' : 'arrow-up'
                         }
                         color={
-                          player.variacao_num && player.variacao_num < 0 ? '#ef4444' : '#4ade80'
+                          player.variacao_num && player.variacao_num < 0 ? '#ef4444' : '#00E094'
                         }
                       />
                     </Text>

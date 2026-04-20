@@ -103,7 +103,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
               className="w-20 h-20 rounded-full"
               style={{
                 borderWidth: 2,
-                borderColor: colorTheme === 'dark' ? '#3b82f6' : '#dbeafe',
+                borderColor: colorTheme === 'dark' ? '#0057FF' : '#DDEEFF',
               }}
               alt={`Imagem do ${player.nome}`}
             />
@@ -215,7 +215,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
                 style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 Preço
               </Text>
-              <Text className="text-base font-bold mt-0.5" style={{ color: '#3b82f6' }}>
+              <Text className="text-base font-bold mt-0.5" style={{ color: '#0057FF' }}>
                 {numberToString(player.preco_num)}
               </Text>
             </View>

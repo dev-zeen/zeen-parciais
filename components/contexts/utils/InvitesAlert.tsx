@@ -40,9 +40,9 @@ export function InvitesAlert() {
               style={{
                 width: 40,
                 height: 40,
-                backgroundColor: colorTheme === 'dark' ? '#1e40af30' : '#dbeafe',
+                backgroundColor: colorTheme === 'dark' ? '#1e40af30' : '#DDEEFF',
               }}>
-              <Feather name="mail" size={20} color="#3b82f6" />
+              <Feather name="mail" size={20} color="#0057FF" />
             </View>
 
             <View style={{ flex: 1, backgroundColor: 'transparent' }}>
@@ -59,7 +59,7 @@ export function InvitesAlert() {
           <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent', flexShrink: 0 }}>
             <View
               className="px-3 py-1 rounded-full"
-              style={{ backgroundColor: '#3b82f6', minWidth: 32 }}>
+              style={{ backgroundColor: '#0057FF', minWidth: 32 }}>
               <Text className="text-sm font-bold text-center" style={{ color: '#ffffff' }}>
                 {invitesCount}
               </Text>

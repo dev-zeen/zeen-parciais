@@ -72,12 +72,12 @@ export function TeamQuickActions({
                     ? '#e5e7eb'
                     : colorTheme === 'dark'
                       ? '#1e40af'
-                      : '#dbeafe',
+                      : '#DDEEFF',
                 }}>
                 <Feather
                   name={isOpened ? 'chevron-up' : 'chevron-down'}
                   size={16}
-                  color={disabled ? '#9ca3af' : '#3b82f6'}
+                  color={disabled ? '#9ca3af' : '#0057FF'}
                 />
               </View>
             );
@@ -121,7 +121,7 @@ export function TeamQuickActions({
                       alignItems: 'center',
                       justifyContent: 'center',
                       backgroundColor: isSelected
-                        ? '#3b82f6'
+                        ? '#0057FF'
                         : colorTheme === 'dark'
                           ? '#374151'
                           : '#f3f4f6',
@@ -132,12 +132,12 @@ export function TeamQuickActions({
                     style={{
                       fontSize: 16,
                       fontWeight: isSelected ? '700' : '600',
-                      color: isSelected ? '#3b82f6' : colorTheme === 'dark' ? '#f3f4f6' : '#1f2937',
+                      color: isSelected ? '#0057FF' : colorTheme === 'dark' ? '#f3f4f6' : '#1f2937',
                     }}>
                     {item}
                   </Text>
                 </View>
-                {isSelected && <Feather name="check" size={20} color="#3b82f6" />}
+                {isSelected && <Feather name="check" size={20} color="#0057FF" />}
               </View>
             );
           }}
@@ -182,7 +182,7 @@ export function TeamQuickActions({
           buttonTextStyle={{
             fontSize: 16,
             fontWeight: '700',
-            color: disabled ? '#9ca3af' : '#3b82f6',
+            color: disabled ? '#9ca3af' : '#0057FF',
             textAlign: 'left',
             marginLeft: 0,
           }}

@@ -1,12 +1,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Image, Modal, Platform, ScrollView } from 'react-native';
+import { ActivityIndicator, Animated, Modal, Platform, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import enterImage from '@/assets/images/auth.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { Logo } from '@/components/structure/Logo';
 import Colors from '@/constants/Colors';
 import { EXPO_PUBLIC_AUTH_URL } from '@/constants/Endpoits';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
@@ -256,7 +256,7 @@ export function Login({ title }: LoginProps) {
 
   return (
     <>
-      <View className="flex-1">
+      <View className="flex-1 mt-8">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
@@ -272,37 +272,20 @@ export function Login({ title }: LoginProps) {
               transform: [{ translateY: slideAnim }],
             }}
             className="items-center mb-6">
-            {/* Logo/Imagem - Menor */}
+            {/* Logo Zeen */}
             <Animated.View
               style={{
                 transform: [{ scale: scaleAnim }],
+                marginBottom: 20,
               }}>
-              <Image
-                source={enterImage}
-                style={{
-                  width: 120,
-                  height: 120,
-                  resizeMode: 'contain',
-                  marginBottom: 16,
-                }}
-                alt="Parciais FC"
-              />
+              <Logo variant="with-name" width={160} height={100} />
             </Animated.View>
-
-            {/* Título Principal */}
-            <Text
-              className="text-2xl font-bold text-center mb-2"
-              style={{
-                fontFamily: 'Nunito_800ExtraBold',
-              }}>
-              Bem-vindo ao Parciais FC
-            </Text>
 
             {/* Subtítulo */}
             <Text
               className="text-sm text-center opacity-70 px-4"
               style={{
-                fontFamily: 'Nunito_400Regular',
+                fontFamily: 'Satoshi-Variable',
                 lineHeight: 20,
               }}>
               Acompanhamento em tempo real do Cartola FC
@@ -347,7 +330,7 @@ export function Login({ title }: LoginProps) {
                   className="text-base font-bold"
                   style={{
                     color: Colors.light.background,
-                    fontFamily: 'Nunito_700Bold',
+                    fontFamily: 'Satoshi-Variable',
                   }}>
                   {isAuthenticating ? 'Autenticando...' : 'Entrar com Cartola FC'}
                 </Text>
@@ -368,7 +351,7 @@ export function Login({ title }: LoginProps) {
               <Text
                 className="text-xs text-center opacity-50"
                 style={{
-                  fontFamily: 'Nunito_400Regular',
+                  fontFamily: 'Satoshi-Variable',
                 }}>
                 Login seguro via Globo ID • Cartola FC Oficial
               </Text>
@@ -381,9 +364,9 @@ export function Login({ title }: LoginProps) {
               className="mb-4 p-3 rounded-xl"
               style={{
                 opacity: fadeAnim,
-                backgroundColor: isDark ? 'rgba(66, 153, 225, 0.15)' : 'rgba(66, 153, 225, 0.1)',
+                backgroundColor: isDark ? 'rgba(255, 138, 0, 0.15)' : 'rgba(255, 138, 0, 0.1)',
                 borderWidth: 1,
-                borderColor: isDark ? 'rgba(66, 153, 225, 0.3)' : 'rgba(66, 153, 225, 0.2)',
+                borderColor: isDark ? 'rgba(255, 138, 0, 0.3)' : 'rgba(255, 138, 0, 0.2)',
               }}>
               <View
                 className="flex-row items-start"
@@ -395,7 +378,7 @@ export function Login({ title }: LoginProps) {
                 <Text
                   className="flex-1 text-xs"
                   style={{
-                    fontFamily: 'Nunito_500Medium',
+                    fontFamily: 'Satoshi-Variable',
                     lineHeight: 18,
                   }}>
                   {title}
@@ -419,7 +402,7 @@ export function Login({ title }: LoginProps) {
             <Text
               className="text-xs opacity-50"
               style={{
-                fontFamily: 'Nunito_600SemiBold',
+                fontFamily: 'Satoshi-Variable',
               }}>
               RECURSOS PRINCIPAIS
             </Text>
@@ -452,9 +435,7 @@ export function Login({ title }: LoginProps) {
                 <View
                   className="w-10 h-10 rounded-full items-center justify-center"
                   style={{
-                    backgroundColor: isDark
-                      ? 'rgba(66, 153, 225, 0.2)'
-                      : 'rgba(66, 153, 225, 0.15)',
+                    backgroundColor: isDark ? 'rgba(255, 138, 0, 0.2)' : 'rgba(255, 138, 0, 0.15)',
                   }}>
                   <Feather name={feature.icon as any} size={18} color={Colors.light.tint} />
                 </View>
@@ -464,14 +445,14 @@ export function Login({ title }: LoginProps) {
                   <Text
                     className="text-sm font-semibold mb-0.5"
                     style={{
-                      fontFamily: 'Nunito_700Bold',
+                      fontFamily: 'Satoshi-Variable',
                     }}>
                     {feature.title}
                   </Text>
                   <Text
                     className="text-xs opacity-70"
                     style={{
-                      fontFamily: 'Nunito_400Regular',
+                      fontFamily: 'Satoshi-Variable',
                       lineHeight: 16,
                     }}>
                     {feature.description}
@@ -512,14 +493,14 @@ export function Login({ title }: LoginProps) {
                   <Text
                     className="text-base font-bold"
                     style={{
-                      fontFamily: 'Nunito_700Bold',
+                      fontFamily: 'Satoshi-Variable',
                     }}>
                     Login Seguro
                   </Text>
                   <Text
                     className="text-xs opacity-60"
                     style={{
-                      fontFamily: 'Nunito_400Regular',
+                      fontFamily: 'Satoshi-Variable',
                     }}>
                     Via Globo.com
                   </Text>
@@ -587,14 +568,14 @@ export function Login({ title }: LoginProps) {
                 <Text
                   className="text-lg font-semibold mt-4 mb-2"
                   style={{
-                    fontFamily: 'Nunito_600SemiBold',
+                    fontFamily: 'Satoshi-Variable',
                   }}>
                   Autenticando...
                 </Text>
                 <Text
                   className="text-sm opacity-60"
                   style={{
-                    fontFamily: 'Nunito_400Regular',
+                    fontFamily: 'Satoshi-Variable',
                   }}>
                   Aguarde um momento
                 </Text>
@@ -619,7 +600,7 @@ export function Login({ title }: LoginProps) {
                 <Text
                   className="text-sm opacity-60 mt-4"
                   style={{
-                    fontFamily: 'Nunito_400Regular',
+                    fontFamily: 'Satoshi-Variable',
                   }}>
                   Carregando página de login...
                 </Text>

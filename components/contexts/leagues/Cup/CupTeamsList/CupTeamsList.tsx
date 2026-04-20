@@ -14,7 +14,7 @@ type CupTeamsListProps = {
 export function CupTeamsList({ cup }: CupTeamsListProps) {
   const colorTheme = useThemeColor();
 
-  const teamDefaultBackground = colorTheme === 'dark' ? '#047857' : '#dbeafe';
+  const teamDefaultBackground = colorTheme === 'dark' ? '#047857' : '#DDEEFF';
   const pedingInviteBackground = colorTheme === 'dark' ? '#ca8a04' : '#fef08a';
 
   const {

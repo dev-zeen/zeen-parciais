@@ -19,7 +19,7 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[validColorScheme].tint,
-        tabBarInactiveTintColor: validColorScheme === 'dark' ? '#9ca3af' : '#6b7280',
+        tabBarInactiveTintColor: Colors[validColorScheme].tabIconDefault,
         headerStyle: {
           backgroundColor:
             validColorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
@@ -28,7 +28,7 @@ export default function TabLayout() {
           backgroundColor:
             validColorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           borderTopWidth: 1,
-          borderTopColor: validColorScheme === 'dark' ? '#1f2937' : '#e5e7eb',
+          borderTopColor: validColorScheme === 'dark' ? '#21262D' : '#e5e7eb',
           ...(Platform.OS === 'android' ? { paddingBottom: 4 } : {}),
         },
       }}>

@@ -32,14 +32,14 @@ export function QuickActionsGrid() {
       label: 'Partidas',
       icon: 'calendar',
       route: '/(tabs)/matches',
-      color: '#3B82F6',
+      color: '#0057FF',
     },
     {
       id: 'players',
       label: 'Jogadores',
       icon: 'trending-up',
       route: '/(tabs)/players',
-      color: '#22C55E',
+      color: '#00E094',
     },
     {
       id: 'leagues',

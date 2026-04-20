@@ -64,14 +64,14 @@ export function CupMatchCard({
   );
 
   const colorScore = useCallback((team: number, compare: number) => {
-    return team > compare ? '#22c55e' : '#ef4444';
+    return team > compare ? '#00E094' : '#ef4444';
   }, []);
 
   const customBorder = useMemo(
     () =>
       myTeam?.time?.time_id === match.time_mandante_id ||
       myTeam?.time?.time_id === match.time_visitante_id
-        ? '#3b82f6'
+        ? '#0057FF'
         : 'transparent',
     [match.time_mandante_id, match.time_visitante_id, myTeam?.time?.time_id]
   );

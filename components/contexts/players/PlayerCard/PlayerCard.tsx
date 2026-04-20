@@ -57,7 +57,7 @@ export const PlayerCard = memo(
     );
 
     const stylePlayerInMyLineup = useMemo(
-      () => (isPlayerOnMyLineup ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''),
+      () => (isPlayerOnMyLineup ? (colorTheme === 'dark' ? 'bg-secondary/30' : 'bg-secondary/10') : ''),
       [colorTheme, isPlayerOnMyLineup]
     );
 
@@ -96,8 +96,8 @@ export const PlayerCard = memo(
                     valorization < 0
                       ? 'text-folly'
                       : colorTheme === 'dark'
-                      ? 'text-blue-300'
-                      : 'text-blue-500'
+                      ? 'text-secondary'
+                      : 'text-secondary'
                   }`}>
                   {numberToString(valorization)}
                 </Text>
@@ -105,7 +105,7 @@ export const PlayerCard = memo(
                   <Feather
                     name={valorization < 0 ? 'arrow-down' : 'arrow-up'}
                     color={
-                      valorization < 0 ? '#ef4444' : colorTheme === 'dark' ? '#93c5fd' : '#3b82f6'
+                      valorization < 0 ? '#ef4444' : '#0057FF'
                     }
                   />
                 ) : (
