@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, ScrollView, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -34,7 +34,15 @@ export function ListPlayersSale({
 
   const [lineupState, setLineupState] = useState<LineupPlayers | undefined>(lineup);
 
-  const [playersSell, setPlayersSell] = useState<PlayersToSell[]>();
+  const [playersSell, setPlayersSell] = useState<PlayersToSell[]>(() =>
+    players.length > 0 ? players : []
+  );
+
+  const handleCloseSuccessSellPlayersRef = useRef(handleCloseSuccessSellPlayers);
+
+  useEffect(() => {
+    handleCloseSuccessSellPlayersRef.current = handleCloseSuccessSellPlayers;
+  });
 
   const handleSellPlayer = useCallback(
     (player: FullPlayer | LineupPlayer) => {
@@ -49,18 +57,11 @@ export function ListPlayersSale({
       setLineupState(lineUpdated);
 
       if (positionSellUpdated?.length === 0) {
-        return handleCloseSuccessSellPlayers(lineUpdated);
+        return handleCloseSuccessSellPlayersRef.current(lineUpdated);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lineupState, playersSell]
   );
-
-  useEffect(() => {
-    if (players.length > 0) {
-      setPlayersSell(players);
-    }
-  }, [players]);
 
   if (!positions) {
     return <Loading />;

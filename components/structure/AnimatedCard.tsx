@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import {  Animated, Pressable,  ViewStyle  } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { Animated, Pressable, ViewStyle } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -25,6 +25,7 @@ export function AnimatedCard({
 }: AnimatedCardProps) {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  const delayRef = useRef(delay);
   const colorTheme = useThemeColor();
 
   useEffect(() => {
@@ -32,33 +33,29 @@ export function AnimatedCard({
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 400,
-        delay,
+        delay: delayRef.current,
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
-        delay,
+        delay: delayRef.current,
         useNativeDriver: true,
         tension: 50,
         friction: 7,
       }),
     ]).start();
-  }, [delay, fadeAnim, scaleAnim]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only entrance animation; delay captured via ref
+  }, []);
 
-  const getVariantStyles = () => {
+  const variantStyle = useMemo(() => {
     const isDark = colorTheme === 'dark';
-    
-    switch (variant) {
-      case 'elevated':
-        return isDark
-          ? 'bg-gray-800 border border-gray-700'
-          : 'bg-white border border-gray-100 shadow-md';
-      case 'flat':
-        return isDark ? 'bg-gray-900' : 'bg-gray-50';
-      default:
-        return isDark ? 'bg-gray-800/50' : 'bg-white/50';
-    }
-  };
+    const styles = {
+      elevated: isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100 shadow-md',
+      flat:     isDark ? 'bg-gray-900' : 'bg-gray-50',
+      default:  isDark ? 'bg-gray-800/50' : 'bg-white/50',
+    } as const;
+    return styles[variant];
+  }, [variant, colorTheme]);
 
   const content = (
     <Animated.View
@@ -71,7 +68,7 @@ export function AnimatedCard({
         },
         style,
       ]}>
-      <View className={`rounded-lg p-4 ${getVariantStyles()} ${className}`}>
+      <View className={`rounded-lg p-4 ${variantStyle} ${className}`}>
         {children}
       </View>
     </Animated.View>

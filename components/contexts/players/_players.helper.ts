@@ -1,4 +1,4 @@
-import { ScorePlayersProps } from '@/app/(tabs)/players';
+import { ScorePlayersProps } from '@/app/(tabs)/rodada';
 import { Appreciations } from '@/models/Player';
 import { IPlayerStats, Player, PlayerStats } from '@/models/Stats';
 

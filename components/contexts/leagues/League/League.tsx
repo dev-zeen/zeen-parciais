@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { 
+import { useCallback, useMemo, useState } from 'react';
+import {
   ActivityIndicator,
   FlatList,
   ListRenderItemInfo,
-  RefreshControl } from 'react-native';
+  RefreshControl,
+  StyleSheet,
+} from 'react-native';
 
-import { View } from '@/components/Themed';
 import { ClubCard } from '@/components/contexts/leagues/club/ClubCard';
+import { LeagueHeader } from '@/components/contexts/leagues/League/LeagueHeader';
+import { LeagueTabs } from '@/components/contexts/leagues/League/LeagueTabs';
 import { DialogComponent } from '@/components/structure/Dialog';
-import { Loading } from '@/components/structure/Loading';
-import { ITab, Tabs } from '@/components/structure/Tabs';
+import { View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -41,60 +43,21 @@ export function League({ league, clubsByLeague }: LeagueProps) {
 
   const [isSortingClubs, setIsSortingClubs] = useState(false);
   const [orderBy, setOrderBy] = useState<OrderByOptions>(OrderByOptions.RODADA);
-  const [showModalPublicLeague, setShowModalPublicLeague] = useState(false);
-
-  const handleOnPressOrderBy = useCallback(
-    (sortProp: OrderByOptions) => {
-      setIsSortingClubs(true);
-      setOrderBy(sortProp);
-      // cálculo é memoizado; só usamos esse flag pra UX (spinner rápido)
-      requestAnimationFrame(() => setIsSortingClubs(false));
-    },
-    []
+  const [showModalPublicLeague, setShowModalPublicLeague] = useState(() =>
+    Boolean(league && !league.liga.time_dono_id)
   );
 
-  const tabs: ITab[] = useMemo(
-    () => [
-      {
-        id: 1,
-        title: 'Rodada',
-        onPress() {
-          handleOnPressOrderBy(OrderByOptions.RODADA);
-        },
-      },
-      {
-        id: 2,
-        title: 'Total',
-        onPress() {
-          handleOnPressOrderBy(OrderByOptions.CAMPEONATO);
-        },
-      },
-      {
-        id: 3,
-        title: 'Turno',
-        onPress() {
-          handleOnPressOrderBy(OrderByOptions.TURNO);
-        },
-      },
-      {
-        id: 4,
-        title: 'Mês',
-        onPress() {
-          handleOnPressOrderBy(OrderByOptions.MES);
-        },
-      },
-      {
-        id: 5,
-        title: 'C$',
-        onPress() {
-          handleOnPressOrderBy(OrderByOptions.PATRIMONIO);
-        },
-      },
-    ],
-    [handleOnPressOrderBy]
-  );
+  const handleOnPressOrderBy = useCallback((sortProp: OrderByOptions) => {
+    setIsSortingClubs(true);
+    setOrderBy(sortProp);
+    requestAnimationFrame(() => setIsSortingClubs(false));
+  }, []);
 
-  type ClubWithCaptain = ClubByLeague & { captainId?: number; captainName?: string; captainPhoto?: string };
+  type ClubWithCaptain = ClubByLeague & {
+    captainId?: number;
+    captainName?: string;
+    captainPhoto?: string;
+  };
 
   const playerById = useMemo(() => {
     const map = new Map<number, FullPlayer>();
@@ -103,12 +66,10 @@ export function League({ league, clubsByLeague }: LeagueProps) {
   }, [market?.atletas]);
 
   const baseClubs: ClubByLeague[] = useMemo(() => {
-    // Quando mercado fechado e temos clubsByLeague + playerStats, podemos calcular parciais ao vivo sem fetch por item.
     if (isMarketClose && clubsByLeague && playerStats && marketStatus && league) {
       return onGetLeagueWithPartials(league, clubsByLeague, playerStats, marketStatus);
     }
 
-    // Mercado aberto: usar dados “mínimos” já presentes em league.times
     return (league?.times ?? []).map((t) => ({
       ...t,
       pontos: t.pontos,
@@ -158,11 +119,18 @@ export function League({ league, clubsByLeague }: LeagueProps) {
 
   const sortedClubs: ClubWithCaptain[] = useMemo(() => {
     const copy = [...clubsWithCaptain];
-    copy.sort((a, b) => getSortValue(b) - getSortValue(a));
+    copy.sort((a, b) => {
+      const diff = getSortValue(b) - getSortValue(a);
+      if (diff !== 0) return diff;
+      return (b.patrimonio ?? 0) - (a.patrimonio ?? 0);
+    });
     return copy;
   }, [clubsWithCaptain, getSortValue]);
 
-  const highestScoringTeam = useMemo(() => (sortedClubs[0] ? getSortValue(sortedClubs[0]) : 0), [getSortValue, sortedClubs]);
+  const highestScoringTeam = useMemo(
+    () => (sortedClubs[0] ? getSortValue(sortedClubs[0]) : 0),
+    [getSortValue, sortedClubs]
+  );
 
   const keyExtractor = useCallback((item: ClubWithCaptain) => `${item.time_id}`, []);
 
@@ -205,40 +173,16 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     [getSortValue, highestScoringTeam, isMarketClose, league?.time_usuario?.time_id, orderBy]
   );
 
-  const onRefetch = useCallback(async () => {
-    await onRefetchLeague();
-  }, [onRefetchLeague]);
+  const bgColor = colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull;
 
-  useEffect(() => {
-    if (league && !league?.liga.time_dono_id) {
-      setShowModalPublicLeague(true);
-    }
-  }, [league]);
-
-  if (!renderItem) {
-    return <Loading />;
-  }
+  const listHeader = useMemo(
+    () => <LeagueHeader liga={league.liga} destaques={league.destaques} />,
+    [league.destaques, league.liga]
+  );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor:
-          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-      }}>
-      <View
-        style={{
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        }}>
-        <View
-          style={{
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}>
-          <Tabs tabs={tabs} />
-        </View>
-      </View>
+    <View style={[styles.root, { backgroundColor: bgColor }]}>
+      <LeagueTabs activeTab={orderBy} onTabChange={handleOnPressOrderBy} />
 
       {isSortingClubs ? (
         <View className="flex-1 items-center justify-center mx-2 pt-6 mt-2 rounded-lg mb-2">
@@ -247,22 +191,19 @@ export function League({ league, clubsByLeague }: LeagueProps) {
       ) : (
         <FlatList
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
+          refreshControl={
+            <RefreshControl onRefresh={onRefetchLeague} refreshing={isRefetchingLeague} />
+          }
           data={sortedClubs}
           keyExtractor={keyExtractor}
+          ListHeaderComponent={listHeader}
           ItemSeparatorComponent={() => (
             <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
           )}
           renderItem={renderItem}
           initialNumToRender={30}
           maxToRenderPerBatch={15}
-          contentContainerStyle={{
-            paddingTop: 8,
-            paddingVertical: 8,
-            paddingHorizontal: 8,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}
+          contentContainerStyle={[styles.listContent, { backgroundColor: bgColor }]}
         />
       )}
 
@@ -276,3 +217,31 @@ export function League({ league, clubsByLeague }: LeagueProps) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  listContent: {
+    paddingTop: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+  },
+  highlightsWrapper: {
+    marginBottom: 12,
+    gap: 8,
+    padding: 8,
+    borderRadius: 8,
+  },
+  highlightsTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    paddingHorizontal: 4,
+  },
+  highlightsScroll: {
+    gap: 8,
+    paddingBottom: 4,
+  },
+});

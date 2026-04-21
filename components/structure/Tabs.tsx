@@ -35,13 +35,13 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
             paddingHorizontal: 16,
             paddingVertical: 12,
             borderBottomWidth: 2,
-            borderBottomColor: isActive ? '#60a5fa' : 'transparent',
+            borderBottomColor: isActive ? '#FF8A00' : 'transparent',
           }}
           onPress={onPress}>
           <Text
             style={{
               fontWeight: isActive ? '700' : '600',
-              color: isActive ? '#60a5fa' : colorTheme === 'dark' ? '#e5e7eb' : '#111827',
+              color: isActive ? '#FF8A00' : colorTheme === 'dark' ? '#e5e7eb' : '#111827',
             }}>
             {item.title}
           </Text>

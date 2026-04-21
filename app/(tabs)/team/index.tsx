@@ -2,7 +2,14 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
-import type { PlayersToSell } from '../../../components/contexts/team/_team.helpers';
+import Market from '@/app/(tabs)/team/market';
+import { View } from '@/components/Themed';
+import { FormationChangeModal } from '@/components/contexts/team/FormationChangeModal';
+import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
+import { SoccerField } from '@/components/contexts/team/SoccerField';
+import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
+import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
+import type { PlayersToSell } from '@/components/contexts/team/_team.helpers';
 import {
   emptyCaptain,
   emptyLineupFormation,
@@ -13,15 +20,7 @@ import {
   onGetEqualLineups,
   onGetFillLineupDefaultPlayers,
   onGetPlayersOnChangePositionSell,
-} from '../../../components/contexts/team/_team.helpers';
-
-import Market from '@/app/(tabs)/team/market';
-import { View } from '@/components/Themed';
-import { FormationChangeModal } from '@/components/contexts/team/FormationChangeModal';
-import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
-import { SoccerField } from '@/components/contexts/team/SoccerField';
-import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
-import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
+} from '@/components/contexts/team/_team.helpers';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import type { BottomSheetRef } from '@/components/structure/BottomSheet';
 import { BottomSheet } from '@/components/structure/BottomSheet';
@@ -43,7 +42,7 @@ import { onGetIsLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/u
 
 export default () => {
   const colorTheme = useThemeColor();
-  const isFirstRender = useRef(true);
+  const hasInitialized = useRef(false);
   const marketSheetRef = useRef<BottomSheetRef>(null);
   const formationModalRef = useRef<BottomSheetRef>(null);
   const tabBarHeight = useBottomTabBarHeight();
@@ -52,7 +51,7 @@ export default () => {
 
   const { marketStatus, allowRequest, isMarketClose } = useMarketStatus();
 
-  const { mutate: saveTeam, isSuccess: isSuccessSaveTeam } = useSaveTeam();
+  const { mutate } = useSaveTeam();
 
   const {
     data: playerStats,
@@ -91,8 +90,6 @@ export default () => {
   const [selectedPlayersToRemove, setSelectedPlayersToRemove] = useState<Set<number>>(new Set());
   const [pendingFormation, setPendingFormation] = useState<string | null>(null);
 
-  // Save button state
-  const [isLineupComplete, setIsLineupComplete] = useState(false);
   // Toast state
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -121,6 +118,13 @@ export default () => {
     [lineup?.reserves]
   );
 
+  const isLineupComplete = useMemo(() => {
+    if (!lineup || !myClub || captain === undefined) return false;
+    const isEqualLineups = onGetEqualLineups(lineup, myClub);
+    const isSameCaptain = myClub.capitao_id === captain;
+    return (!isSameCaptain || !isEqualLineups) && onGetIsLineupComplete(lineup);
+  }, [lineup, captain, myClub]);
+
   const mountLineup = useCallback(
     (myTeam: FullClubInfo) => {
       const defaultLineup = onGetFillLineupDefaultPlayers({
@@ -136,50 +140,26 @@ export default () => {
     [isMarketClose, playerStats]
   );
 
-  // Check for changes
   useEffect(() => {
-    if (lineup && myClub && captain !== undefined) {
-      const isEqualLineups = onGetEqualLineups(lineup, myClub);
-      const isSameCaptain = myClub.capitao_id === captain;
-      const hasLineupChanges = !isSameCaptain || !isEqualLineups;
+    if (hasInitialized.current || !myClub || isRefetching) return;
+    hasInitialized.current = true;
 
-      const isFilledLineup = onGetIsLineupComplete(lineup);
-      setIsLineupComplete(hasLineupChanges && isFilledLineup);
-    }
-  }, [lineup, captain, myClub]);
-
-  useEffect(() => {
-    if (!lineup && myClub && !isRefetching) {
-      const defaultLineup = mountLineup(myClub);
-      updateLineup(defaultLineup as LineupPlayers);
-      updateCaptain(myClub.capitao_id ?? 0);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMarketClose, isRefetching, myClub, playerStats]);
-
-  useEffect(() => {
+    const defaultLineup = mountLineup(myClub);
+    updateLineup(defaultLineup as LineupPlayers);
+    updateCaptain(myClub.capitao_id ?? 0);
+    updatePrice(onGetTeamPrice(defaultLineup.starting));
     if (!formation) updateFormation(initialLineupTeamFormation);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (lineup && isFirstRender.current) {
-      const initialPrice = onGetTeamPrice(lineup?.starting);
-      updatePrice(initialPrice);
-      isFirstRender.current = false;
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lineup]);
-
-  useEffect(() => {
-    if (isSuccessSaveTeam) {
-      onRefetchMyClub && onRefetchMyClub();
-      setToastMessage('Time salvo com sucesso!');
-      setToastType('success');
-      setShowToast(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuccessSaveTeam]);
+  }, [
+    myClub,
+    isRefetching,
+    mountLineup,
+    formation,
+    initialLineupTeamFormation,
+    updateLineup,
+    updateCaptain,
+    updatePrice,
+    updateFormation,
+  ]);
 
   const onRefresh = useCallback(() => {
     // Force remount of BottomSheet to reset SafeAreaView
@@ -249,7 +229,6 @@ export default () => {
     updateLineup(lineupWithoutPlayers);
     updateCaptain(0);
     updatePrice(newPrice);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     lineup,
     initialLineupTeamFormation,
@@ -396,7 +375,15 @@ export default () => {
           captain,
           formation,
         });
-        saveTeam(payload);
+
+        mutate(payload, {
+          onSuccess: () => {
+            onRefetchMyClub();
+            setToastMessage('Time salvo com sucesso!');
+            setToastType('success');
+            setShowToast(true);
+          },
+        });
       });
       return;
     }
@@ -406,7 +393,15 @@ export default () => {
       captain,
       formation,
     });
-    saveTeam(payload);
+
+    mutate(payload, {
+      onSuccess: () => {
+        onRefetchMyClub();
+        setToastMessage('Time salvo com sucesso!');
+        setToastType('success');
+        setShowToast(true);
+      },
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [captain, formation, lineup]);
 

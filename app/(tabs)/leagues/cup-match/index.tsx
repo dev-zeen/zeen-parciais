@@ -17,6 +17,7 @@ export default () => {
   const colorTheme = useThemeColor();
 
   const { slug, chaveId } = useLocalSearchParams();
+
   const leagueSlug = typeof slug === 'string' ? slug : '';
   const chaveIdNum = typeof chaveId === 'string' ? Number(chaveId) : NaN;
 

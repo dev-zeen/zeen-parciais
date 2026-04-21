@@ -71,7 +71,7 @@ export function MatchCard({
       home: match.clube_casa_id,
       away: match.clube_visitante_id,
     };
-    router.push(`/matches/${JSON.stringify(payload)}`);
+    router.push(`/rodada/matches/${JSON.stringify(payload)}`);
   }, [match, router]);
 
   return (

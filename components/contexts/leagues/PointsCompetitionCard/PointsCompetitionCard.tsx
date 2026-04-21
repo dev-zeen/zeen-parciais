@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import {  Image } from 'react-native';
+import { Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
@@ -24,9 +24,7 @@ export function PointsCompetitionCard({ competition, myTeamId }: Props) {
       variant="flat"
       className="p-0"
       onPress={() => router.push(`/leagues/points/${competition.slug}`)}>
-      <View
-        className="flex-row items-center"
-        style={{ gap: 12, backgroundColor: 'transparent' }}>
+      <View className="flex-row items-center" style={{ gap: 12, backgroundColor: 'transparent' }}>
         <Image
           source={{
             uri: competition.url_taca_png,
@@ -48,7 +46,13 @@ export function PointsCompetitionCard({ competition, myTeamId }: Props) {
             {meta}
           </Text>
 
-          <View style={{ flexDirection: 'row', gap: 8, backgroundColor: 'transparent', flexWrap: 'wrap' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 8,
+              backgroundColor: 'transparent',
+              flexWrap: 'wrap',
+            }}>
             {isOwner && (
               <View
                 className="px-2 py-1 rounded-full"
@@ -80,4 +84,3 @@ export function PointsCompetitionCard({ competition, myTeamId }: Props) {
     </AnimatedCard>
   );
 }
-

@@ -1,14 +1,11 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { Alert } from 'react-native';
 
-import { GET_ALL_LEAGUES, INVITES, INVITES_POINTS_COMPETITIONS } from '@/constants/Endpoits';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { onAcceptInvite, onDeclineInvitation, useGetInvites } from '@/queries/invites.query';
+import { useAcceptInvite, useDeclineInvitation, useGetInvites } from '@/queries/invites.query';
 
 const useInvites = () => {
   const { allowRequest } = useMarketStatus();
-  const queryClient = useQueryClient();
 
   const {
     data: invites,
@@ -18,50 +15,29 @@ const useInvites = () => {
   } = useGetInvites(allowRequest);
 
   const alertResponseInvite = (title: string, subtitle: string) => {
-    return Alert.alert(title, subtitle, [
-      {
-        text: 'Ok',
-        style: 'cancel',
-      },
-    ]);
+    return Alert.alert(title, subtitle, [{ text: 'Ok', style: 'cancel' }]);
   };
 
-  const onRefetch = useCallback(async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({ queryKey: [INVITES] }),
-      queryClient.invalidateQueries({ queryKey: [INVITES_POINTS_COMPETITIONS] }),
-      queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] }),
-    ]);
-  }, [queryClient]);
+  const { mutate: acceptInvite } = useAcceptInvite({
+    onSuccess: (data) => alertResponseInvite('Tudo Certo!', data.mensagem),
+    onError: (error) =>
+      alertResponseInvite('Alerta!', error?.response?.data?.mensagem as string),
+  });
+
+  const { mutate: declineInvite } = useDeclineInvitation({
+    onSuccess: (data) => alertResponseInvite('Tudo Certo!', data.mensagem),
+    onError: (error) =>
+      alertResponseInvite('Alerta!', error?.response?.data?.mensagem as string),
+  });
 
   const handleAcceptInvite = useCallback(
-    async (messageId: number) => {
-      await onAcceptInvite(String(messageId))
-        .then((response) => {
-          alertResponseInvite('Tudo Certo!', response.data.mensagem);
-        })
-        .catch((err: any) =>
-          alertResponseInvite('Alerta!', err?.response?.data?.mensagem as string)
-        );
-
-      await onRefetch();
-    },
-    [onRefetch]
+    (messageId: number) => acceptInvite(String(messageId)),
+    [acceptInvite]
   );
 
   const handleDeclineInvitation = useCallback(
-    async (messageId: number) => {
-      await onDeclineInvitation(String(messageId))
-        .then((response) => {
-          alertResponseInvite('Tudo Certo!', response.data.mensagem);
-        })
-        .catch((err: any) =>
-          alertResponseInvite('Alerta!', err?.response?.data?.mensagem as string)
-        );
-
-      await onRefetch();
-    },
-    [onRefetch]
+    (messageId: number) => declineInvite(String(messageId)),
+    [declineInvite]
   );
 
   return {

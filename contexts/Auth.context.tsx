@@ -1,6 +1,6 @@
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 import { useQueryClient } from '@tanstack/react-query';
-import { ReactNode, createContext, useCallback, useEffect, useState } from 'react';
+import { ReactNode, createContext, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { clearGloboidClientSettings } from '@/lib/core/auth';
@@ -25,9 +25,9 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
 
   const resetStore = useTeamLineupStore((state) => state.reset);
 
-  async function handleSuccessAuth() {
+  const handleSuccessAuth = useCallback(() => {
     setIsAutheticated(true);
-  }
+  }, []);
 
   const handleUnautenticated = useCallback(async () => {
     await removeItem();
@@ -41,37 +41,28 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
     handleUnautenticated();
   }, [handleUnautenticated, queryClient, resetStore]);
 
-  // Registra callback de desautenticação no interceptor da API
   useEffect(() => {
     setUnauthenticatedCallback(() => {
       console.log('🔒 Session expired - logging out');
       handleLogout();
     });
+
+    return () => setUnauthenticatedCallback(() => {});
   }, [handleLogout]);
 
   useEffect(() => {
-    function handleGetToken() {
-      const token = getItem().then((item) => {
-        if (item) {
-          setIsAutheticated(true);
-        }
-      });
-      return token;
-    }
+    getItem().then((item) => {
+      if (item) setIsAutheticated(true);
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    if (!isAutheticated) {
-      handleGetToken();
-    }
-  }, [getItem, isAutheticated]);
+  const contextValue = useMemo(
+    () => ({ isAutheticated, handleSuccessAuth, handleUnautenticated, handleLogout }),
+    [isAutheticated, handleSuccessAuth, handleUnautenticated, handleLogout]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAutheticated,
-        handleSuccessAuth,
-        handleUnautenticated,
-        handleLogout,
-      }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

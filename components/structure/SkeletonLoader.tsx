@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import {  Animated } from 'react-native';
+import { Animated } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -9,6 +9,13 @@ type SkeletonLoaderProps = {
   height?: number;
   variant?: 'card' | 'text' | 'circle' | 'rect';
   className?: string;
+};
+
+const VARIANT_STYLES: Record<NonNullable<SkeletonLoaderProps['variant']>, string> = {
+  card: 'rounded-xl p-4',
+  text: 'rounded',
+  circle: 'rounded-full',
+  rect: 'rounded-lg',
 };
 
 export function SkeletonLoader({
@@ -23,34 +30,14 @@ export function SkeletonLoader({
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.3,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 0.3, duration: 1000, useNativeDriver: true }),
       ])
     );
     animation.start();
     return () => animation.stop();
-  }, [pulseAnim]);
-
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'card':
-        return 'rounded-xl p-4';
-      case 'text':
-        return 'rounded';
-      case 'circle':
-        return 'rounded-full';
-      default:
-        return 'rounded-lg';
-    }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- pulseAnim is a stable Animated.Value ref from useRef
+  }, []);
 
   const backgroundColor = colorTheme === 'dark' ? 'bg-gray-700' : 'bg-gray-200';
 
@@ -63,7 +50,7 @@ export function SkeletonLoader({
       }}
       className={typeof width === 'string' && width === '100%' ? 'w-full' : ''}>
       <View
-        className={`${backgroundColor} ${getVariantStyles()} ${className}`}
+        className={`${backgroundColor} ${VARIANT_STYLES[variant]} ${className}`}
         style={{
           width: typeof width === 'number' ? width : undefined,
           height,

@@ -16,6 +16,13 @@ type SaveTeamProps = {
   formation: string;
 };
 
+export type SaveTeamPayload = {
+  atletas: (number | undefined)[];
+  reservas: Record<string, number>;
+  esquema: number;
+  capitao: number;
+};
+
 export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPlayer | FullPlayer) {
   const { starting, reserves } = lineup;
   const { atleta_id: playerId, posicao_id: playerPositionId } = player;
@@ -119,7 +126,7 @@ export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: 
   return lineup;
 }
 
-export function onGetPayloadSaveTeam({ lineup, captain, formation }: SaveTeamProps) {
+export function onGetPayloadSaveTeam({ lineup, captain, formation }: SaveTeamProps): SaveTeamPayload {
   const atletas = lineup.starting.map((position) => position.player?.atleta_id);
 
   const reservas = lineup.reserves.reduce((obj, reserve) => {

@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Modal, Platform, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
@@ -139,120 +139,71 @@ export function Login({ title }: LoginProps) {
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
 
-  // Inicia animações ao montar o componente
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        tension: 50,
-        friction: 7,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
+      Animated.spring(scaleAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
     ]).start();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleGetLoginPage() {
+  const handleGetLoginPage = useCallback(() => {
     setShowModalAuth(true);
     setWebViewLoading(true);
-  }
+  }, []);
 
-  function handleCloseModal() {
-    // Limpa o timeout ao fechar manualmente
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+  const handleCloseModal = useCallback(() => {
     setShowModalAuth(false);
     setIsAuthenticating(false);
     setWebViewLoading(true);
-  }
+  }, []);
 
   // Timeout de segurança: fecha a modal após 10 minutos se não receber resposta
   useEffect(() => {
     if (showModalAuth) {
-      timeoutRef.current = setTimeout(
-        () => {
-          console.log('⏱️ Login timeout - fechando modal');
-          setShowModalAuth(false);
-        },
-        10 * 60 * 1000
-      ) as any; // 10 minutos
+      timeoutRef.current = setTimeout(() => {
+        console.log('⏱️ Login timeout - fechando modal');
+        setShowModalAuth(false);
+      }, 10 * 60 * 1000) as any;
     }
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [showModalAuth]);
 
-  async function handleWebViewMessage(event: WebViewMessageEvent) {
+  const handleWebViewMessage = useCallback(async (event: WebViewMessageEvent) => {
     setIsAuthenticating(true);
+
+    let token: string | null = null;
 
     try {
       const data = JSON.parse(event.nativeEvent.data);
-
       if (data.type === 'AUTH_TOKEN' && data.tokens) {
         console.log('✅ Tokens recebidos com sucesso');
-
-        // Salva o objeto completo de tokens como JSON string
-        await setItem(JSON.stringify(data.tokens));
-
-        // Busca as configurações do cliente Globoid
-        console.log('🔍 Buscando configurações do cliente Globoid...');
-        await fetchGloboidClientSettings();
-
-        // Limpa o timeout
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-
-        // Pequeno delay para feedback visual
-        setTimeout(() => {
-          // Atualiza o estado de autenticação
-          handleSuccessAuth();
-
-          // Fecha a modal
-          setShowModalAuth(false);
-          setIsAuthenticating(false);
-        }, 500);
+        token = JSON.stringify(data.tokens);
       }
     } catch {
-      // Fallback para formato antigo (se vier string pura)
-      const token = event.nativeEvent.data;
-      if (token && typeof token === 'string' && token.trim() !== '' && !token.startsWith('{')) {
+      const raw = event.nativeEvent.data;
+      if (raw && typeof raw === 'string' && raw.trim() !== '' && !raw.startsWith('{')) {
         console.log('✅ Token recebido (formato legado)');
-
-        // Salva o token
-        await setItem(token);
-
-        // Limpa o timeout
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-
-        // Pequeno delay para feedback visual
-        setTimeout(() => {
-          // Atualiza o estado de autenticação
-          handleSuccessAuth();
-
-          // Fecha a modal
-          setShowModalAuth(false);
-          setIsAuthenticating(false);
-        }, 500);
+        token = raw;
       }
     }
-  }
+
+    if (!token) return;
+
+    await setItem(token);
+    console.log('🔍 Buscando configurações do cliente Globoid...');
+    await fetchGloboidClientSettings();
+
+    setTimeout(() => {
+      handleSuccessAuth();
+      setShowModalAuth(false);
+      setIsAuthenticating(false);
+    }, 500);
+  }, [setItem, handleSuccessAuth]);
 
   return (
     <>

@@ -1,12 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { 
+import { useCallback, useContext, useMemo, useState } from 'react';
+import {
+  Image,
   ListRenderItemInfo,
   RefreshControl,
   SectionList,
   TouchableOpacity,
-  TextInput } from 'react-native';
+  TextInput,
+} from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
@@ -25,7 +27,7 @@ import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
-import { useGetPointsCompetitions } from '@/queries/competitions.query';
+import { useGetFinalizedPointsCompetitions, useGetPointsCompetitions } from '@/queries/competitions.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 
 type SectionLeagueProps = {
@@ -47,7 +49,6 @@ export default function () {
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
 
-  const [sectionLeaguesList, setSectionLeaguesList] = useState<SectionLeagueProps[]>();
 
   const { invites, isLoadingInvites, onRefetchInvites, isRefetchingInvites } = useInvites();
   const { invites: pointsInvites } = usePointsCompetitionInvites();
@@ -71,16 +72,20 @@ export default function () {
     isRefetching: isRefetchingPointsCompetitions,
   } = useGetPointsCompetitions(!!allowRequest);
 
-  useEffect(() => {
-    if (!leagues) {
-      return;
-    }
+  const {
+    data: finalizedCompetitions,
+    refetch: onRefetchFinalizedCompetitions,
+    isRefetching: isRefetchingFinalizedCompetitions,
+  } = useGetFinalizedPointsCompetitions(!!allowRequest);
 
-    const { ligas } = leagues || {};
+  const sectionLeaguesList = useMemo(() => {
+    if (!leagues) return [];
+
+    const { ligas } = leagues;
     const query = search.trim().toLowerCase();
     const matchesQuery = (league: LeagueUserDetails) =>
       !query || league.nome.toLowerCase().includes(query);
-    
+
     const max_ligas_pro = marketStatus?.max_ligas_pro ?? 0;
     const max_ligas_free = marketStatus?.max_ligas_free ?? 0;
     const max_ligas_matamata_pro = marketStatus?.max_ligas_matamata_pro ?? 0;
@@ -96,47 +101,40 @@ export default function () {
 
     const isProAssinante = myClub?.time.assinante;
 
-    const sectionLeagues: SectionLeagueProps[] = [];
-
-    const createLeagueSection = (
+    const toSection = (
       title: string,
       subtitle: string | undefined,
       data: LeagueUserDetails[]
-    ) => {
-      if (data.length > 0) {
-        sectionLeagues.push({ title, subtitle, data });
-      }
-    };
+    ): SectionLeagueProps | null =>
+      data.length > 0 ? { title, subtitle, data } : null;
 
-    createLeagueSection(
-      'Clássicas',
-      query
-        ? `${privateLeagues.length} de ${privateLeaguesAll.length} · ${privateLeaguesAll.length} / ${
-            isProAssinante ? max_ligas_pro : max_ligas_free
-          }`
-        : `${privateLeaguesAll.length} / ${isProAssinante ? max_ligas_pro : max_ligas_free}`,
-      privateLeagues
-    );
-
-    createLeagueSection(
-      'Mata-mata',
-      query
-        ? `${cups.length} de ${cupsAll.length} · ${cupsAll.length} / ${
-            isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free
-          }`
-        : `${cupsAll.length} / ${isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free}`,
-      cups
-    );
-
-    if (!isMarketClose) {
-      createLeagueSection(
-        'Padrão',
-        query ? `${defaultLeagues.length} de ${defaultLeaguesAll.length}` : `${defaultLeaguesAll.length}`,
-        defaultLeagues
-      );
-    }
-
-    setSectionLeaguesList(sectionLeagues);
+    return [
+      toSection(
+        'Clássicas',
+        query
+          ? `${privateLeagues.length} de ${privateLeaguesAll.length} · ${privateLeaguesAll.length} / ${
+              isProAssinante ? max_ligas_pro : max_ligas_free
+            }`
+          : `${privateLeaguesAll.length} / ${isProAssinante ? max_ligas_pro : max_ligas_free}`,
+        privateLeagues
+      ),
+      toSection(
+        'Mata-mata',
+        query
+          ? `${cups.length} de ${cupsAll.length} · ${cupsAll.length} / ${
+              isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free
+            }`
+          : `${cupsAll.length} / ${isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free}`,
+        cups
+      ),
+      !isMarketClose
+        ? toSection(
+            'Padrão',
+            query ? `${defaultLeagues.length} de ${defaultLeaguesAll.length}` : `${defaultLeaguesAll.length}`,
+            defaultLeagues
+          )
+        : null,
+    ].filter((s): s is SectionLeagueProps => s !== null);
   }, [leagues, isMarketClose, marketStatus, myClub?.time.assinante, search]);
 
   const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
@@ -151,11 +149,13 @@ export default function () {
       onRefetchLeagues(),
       onRefetchInvites(),
       onRefetchPointsCompetitions(),
+      onRefetchFinalizedCompetitions(),
     ]);
-  }, [onRefetchInvites, onRefetchLeagues, onRefetchMyClub, onRefetchPointsCompetitions]);
+  }, [onRefetchInvites, onRefetchLeagues, onRefetchMyClub, onRefetchPointsCompetitions, onRefetchFinalizedCompetitions]);
 
   const isRefetching =
-    isRefetchingMyClub || isRefetchingLeagues || isRefetchingInvites || isRefetchingPointsCompetitions;
+    isRefetchingMyClub || isRefetchingLeagues || isRefetchingInvites ||
+    isRefetchingPointsCompetitions || isRefetchingFinalizedCompetitions;
 
   if (!isAutheticated) {
     return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;
@@ -165,7 +165,7 @@ export default function () {
     return <MaintenanceMarket hasHeader />;
   }
 
-  if (!leagues || !myClub || isLoadingInvites || !sectionLeaguesList) {
+  if (!leagues || !myClub || isLoadingInvites) {
     return <LoadingScreen title="Carregando minhas ligas" />;
   }
 
@@ -175,6 +175,12 @@ export default function () {
     pointsQuery.length > 0
       ? pointsList.filter((c) => c.nome.toLowerCase().includes(pointsQuery))
       : pointsList;
+
+  const finalizedList = finalizedCompetitions ?? [];
+  const finalizedFiltered =
+    pointsQuery.length > 0
+      ? finalizedList.filter((c) => c.nome.toLowerCase().includes(pointsQuery))
+      : finalizedList;
 
   return (
     <SafeAreaViewContainer edges={['top']}>
@@ -302,6 +308,101 @@ export default function () {
           )}
           ListEmptyComponent={<EmptyLeagueList />}
           stickySectionHeadersEnabled={false}
+          ListFooterComponent={
+            finalizedFiltered.length > 0 ? (
+              <View style={{ paddingTop: 8, backgroundColor: 'transparent' }}>
+                <View
+                  className="py-3"
+                  style={{
+                    backgroundColor:
+                      colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+                  }}>
+                  <View
+                    className="flex-row items-end justify-between"
+                    style={{ backgroundColor: 'transparent' }}>
+                    <Text className="font-bold text-base">Finalizadas</Text>
+                    <Text className="text-xs text-gray-500">{finalizedFiltered.length}</Text>
+                  </View>
+                </View>
+                <View style={{ gap: 10, backgroundColor: 'transparent' }}>
+                  {finalizedFiltered.map((competition) => (
+                    <TouchableOpacity
+                      key={competition.slug}
+                      activeOpacity={0.7}
+                      onPress={() => router.push(`/leagues/points/${competition.slug}`)}
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: 12,
+                        borderRadius: 12,
+                        backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+                        borderWidth: 1,
+                        borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
+                      }}>
+                      {competition.url_taca_png ? (
+                        <View
+                          style={{
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                          <Image
+                            source={{ uri: competition.url_taca_png }}
+                            style={{ width: 48, height: 48, borderRadius: 24 }}
+                          />
+                        </View>
+                      ) : null}
+                      <View style={{ flex: 1, backgroundColor: 'transparent', gap: 4 }}>
+                        <Text className="text-base font-bold" numberOfLines={1}>
+                          {competition.nome}
+                        </Text>
+                        <Text className="text-xs text-gray-500" numberOfLines={1}>
+                          {competition.privacidade === 'A' ? 'Aberta' : 'Fechada'} ·{' '}
+                          {competition.quantidade_participantes} times · Rd{' '}
+                          {competition.rodada_inicial}–{competition.rodada_final}
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            gap: 6,
+                            backgroundColor: 'transparent',
+                            flexWrap: 'wrap',
+                          }}>
+                          <View
+                            className="px-2 py-1 rounded-full"
+                            style={{
+                              backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#e5e7eb',
+                            }}>
+                            <Text className="text-[11px] font-semibold" style={{ color: '#9ca3af' }}>
+                              Finalizada
+                            </Text>
+                          </View>
+                          <View
+                            className="px-2 py-1 rounded-full"
+                            style={{
+                              backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#e5e7eb',
+                            }}>
+                            <Text className="text-[11px] font-semibold" style={{ color: '#f59e0b' }}>
+                              #{competition.ranking_time.posicao}º lugar
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                      <Feather
+                        name="chevron-right"
+                        size={16}
+                        color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            ) : null
+          }
         />
       </View>
     </SafeAreaViewContainer>

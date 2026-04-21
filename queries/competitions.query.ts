@@ -2,14 +2,15 @@ import { useQuery } from '@tanstack/react-query';
 
 import {
   GET_POINTS_COMPETITIONS,
+  GET_POINTS_COMPETITIONS_FINALIZADAS,
   GET_POINTS_COMPETITION_BY_SLUG,
 } from '@/constants/Endpoits';
 import type {
   PointsCompetitionDetails,
+  PointsCompetitionFinalizedItem,
   PointsCompetitionListItem,
 } from '@/models/Competition';
 import api from '@/services/api';
-import { useFetch } from '@/utils/reactQuery';
 
 type UnknownListResponse =
   | PointsCompetitionListItem[]
@@ -39,7 +40,24 @@ export const useGetPointsCompetitions = (allowRequest?: boolean) =>
   });
 
 export const useGetPointsCompetitionBySlug = (slug: string, allowRequest?: boolean) =>
-  useFetch<PointsCompetitionDetails>(GET_POINTS_COMPETITION_BY_SLUG.replace(':slug', slug), undefined, {
+  useQuery<PointsCompetitionDetails>({
+    queryKey: [GET_POINTS_COMPETITION_BY_SLUG.replace(':slug', slug)],
+    queryFn: () =>
+      api
+        .get<PointsCompetitionDetails>(GET_POINTS_COMPETITION_BY_SLUG.replace(':slug', slug))
+        .then((r) => r.data),
     enabled: !!slug && !!allowRequest,
+  });
+
+export const useGetFinalizedPointsCompetitions = (allowRequest?: boolean) =>
+  useQuery<PointsCompetitionFinalizedItem[]>({
+    queryKey: [GET_POINTS_COMPETITIONS_FINALIZADAS],
+    enabled: !!allowRequest,
+    queryFn: async () => {
+      const res = await api.get<PointsCompetitionFinalizedItem[] | null>(
+        GET_POINTS_COMPETITIONS_FINALIZADAS
+      );
+      return Array.isArray(res.data) ? res.data : [];
+    },
   });
 

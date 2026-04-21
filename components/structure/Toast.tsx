@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { useEffect, useRef } from 'react';
-import {  Animated, Platform, StyleSheet } from 'react-native';
+import { Animated, Platform, StyleSheet } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -13,6 +13,18 @@ type ToastProps = {
   duration?: number;
 };
 
+const TOAST_COLORS: Record<NonNullable<ToastProps['type']>, string> = {
+  success: '#00E094',
+  error: '#ef4444',
+  info: '#0057FF',
+};
+
+const TOAST_ICONS: Record<NonNullable<ToastProps['type']>, keyof typeof Feather.glyphMap> = {
+  success: 'check-circle',
+  error: 'alert-circle',
+  info: 'info',
+};
+
 export function Toast({ visible, message, type = 'success', onHide, duration = 3000 }: ToastProps) {
   const colorTheme = useThemeColor();
   const translateY = useRef(new Animated.Value(-100)).current;
@@ -20,6 +32,9 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 3
 
   useEffect(() => {
     if (visible) {
+      translateY.setValue(-100);
+      opacity.setValue(0);
+
       Animated.parallel([
         Animated.spring(translateY, {
           toValue: 0,
@@ -47,42 +62,17 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 3
             duration: 300,
             useNativeDriver: true,
           }),
-        ]).start(() => {
-          if (onHide) onHide();
-        });
+        ]).start(() => onHide?.());
       }, duration);
 
       return () => clearTimeout(timer);
     }
-  }, [visible, translateY, opacity, onHide, duration]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- translateY and opacity are stable Animated.Value refs from useRef
+  }, [visible, onHide, duration]);
 
   if (!visible) return null;
 
-  const getToastColor = () => {
-    switch (type) {
-      case 'success':
-        return '#00E094';
-      case 'error':
-        return '#ef4444';
-      case 'info':
-        return '#0057FF';
-      default:
-        return '#22c55e';
-    }
-  };
-
-  const getIconName = (): keyof typeof Feather.glyphMap => {
-    switch (type) {
-      case 'success':
-        return 'check-circle';
-      case 'error':
-        return 'alert-circle';
-      case 'info':
-        return 'info';
-      default:
-        return 'check-circle';
-    }
-  };
+  const toastColor = TOAST_COLORS[type];
 
   return (
     <Animated.View
@@ -98,11 +88,11 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 3
           styles.toast,
           {
             backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#ffffff',
-            borderLeftColor: getToastColor(),
+            borderLeftColor: toastColor,
           },
         ]}>
-        <View style={[styles.iconContainer, { backgroundColor: getToastColor() }]}>
-          <Feather name={getIconName()} size={20} color="#ffffff" />
+        <View style={[styles.iconContainer, { backgroundColor: toastColor }]}>
+          <Feather name={TOAST_ICONS[type]} size={20} color="#ffffff" />
         </View>
         <Text style={styles.message}>{message}</Text>
       </View>

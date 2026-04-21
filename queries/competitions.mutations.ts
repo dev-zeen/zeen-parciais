@@ -1,4 +1,11 @@
-import { GET_POINTS_COMPETITIONS, INVITE_POINTS_COMPETITION } from '@/constants/Endpoits';
+import { UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+
+import {
+  GET_POINTS_COMPETITION_BY_SLUG,
+  GET_POINTS_COMPETITIONS,
+  INVITE_POINTS_COMPETITION,
+} from '@/constants/Endpoits';
 import type { CompetitionPrivacy } from '@/models/Competition';
 import api from '@/services/api';
 
@@ -20,18 +27,64 @@ export type CreatePointsCompetitionResponse = {
   mensagem?: string;
 };
 
-export const createPointsCompetition = async (payload: CreatePointsCompetitionPayload) => {
-  const res = await api.post<CreatePointsCompetitionResponse>(GET_POINTS_COMPETITIONS, payload);
-  return res.data;
+const createPointsCompetitionRequest = async (
+  payload: CreatePointsCompetitionPayload
+): Promise<CreatePointsCompetitionResponse> => {
+  const { data } = await api.post<CreatePointsCompetitionResponse>(GET_POINTS_COMPETITIONS, payload);
+  return data;
 };
+
+export function useCreatePointsCompetition(
+  options?: UseMutationOptions<CreatePointsCompetitionResponse, AxiosError<{ mensagem?: string }>, CreatePointsCompetitionPayload>
+) {
+  const queryClient = useQueryClient();
+  return useMutation<CreatePointsCompetitionResponse, AxiosError<{ mensagem?: string }>, CreatePointsCompetitionPayload>({
+    mutationFn: createPointsCompetitionRequest,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({ queryKey: [GET_POINTS_COMPETITIONS] });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    onError: (error, variables, onMutateResult, context) => {
+      console.error(error.response?.data ?? error.message);
+      options?.onError?.(error, variables, onMutateResult, context);
+    },
+    ...options,
+  });
+}
 
 export type InvitePointsCompetitionPayload = {
-  times_ids: number[];
+  slug: string;
+  teamIds: number[];
 };
 
-export const invitePointsCompetition = async (slug: string, teamIds: number[]) => {
+type InvitePointsCompetitionResponse = unknown;
+
+const invitePointsCompetitionRequest = async ({
+  slug,
+  teamIds,
+}: InvitePointsCompetitionPayload): Promise<InvitePointsCompetitionResponse> => {
   // Para pontos corridos, a API espera um array de ids numéricos. Ex: [147322]
-  const res = await api.post(INVITE_POINTS_COMPETITION.replace(':slug', slug), teamIds);
-  return res.data;
+  const { data } = await api.post(INVITE_POINTS_COMPETITION.replace(':slug', slug), teamIds);
+  return data;
 };
+
+export function useInvitePointsCompetition(
+  options?: UseMutationOptions<InvitePointsCompetitionResponse, AxiosError<{ mensagem?: string }>, InvitePointsCompetitionPayload>
+) {
+  const queryClient = useQueryClient();
+  return useMutation<InvitePointsCompetitionResponse, AxiosError<{ mensagem?: string }>, InvitePointsCompetitionPayload>({
+    mutationFn: invitePointsCompetitionRequest,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({
+        queryKey: [GET_POINTS_COMPETITION_BY_SLUG.replace(':slug', variables.slug)],
+      });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    onError: (error, variables, onMutateResult, context) => {
+      console.error(error.response?.data ?? error.message);
+      options?.onError?.(error, variables, onMutateResult, context);
+    },
+    ...options,
+  });
+}
 

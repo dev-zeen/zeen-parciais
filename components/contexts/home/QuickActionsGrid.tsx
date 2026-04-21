@@ -28,17 +28,10 @@ export function QuickActionsGrid() {
       color: '#8B5CF6',
     },
     {
-      id: 'matches',
-      label: 'Partidas',
-      icon: 'calendar',
-      route: '/(tabs)/matches',
-      color: '#0057FF',
-    },
-    {
       id: 'players',
-      label: 'Jogadores',
+      label: 'Rodada',
       icon: 'trending-up',
-      route: '/(tabs)/players',
+      route: '/(tabs)/rodada',
       color: '#00E094',
     },
     {

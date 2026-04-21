@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AuthContextProvider } from '@/contexts/Auth.context';
 import { ThemeContextProvider } from '@/contexts/Theme.context';
@@ -22,10 +23,12 @@ export default function Providers({ children }: ProvidersProps): ReactNode {
   });
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeContextProvider>
-        <AuthContextProvider>{children}</AuthContextProvider>
-      </ThemeContextProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeContextProvider>
+          <AuthContextProvider>{children}</AuthContextProvider>
+        </ThemeContextProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons';
-import { useQueryClient } from '@tanstack/react-query';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
@@ -15,12 +14,11 @@ import { Text, View } from '@/components/Themed';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
-import { GET_LEAGUE_BY_SLUG, GET_POINTS_COMPETITION_BY_SLUG } from '@/constants/Endpoits';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { invitePointsCompetition } from '@/queries/competitions.mutations';
-import { inviteLeague } from '@/queries/leagues.mutations';
+import { useInvitePointsCompetition } from '@/queries/competitions.mutations';
+import { useInviteLeague } from '@/queries/leagues.mutations';
 import { SearchTeamItem, useSearchTeams } from '@/queries/teams.query';
 
 type InviteType = 'classic' | 'matamata' | 'points';
@@ -30,7 +28,6 @@ export default function () {
   const { isAutheticated } = useContext(AuthContext);
   const { allowRequest } = useMarketStatus();
   const params = useLocalSearchParams();
-  const queryClient = useQueryClient();
 
   const slug = useMemo(() => {
     const raw = params.slug;
@@ -47,7 +44,6 @@ export default function () {
   const [debouncedQ, setDebouncedQ] = useState('');
   const [selectedIds, setSelectedIds] = useState<Record<number, boolean>>({});
   const [selectedSlugs, setSelectedSlugs] = useState<Record<string, boolean>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q), 350);
@@ -72,6 +68,36 @@ export default function () {
     return 'Convidar (Clássica)';
   }, [type]);
 
+  const { mutate: invitePoints, isPending: isInvitingPoints } = useInvitePointsCompetition({
+    onSuccess: () => {
+      Alert.alert('Tudo certo!', 'Convites enviados.');
+      setSelectedIds({});
+    },
+    onError: (error) => {
+      const msg =
+        typeof error?.response?.data?.mensagem === 'string'
+          ? error.response.data.mensagem
+          : 'Não foi possível enviar os convites.';
+      Alert.alert('Alerta!', msg);
+    },
+  });
+
+  const { mutate: inviteLeague, isPending: isInvitingLeague } = useInviteLeague({
+    onSuccess: () => {
+      Alert.alert('Tudo certo!', 'Convites enviados.');
+      setSelectedSlugs({});
+    },
+    onError: (error) => {
+      const msg =
+        typeof error?.response?.data?.mensagem === 'string'
+          ? error.response.data.mensagem
+          : 'Não foi possível enviar os convites.';
+      Alert.alert('Alerta!', msg);
+    },
+  });
+
+  const isSubmitting = isInvitingPoints || isInvitingLeague;
+
   const toggleTeam = useCallback(
     (team: SearchTeamItem) => {
       if (type === 'points') {
@@ -90,7 +116,7 @@ export default function () {
     [type]
   );
 
-  const onSubmit = useCallback(async () => {
+  const onSubmit = useCallback(() => {
     if (!slug) return;
     const hasSelection =
       type === 'points' ? selectedTeamIds.length > 0 : selectedTeamSlugs.length > 0;
@@ -100,36 +126,12 @@ export default function () {
       return;
     }
 
-    try {
-      setIsSubmitting(true);
-
-      if (type === 'points') {
-        await invitePointsCompetition(slug, selectedTeamIds);
-        // Invalidate points competition detail query
-        await queryClient.invalidateQueries({
-          queryKey: [GET_POINTS_COMPETITION_BY_SLUG.replace(':slug', slug)],
-        });
-      } else {
-        await inviteLeague(slug, selectedTeamSlugs);
-        // Invalidate league detail query
-        await queryClient.invalidateQueries({
-          queryKey: [GET_LEAGUE_BY_SLUG.replace(':slug', slug)],
-        });
-      }
-
-      Alert.alert('Tudo certo!', 'Convites enviados.');
-      setSelectedIds({});
-      setSelectedSlugs({});
-    } catch (err: any) {
-      const msg =
-        typeof err?.response?.data?.mensagem === 'string'
-          ? err.response.data.mensagem
-          : 'Não foi possível enviar os convites.';
-      Alert.alert('Alerta!', msg);
-    } finally {
-      setIsSubmitting(false);
+    if (type === 'points') {
+      invitePoints({ slug, teamIds: selectedTeamIds });
+    } else {
+      inviteLeague({ slug, teamSlugs: selectedTeamSlugs });
     }
-  }, [selectedTeamIds, selectedTeamSlugs, slug, type, queryClient]);
+  }, [selectedTeamIds, selectedTeamSlugs, slug, type, invitePoints, inviteLeague]);
 
   const keyExtractor = useCallback((item: SearchTeamItem) => `${item.time_id}`, []);
 
@@ -275,15 +277,15 @@ export default function () {
           }}
           ListEmptyComponent={
             q.trim().length < 2 ? (
-              <View style={{ padding: 16, backgroundColor: 'transparent' }}>
+              <View style={{ backgroundColor: 'transparent' }}>
                 <Text className="text-sm text-gray-500">Digite ao menos 2 letras para buscar.</Text>
               </View>
             ) : isFetching ? (
-              <View style={{ padding: 16, backgroundColor: 'transparent' }}>
+              <View style={{ backgroundColor: 'transparent' }}>
                 <Text className="text-sm text-gray-500">Buscando...</Text>
               </View>
             ) : (
-              <View style={{ padding: 16, backgroundColor: 'transparent' }}>
+              <View style={{ backgroundColor: 'transparent' }}>
                 <Text className="text-sm text-gray-500">Nenhum time encontrado.</Text>
               </View>
             )

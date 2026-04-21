@@ -8,7 +8,7 @@ import { useGetAppreciations } from '@/queries/players.query';
 import { onGetFromStorage } from '@/utils/asyncStorage';
 
 const useValorization = () => {
-  const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
+  const { isMarketClose, allowRequest } = useMarketStatus();
 
   const { data: market } = useGetMarket();
 
@@ -18,48 +18,45 @@ const useValorization = () => {
     isRefetching: isRefetchingValorizations,
   } = useGetAppreciations(!!allowRequest);
 
-  const [currentValorizations, setCurrentValorizations] = useState<Appreciations>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [storedValorizations, setStoredValorizations] = useState<Appreciations | null>(null);
+  const [isStorageLoading, setIsStorageLoading] = useState(isMarketClose);
 
   useEffect(() => {
+    if (!isMarketClose) {
+      setIsStorageLoading(false);
+      return;
+    }
     onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
-      if (isMarketClose && res) {
-        setCurrentValorizations(res);
-      } else {
-        const newAppreciations = market?.atletas
-          .filter((current) => current.entrou_em_campo)
-          .reduce(
-            (acc, current) => ({
-              ...acc,
-              atletas: {
-                ...acc.atletas,
-                [current?.atleta_id]: {
-                  posicao_id: current?.posicao_id,
-                  variacao_num: current?.variacao_num,
-                },
-              },
-            }),
-            { atletas: {} } as Appreciations
-          );
-
-        setCurrentValorizations(newAppreciations);
-      }
-
-      setIsLoading(false);
+      setStoredValorizations(res ?? null);
+      setIsStorageLoading(false);
     });
-  }, [marketStatus, isMarketClose, market]);
+  }, [isMarketClose]);
+
+  const valorizations = useMemo<Appreciations | undefined>(() => {
+    if (isMarketClose && storedValorizations) return storedValorizations;
+
+    return market?.atletas
+      .filter((a) => a.entrou_em_campo)
+      .reduce(
+        (acc, a) => ({
+          ...acc,
+          atletas: {
+            ...acc.atletas,
+            [a.atleta_id]: {
+              posicao_id: a.posicao_id,
+              variacao_num: a.variacao_num,
+            },
+          },
+        }),
+        { atletas: {} } as Appreciations
+      );
+  }, [isMarketClose, storedValorizations, market?.atletas]);
 
   return {
-    valorizations: useMemo(() => currentValorizations, [currentValorizations]),
-    isLoadingValorizations: useMemo(
-      () => isLoadingValorizations || isLoading,
-      [isLoadingValorizations, isLoading]
-    ),
-    onRefetchValorizations: !allowRequest ? () => null : onRefetchValorizations,
-    isRefetchingValorizations: useMemo(
-      () => isRefetchingValorizations,
-      [isRefetchingValorizations]
-    ),
+    valorizations,
+    isLoadingValorizations: isLoadingValorizations || isStorageLoading,
+    onRefetchValorizations: allowRequest ? onRefetchValorizations : () => null,
+    isRefetchingValorizations,
   };
 };
 

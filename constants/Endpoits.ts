@@ -39,6 +39,7 @@ export const QUIT_LEAGUE = '/auth/liga/:slug/associacao';
 
 // Pontos Corridos
 export const GET_POINTS_COMPETITIONS = '/auth/competicoes/pontoscorridos';
+export const GET_POINTS_COMPETITIONS_FINALIZADAS = '/auth/competicoes/pontoscorridos/finalizadas';
 export const GET_POINTS_COMPETITION_BY_SLUG = '/auth/competicoes/pontoscorridos/slug/:slug';
 export const INVITES_POINTS_COMPETITIONS = '/auth/competicoes/convites';
 export const RESPONSE_INVITE_POINTS_COMPETITIONS = '/auth/competicoes/convites/:messageId';

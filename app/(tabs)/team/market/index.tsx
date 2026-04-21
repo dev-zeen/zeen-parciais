@@ -2,13 +2,13 @@ import { Feather } from '@expo/vector-icons';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { onGetEmptyPositions } from '@/components/contexts/team/_team.helpers';
-import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
@@ -173,7 +173,12 @@ export default ({
 
   const isLoading = !marketPlayers || !myClub || !market || !matches || !lineup || isFiltering;
 
-  if (isLoading) return <LoadingScreen />;
+  if (isLoading)
+    return (
+      <View style={{ height: 300, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color="#FF8A00" />
+      </View>
+    );
 
   return (
     <View

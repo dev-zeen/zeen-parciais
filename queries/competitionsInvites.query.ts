@@ -1,4 +1,9 @@
+import { UseMutationOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+
 import {
+  GET_ALL_LEAGUES,
+  GET_POINTS_COMPETITIONS,
   INVITES_POINTS_COMPETITIONS,
   RESPONSE_INVITE_POINTS_COMPETITIONS,
 } from '@/constants/Endpoits';
@@ -7,23 +12,44 @@ import type {
   RespondCompetitionInviteInput,
 } from '@/models/Competition';
 import api from '@/services/api';
-import { useFetch } from '@/utils/reactQuery';
+
+type RespondInviteResponse = { mensagem?: string };
 
 export const useGetPointsCompetitionInvites = (allowRequest?: boolean) =>
-  useFetch<PointsCompetitionInvitesResponse>(INVITES_POINTS_COMPETITIONS, undefined, {
+  useQuery<PointsCompetitionInvitesResponse>({
+    queryKey: [INVITES_POINTS_COMPETITIONS],
+    queryFn: () =>
+      api.get<PointsCompetitionInvitesResponse>(INVITES_POINTS_COMPETITIONS).then((r) => r.data),
     enabled: !!allowRequest,
   });
 
-/**
- * Aceitar/recusar convite de pontos corridos.
- *
- * Observação: a API usa PUT no mesmo endpoint; o shape exato do body pode variar.
- * Implementamos um body explícito para suportar ambos os caminhos.
- */
-export const onRespondPointsCompetitionInvite = async ({
-  messageId,
-  decision,
-}: RespondCompetitionInviteInput) => {
-  const body = { aceitar: decision === 'accept' };
-  return api.put(RESPONSE_INVITE_POINTS_COMPETITIONS.replace(':messageId', String(messageId)), body);
+const respondCompetitionInviteRequest = async (
+  input: RespondCompetitionInviteInput
+): Promise<RespondInviteResponse> => {
+  const body = { aceitar: input.decision === 'accept' };
+  const { data } = await api.put<RespondInviteResponse>(
+    RESPONSE_INVITE_POINTS_COMPETITIONS.replace(':messageId', String(input.messageId)),
+    body
+  );
+  return data;
 };
+
+export function useRespondPointsCompetitionInvite(
+  options?: UseMutationOptions<RespondInviteResponse, AxiosError<{ mensagem?: string }>, RespondCompetitionInviteInput>
+) {
+  const queryClient = useQueryClient();
+  return useMutation<RespondInviteResponse, AxiosError<{ mensagem?: string }>, RespondCompetitionInviteInput>({
+    mutationFn: respondCompetitionInviteRequest,
+    onSuccess: (data, variables, onMutateResult, context) => {
+      queryClient.invalidateQueries({ queryKey: [INVITES_POINTS_COMPETITIONS] });
+      queryClient.invalidateQueries({ queryKey: [GET_POINTS_COMPETITIONS] });
+      queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
+      options?.onSuccess?.(data, variables, onMutateResult, context);
+    },
+    onError: (error, variables, onMutateResult, context) => {
+      console.error(error.response?.data ?? error.message);
+      options?.onError?.(error, variables, onMutateResult, context);
+    },
+    ...options,
+  });
+}

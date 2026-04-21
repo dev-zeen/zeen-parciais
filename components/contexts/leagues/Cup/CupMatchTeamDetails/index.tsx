@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
 import { View } from '@/components/Themed';
@@ -22,16 +22,12 @@ type CupMatchTeamDetailsProps = {
 };
 
 export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDetailsProps) {
-  const isFirstRender = useRef(true);
-
   const colorTheme = useThemeColor();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
   const { refetch: onRefetchStats, isRefetching: isRefetchingPlayerStats } =
     useGetScoredPlayers(isMarketClose);
-
-  const [currentRound, setCurrentRound] = useState(0);
 
   const {
     data: substitutions,
@@ -42,6 +38,11 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
     id: team?.time.time_id,
     round: match.rodada_id,
   });
+
+  const currentRound = useMemo(() => {
+    if (!marketStatus) return 0;
+    return isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1;
+  }, [isMarketClose, marketStatus]);
 
   const lineup = useMemo(() => {
     if (team && team.atletas && team.reservas)
@@ -57,24 +58,12 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
       });
   }, [currentRound, isMarketClose, match.rodada_id, playerStats, team]);
 
-  useEffect(() => {
-    if (marketStatus && isFirstRender.current) {
-      const round = isMarketClose ? marketStatus.rodada_atual : marketStatus.rodada_atual - 1;
-      setCurrentRound(round);
-
-      isFirstRender.current = false;
-    }
-  }, [isMarketClose, marketStatus]);
-
   const onRefetch = useCallback(
     () => Promise.all([onRefetchStats(), onRefetchSubstitutions()]),
     [onRefetchStats, onRefetchSubstitutions]
   );
 
-  const isRefetching = useMemo(
-    () => isRefetchingPlayerStats || isRefetchingSubstitutions,
-    [isRefetchingPlayerStats, isRefetchingSubstitutions]
-  );
+  const isRefetching = isRefetchingPlayerStats || isRefetchingSubstitutions;
 
   if (isInitialLoadingSubstitutions || !lineup) {
     return <Loading />;

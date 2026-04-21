@@ -2,11 +2,9 @@ import { Image, ScrollView } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 
 import maintenanceImage from '@/assets/images/manutencao.png';
-import { Text, View } from '@/components/Themed';
+import { View } from '@/components/Themed';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
-import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMarketStatus } from '@/queries/market.query';
 
 type MaintenanceMarketProps = {
@@ -14,71 +12,24 @@ type MaintenanceMarketProps = {
 };
 
 export function MaintenanceMarket({ hasHeader }: MaintenanceMarketProps) {
-  const colorTheme = useThemeColor();
-
   const { refetch, isRefetching } = useGetMarketStatus();
 
   return (
-    <ScrollView refreshControl={<RefreshControl onRefresh={refetch} refreshing={isRefetching} />}>
-      {hasHeader ? (
+    <SafeAreaViewContainer edges={hasHeader ? [] : ['top']}>
+      <MarketStatusCard />
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={<RefreshControl onRefresh={refetch} refreshing={isRefetching} />}>
         <View
-          className="mx-2 rounded-lg"
-          style={{
-            gap: 8,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}>
-          <MarketStatusCard />
-
-          <View
-            className="items-center justify-center p-4 rounded-lg"
-            style={{
-              gap: 16,
-            }}>
-            <Text className="font-semibold text-sm">Mercado em Manutenção</Text>
-            <Image
-              source={maintenanceImage}
-              alt="Mercado em manutenção"
-              width={40}
-              height={40}
-              style={{
-                height: 200,
-                width: 200,
-              }}
-            />
-          </View>
+          className="flex-1 items-center justify-center p-6"
+          style={{ gap: 16, backgroundColor: 'transparent' }}>
+          <Image
+            source={maintenanceImage}
+            alt="Mercado em manutenção"
+            style={{ height: 300, width: 300, resizeMode: 'contain' }}
+          />
         </View>
-      ) : (
-        <SafeAreaViewContainer edges={['top']}>
-          <View
-            className="mx-2 rounded-lg"
-            style={{
-              gap: 8,
-              backgroundColor:
-                colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-            }}>
-            <MarketStatusCard />
-
-            <View
-              className="items-center justify-center p-4 rounded-lg"
-              style={{
-                gap: 16,
-              }}>
-              <Text className="font-semibold text-sm">Mercado em Manutenção</Text>
-              <Image
-                source={maintenanceImage}
-                alt="Mercado em manutenção"
-                width={40}
-                height={40}
-                style={{
-                  height: 200,
-                  width: 200,
-                }}
-              />
-            </View>
-          </View>
-        </SafeAreaViewContainer>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaViewContainer>
   );
 }

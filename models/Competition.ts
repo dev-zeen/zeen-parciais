@@ -14,9 +14,22 @@ export type PointsCompetitionTeam = {
 
 export type PointsCompetitionTeamsMap = Record<string, PointsCompetitionTeam>;
 
+export type ConfrontoParte = {
+  id: number;
+  pontuacao_rodada?: number;
+  pontos_conquistados?: number;
+};
+
+export type Confronto = {
+  mandante: ConfrontoParte;
+  visitante: ConfrontoParte;
+  vencedor_id: number | null;
+};
+
 export type PointsCompetitionDetails = {
   participantes: PointsCompetitionTeamsMap;
   convidados: PointsCompetitionTeamsMap;
+  confrontos?: Record<string, Confronto[]>;
   data_inicio: string;
   data_fim: string;
   privacidade: CompetitionPrivacy;
@@ -39,6 +52,29 @@ export type PointsCompetitionDetails = {
   quantidade_participantes: number;
   quantidade_times: number;
   membro: boolean;
+};
+
+export type PointsCompetitionFinalizedItem = {
+  ranking_time: { posicao: number; variacao: number };
+  privacidade: CompetitionPrivacy;
+  url_taca_svg: string;
+  url_taca_png?: string;
+  nome: string;
+  criacao: string;
+  slug: string;
+  descricao: string;
+  patrocinador_id: number | null;
+  id: number;
+  time_dono_id: number;
+  tipo_taca_id: number;
+  sorteada: boolean;
+  rodada_inicial: number;
+  rodada_final: number;
+  tem_returno: boolean;
+  cor_taca_id: number;
+  finalizada: true;
+  quantidade_participantes: number;
+  quantidade_times: number;
 };
 
 /**

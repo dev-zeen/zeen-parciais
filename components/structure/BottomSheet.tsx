@@ -1,5 +1,5 @@
 import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Modal, Pressable, StyleSheet } from 'react-native';
+import { Modal, Pressable, StyleSheet, View } from 'react-native';
 
 import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -43,24 +43,25 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
           setVisible(false);
           if (onClose) onClose();
         }}>
-        <Pressable
-          style={styles.overlay}
-          onPress={() => {
-            setVisible(false);
-            if (onClose) onClose();
-          }}>
+        <View style={styles.overlay}>
           <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => {
+              setVisible(false);
+              if (onClose) onClose();
+            }}
+          />
+          <View
             style={[
               styles.container,
               {
                 backgroundColor:
                   colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
               },
-            ]}
-            onPress={(e) => e.stopPropagation()}>
+            ]}>
             {children}
-          </Pressable>
-        </Pressable>
+          </View>
+        </View>
       </Modal>
     );
   }
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    maxHeight: '90%',
+    height: '90%',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: 'hidden',
