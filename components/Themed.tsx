@@ -7,10 +7,10 @@ import {
   Text as DefaultText,
   TouchableOpacity as DefaultTouchableOpacity,
   View as DefaultView,
-  useColorScheme,
 } from 'react-native';
 
 import Colors from '@/constants/Colors';
+import { useThemeColor as useAppThemeColor } from '@/hooks/useThemeColor';
 
 type ThemeProps = {
   lightColor?: string;
@@ -19,13 +19,13 @@ type ThemeProps = {
 
 export type TextProps = ThemeProps & DefaultText['props'];
 export type ViewProps = ThemeProps & DefaultView['props'];
-export type TouchableOpacityProps = ThemeProps & DefaultTouchableOpacity['props'];
+export type TouchableOpacityProps = ThemeProps & React.ComponentProps<typeof DefaultTouchableOpacity>;
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof Colors.light & keyof typeof Colors.dark
 ) {
-  const theme = useColorScheme() ?? 'light';
+  const theme = useAppThemeColor();
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -46,7 +46,7 @@ export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
 
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+  return <DefaultText style={[{ color, fontFamily: 'Satoshi-Variable' }, style]} {...otherProps} />;
 }
 
 export function View(props: ViewProps) {

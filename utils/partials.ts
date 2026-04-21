@@ -70,8 +70,8 @@ export function onGetPlayersHaveAlreadyPlayed(players: FullPlayer[], stats: Play
 }
 
 export function onUpdateTeamWithSubstitutedPlayers(club: FullClubInfo, replaces?: Substitutions[]) {
-  let playersUpdated = [...club.atletas];
-  let reservesUpdated = [...club.reservas];
+  let playersUpdated = [...(club.atletas ?? [])];
+  let reservesUpdated = [...(club.reservas ?? [])];
 
   if (replaces) {
     replaces.forEach((replace) => {

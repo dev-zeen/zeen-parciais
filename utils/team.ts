@@ -1,4 +1,4 @@
-import { PlayersToSell } from '@/app/(tabs)/team/team.helpers';
+import { PlayersToSell } from '@/components/contexts/team/_team.helpers';
 import { LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
@@ -14,6 +14,13 @@ type SaveTeamProps = {
   lineup: LineupPlayers;
   captain: number;
   formation: string;
+};
+
+export type SaveTeamPayload = {
+  atletas: (number | undefined)[];
+  reservas: Record<string, number>;
+  esquema: number;
+  capitao: number;
 };
 
 export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPlayer | FullPlayer) {
@@ -119,7 +126,7 @@ export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: 
   return lineup;
 }
 
-export function onGetPayloadSaveTeam({ lineup, captain, formation }: SaveTeamProps) {
+export function onGetPayloadSaveTeam({ lineup, captain, formation }: SaveTeamProps): SaveTeamPayload {
   const atletas = lineup.starting.map((position) => position.player?.atleta_id);
 
   const reservas = lineup.reserves.reduce((obj, reserve) => {

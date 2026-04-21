@@ -1,5 +1,7 @@
 export const ACCESS_TOKEN_KEY_STORAGE = '@access_token';
 
+export const GLOBOID_CLIENT_SETTINGS_KEY = '@globoid_client_settings';
+
 export const CURRENT_STATS = '@current_stats';
 
 export const APPRECIATIONS = '@appreciations';

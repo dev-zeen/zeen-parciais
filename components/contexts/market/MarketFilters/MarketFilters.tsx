@@ -11,6 +11,7 @@ import { sortedOptions, statusPlayerOptions } from './filters.helper';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { FilterMarketByTeam } from '@/components/contexts/market/MarketFilters/FilterMarketByTeam';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullPlayer } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
 
@@ -21,6 +22,7 @@ type MarketFilterProps = {
 };
 
 export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: MarketFilterProps) {
+  const colorTheme = useThemeColor();
   const { data: market } = useGetMarket();
 
   const [showOrderMarket, setShowOrderMarket] = useState(false);
@@ -156,40 +158,80 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
 
   return (
     <>
-      <View className="flex-row rounded-lg items-center p-2 mb-2">
+      <View 
+        className="flex-row rounded-lg items-center p-2 justify-center"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+          borderWidth: 1,
+          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+        }}>
         <TouchableOpacity
-          activeOpacity={0.6}
+          activeOpacity={0.7}
           onPress={() => setShowOrderMarket(true)}
-          className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
+          className="w-1/3 p-2 rounded-lg flex-row items-center justify-center"
           style={{
-            gap: 8,
+            gap: 6,
+            backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f9fafb',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
           }}>
-          <Feather name="bar-chart" color="#9ca3af" size={20} />
-          <Text className="text-xs font-semibold">{selectedOrder?.title}</Text>
+          <Feather 
+            name="bar-chart" 
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
+            size={18}
+          />
+          <Text 
+            className="text-xs font-semibold"
+            style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}
+            numberOfLines={1}>
+            {selectedOrder?.title}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          activeOpacity={0.6}
-          className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
+          activeOpacity={0.7}
+          className="w-1/3 p-2 rounded-lg flex-row items-center justify-center mx-1"
           style={{
-            gap: 8,
+            gap: 6,
+            backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f9fafb',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
           }}
           onPress={() => setShowFilterByStatusMarket(true)}>
-          <Feather name="user-check" color="#9ca3af" size={20} />
-          <Text className="text-xs font-semibold" numberOfLines={1}>
+          <Feather 
+            name="user-check" 
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
+            size={18} 
+          />
+          <Text 
+            className="text-xs font-semibold" 
+            style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}
+            numberOfLines={1}>
             {titleFilterByStatus}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          activeOpacity={0.6}
-          className="w-1/3 p-2 rounded-full flex-row items-center justify-center"
+          activeOpacity={0.7}
+          className="w-1/3 p-2 rounded-lg flex-row items-center justify-center"
           style={{
-            gap: 8,
+            gap: 6,
+            backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f9fafb',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
           }}
           onPress={() => setShowFilterMarketByTeam(true)}>
-          <Feather name="filter" color="#9ca3af" size={20} />
-          <Text className="text-xs font-semibold">{titleFilterByTeams}</Text>
+          <Feather 
+            name="filter" 
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
+            size={18} 
+          />
+          <Text 
+            className="text-xs font-semibold"
+            style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}
+            numberOfLines={1}>
+            {titleFilterByTeams}
+          </Text>
         </TouchableOpacity>
       </View>
 

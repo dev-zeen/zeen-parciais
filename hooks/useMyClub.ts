@@ -21,7 +21,7 @@ const useMyClub = () => {
   } = useGetMyClub(!!allowRequest);
 
   const defaultCapitainClub = useMemo(
-    () => myClub && myClub.atletas.find((item) => item.atleta_id === myClub.capitao_id),
+    () => myClub && myClub.atletas?.find((item) => item.atleta_id === myClub.capitao_id),
     [myClub]
   );
 

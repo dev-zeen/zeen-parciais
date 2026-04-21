@@ -22,14 +22,28 @@ export const GET_SCORED_PLAYERS = '/atletas/pontuados';
 export const GET_TOP_RANKED_PLAYERS = 'auth/mercado/destaques';
 export const GET_TOP_RESERVE_PLAYERS = 'auth/mercado/destaques/reservas';
 export const GET_TOP_PLAYERS = 'auth/mercado/selecao';
+export const GET_PLAYER_STATS_BY_ID = '/auth/mercado/atleta/:playerId/pontuacao';
 
 export const GET_LEAGUE_BY_SLUG = '/auth/liga/:slug'; // @Controller('/api/v1/leagues/:slug')
 export const GET_ALL_LEAGUES = '/auth/ligas'; // @Controller('/api/v1/leagues')
 export const INVITES = '/auth/convites';
 export const RESPONSE_INVITE = '/auth/mensagem/:messageId';
+export const CREATE_LEAGUE = '/auth/liga';
+export const INVITE_LEAGUE = '/auth/liga/:slug/convidar';
 
 export const REFRESH_TOKEN = '/refresh';
 
 // Ligas
 // TODO AINDA VAI SER IMPLEMENTADO
 export const QUIT_LEAGUE = '/auth/liga/:slug/associacao';
+
+// Pontos Corridos
+export const GET_POINTS_COMPETITIONS = '/auth/competicoes/pontoscorridos';
+export const GET_POINTS_COMPETITIONS_FINALIZADAS = '/auth/competicoes/pontoscorridos/finalizadas';
+export const GET_POINTS_COMPETITION_BY_SLUG = '/auth/competicoes/pontoscorridos/slug/:slug';
+export const INVITES_POINTS_COMPETITIONS = '/auth/competicoes/convites';
+export const RESPONSE_INVITE_POINTS_COMPETITIONS = '/auth/competicoes/convites/:messageId';
+export const INVITE_POINTS_COMPETITION = '/auth/competicoes/pontoscorridos/slug/:slug/convidar';
+
+// Busca
+export const SEARCH_TEAMS = '/times';

@@ -1,8 +1,9 @@
 export default {
   Tokens: {
     COLORS: {
-      PRIMARY: '#3b82f6',
-      SECONDARY: '#AD72ED',
+      PRIMARY: '#FF8A00',
+      SECONDARY: '#0057FF',
+      TERTIARY: '#00E094',
       NEUTRAL: '#FAFAFA',
 
       GRAY_200: '#e5e7eb',
@@ -10,9 +11,9 @@ export default {
       GRAY_400: '#9ca3af',
       GRAY_500: '#6b7280',
 
-      BLUE_100: '#dbeafe',
-      BLUE_200: '#bfdbfe',
-      BLUE_500: '#3b82f6',
+      BLUE_100: '#DDEEFF',
+      BLUE_200: '#5B8EFF',
+      BLUE_500: '#0057FF',
     },
     SIZE: {
       xs: 16,
@@ -31,15 +32,10 @@ export default {
     RADIUS_FULL: 9999,
     SCREENS: {
       sm: '640px',
-      // => @media (min-width: 640px) { ... }
       md: '768px',
-      // => @media (min-width: 768px) { ... }
       lg: '1024px',
-      // => @media (min-width: 1024px) { ... }
       xl: '1280px',
-      // => @media (min-width: 1280px) { ... }
       '2xl': '1536px',
-      // => @media (min-width: 1536px) { ... }
     },
     TEXT: {
       xxs: 11,

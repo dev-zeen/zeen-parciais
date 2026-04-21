@@ -1,12 +1,13 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useEffect, useState } from 'react';
-import { Image, ScrollView, TouchableOpacity, useColorScheme } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Image, ScrollView, TouchableOpacity } from 'react-native';
 
-import { PlayersToSell } from '@/app/(tabs)/team/team.helpers';
 import { Text, View } from '@/components/Themed';
+import { PlayersToSell } from '@/components/contexts/team/_team.helpers';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
 import { useGetPositions } from '@/queries/players.query';
@@ -25,7 +26,7 @@ export function ListPlayersSale({
   handleClose,
   handleCloseSuccessSellPlayers,
 }: ListPlayersSaleProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: positions } = useGetPositions();
 
@@ -33,7 +34,15 @@ export function ListPlayersSale({
 
   const [lineupState, setLineupState] = useState<LineupPlayers | undefined>(lineup);
 
-  const [playersSell, setPlayersSell] = useState<PlayersToSell[]>();
+  const [playersSell, setPlayersSell] = useState<PlayersToSell[]>(() =>
+    players.length > 0 ? players : []
+  );
+
+  const handleCloseSuccessSellPlayersRef = useRef(handleCloseSuccessSellPlayers);
+
+  useEffect(() => {
+    handleCloseSuccessSellPlayersRef.current = handleCloseSuccessSellPlayers;
+  });
 
   const handleSellPlayer = useCallback(
     (player: FullPlayer | LineupPlayer) => {
@@ -48,18 +57,11 @@ export function ListPlayersSale({
       setLineupState(lineUpdated);
 
       if (positionSellUpdated?.length === 0) {
-        return handleCloseSuccessSellPlayers(lineUpdated);
+        return handleCloseSuccessSellPlayersRef.current(lineUpdated);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [lineupState, playersSell]
   );
-
-  useEffect(() => {
-    if (players.length > 0) {
-      setPlayersSell(players);
-    }
-  }, [players]);
 
   if (!positions) {
     return <Loading />;
@@ -139,7 +141,11 @@ export function ListPlayersSale({
                                   </Text>
 
                                   <View className="flex-row" style={{ gap: 4 }}>
-                                    <Text className="font-medium text-xs">
+                                    <Text
+                                      className="font-medium text-xs"
+                                      style={{
+                                        color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280',
+                                      }}>
                                       {
                                         OBJECT_STATUS_MARKET_PLAYER[(player as any)?.status_id]
                                           ?.name
@@ -187,7 +193,11 @@ export function ListPlayersSale({
                                           }}>
                                           Média
                                         </Text>
-                                        <Text className="font-semibold text-xs">
+                                        <Text
+                                          className="font-semibold text-xs"
+                                          style={{
+                                            color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280',
+                                          }}>
                                           {numberToString(player?.media_num)}
                                         </Text>
                                       </View>
@@ -200,7 +210,11 @@ export function ListPlayersSale({
                                           }}>
                                           Última
                                         </Text>
-                                        <Text className="font-semibold text-xs">
+                                        <Text
+                                          className="font-semibold text-xs"
+                                          style={{
+                                            color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280',
+                                          }}>
                                           {numberToString(player?.pontos_num)}
                                         </Text>
                                       </View>
@@ -213,7 +227,11 @@ export function ListPlayersSale({
                                           }}>
                                           Min P/ Val
                                         </Text>
-                                        <Text className="font-semibold text-xs">
+                                        <Text
+                                          className="font-semibold text-xs"
+                                          style={{
+                                            color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280',
+                                          }}>
                                           {numberToString(player?.minimo_para_valorizar)}
                                         </Text>
                                       </View>

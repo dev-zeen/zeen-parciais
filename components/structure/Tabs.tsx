@@ -1,5 +1,7 @@
 import { ReactNode, useCallback, useMemo, useState } from 'react';
-import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import {  FlatList, Text, TouchableOpacity,  View  } from 'react-native';
+
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ITab = {
   id: number;
@@ -15,53 +17,44 @@ type TabProps = {
 };
 
 export function Tabs({ tabs, initialTabActive }: TabProps) {
+  const colorTheme = useThemeColor();
   const [activeTab, setActiveTab] = useState(initialTabActive ?? 0);
 
-  const handlePress = useCallback((index: number): void => {
-    setActiveTab(index);
-  }, []);
-
-  const memoizedTabs = useMemo(
-    () =>
-      tabs.map((tab, index) => ({
-        ...tab,
-        onPress: () => {
-          if (activeTab !== index && tab.onPress) {
-            tab.onPress();
-            handlePress(index);
-          }
-        },
-      })),
-    [activeTab, handlePress, tabs]
-  );
-
   const renderTab = useCallback(
-    ({ item, index }: any) => {
+    ({ item, index }: { item: ITab; index: number }) => {
       const isActive = index === activeTab;
+      const onPress = () => {
+        if (activeTab === index) return;
+        setActiveTab(index);
+        item.onPress?.();
+      };
 
       return (
         <TouchableOpacity
           style={{
-            paddingHorizontal: 20,
-            paddingVertical: 15,
-            borderBottomWidth: isActive ? 2 : 0,
-            borderBottomColor: '#60a5fa',
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderBottomWidth: 2,
+            borderBottomColor: isActive ? '#FF8A00' : 'transparent',
           }}
-          onPress={() => {
-            setActiveTab(index);
-            item.onPress();
-          }}>
-          <Text style={{ fontWeight: isActive ? 'bold' : 'normal' }}>{item.title}</Text>
+          onPress={onPress}>
+          <Text
+            style={{
+              fontWeight: isActive ? '700' : '600',
+              color: isActive ? '#FF8A00' : colorTheme === 'dark' ? '#e5e7eb' : '#111827',
+            }}>
+            {item.title}
+          </Text>
         </TouchableOpacity>
       );
     },
-    [activeTab]
+    [activeTab, colorTheme]
   );
 
   const activeTabContent = useMemo(() => {
-    const tab = memoizedTabs[activeTab];
-    return tab.content && tab.content();
-  }, [memoizedTabs, activeTab]);
+    const tab = tabs[activeTab];
+    return tab?.content ? tab.content() : null;
+  }, [tabs, activeTab]);
 
   return (
     <>
@@ -69,23 +62,30 @@ export function Tabs({ tabs, initialTabActive }: TabProps) {
         style={{
           flexDirection: 'row',
           marginHorizontal: 8,
+          marginBottom: 8,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: 'white',
-          borderRadius: 4,
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
           gap: 4,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 2,
         }}>
         <FlatList
-          data={memoizedTabs}
+          data={tabs}
           renderItem={renderTab}
-          keyExtractor={(item) => item.title}
+          keyExtractor={(item) => String(item.id)}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
+          contentContainerStyle={{ alignItems: 'center' }}
         />
       </View>
       {activeTabContent}

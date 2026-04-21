@@ -3,6 +3,7 @@ import { Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer } from '@/models/Formations';
 import { useGetMarket } from '@/queries/market.query';
 import { useGetPositions } from '@/queries/players.query';
@@ -13,28 +14,44 @@ type PlayerLowestCardProps = {
 };
 
 export function PlayerLowestCard({ player }: PlayerLowestCardProps) {
+  const colorTheme = useThemeColor();
   const { data: positions } = useGetPositions();
   const { data: market } = useGetMarket();
 
   return (
-    <View className="rounded-lg flex-row items-center justify-between p-2 border-2 border-orange-500 mb-1">
-      <View>
+    <View 
+      className="rounded-lg flex-row items-center justify-between p-3 mb-2"
+      style={{
+        backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+        borderWidth: 2,
+        borderColor: colorTheme === 'dark' ? '#f97316' : '#fb923c',
+      }}>
+      <View style={{ backgroundColor: 'transparent' }}>
         <Image
           source={{
             uri: player?.foto?.replace('FORMATO', '220x220'),
           }}
-          className="w-12 h-12 rounded-full mr-2"
+          className="w-14 h-14 rounded-full mr-2"
           alt={`Imagem do ${player?.nome}`}
         />
       </View>
 
-      <View className="flex-1 justify-between">
-        <View className="flex-row justify-between items-center flex-1">
-          <View className="items-start justify-center">
-            <View className="flex-row items-center gap-1">
-              <Text className="flex-row text-sm font-bold">{player?.apelido_abreviado}</Text>
-              <View className="rounded-full bg-gray-300 h-1 w-1" />
-              <Text className="font-medium text-xs">
+      <View className="flex-1 justify-between" style={{ backgroundColor: 'transparent' }}>
+        <View className="flex-row justify-between items-center flex-1" style={{ backgroundColor: 'transparent' }}>
+          <View className="items-start justify-center" style={{ backgroundColor: 'transparent' }}>
+            <View className="flex-row items-center gap-1" style={{ backgroundColor: 'transparent' }}>
+              <Text 
+                className="flex-row text-sm font-bold"
+                style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+                {player?.apelido_abreviado}
+              </Text>
+              <View 
+                className="rounded-full h-1 w-1"
+                style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }} 
+              />
+              <Text 
+                className="font-medium text-xs"
+                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 {OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number].name}
               </Text>
               <View
@@ -63,21 +80,31 @@ export function PlayerLowestCard({ player }: PlayerLowestCardProps) {
               className="flex-row items-center justify-start"
               style={{
                 gap: 4,
+                backgroundColor: 'transparent',
               }}>
-              <Text className="font-medium uppercase text-xs">
+              <Text 
+                className="font-medium uppercase text-xs"
+                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 {positions?.[player?.posicao_id as number].abreviacao}
               </Text>
 
-              <View className="rounded-full bg-gray-300 h-1 w-1" />
+              <View 
+                className="rounded-full h-1 w-1"
+                style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }} 
+              />
 
-              <Text className="font-medium uppercase text-xs">
+              <Text 
+                className="font-medium uppercase text-xs"
+                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 {market?.clubes[player?.clube_id as number].abreviacao}
               </Text>
             </View>
           </View>
 
-          <View className="flex-row" style={{ gap: 4 }}>
-            <Text className="flex-row text-sm font-semibold">
+          <View className="flex-row" style={{ gap: 4, backgroundColor: 'transparent' }}>
+            <Text 
+              className="flex-row text-sm font-semibold"
+              style={{ color: colorTheme === 'dark' ? '#10b981' : '#059669' }}>
               C$ {numberToString(player?.preco_num)}
             </Text>
           </View>

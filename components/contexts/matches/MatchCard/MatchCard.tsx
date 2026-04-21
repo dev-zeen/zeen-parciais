@@ -3,10 +3,10 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { Image, TouchableOpacity, useColorScheme } from 'react-native';
+import { Image, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
-import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Club } from '@/models/Club';
 import { Match } from '@/models/Matches';
 import { FullPlayer } from '@/models/Stats';
@@ -30,7 +30,7 @@ export function MatchCard({
   isDisabled = false,
 }: MatchCardProps) {
   const router = useRouter();
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: playerStats } = useGetScoredPlayers();
 
@@ -71,13 +71,24 @@ export function MatchCard({
       home: match.clube_casa_id,
       away: match.clube_visitante_id,
     };
-    router.push(`/matches/${JSON.stringify(payload)}`);
+    router.push(`/rodada/matches/${JSON.stringify(payload)}`);
   }, [match, router]);
 
   return (
     <TouchableOpacity disabled={isDisabled} activeOpacity={0.6} onPress={onPressHandler}>
-      <View className="p-2 rounded-lg">
-        <Text className="font-medium text-xs text-center">
+      <View
+        className="p-4 rounded-lg"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
+          borderWidth: 1,
+          borderColor: !match.valida 
+            ? (colorTheme === 'dark' ? '#991b1b' : '#fca5a5')
+            : (colorTheme === 'dark' ? '#1f2937' : '#f3f4f6'),
+          opacity: !match.valida ? 0.85 : 1,
+        }}>
+        <Text
+          className="font-medium text-xs text-center mb-2"
+          style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
           {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
             locale: ptBR,
           })}
@@ -89,10 +100,17 @@ export function MatchCard({
           }`}
           style={{
             gap: 24,
+            backgroundColor: 'transparent',
           }}>
-          <View className="items-center justify-center" style={{ gap: 4 }}>
+          <View
+            className="items-center justify-center"
+            style={{ gap: 4, backgroundColor: 'transparent' }}>
             {showTeamScore ? (
-              <Text className="font-semibold">{numberToString(homeTeamPartials)}</Text>
+              <Text
+                className="font-semibold"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+                {numberToString(homeTeamPartials)}
+              </Text>
             ) : (
               <></>
             )}
@@ -105,7 +123,9 @@ export function MatchCard({
               alt={`Escudo do ${homeClub?.nome}`}
             />
 
-            <Text className="font-semibold">
+            <Text
+              className="font-semibold"
+              style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
               {homeClub?.abreviacao} {`${match.clube_casa_posicao}º`}
             </Text>
 
@@ -133,35 +153,47 @@ export function MatchCard({
             className="items-center justify-center"
             style={{
               gap: 4,
+              backgroundColor: 'transparent',
             }}>
             <View
-              className={`flex-row justify-center items-center border rounded ${
-                colorTheme === 'dark' ? 'border-gray-400' : 'border-gray-300'
-              } px-4 py-2`}
+              className="flex-row justify-center items-center rounded-lg px-4 py-2"
               style={{
                 gap: 8,
+                backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#ffffff',
+                borderWidth: 1,
+                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Text className="font-semibold text-base">
+              <Text
+                className="font-semibold text-base"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {match.placar_oficial_mandante ?? '-'}
               </Text>
 
-              <Feather
-                name="x"
-                size={16}
-                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
-              />
+              <Feather name="x" size={16} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
 
-              <Text className="font-semibold text-base ">
+              <Text
+                className="font-semibold text-base"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
                 {match.placar_oficial_visitante ?? '-'}
               </Text>
             </View>
 
-            <Text className="text-xs">{match.local}</Text>
+            <Text
+              className="text-xs"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              {match.local}
+            </Text>
           </View>
 
-          <View className="justify-center items-center" style={{ gap: 4 }}>
+          <View
+            className="justify-center items-center"
+            style={{ gap: 4, backgroundColor: 'transparent' }}>
             {showTeamScore ? (
-              <Text className="font-semibold">{numberToString(awayTeamPartials)}</Text>
+              <Text
+                className="font-semibold"
+                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
+                {numberToString(awayTeamPartials)}
+              </Text>
             ) : (
               <></>
             )}
@@ -173,7 +205,9 @@ export function MatchCard({
               className="w-12 h-12"
               alt={`Escudo do ${awayClub?.nome}`}
             />
-            <Text className="font-semibold">
+            <Text
+              className="font-semibold"
+              style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
               {awayClub?.abreviacao} {`${match.clube_visitante_posicao}º`}
             </Text>
 
@@ -201,16 +235,71 @@ export function MatchCard({
         {match.valida ? (
           <>
             {match.status_transmissao_tr === 'ENCERRADA' && (
-              <View className="justify-center items-center bg-folly p-2 my-1 mx-16 rounded-lg">
-                <Text className="text-gray-50 text-xs font-semibold">Encerrado</Text>
+              <View 
+                className="mt-3 mx-2 rounded-xl p-3"
+                style={{
+                  backgroundColor: colorTheme === 'dark' ? '#1e293b' : '#f1f5f9',
+                  borderWidth: 1,
+                  borderColor: colorTheme === 'dark' ? '#334155' : '#e2e8f0',
+                }}>
+                <View 
+                  className="flex-row items-center justify-center"
+                  style={{ gap: 8, backgroundColor: 'transparent' }}>
+                  <Feather 
+                    name="check-circle" 
+                    size={16} 
+                    color={colorTheme === 'dark' ? '#94a3b8' : '#64748b'} 
+                  />
+                  <Text 
+                    className="text-xs font-semibold"
+                    style={{ 
+                      color: colorTheme === 'dark' ? '#cbd5e1' : '#475569',
+                    }}>
+                    Partida Encerrada
+                  </Text>
+                </View>
               </View>
             )}
           </>
         ) : (
-          <View className="justify-center items-center bg-red-500 p-2 my-1 mx-16 rounded-lg">
-            <Text className="text-xs text-white font-semibold">
-              Esta partida é inválida para a rodada
-            </Text>
+          <View 
+            className="mt-3 mx-2 rounded-xl p-3"
+            style={{
+              backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
+              borderWidth: 1,
+              borderColor: colorTheme === 'dark' ? '#991b1b' : '#fecaca',
+            }}>
+            <View 
+              className="flex-row items-start"
+              style={{ gap: 10, backgroundColor: 'transparent' }}>
+              <View 
+                className="w-7 h-7 rounded-full items-center justify-center mt-0.5"
+                style={{
+                  backgroundColor: colorTheme === 'dark' ? '#991b1b' : '#fecaca',
+                }}>
+                <Feather 
+                  name="alert-circle" 
+                  size={16} 
+                  color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} 
+                />
+              </View>
+              <View className="flex-1" style={{ backgroundColor: 'transparent' }}>
+                <Text 
+                  className="text-sm font-semibold mb-1"
+                  style={{ 
+                    color: colorTheme === 'dark' ? '#fca5a5' : '#dc2626',
+                  }}>
+                  Partida Inválida
+                </Text>
+                <Text 
+                  className="text-xs leading-4"
+                  style={{ 
+                    color: colorTheme === 'dark' ? '#fecaca' : '#ef4444',
+                  }}>
+                  Esta partida não conta pontos para a rodada atual do Cartola FC
+                </Text>
+              </View>
+            </View>
           </View>
         )}
       </View>

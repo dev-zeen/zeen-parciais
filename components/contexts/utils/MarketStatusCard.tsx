@@ -3,12 +3,13 @@ import { ptBR } from 'date-fns/locale';
 import { useMemo } from 'react';
 
 import { Text, View } from '@/components/Themed';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Loading } from '@/components/structure/Loading';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import useMarketStatus from '@/hooks/useMarketStatus';
 
 export function MarketStatusCard() {
-  const { marketStatus } = useMarketStatus();
+  const { marketStatus, isBallRolling, currentRoundInfo } = useMarketStatus();
 
   const MARKET_STATUS_COLOR_NAMED = {
     1: 'bg-green-500',
@@ -34,39 +35,68 @@ export function MarketStatusCard() {
     }
   }, [marketStatus]);
 
+  const isFinalRound = useMemo(() => {
+    return currentRoundInfo?.numero === currentRoundInfo?.rodadaFinal;
+  }, [currentRoundInfo]);
+
   if (!marketStatus) {
     return <Loading />;
   }
 
   return (
-    <View className="w-full flex-row items-center justify-between rounded-lg p-4">
-      {marketStatus.status_mercado !== MARKET_STATUS_NAME.FECHADO && (
-        <View className="flex-row justify-center items-center gap-1">
+    <AnimatedCard delay={100} variant="flat">
+      <View
+        className="flex-row items-center justify-between"
+        style={{ backgroundColor: 'transparent' }}>
+        {/* Status Indicator */}
+        <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
           <View
-            className={`relative inline-flex rounded-full h-3.5 w-3.5 ${
+            className={`rounded-full h-2.5 w-2.5 ${
               MARKET_STATUS_COLOR_NAMED[marketStatus.status_mercado]
             }`}
           />
-          <Text className="font-semibold text-xs">
-            {`${MARKET_STATUS_NAMED[marketStatus.status_mercado]}`}
+
+          <Text className="font-semibold text-sm">
+            {marketStatus.status_mercado === MARKET_STATUS_NAME.ABERTO
+              ? 'Mercado Aberto'
+              : marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO
+                ? isBallRolling
+                  ? 'Bola Rolando'
+                  : 'Mercado Fechado'
+                : MARKET_STATUS_NAMED[marketStatus.status_mercado]}
           </Text>
         </View>
-      )}
 
-      <Text className="text-xs font-semibold">{`${
-        marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO
-          ? `até ${marketClosingDate}`
-          : `Rodada ${marketStatus?.rodada_atual}`
-      } `}</Text>
+        {/* Time/Round Info */}
+        <Text className="text-xs font-semibold text-gray-600 dark:text-gray-400">
+          {marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO
+            ? marketClosingDate
+            : currentRoundInfo?.nome || `Rodada ${marketStatus?.rodada_atual}`}
+        </Text>
+      </View>
 
-      {marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO && (
-        <View className="flex-row justify-center items-center gap-1">
-          <View
-            className={`relative inline-flex rounded-full h-3.5 w-3.5 ${MARKET_STATUS_COLOR_NAMED[1]}`}
-          />
-          <Text className="text-xs font-semibold">Atualização em tempo real</Text>
+      {/* Additional Info Row */}
+      {(isBallRolling || isFinalRound) && (
+        <View
+          className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-gray-700"
+          style={{ backgroundColor: 'transparent' }}>
+          {isBallRolling && (
+            <View
+              className="flex-row items-center"
+              style={{ gap: 4, backgroundColor: 'transparent' }}>
+              <View className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+              <Text className="text-xs text-gray-600 dark:text-gray-400">
+                Atualização em tempo real
+              </Text>
+            </View>
+          )}
+          {isFinalRound && (
+            <View className="bg-yellow-500 px-2 py-0.5 rounded-full">
+              <Text className="text-xs font-bold text-black">Rodada Final</Text>
+            </View>
+          )}
         </View>
       )}
-    </View>
+    </AnimatedCard>
   );
 }

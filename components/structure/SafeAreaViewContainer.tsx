@@ -1,17 +1,22 @@
 import { ReactNode } from 'react';
-import { Platform, SafeAreaView, StatusBar, StyleSheet, useColorScheme } from 'react-native';
+import {  Platform, StatusBar, StyleSheet } from 'react-native';
+import { Edge, SafeAreaView } from 'react-native-safe-area-context';
+
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type SafeAreaViewContainerProps = {
   children: ReactNode;
+  edges?: Edge[];
 };
 
-export function SafeAreaViewContainer({ children }: SafeAreaViewContainerProps) {
-  const colorTheme = useColorScheme();
+export function SafeAreaViewContainer({ children, edges }: SafeAreaViewContainerProps) {
+  const colorTheme = useThemeColor();
 
   return (
     <SafeAreaView
       className={`flex-1 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
-      style={styles.container}>
+      style={styles.container}
+      edges={edges}>
       {children}
     </SafeAreaView>
   );

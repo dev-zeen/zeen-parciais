@@ -1,10 +1,11 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useMemo, useState } from 'react';
-import { Image, Modal, TouchableOpacity } from 'react-native';
+import { useCallback, useMemo, useRef } from 'react';
+import { Image, TouchableOpacity } from 'react-native';
 
 import captainImage from '@/assets/images/letter-c.png';
 import { Text, View } from '@/components/Themed';
 import { TeamPlayerCard } from '@/components/contexts/team/TeamPlayerCard';
+import { BottomSheet, BottomSheetRef } from '@/components/structure/BottomSheet';
 import { ENUM_STATUS_MARKET_PLAYER, OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { LineupPlayer } from '@/models/Formations';
@@ -36,12 +37,19 @@ export function TeamPlayer({
 }: TeamPlayerProps) {
   const { isMarketClose, marketStatus } = useMarketStatus();
 
-  const [activePlayerCard, setActivePlayerCard] = useState(false);
+  const bottomSheetRef = useRef<BottomSheetRef>(null);
 
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const handleModalPlayerCard = useCallback(() => {
-    setActivePlayerCard((previous) => !previous);
+    if (!player) return;
+    if (bottomSheetRef.current) {
+      bottomSheetRef.current.snapToIndex(0);
+    }
+  }, [player]);
+
+  const handleSheetClose = useCallback(() => {
+    // Callback quando o sheet fecha
   }, []);
 
   const handleRemovePlayerFromLayout = useCallback(
@@ -54,9 +62,8 @@ export function TeamPlayer({
 
   const partialScore = useMemo(() => {
     if (isPlayed) {
-      return isCaptain
-        ? (player as LineupPlayer)?.pontuacao * 1.5 ?? 0
-        : (player as LineupPlayer)?.pontuacao ?? 0;
+      const pontuacao = (player as LineupPlayer)?.pontuacao ?? 0;
+      return isCaptain ? pontuacao * 1.5 : pontuacao;
     }
   }, [isCaptain, isPlayed, player]);
 
@@ -64,7 +71,7 @@ export function TeamPlayer({
     if (player?.pontos_num !== null) {
       return isCaptain
         ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
-        : (player as LineupPlayer)?.pontos_num ?? 0;
+        : ((player as LineupPlayer)?.pontos_num ?? 0);
     }
   }, [isCaptain, player]);
 
@@ -172,7 +179,7 @@ export function TeamPlayer({
             style={{
               bottom: -2,
               right: 30,
-              backgroundColor: isReplaced ? '#ef4444' : '#22c55e',
+              backgroundColor: isReplaced ? '#ef4444' : '#00E094',
             }}>
             <Feather name={isReplaced ? 'arrow-down' : 'arrow-up'} color={'#fafafa'} size={14} />
           </View>
@@ -192,19 +199,15 @@ export function TeamPlayer({
         </Text>
       </View>
 
-      {activePlayerCard && (
-        <Modal
-          animationType="fade"
-          transparent
-          visible={activePlayerCard}
-          onRequestClose={() => setActivePlayerCard(false)}>
+      <BottomSheet ref={bottomSheetRef} onClose={handleSheetClose}>
+        {player ? (
           <TeamPlayerCard
-            player={player as LineupPlayer}
-            onClose={handleModalPlayerCard}
+            player={player}
+            onClose={() => bottomSheetRef.current?.close()}
             isReservePlayer={isReservePlayer}
           />
-        </Modal>
-      )}
+        ) : null}
+      </BottomSheet>
     </View>
   );
 }

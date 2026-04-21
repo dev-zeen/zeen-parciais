@@ -1,3 +1,6 @@
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
+
 import {
   GET_CLUB_BY_ID,
   GET_CLUB_BY_ID_AND_ROUND,
@@ -8,7 +11,8 @@ import {
   SAVE_TEAM,
 } from '@/constants/Endpoits';
 import { FullClubInfo, Substitutions, TeamHistoryRound } from '@/models/Club';
-import { useFetch, usePost, usePrefetch } from '@/utils/reactQuery';
+import api from '@/services/api';
+import { SaveTeamPayload } from '@/utils/team';
 
 interface SubstitutionsParams {
   id?: number | string;
@@ -17,58 +21,107 @@ interface SubstitutionsParams {
 }
 
 export const useGetMyClub = (allowRequest?: boolean) =>
-  useFetch<FullClubInfo>(GET_MY_CLUB, undefined, {
+  useQuery<FullClubInfo>({
+    queryKey: [GET_MY_CLUB],
+    queryFn: () => api.get<FullClubInfo>(GET_MY_CLUB).then((r) => r.data),
     enabled: !!allowRequest,
-  });
+    select: (data) => {
+      // Se não tem atletas (time não escalado), retorna dados com arrays vazios
+      if (!data?.atletas) {
+        return {
+          ...data,
+          atletas: [],
+          reservas: [],
+          capitao_id: data?.capitao_id ?? 0,
+          esquema_id: data?.esquema_id ?? 4, // esquema default
+        };
+      }
 
-export const usePrefetchMyClub = (allowRequest?: boolean) =>
-  usePrefetch<FullClubInfo>(GET_MY_CLUB, undefined, {
-    enabled: !!allowRequest,
+      return {
+        ...data,
+        reservas:
+          data?.reservas && data.reservas.length > 0
+            ? data.reservas.sort((a, b) => a.posicao_id - b.posicao_id)
+            : [],
+        atletas: data.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
+      };
+    },
   });
 
 export const useGetClub = (id?: number | string, round?: number) => {
   const url = GET_CLUB_BY_ID.replace(':id', String(id));
-
   const urlWithRound = GET_CLUB_BY_ID_AND_ROUND.replace(':id', String(id)).replace(
     ':round',
     String(round)
   );
+  const resolvedUrl = round ? urlWithRound : url;
 
-  return useFetch<FullClubInfo>(round ? urlWithRound : url, undefined, {
+  return useQuery<FullClubInfo>({
+    queryKey: [resolvedUrl],
+    queryFn: () => api.get<FullClubInfo>(resolvedUrl).then((r) => r.data),
     enabled: !!id,
     select: (data) => {
-      const newData = {
+      // Se não tem atletas (time não escalado), retorna dados como vieram
+      if (!data?.atletas) {
+        return {
+          ...data,
+          atletas: [],
+          reservas: [],
+        };
+      }
+
+      return {
         ...data,
         reservas:
           data?.reservas && data.reservas.length > 0
-            ? data?.reservas.sort((a, b) => a.posicao_id - b.posicao_id)
+            ? data.reservas.sort((a, b) => a.posicao_id - b.posicao_id)
             : [],
-        atletas: data?.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
+        atletas: data.atletas.sort((a, b) => a.posicao_id - b.posicao_id),
       };
-
-      return newData;
     },
   });
 };
 
 export const useGetHistoricMyClub = (allowRequest: boolean) =>
-  useFetch<TeamHistoryRound[]>(GET_CLUB_HISTORY, undefined, {
+  useQuery<TeamHistoryRound[]>({
+    queryKey: [GET_CLUB_HISTORY],
+    queryFn: () => api.get<TeamHistoryRound[]>(GET_CLUB_HISTORY).then((r) => r.data),
     enabled: !!allowRequest,
   });
 
 export const useGetMatchSubstitutions = ({ id, round }: SubstitutionsParams) => {
   const url = GET_MATCH_SUBSTITUTIONS.replace(':clubId', String(id));
-
   const urlWithRound = GET_MATCH_SUBSTITUTIONS_BY_ROUND.replace(':clubId', String(id)).replace(
     ':round',
     String(round)
   );
+  const resolvedUrl = round ? urlWithRound : url;
 
-  return useFetch<Substitutions[]>(round ? urlWithRound : url, undefined, {
+  return useQuery<Substitutions[]>({
+    queryKey: [resolvedUrl],
+    queryFn: () => api.get<Substitutions[]>(resolvedUrl).then((r) => r.data),
     enabled: round ? !!id && !!round : !!id,
   });
 };
 
-export const useSaveTeam = () => {
-  return usePost(SAVE_TEAM);
+interface SaveTeamCallbacks {
+  onSuccess?: () => void;
+  onError?: (error: AxiosError) => void;
+}
+
+export const useSaveTeam = (callbacks?: SaveTeamCallbacks) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SaveTeamPayload) => api.post(SAVE_TEAM, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [GET_MY_CLUB],
+      });
+      callbacks?.onSuccess?.();
+    },
+    onError: (error: AxiosError) => {
+      callbacks?.onError?.(error);
+    },
+  });
 };

@@ -1,1 +1,0 @@
-export { TopPlayerList } from './TopPlayerList';

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { CURRENT_STATS } from '@/constants/Keys';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -9,34 +9,28 @@ import { onGetFromStorage } from '@/utils/asyncStorage';
 const usePlayerStats = () => {
   const { isMarketClose } = useMarketStatus();
 
-  const [currentStats, setCurrentStats] = useState<PlayerStats>();
+  const [cachedStats, setCachedStats] = useState<PlayerStats>();
+  const [isCacheLoading, setIsCacheLoading] = useState(true);
+
+  useEffect(() => {
+    onGetFromStorage<string>(CURRENT_STATS).then((res: string) => {
+      if (res) setCachedStats(JSON.parse(res));
+      setIsCacheLoading(false);
+    });
+  }, []);
 
   const {
-    isLoading: isLoadingPlayerStats,
+    data: liveStats,
+    isLoading: isLoadingQuery,
     refetch: onRefetchStats,
     isRefetching: isRefetchingPlayerStats,
   } = useGetScoredPlayers(isMarketClose);
 
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    onGetFromStorage<string>(CURRENT_STATS).then((res: string) => {
-      const statsFormated: PlayerStats = JSON.parse(res);
-      if (res) {
-        setCurrentStats(statsFormated);
-      }
-      setIsLoading(false);
-    });
-  }, []);
-
   return {
-    playerStats: useMemo(() => currentStats, [currentStats]),
-    isLoadingPlayerStats: useMemo(
-      () => isLoadingPlayerStats || isLoading,
-      [isLoading, isLoadingPlayerStats]
-    ),
+    playerStats: liveStats ?? cachedStats,
+    isLoadingPlayerStats: isLoadingQuery && isCacheLoading,
     onRefetchStats,
-    isRefetchingPlayerStats: useMemo(() => isRefetchingPlayerStats, [isRefetchingPlayerStats]),
+    isRefetchingPlayerStats,
   };
 };
 

@@ -1,4 +1,5 @@
-import { ActivityIndicator, Image } from 'react-native';
+import { router } from 'expo-router';
+import { ActivityIndicator, Image, TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
@@ -20,8 +21,18 @@ export function TeamCupMatch({ match, teamId, opacity }: TeamCupMatchProps) {
     return <ActivityIndicator />;
   }
 
+  const handlePress = (e: any) => {
+    if (team?.time?.time_id) {
+      e.stopPropagation();
+      router.push(`/leagues/club/${team.time.time_id}`);
+    }
+  };
+
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={team?.time?.time_id ? 0.7 : 1}
+      disabled={!team?.time?.time_id}
+      onPress={handlePress}
       className="justify-center items-center bg-transparent"
       style={{
         width: '30%',
@@ -55,6 +66,6 @@ export function TeamCupMatch({ match, teamId, opacity }: TeamCupMatchProps) {
           </Text>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

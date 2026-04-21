@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Alert, Modal } from 'react-native';
+import { useCallback } from 'react';
+import {  Alert } from 'react-native';
 
-import Market from '@/app/(tabs)/team/market';
-import { View } from '@/components/Themed';
+import { Text, View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import usePlayerStats from '@/hooks/usePlayerStats';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { onGetPlayerLowestPrice } from '@/utils/team';
@@ -15,6 +16,7 @@ type ListReservePlayersProps = {
   substitutions?: Substitutions[];
   isViewOnly?: boolean;
   round?: number;
+  onOpenMarket: (position: LineupPosition, playerIndex: number, playerLowestPrice?: LineupPosition) => void;
 };
 
 export function ListReservePlayers({
@@ -22,7 +24,9 @@ export function ListReservePlayers({
   substitutions,
   isViewOnly = false,
   round,
+  onOpenMarket,
 }: ListReservePlayersProps) {
+  const colorTheme = useThemeColor();
   const alertToStartingsPlayerPositionNotFilled = useCallback(
     () =>
       Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
@@ -32,11 +36,6 @@ export function ListReservePlayers({
   );
 
   const { playerStats } = usePlayerStats();
-
-  const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
-  const [showMarketModal, setShowMarketModal] = useState(false);
-  const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
-  const [playerIndex, setPlayerIndex] = useState(0);
 
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
@@ -54,72 +53,75 @@ export function ListReservePlayers({
       }
 
       const lowestPlayer = onGetPlayerLowestPrice(lineup as LineupPlayers, player);
-      setPlayerLowestPrice(lowestPlayer);
-
-      setPositionMarketSearch(player);
-      setPlayerIndex(playerIndex);
+      onOpenMarket(player, playerIndex, lowestPlayer);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lineup]
+    [lineup, onOpenMarket]
   );
 
-  const handleCloseMarketModal = useCallback(() => {
-    setShowMarketModal(false);
-    setPositionMarketSearch(undefined);
-    setPlayerIndex(0);
-  }, []);
-
-  useEffect(() => {
-    if (positionMarketSearch && playerLowestPrice) setShowMarketModal(true);
-  }, [positionMarketSearch, playerLowestPrice]);
+  const reservesCount = lineup?.reserves?.filter((item) => item.player).length || 0;
+  const totalReserves = lineup?.reserves?.length || 0;
 
   return (
-    <>
-      <View className="flex-row rounded-lg py-2">
-        {lineup?.reserves?.map((position, index) => {
-          return (
-            <View key={position.position} className="flex-1 items-center">
-              {position && position.player ? (
-                <TeamPlayer
-                  isViewOnly={isViewOnly}
-                  player={position.player as LineupPlayer}
-                  isReservePlayer
-                  isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
-                  isEnteredInMatch={substitutions?.some(
-                    (item) => item.entrou.atleta_id === position.player?.atleta_id
-                  )}
-                  round={round}
-                  isReplaced={substitutions?.some(
-                    (item) => item.saiu.atleta_id === position.player?.atleta_id
-                  )}
-                />
-              ) : (
-                <AddPlayerButton
-                  key={position.abbr}
-                  onPurchasePlayerOnMarket={() => handlePurchasePlayerOnMarket(position, index)}
-                  positionLineup={position}
-                  isViewOnly={isViewOnly}
-                />
-              )}
-            </View>
-          );
-        })}
-      </View>
+    <AnimatedCard variant="flat">
+      <View style={{ backgroundColor: 'transparent', gap: 12 }}>
+        <View
+          className="flex-row justify-between items-center"
+          style={{ backgroundColor: 'transparent' }}>
+          <Text className="text-base font-semibold">Jogadores Reservas</Text>
+          <View
+            className={`px-2 py-1 rounded-full ${
+              reservesCount === totalReserves
+                ? colorTheme === 'dark'
+                  ? 'bg-green-900'
+                  : 'bg-green-100'
+                : colorTheme === 'dark'
+                ? 'bg-amber-900'
+                : 'bg-amber-100'
+            }`}>
+            <Text
+              className={`text-xs font-semibold ${
+                reservesCount === totalReserves ? 'text-green-500' : 'text-amber-500'
+              }`}>
+              {reservesCount}/{totalReserves}
+            </Text>
+          </View>
+        </View>
 
-      {showMarketModal && (
-        <Modal
-          animationType="slide"
-          transparent
-          visible={showMarketModal}
-          onRequestClose={() => setShowMarketModal(false)}>
-          <Market
-            position={positionMarketSearch}
-            handleCloseMarketModal={handleCloseMarketModal}
-            playerIndex={playerIndex}
-            playerLowestPrice={playerLowestPrice?.player}
-          />
-        </Modal>
-      )}
-    </>
+        <View className="flex-row rounded-lg" style={{ backgroundColor: 'transparent' }}>
+          {lineup?.reserves?.map((position, index) => {
+            return (
+              <View
+                key={position.position + '-' + index}
+                className="flex-1 items-center"
+                style={{ backgroundColor: 'transparent' }}>
+                {position && position.player ? (
+                  <TeamPlayer
+                    isViewOnly={isViewOnly}
+                    player={position.player as LineupPlayer}
+                    isReservePlayer
+                    isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
+                    isEnteredInMatch={substitutions?.some(
+                      (item) => item.entrou.atleta_id === position.player?.atleta_id
+                    )}
+                    round={round}
+                    isReplaced={substitutions?.some(
+                      (item) => item.saiu.atleta_id === position.player?.atleta_id
+                    )}
+                  />
+                ) : (
+                  <AddPlayerButton
+                    key={position.abbr}
+                    onPurchasePlayerOnMarket={() => handlePurchasePlayerOnMarket(position, index)}
+                    positionLineup={position}
+                    isViewOnly={isViewOnly}
+                  />
+                )}
+              </View>
+            );
+          })}
+        </View>
+      </View>
+    </AnimatedCard>
   );
 }

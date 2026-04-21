@@ -1,8 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
-import { FlatList, Switch, useColorScheme } from 'react-native';
+import {  FlatList, Switch } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type FilterMarketByStatusProps = {
   statusSelecteds: PlayerStatusFilter[];
@@ -21,7 +23,7 @@ export function FilterMarketByStatus({
   applyFilter,
   handleClose,
 }: FilterMarketByStatusProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const [filters, setFilters] = useState<PlayerStatusFilter[]>(statusSelecteds);
 
@@ -44,45 +46,73 @@ export function FilterMarketByStatus({
   );
 
   return (
-    <View
-      className="flex-1 rounded-lg pt-20"
-      style={{
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      }}>
+    <SafeAreaViewContainer edges={['top', 'bottom']}>
       <View
-        className="items-center justify-between flex-row p-2 rounded-t-lg"
+        className="flex-1 rounded-lg mx-2 mt-2"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+          borderWidth: 1,
+          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+        }}>
+      <View
+        className="items-center justify-between flex-row p-4"
         style={{
           gap: 16,
+          backgroundColor: 'transparent',
         }}>
-        <Text className="font-semibold text-lg">Filtrar Jogadores</Text>
+        <Text 
+          className="font-semibold text-lg"
+          style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+          Filtrar Jogadores
+        </Text>
 
         <TouchableOpacity
           activeOpacity={0.6}
           onPress={handleClose}
-          className="p-2 rounded-full border border-red-400 bg-red-300">
-          <Feather name="x" color="#525252" size={24} />
+          className="p-2 rounded-full"
+          style={{
+            backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#dc2626' : '#fca5a5',
+          }}>
+          <Feather name="x" size={20} color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} />
         </TouchableOpacity>
       </View>
 
-      <View className="flex-1 px-2 pb-4">
+      <View className="flex-1 px-2 pb-4" style={{ backgroundColor: 'transparent' }}>
         <FlatList
           contentContainerStyle={{
             gap: 8,
             padding: 8,
+            backgroundColor: 'transparent',
           }}
+          style={{ backgroundColor: 'transparent' }}
           data={filters}
           renderItem={({ item }) => {
             return (
               <View
                 className="flex-row justify-between p-4 rounded-lg items-center"
                 style={{
-                  backgroundColor: colorTheme === 'dark' ? '#3b82f6' : '#eff6ff',
+                  backgroundColor: item.selected
+                    ? (colorTheme === 'dark' ? '#0A1F4A' : '#DDEEFF')
+                    : (colorTheme === 'dark' ? '#1f2937' : '#f9fafb'),
+                  borderWidth: 1,
+                  borderColor: item.selected
+                    ? (colorTheme === 'dark' ? '#0057FF' : '#5B8EFF')
+                    : (colorTheme === 'dark' ? '#374151' : '#e5e7eb'),
                 }}>
-                <Text className="font-semibold text-base">{item.title}</Text>
+                <Text 
+                  className="font-semibold text-base"
+                  style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
+                  {item.title}
+                </Text>
                 <Switch
-                  trackColor={{ false: '#FFF', true: '#bfdbfe' }}
-                  thumbColor={item.selected ? '#3b82f6' : '#f4f3f4'}
-                  ios_backgroundColor="#FFF"
+                  trackColor={{ 
+                    false: colorTheme === 'dark' ? '#374151' : '#d1d5db', 
+                    true: colorTheme === 'dark' ? '#5B8EFF' : '#5B8EFF' 
+                  }}
+                  thumbColor={item.selected ? '#0057FF' : '#f3f4f6'}
+                  ios_backgroundColor={colorTheme === 'dark' ? '#374151' : '#d1d5db'}
                   onValueChange={() => handleChangeFilter(item)}
                   value={item.selected}
                 />
@@ -95,16 +125,22 @@ export function FilterMarketByStatus({
         <TouchableOpacity
           disabled={isFiltersEmpty}
           onPress={handleStatusFilter}
-          activeOpacity={0.6}
-          className={`mx-2 p-4 rounded-lg items-center justify-center  ${
-            isFiltersEmpty ? 'bg-gray-300' : 'bg-blue-500'
-          }`}
+          activeOpacity={0.7}
+          className="mx-2 p-4 rounded-lg items-center justify-center"
           style={{
-            gap: 16,
+            backgroundColor: isFiltersEmpty 
+              ? (colorTheme === 'dark' ? '#374151' : '#e5e7eb')
+              : (colorTheme === 'dark' ? '#1e40af' : '#0057FF'),
+            borderWidth: 1,
+            borderColor: isFiltersEmpty
+              ? (colorTheme === 'dark' ? '#4b5563' : '#d1d5db')
+              : (colorTheme === 'dark' ? '#0057FF' : '#0057FF'),
+            opacity: isFiltersEmpty ? 0.5 : 1,
           }}>
           <Text className="font-semibold text-sm text-white">Filtrar</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      </View>
+    </SafeAreaViewContainer>
   );
 }

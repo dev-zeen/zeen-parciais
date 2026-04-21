@@ -4,35 +4,32 @@ import { useFonts } from 'expo-font';
 import { SplashScreen, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
 
-import { Providers } from '@/app/providers';
+import Providers from './_providers';
+
 import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'Satoshi-Variable': require('../assets/fonts/Satoshi-Variable.ttf'),
+    'Satoshi-VariableItalic': require('../assets/fonts/Satoshi-VariableItalic.ttf'),
     ...FontAwesome.font,
   });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
 
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  if (error) throw error;
 
   if (!loaded) {
     return null;
@@ -42,7 +39,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useThemeColor();
 
   return (
     <Providers>

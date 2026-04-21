@@ -1,9 +1,10 @@
 import { AxiosError } from 'axios';
-import { GestureResponderEvent, Image, useColorScheme } from 'react-native';
+import {  GestureResponderEvent, Image } from 'react-native';
 
 import errorImage from '@/assets/images/error-background.png';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { StatusErrorMessages } from '@/constants/Errors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type CustomErrorBoundaryProps = {
   error: AxiosError<Error>;
@@ -11,7 +12,7 @@ type CustomErrorBoundaryProps = {
 };
 
 export function ErrorBoundaryComponent({ error, resetError }: CustomErrorBoundaryProps) {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const errorData = error.response
     ? StatusErrorMessages[error.response.status as number]

@@ -1,11 +1,15 @@
+import { useQuery } from '@tanstack/react-query';
+
 import { GET_SCORED_PLAYERS } from '@/constants/Endpoits';
 import { CURRENT_STATS } from '@/constants/Keys';
 import { Player, PlayerStats } from '@/models/Stats';
+import api from '@/services/api';
 import { onSaveStorage } from '@/utils/asyncStorage';
-import { useFetch } from '@/utils/reactQuery';
 
 export const useGetScoredPlayers = (isMarketClose?: boolean) =>
-  useFetch<PlayerStats>(GET_SCORED_PLAYERS, undefined, {
+  useQuery<PlayerStats>({
+    queryKey: [GET_SCORED_PLAYERS],
+    queryFn: () => api.get<PlayerStats>(GET_SCORED_PLAYERS).then((r) => r.data),
     refetchInterval: isMarketClose ? 1000 * 30 : Infinity,
     refetchIntervalInBackground: isMarketClose,
     select: (data) => {

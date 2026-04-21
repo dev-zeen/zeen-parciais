@@ -1,15 +1,20 @@
 import { FullPlayer } from '@/models/Stats';
 
 interface IEmblem {
-  [key: string]: string;
+  '60x60': string;
+  '45x45': string;
+  '30x30': string;
 }
 
 export interface Club {
-  id: string;
+  id: number;
   nome: string;
   abreviacao: string;
-  escudos: IEmblem;
+  slug: string;
+  apelido: string;
   nome_fantasia: string;
+  escudos: IEmblem;
+  url_editoria?: string;
 }
 
 export interface IClub {
@@ -55,12 +60,12 @@ export interface MyClubDetails {
 }
 
 export interface FullClubInfo {
-  atletas: FullPlayer[];
-  capitao_id: number;
-  esquema_id: number;
-  patrimonio: number;
-  pontos: number;
-  pontos_campeonato: number;
+  atletas?: FullPlayer[]; // Opcional quando time não escalado
+  capitao_id?: number; // Opcional quando time não escalado
+  esquema_id?: number; // Opcional quando time não escalado
+  patrimonio?: number; // Opcional quando time não escalado
+  pontos?: number; // Opcional quando time não escalado
+  pontos_campeonato?: number; // Opcional quando time não escalado
   ranking: {
     anterior: {
       mes: number;
@@ -74,15 +79,16 @@ export interface FullClubInfo {
     };
     melhor_ranking_id: number;
   };
-  reservas: FullPlayer[];
+  reservas?: FullPlayer[]; // Opcional quando time não escalado
   rodada_atual: number;
   servicos?: any[];
   time: MyClubDetails;
-  total_ligas: number;
-  total_ligas_matamata: number;
-  valor_time: number;
-  variacao_patrimonio: number;
-  variacao_pontos: number;
+  total_ligas?: number; // Opcional quando time não escalado
+  total_ligas_matamata?: number; // Opcional quando time não escalado
+  valor_time?: number; // Opcional quando time não escalado
+  variacao_patrimonio?: number; // Opcional quando time não escalado
+  variacao_pontos?: number; // Opcional quando time não escalado
+  mensagem?: string; // Mensagem quando time não foi escalado
 }
 
 export interface TeamHistoryRound {

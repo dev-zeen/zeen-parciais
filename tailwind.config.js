@@ -9,17 +9,34 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Lato'],
+        sans: ['Satoshi-Variable'],
+        body: ['Satoshi-Variable'],
+        light: ['Satoshi-Variable'],
+        regular: ['Satoshi-Variable'],
+        medium: ['Satoshi-Variable'],
+        semibold: ['Satoshi-Variable'],
+        bold: ['Satoshi-Variable'],
+        extrabold: ['Satoshi-Variable'],
+        black: ['Satoshi-Variable'],
       },
       colors: {
+        primary: {
+          DEFAULT: '#FF8A00',
+        },
+        secondary: {
+          DEFAULT: '#0057FF',
+        },
+        tertiary: {
+          DEFAULT: '#00E094',
+        },
         folly: {
           DEFAULT: '#FF4365',
         },
         light: {
-          DEFAULT: '#f5f5f5',
+          DEFAULT: '#F5F5F5',
         },
         dark: {
-          DEFAULT: '#12294D',
+          DEFAULT: '#0D1117',
         },
       },
     },

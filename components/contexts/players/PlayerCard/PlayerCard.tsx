@@ -1,9 +1,10 @@
 import { Feather } from '@expo/vector-icons';
 import { memo, useContext, useMemo } from 'react';
-import { Image, useColorScheme } from 'react-native';
+import {  Image } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { AuthContext } from '@/contexts/Auth.context';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Club } from '@/models/Club';
 import { Player, Position } from '@/models/Stats';
 import { numberToString } from '@/utils/parseTo';
@@ -18,7 +19,7 @@ interface PlayerCardProps {
 
 export const PlayerCard = memo(
   ({ player, club, position, valorization, isPlayerOnMyLineup }: PlayerCardProps) => {
-    const colorTheme = useColorScheme();
+    const colorTheme = useThemeColor();
 
     const { isAutheticated } = useContext(AuthContext);
 
@@ -56,7 +57,7 @@ export const PlayerCard = memo(
     );
 
     const stylePlayerInMyLineup = useMemo(
-      () => (isPlayerOnMyLineup ? (colorTheme === 'dark' ? 'bg-blue-600' : 'bg-blue-200') : ''),
+      () => (isPlayerOnMyLineup ? (colorTheme === 'dark' ? 'bg-secondary/30' : 'bg-secondary/10') : ''),
       [colorTheme, isPlayerOnMyLineup]
     );
 
@@ -79,9 +80,9 @@ export const PlayerCard = memo(
               style={{
                 gap: 4,
               }}>
-              <Text className="text-xs">{position?.nome}</Text>
+              <Text className="text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{position?.nome}</Text>
               <View className="rounded-full bg-gray-300 h-1 w-1" />
-              <Text className="text-xs">{club?.nome}</Text>
+              <Text className="text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{club?.nome}</Text>
             </View>
           </View>
         </View>
@@ -95,8 +96,8 @@ export const PlayerCard = memo(
                     valorization < 0
                       ? 'text-folly'
                       : colorTheme === 'dark'
-                      ? 'text-blue-300'
-                      : 'text-blue-500'
+                      ? 'text-secondary'
+                      : 'text-secondary'
                   }`}>
                   {numberToString(valorization)}
                 </Text>
@@ -104,7 +105,7 @@ export const PlayerCard = memo(
                   <Feather
                     name={valorization < 0 ? 'arrow-down' : 'arrow-up'}
                     color={
-                      valorization < 0 ? '#ef4444' : colorTheme === 'dark' ? '#93c5fd' : '#3b82f6'
+                      valorization < 0 ? '#ef4444' : '#0057FF'
                     }
                   />
                 ) : (

@@ -2,15 +2,15 @@ import { Feather } from '@expo/vector-icons';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 
-import { onGetEmptyPositions } from '@/app/(tabs)/team/team.helpers';
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
-import { Loading } from '@/components/structure/Loading';
+import { onGetEmptyPositions } from '@/components/contexts/team/_team.helpers';
 import Colors from '@/constants/Colors';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
@@ -39,7 +39,7 @@ export default ({
 }: MarketProps) => {
   const isFirstRender = useRef(true);
 
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const { data: myClub } = useGetMyClub();
 
@@ -61,7 +61,7 @@ export default ({
   const emptyPositions = useMemo(() => lineup && onGetEmptyPositions(lineup), [lineup]);
 
   const currentBalancePrice = useMemo(() => {
-    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio, price);
+    if (myClub && price >= 0) return onBalancePrice(myClub.patrimonio || 0, price);
     return 0;
   }, [myClub, price]);
 
@@ -72,11 +72,24 @@ export default ({
         index: undefined,
         isReservePlayer: !!playerLowestPrice,
       });
-      // if (!!playerLowestPrice && handleCloseMarketModal) handleCloseMarketModal();
+
+      // Obter estado atualizado do Zustand após adicionar jogador
+      const updatedLineup = useTeamLineupStore.getState().lineup;
+
+      if (!updatedLineup) return;
+
+      const updatedEmptyPositions = onGetEmptyPositions(updatedLineup);
+
+      // Se há posição filtrada E ainda tem vagas, manter modal aberto
+      if (position && updatedEmptyPositions?.has(position.position)) {
+        return; // NÃO fecha o modal
+      }
+
+      // Fechar modal em qualquer outro caso
       handleCloseMarketModal && handleCloseMarketModal();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [playerLowestPrice]
+    [playerLowestPrice, position, handleCloseMarketModal]
   );
 
   const handleRemovePlayerFromLineup = useCallback((player: FullPlayer) => {
@@ -104,7 +117,7 @@ export default ({
   );
 
   const handleCloseMarket = useCallback(
-    () => (handleCloseMarketModal ? handleCloseMarketModal() : router.push('/team/')),
+    () => (handleCloseMarketModal ? handleCloseMarketModal() : router.back()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -160,23 +173,52 @@ export default ({
 
   const isLoading = !marketPlayers || !myClub || !market || !matches || !lineup || isFiltering;
 
-  if (isLoading) return <Loading />;
+  if (isLoading)
+    return (
+      <View style={{ height: 300, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color="#FF8A00" />
+      </View>
+    );
 
   return (
-    <View className={`flex-1 px-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
-      <View className="justify-between items-center flex-row rounded-lg mb-2 py-2 px-4">
+    <View
+      className="flex-1 px-2"
+      style={{
+        backgroundColor:
+          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+      }}>
+      <View
+        className="justify-between items-center flex-row rounded-lg mb-2 py-3 px-4"
+        style={{
+          backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+          borderWidth: 1,
+          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
+        }}>
         <View
           className="flex-row items-center"
           style={{
             gap: 16,
+            backgroundColor: 'transparent',
           }}>
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">Valor atual</Text>
+          <View
+            className="justify-center items-center gap-1"
+            style={{ backgroundColor: 'transparent' }}>
+            <Text
+              className="text-xs"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              Valor atual
+            </Text>
             <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
           </View>
 
-          <View className="justify-center items-center gap-1">
-            <Text className="text-xs">Restante</Text>
+          <View
+            className="justify-center items-center gap-1"
+            style={{ backgroundColor: 'transparent' }}>
+            <Text
+              className="text-xs"
+              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
+              Restante
+            </Text>
             <Text className="font-bold text-xs text-green-500">
               {numberToString(currentBalancePrice)}
             </Text>
@@ -186,8 +228,13 @@ export default ({
         <TouchableOpacity
           activeOpacity={0.6}
           onPress={handleCloseMarket}
-          className="p-2 rounded-full border border-red-400 bg-red-300">
-          <Feather name="x" color="#525252" size={24} />
+          className="p-2 rounded-full"
+          style={{
+            backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#dc2626' : '#fca5a5',
+          }}>
+          <Feather name="x" size={20} color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} />
         </TouchableOpacity>
       </View>
 
@@ -203,11 +250,16 @@ export default ({
         data={marketPlayers}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        estimatedItemSize={100}
         ItemSeparatorComponent={() => (
-          <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
+          <View
+            style={{
+              height: 8,
+              backgroundColor: 'transparent',
+            }}
+          />
         )}
         contentContainerStyle={{
+          paddingVertical: 8,
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}

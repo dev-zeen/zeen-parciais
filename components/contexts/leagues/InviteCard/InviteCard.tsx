@@ -1,89 +1,79 @@
-import { useCallback } from 'react';
-import { Image } from 'react-native';
+import {  Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
+import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Button } from '@/components/structure/Button';
-import useInvites from '@/hooks/useInvites';
-import { Invite } from '@/models/Invites';
-import { useGetLeagues } from '@/queries/leagues.query';
+import { useThemeColor } from '@/hooks/useThemeColor';
 
 type InviteCardProps = {
-  invite: Invite;
+  title?: string;
+  subtitle?: string;
+  imageUrl?: string;
+  teamName?: string;
+  onAccept: () => void;
+  onDecline: () => void;
 };
 
-export function InviteCard({ invite }: InviteCardProps) {
-  const { handleAcceptInvite: onAcceptInvite, handleDeclineInvitation: onDeclineInvitation } =
-    useInvites();
-
-  const { refetch: onRefetchLeagues } = useGetLeagues();
-
-  const handleAcceptInvite = useCallback(
-    async (messageId: number) => {
-      await onAcceptInvite(messageId).then(async () => {
-        await onRefetchLeagues();
-      });
-    },
-    [onAcceptInvite, onRefetchLeagues]
-  );
-
-  const handleDeclineInvitation = useCallback(
-    async (messageId: number) => {
-      await onDeclineInvitation(messageId).then(async () => {
-        await onRefetchLeagues();
-      });
-    },
-    [onDeclineInvitation, onRefetchLeagues]
-  );
+export function InviteCard({ title, subtitle, imageUrl, teamName, onAccept, onDecline }: InviteCardProps) {
+  const colorTheme = useThemeColor();
 
   return (
-    <View
-      className="flex p-3 rounded-lg"
-      style={{
-        gap: 8,
-      }}>
+    <AnimatedCard variant="flat" className="p-0">
       <View
         className="flex-row items-center"
         style={{
-          gap: 4,
+          gap: 12,
+          backgroundColor: 'transparent',
         }}>
+        {/* Imagem da Liga/Competição */}
         <Image
           source={{
-            uri: invite.liga?.imagem,
+            uri: imageUrl,
           }}
-          className="w-12 h-12 rounded-full"
-          alt={`Imagem da Liga ${invite.liga?.nome}`}
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            backgroundColor: colorTheme === 'dark' ? '#111827' : '#f3f4f6',
+          }}
+          alt={`Imagem do convite ${title ?? ''}`}
         />
 
-        <View>
-          <Text className="text-sm font-bold">{invite.liga?.nome}</Text>
-          <Text className="text-sm ">{invite.time.nome}</Text>
-
-          <Text className="text-xs ">
-            {invite.liga?.mata_mata ? 'Mata-Mata' : 'Clássica'} | {invite.liga?.tipo}
+        {/* Informações do Convite */}
+        <View style={{ flex: 1, backgroundColor: 'transparent', gap: 4 }}>
+          <Text className="text-base font-bold" numberOfLines={1}>
+            {title}
           </Text>
+          <Text className="text-xs text-gray-500" numberOfLines={1}>
+            {subtitle}
+          </Text>
+          {teamName && (
+            <Text className="text-xs font-medium" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }} numberOfLines={1}>
+              De: {teamName}
+            </Text>
+          )}
+        </View>
+
+        {/* Botões de Ação */}
+        <View
+          className="flex-row items-center"
+          style={{ gap: 8, backgroundColor: 'transparent' }}>
+          <Button
+            onPress={onDecline}
+            variant="error"
+            onlyIcon
+            hasIcon
+            iconName="x"
+          />
+          <Button
+            onPress={onAccept}
+            variant="success"
+            onlyIcon
+            hasIcon
+            iconName="check"
+          />
         </View>
       </View>
-
-      <View
-        className="flex-row justify-center items-center"
-        style={{
-          gap: 16,
-        }}>
-        <Button
-          onPress={() => handleDeclineInvitation(invite?.mensagem_id)}
-          variant="error"
-          onlyIcon
-          hasIcon
-          iconName="x"
-        />
-        <Button
-          onPress={() => handleAcceptInvite(invite.mensagem_id)}
-          variant="success"
-          onlyIcon
-          hasIcon
-          iconName="check"
-        />
-      </View>
-    </View>
+    </AnimatedCard>
   );
 }

@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Dimensions, ImageBackground, Modal } from 'react-native';
+import { useCallback } from 'react';
+import { Dimensions, ImageBackground } from 'react-native';
 
-import Market from '@/app/(tabs)/team/market';
 import footballField from '@/assets/images/field.png';
 import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
@@ -21,6 +20,7 @@ type SoccerFieldProps = {
   substitutions?: Substitutions[];
   isViewOnly?: boolean;
   round: number;
+  onOpenMarket: (position: LineupPosition, playerIndex: number) => void;
 };
 
 export function SoccerField({
@@ -29,32 +29,18 @@ export function SoccerField({
   captain,
   isViewOnly = false,
   round,
+  onOpenMarket,
 }: SoccerFieldProps) {
   const { playerStats } = usePlayerStats();
 
   const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
 
-  const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
-  const [playerIndex, setPlayerIndex] = useState(0);
-  const [showMarketModal, setShowMarketModal] = useState(false);
-
   const handlePurchasePlayerOnMarket = useCallback(
     (player: LineupPosition, playerIndex: number) => {
-      setPositionMarketSearch(player);
-      setPlayerIndex(playerIndex);
+      onOpenMarket(player, playerIndex);
     },
-    []
+    [onOpenMarket]
   );
-
-  const handleCloseMarketModal = useCallback(() => {
-    setShowMarketModal(false);
-    setPositionMarketSearch(undefined);
-    setPlayerIndex(0);
-  }, []);
-
-  useEffect(() => {
-    if (positionMarketSearch) setShowMarketModal(true);
-  }, [positionMarketSearch]);
 
   const renderItem = useCallback(
     (position: LineupPosition, index: number) => {
@@ -100,7 +86,7 @@ export function SoccerField({
   );
 
   return (
-    <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2">
+    <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2 bg-transparent">
       <ImageBackground
         source={footballField}
         style={{
@@ -179,20 +165,6 @@ export function SoccerField({
         }}>
         {lineup?.starting.filter((item) => item.position === Positions.TECNICO).map(renderItem)}
       </View>
-
-      {showMarketModal && !isViewOnly && (
-        <Modal
-          animationType="slide"
-          transparent
-          visible={showMarketModal}
-          onRequestClose={() => setShowMarketModal(false)}>
-          <Market
-            position={positionMarketSearch}
-            handleCloseMarketModal={handleCloseMarketModal}
-            playerIndex={playerIndex}
-          />
-        </Modal>
-      )}
     </View>
   );
 }

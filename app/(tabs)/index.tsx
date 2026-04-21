@@ -1,27 +1,30 @@
 import { useCallback, useMemo } from 'react';
-import { RefreshControl, ScrollView, useColorScheme } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 
 import { View } from '@/components/Themed';
-import { TopPlayerList } from '@/components/contexts/players/TopPlayerList';
+import { AlertsCard } from '@/components/contexts/home/AlertsCard';
+import { PlayerHighlightsCarousel } from '@/components/contexts/home/PlayerHighlightsCarousel';
+import { QuickActionsGrid } from '@/components/contexts/home/QuickActionsGrid';
+import { StatsOverviewCard } from '@/components/contexts/home/StatsOverviewCard';
+import { TeamSummaryCard } from '@/components/contexts/home/TeamSummaryCard';
 import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
+import { InvitesAlert } from '@/components/contexts/utils/InvitesAlert';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
-import { ReviewLikelyPlayers } from '@/components/contexts/utils/ReviewLikelyPlayers';
-import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
-import { TeamBanner } from '@/components/contexts/utils/TeamBanner';
-import { Loading } from '@/components/structure/Loading';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import theme from '@/styles/theme';
 
 export default () => {
-  const colorTheme = useColorScheme();
+  const colorTheme = useThemeColor();
 
   const {
     marketStatus,
@@ -44,7 +47,7 @@ export default () => {
 
   const lineupPlayersUnlikely = useMemo(
     () =>
-      myClub?.atletas.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
+      myClub?.atletas?.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
     [myClub?.atletas]
   );
 
@@ -76,11 +79,11 @@ export default () => {
   }
 
   if (isLoading) {
-    return <Loading />;
+    return <LoadingScreen />;
   }
 
   return (
-    <SafeAreaViewContainer>
+    <SafeAreaViewContainer edges={['top']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingMyClub} />}
@@ -90,23 +93,32 @@ export default () => {
           style={{
             gap: theme.Tokens.SPACING.xs,
             marginHorizontal: theme.Tokens.SPACING.xs,
-            flex: 1,
-            paddingBottom: 8,
           }}>
+          {/* Market Status Bar */}
           <MarketStatusCard />
+
+          {/* Invites Alert */}
+          <InvitesAlert />
+
           {myClub ? (
             <>
-              <TeamBanner team={myClub} />
+              {/* Team Summary */}
+              <TeamSummaryCard team={myClub} />
 
-              <StatsClubCard team={myClub} round={marketStatus?.rodada_atual} />
+              {/* Quick Actions Grid */}
+              <QuickActionsGrid />
 
-              {lineupPlayersUnlikely && lineupPlayersUnlikely.length > 0 && (
-                <ReviewLikelyPlayers lineupPlayersUnlikely={lineupPlayersUnlikely} />
-              )}
+              {/* Stats Overview with Chart */}
+              <StatsOverviewCard />
 
+              {/* Captain Card - Only shows if captain exists */}
               <CaptainCard />
 
-              <TopPlayerList />
+              {/* Alerts & Notices */}
+              <AlertsCard lineupPlayersUnlikely={lineupPlayersUnlikely} />
+
+              {/* Player Highlights Carousel */}
+              <PlayerHighlightsCarousel />
             </>
           ) : (
             <Login />
