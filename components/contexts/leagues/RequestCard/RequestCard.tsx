@@ -1,40 +1,53 @@
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { Image } from 'react-native';
+import { Alert, Image } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { Button } from '@/components/structure/Button';
-import useInvites from '@/hooks/useInvites';
 import { Invite } from '@/models/Invites';
 import { League } from '@/models/Leagues';
+import { useAcceptInvite, useDeclineInvitation } from '@/queries/invites.query';
 
 type InviteCardProps = {
-  onRefetchLeague: <TPageData>(
-    options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
-  ) => Promise<QueryObserverResult<League, Error>>;
+  onRefetchLeague: (options?: RefetchOptions) => Promise<QueryObserverResult<League, Error>>;
   request: Invite;
 };
 
+const alertResponseInvite = (title: string, subtitle: string) => {
+  return Alert.alert(title, subtitle, [{ text: 'Ok', style: 'cancel' }]);
+};
+
 export function RequestCard({ request, onRefetchLeague }: InviteCardProps) {
-  const { handleAcceptInvite: onAcceptInvite, handleDeclineInvitation: onDeclineInvitation } =
-    useInvites();
+  const { mutate: acceptInvite } = useAcceptInvite({
+    onSuccess: (data) => alertResponseInvite('Tudo Certo!', data.mensagem),
+    onError: (error) => alertResponseInvite('Alerta!', error?.response?.data?.mensagem as string),
+  });
+
+  const { mutate: declineInvite } = useDeclineInvitation({
+    onSuccess: (data) => alertResponseInvite('Tudo Certo!', data.mensagem),
+    onError: (error) => alertResponseInvite('Alerta!', error?.response?.data?.mensagem as string),
+  });
 
   const handleAcceptInvite = useCallback(
-    async (messageId: number) => {
-      await onAcceptInvite(messageId).then(() => {
-        onRefetchLeague();
+    (messageId: number) => {
+      acceptInvite(String(messageId), {
+        onSuccess: () => {
+          onRefetchLeague();
+        },
       });
     },
-    [onAcceptInvite, onRefetchLeague]
+    [acceptInvite, onRefetchLeague]
   );
 
   const handleDeclineInvitation = useCallback(
-    async (messageId: number) => {
-      await onDeclineInvitation(messageId).then(() => {
-        onRefetchLeague();
+    (messageId: number) => {
+      declineInvite(String(messageId), {
+        onSuccess: () => {
+          onRefetchLeague();
+        },
       });
     },
-    [onDeclineInvitation, onRefetchLeague]
+    [declineInvite, onRefetchLeague]
   );
 
   return (

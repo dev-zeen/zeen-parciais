@@ -1,11 +1,13 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import { 
+import {
+  Alert,
   ListRenderItemInfo,
   RefreshControl,
   SectionList,
-  TouchableOpacity } from 'react-native';
+  TouchableOpacity,
+} from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
@@ -13,11 +15,12 @@ import { InviteCard } from '@/components/contexts/leagues/InviteCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
-import useInvites from '@/hooks/useInvites';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import type { PointsCompetitionInvite } from '@/models/Competition';
 import { Invite } from '@/models/Invites';
+import { useAcceptInvite, useDeclineInvitation, useGetInvites } from '@/queries/invites.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 
 type InviteRow =
@@ -29,17 +32,31 @@ type InviteSection = {
   data: InviteRow[];
 };
 
+const alertResponseInvite = (title: string, subtitle: string) => {
+  return Alert.alert(title, subtitle, [{ text: 'Ok', style: 'cancel' }]);
+};
+
 export default () => {
   const colorTheme = useThemeColor();
 
+  const { allowRequest } = useMarketStatus();
+
   const {
-    invites: leagueInvites,
-    isLoadingInvites: isLoadingLeagueInvites,
-    onRefetchInvites: onRefetchLeagueInvites,
-    isRefetchingInvites: isRefetchingLeagueInvites,
-    handleAcceptInvite,
-    handleDeclineInvitation,
-  } = useInvites();
+    data: leagueInvites,
+    isLoading: isLoadingLeagueInvites,
+    refetch: onRefetchLeagueInvites,
+    isRefetching: isRefetchingLeagueInvites,
+  } = useGetInvites(allowRequest);
+
+  const { mutate: handleAcceptInvite } = useAcceptInvite({
+    onSuccess: (data) => alertResponseInvite('Tudo Certo!', data.mensagem),
+    onError: (error) => alertResponseInvite('Alerta!', error?.response?.data?.mensagem as string),
+  });
+
+  const { mutate: handleDeclineInvitation } = useDeclineInvitation({
+    onSuccess: (data) => alertResponseInvite('Tudo Certo!', data.mensagem),
+    onError: (error) => alertResponseInvite('Alerta!', error?.response?.data?.mensagem as string),
+  });
 
   const {
     invites: pointsInvites,
@@ -57,7 +74,11 @@ export default () => {
   const { refetch: onRefetchLeagues } = useGetLeagues();
 
   const onRefetch = useCallback(async () => {
-    await Promise.allSettled([onRefetchLeagues(), onRefetchLeagueInvites(), onRefetchPointsInvites()]);
+    await Promise.allSettled([
+      onRefetchLeagues(),
+      onRefetchLeagueInvites(),
+      onRefetchPointsInvites(),
+    ]);
   }, [onRefetchLeagues, onRefetchLeagueInvites, onRefetchPointsInvites]);
 
   const sections: InviteSection[] = useMemo(() => {
@@ -78,48 +99,59 @@ export default () => {
     return `points-${item.invite.id}`;
   }, []);
 
-  const renderItem = useCallback(({ item }: ListRenderItemInfo<InviteRow>) => {
-    if (item.kind === 'league') {
-      const invite = item.invite;
-      const title = invite.liga?.nome ?? 'Convite';
-      const typeLabel = invite.liga?.mata_mata ? 'Mata-mata' : 'Clássica';
-      const privacyMap = { A: 'Aberta', M: 'Moderada', F: 'Fechada' };
-      const privacy = invite.liga?.tipo ? privacyMap[invite.liga.tipo] : '';
-      const subtitle = privacy ? `${typeLabel} · ${privacy}` : typeLabel;
+  const renderItem = useCallback(
+    ({ item }: ListRenderItemInfo<InviteRow>) => {
+      if (item.kind === 'league') {
+        const invite = item.invite;
+        const title = invite.liga?.nome ?? 'Convite';
+        const typeLabel = invite.liga?.mata_mata ? 'Mata-mata' : 'Clássica';
+        const privacyMap = { A: 'Aberta', M: 'Moderada', F: 'Fechada' };
+        const privacy = invite.liga?.tipo ? privacyMap[invite.liga.tipo] : '';
+        const subtitle = privacy ? `${typeLabel} · ${privacy}` : typeLabel;
 
-      // A API de convites retorna o campo "imagem" com a URL já processada
-      const imageUrl = invite.liga?.imagem ?? 
-        (invite.liga?.mata_mata ? invite.liga.url_trofeu_png : invite.liga?.url_flamula_png);
+        // A API de convites retorna o campo "imagem" com a URL já processada
+        const imageUrl =
+          invite.liga?.imagem ??
+          (invite.liga?.mata_mata ? invite.liga.url_trofeu_png : invite.liga?.url_flamula_png);
+
+        return (
+          <InviteCard
+            title={title}
+            subtitle={subtitle}
+            imageUrl={imageUrl}
+            teamName={invite.time?.nome}
+            onAccept={() => handleAcceptInvite(String(invite.mensagem_id))}
+            onDecline={() => handleDeclineInvitation(String(invite.mensagem_id))}
+          />
+        );
+      }
+
+      const invite = item.invite;
+      const title = invite.competicao?.nome ?? 'Convite (Pontos Corridos)';
+      const privacyMap = { A: 'Aberta', F: 'Fechada' };
+      const privacy = invite.competicao?.privacidade
+        ? privacyMap[invite.competicao.privacidade]
+        : '';
+      const subtitle = privacy ? `Pontos Corridos · ${privacy}` : 'Pontos Corridos';
 
       return (
         <InviteCard
           title={title}
           subtitle={subtitle}
-          imageUrl={imageUrl}
-          teamName={invite.time?.nome}
-          onAccept={() => handleAcceptInvite(invite.mensagem_id)}
-          onDecline={() => handleDeclineInvitation(invite.mensagem_id)}
+          imageUrl={invite.competicao?.url_asset_png}
+          teamName={invite.remetente?.nome}
+          onAccept={() => handleAcceptPointsInvite(invite.id)}
+          onDecline={() => handleDeclinePointsInvite(invite.id)}
         />
       );
-    }
-
-    const invite = item.invite;
-    const title = invite.competicao?.nome ?? 'Convite (Pontos Corridos)';
-    const privacyMap = { A: 'Aberta', F: 'Fechada' };
-    const privacy = invite.competicao?.privacidade ? privacyMap[invite.competicao.privacidade] : '';
-    const subtitle = privacy ? `Pontos Corridos · ${privacy}` : 'Pontos Corridos';
-
-    return (
-      <InviteCard
-        title={title}
-        subtitle={subtitle}
-        imageUrl={invite.competicao?.url_asset_png}
-        teamName={invite.remetente?.nome}
-        onAccept={() => handleAcceptPointsInvite(invite.id)}
-        onDecline={() => handleDeclinePointsInvite(invite.id)}
-      />
-    );
-  }, [handleAcceptInvite, handleAcceptPointsInvite, handleDeclineInvitation, handleDeclinePointsInvite]);
+    },
+    [
+      handleAcceptInvite,
+      handleAcceptPointsInvite,
+      handleDeclineInvitation,
+      handleDeclinePointsInvite,
+    ]
+  );
 
   const isLoading = isLoadingLeagueInvites || isLoadingPointsInvites;
   if (isLoading) return <LoadingScreen title="Carregando Convites" />;
@@ -150,7 +182,11 @@ export default () => {
                 borderWidth: 1,
                 borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Feather name="chevron-left" size={20} color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'} />
+              <Feather
+                name="chevron-left"
+                size={20}
+                color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'}
+              />
             </TouchableOpacity>
 
             <View style={{ flex: 1, paddingHorizontal: 12, backgroundColor: 'transparent' }}>

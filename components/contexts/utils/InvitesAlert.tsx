@@ -1,18 +1,21 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import {  TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
-import useInvites from '@/hooks/useInvites';
+import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useGetInvites } from '@/queries/invites.query';
 
 export function InvitesAlert() {
   const colorTheme = useThemeColor();
+  const { allowRequest } = useMarketStatus();
 
-  const { invites } = useInvites();
+  const { data: invites } = useGetInvites(allowRequest);
+
   const { invites: pointsInvites } = usePointsCompetitionInvites();
 
   const invitesCount = useMemo(
@@ -34,7 +37,9 @@ export function InvitesAlert() {
           className="flex-row items-center justify-between"
           style={{ backgroundColor: 'transparent' }}>
           {/* Left side - Icon and text */}
-          <View className="flex-row items-center flex-1" style={{ gap: 12, backgroundColor: 'transparent' }}>
+          <View
+            className="flex-row items-center flex-1"
+            style={{ gap: 12, backgroundColor: 'transparent' }}>
             <View
               className="rounded-full items-center justify-center"
               style={{
@@ -56,7 +61,9 @@ export function InvitesAlert() {
           </View>
 
           {/* Right side - Badge and arrow */}
-          <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent', flexShrink: 0 }}>
+          <View
+            className="flex-row items-center"
+            style={{ gap: 8, backgroundColor: 'transparent', flexShrink: 0 }}>
             <View
               className="px-3 py-1 rounded-full"
               style={{ backgroundColor: '#0057FF', minWidth: 32 }}>
@@ -64,7 +71,11 @@ export function InvitesAlert() {
                 {invitesCount}
               </Text>
             </View>
-            <Feather name="chevron-right" size={20} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
+            <Feather
+              name="chevron-right"
+              size={20}
+              color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
+            />
           </View>
         </View>
       </TouchableOpacity>

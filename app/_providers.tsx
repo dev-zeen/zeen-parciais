@@ -14,7 +14,6 @@ export default function Providers({ children }: ProvidersProps): ReactNode {
     defaultOptions: {
       queries: {
         retry: 1,
-        useErrorBoundary: true,
         refetchOnReconnect: true,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

@@ -6,8 +6,8 @@ import {
   ListRenderItemInfo,
   RefreshControl,
   SectionList,
-  TouchableOpacity,
   TextInput,
+  TouchableOpacity,
 } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
@@ -21,13 +21,16 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
-import useInvites from '@/hooks/useInvites';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
-import { useGetFinalizedPointsCompetitions, useGetPointsCompetitions } from '@/queries/competitions.query';
+import {
+  useGetFinalizedPointsCompetitions,
+  useGetPointsCompetitions,
+} from '@/queries/competitions.query';
+import { useGetInvites } from '@/queries/invites.query';
 import { useGetLeagues } from '@/queries/leagues.query';
 
 type SectionLeagueProps = {
@@ -49,10 +52,15 @@ export default function () {
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
 
+  const {
+    data: invites,
+    isLoading: isLoadingInvites,
+    refetch: onRefetchInvites,
+    isRefetching: isRefetchingInvites,
+  } = useGetInvites(allowRequest);
 
-  const { invites, isLoadingInvites, onRefetchInvites, isRefetchingInvites } = useInvites();
   const { invites: pointsInvites } = usePointsCompetitionInvites();
-  
+
   const invitesCount = useMemo(
     () => (invites?.convites?.length ?? 0) + (pointsInvites?.length ?? 0),
     [invites?.convites?.length, pointsInvites?.length]
@@ -105,8 +113,7 @@ export default function () {
       title: string,
       subtitle: string | undefined,
       data: LeagueUserDetails[]
-    ): SectionLeagueProps | null =>
-      data.length > 0 ? { title, subtitle, data } : null;
+    ): SectionLeagueProps | null => (data.length > 0 ? { title, subtitle, data } : null);
 
     return [
       toSection(
@@ -130,7 +137,9 @@ export default function () {
       !isMarketClose
         ? toSection(
             'Padrão',
-            query ? `${defaultLeagues.length} de ${defaultLeaguesAll.length}` : `${defaultLeaguesAll.length}`,
+            query
+              ? `${defaultLeagues.length} de ${defaultLeaguesAll.length}`
+              : `${defaultLeaguesAll.length}`,
             defaultLeagues
           )
         : null,
@@ -139,9 +148,12 @@ export default function () {
 
   const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
 
-  const renderItem = useCallback(({ item: league }: ListRenderItemInfo<LeagueUserDetails>) => {
-    return <LeagueCard key={league.liga_id} league={league} myTeamId={myClub?.time?.time_id} />;
-  }, [myClub?.time?.time_id]);
+  const renderItem = useCallback(
+    ({ item: league }: ListRenderItemInfo<LeagueUserDetails>) => {
+      return <LeagueCard key={league.liga_id} league={league} myTeamId={myClub?.time?.time_id} />;
+    },
+    [myClub?.time?.time_id]
+  );
 
   const onRefetch = useCallback(async () => {
     Promise.allSettled([
@@ -151,11 +163,20 @@ export default function () {
       onRefetchPointsCompetitions(),
       onRefetchFinalizedCompetitions(),
     ]);
-  }, [onRefetchInvites, onRefetchLeagues, onRefetchMyClub, onRefetchPointsCompetitions, onRefetchFinalizedCompetitions]);
+  }, [
+    onRefetchInvites,
+    onRefetchLeagues,
+    onRefetchMyClub,
+    onRefetchPointsCompetitions,
+    onRefetchFinalizedCompetitions,
+  ]);
 
   const isRefetching =
-    isRefetchingMyClub || isRefetchingLeagues || isRefetchingInvites ||
-    isRefetchingPointsCompetitions || isRefetchingFinalizedCompetitions;
+    isRefetchingMyClub ||
+    isRefetchingLeagues ||
+    isRefetchingInvites ||
+    isRefetchingPointsCompetitions ||
+    isRefetchingFinalizedCompetitions;
 
   if (!isAutheticated) {
     return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;
@@ -192,7 +213,13 @@ export default function () {
         }}>
         {/* Header (fixo) */}
         <View className="px-2 pt-3 pb-2" style={{ gap: 10, backgroundColor: 'transparent' }}>
-          <View style={{ backgroundColor: 'transparent', gap: 10, flexDirection: 'row', justifyContent: 'space-between' }}>
+          <View
+            style={{
+              backgroundColor: 'transparent',
+              gap: 10,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
             <View
               className="flex-row items-center rounded-xl px-3 flex-1"
               style={{
@@ -202,7 +229,11 @@ export default function () {
                 borderWidth: 1,
                 borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
               }}>
-              <Feather name="search" size={18} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
+              <Feather
+                name="search"
+                size={18}
+                color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
+              />
               <TextInput
                 value={search}
                 onChangeText={setSearch}
@@ -237,9 +268,7 @@ export default function () {
               />
               <Text className="text-sm font-semibold">Convites</Text>
               {invitesCount > 0 && (
-                <View
-                  className="px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: '#ef4444' }}>
+                <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ef4444' }}>
                   <Text className="text-xs font-bold" style={{ color: '#ffffff' }}>
                     {invitesCount}
                   </Text>
@@ -255,7 +284,9 @@ export default function () {
           keyExtractor={keyExtractor}
           renderItem={renderItem}
           showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => <View style={{ height: 10, backgroundColor: 'transparent' }} />}
+          ItemSeparatorComponent={() => (
+            <View style={{ height: 10, backgroundColor: 'transparent' }} />
+          )}
           ListHeaderComponent={
             pointsFiltered.length > 0 ? (
               <View style={{ paddingBottom: 8, backgroundColor: 'transparent' }}>
@@ -263,7 +294,9 @@ export default function () {
                   className="py-3"
                   style={{
                     backgroundColor:
-                      colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+                      colorTheme === 'dark'
+                        ? Colors.dark.backgroundFull
+                        : Colors.light.backgroundFull,
                   }}>
                   <View
                     className="flex-row items-end justify-between"
@@ -277,7 +310,11 @@ export default function () {
                 </View>
                 <View style={{ gap: 10, backgroundColor: 'transparent' }}>
                   {pointsFiltered.map((competition) => (
-                    <PointsCompetitionCard key={competition.slug} competition={competition} myTeamId={myClub?.time?.time_id} />
+                    <PointsCompetitionCard
+                      key={competition.slug}
+                      competition={competition}
+                      myTeamId={myClub?.time?.time_id}
+                    />
                   ))}
                 </View>
               </View>
@@ -300,9 +337,7 @@ export default function () {
                 className="flex-row items-end justify-between"
                 style={{ backgroundColor: 'transparent' }}>
                 <Text className="font-bold text-base">{title}</Text>
-                {subtitle && (
-                  <Text className="text-xs text-gray-500">{subtitle}</Text>
-                )}
+                {subtitle && <Text className="text-xs text-gray-500">{subtitle}</Text>}
               </View>
             </View>
           )}
@@ -315,7 +350,9 @@ export default function () {
                   className="py-3"
                   style={{
                     backgroundColor:
-                      colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+                      colorTheme === 'dark'
+                        ? Colors.dark.backgroundFull
+                        : Colors.light.backgroundFull,
                   }}>
                   <View
                     className="flex-row items-end justify-between"
@@ -377,7 +414,9 @@ export default function () {
                             style={{
                               backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#e5e7eb',
                             }}>
-                            <Text className="text-[11px] font-semibold" style={{ color: '#9ca3af' }}>
+                            <Text
+                              className="text-[11px] font-semibold"
+                              style={{ color: '#9ca3af' }}>
                               Finalizada
                             </Text>
                           </View>
@@ -386,7 +425,9 @@ export default function () {
                             style={{
                               backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#e5e7eb',
                             }}>
-                            <Text className="text-[11px] font-semibold" style={{ color: '#f59e0b' }}>
+                            <Text
+                              className="text-[11px] font-semibold"
+                              style={{ color: '#f59e0b' }}>
                               #{competition.ranking_time.posicao}º lugar
                             </Text>
                           </View>
