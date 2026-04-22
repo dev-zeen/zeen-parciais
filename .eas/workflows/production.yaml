@@ -11,7 +11,7 @@ jobs:
     type: custom
     steps:
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Lint
         run: npx expo lint
