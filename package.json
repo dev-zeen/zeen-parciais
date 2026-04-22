@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "npx expo lint",
+    "typecheck": "tsc --noEmit",
     "rebuild": "npx expo prebuild --clean",
     "rebuild-test": "npx expo prebuild --clean && npm run ios",
     "build:preview:android": "eas build --platform android --profile preview",

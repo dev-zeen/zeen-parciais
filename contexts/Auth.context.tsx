@@ -61,9 +61,5 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
     [isAutheticated, handleSuccessAuth, handleUnautenticated, handleLogout]
   );
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 }

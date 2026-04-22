@@ -42,24 +42,23 @@ api.interceptors.response.use(
         return await api(originalConfig);
       } catch (refreshError) {
         isRefreshing = false;
-        
+
         // Se o erro for "No refresh token available" ou "Refresh token mode disabled"
         if (refreshError instanceof Error) {
           if (
             refreshError.message === 'No refresh token available' ||
             refreshError.message === 'Refresh token mode disabled'
           ) {
-            console.log('⚠️ Cannot refresh token - clearing storage and logging out');
             console.log('Reason:', refreshError.message);
             await AsyncStorage.removeItem(ACCESS_TOKEN_KEY_STORAGE);
-            
+
             // Chama callback de desautenticação se estiver registrado
             if (onUnauthenticated) {
               onUnauthenticated();
             }
           }
         }
-        
+
         return Promise.reject(refreshError);
       }
     }

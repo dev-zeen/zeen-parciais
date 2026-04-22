@@ -168,10 +168,7 @@ export default () => {
     Promise.allSettled([onRefetchPlayerStats(), onRefetchMyClub()])
       .then((results) => {
         const myClubResult = results[1];
-        if (myClubResult.status !== 'fulfilled') {
-          console.log('⚠️ Falha ao atualizar meu time:', myClubResult.reason);
-          return;
-        }
+        if (myClubResult.status !== 'fulfilled') return;
 
         const myTeamData = myClubResult.value.data;
         if (!myTeamData) return;

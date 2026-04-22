@@ -1,0 +1,52 @@
+name: Production Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    type: managed
+    steps:
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx expo lint
+
+      - name: Type Check
+        run: npx tsc --noEmit
+
+  build_ios:
+    name: Build iOS
+    type: build
+    needs: [lint]
+    params:
+      platform: ios
+      profile: production
+
+  build_android:
+    name: Build Android
+    type: build
+    needs: [lint]
+    params:
+      platform: android
+      profile: production
+
+  submit_ios:
+    name: Submit iOS
+    type: submit
+    needs: [build_ios]
+    params:
+      platform: ios
+      profile: production
+
+  submit_android:
+    name: Submit Android
+    type: submit
+    needs: [build_android]
+    params:
+      platform: android
+      profile: production

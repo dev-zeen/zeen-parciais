@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "zeenparciaisfc",
+    "scheme": "zeenparciais",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splashscreen.png",
@@ -17,15 +17,18 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zeenparciaisfc",
-      "buildNumber": "1"
+      "bundleIdentifier": "com.zeenparciais",
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8A00"
       },
-      "package": "com.zeenparciaisfc",
+      "package": "com.zeenparciais",
       "versionCode": 1
     },
     "web": {
