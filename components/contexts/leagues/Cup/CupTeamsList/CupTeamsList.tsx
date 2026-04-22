@@ -12,9 +12,7 @@ type CupTeamsListProps = {
   cup: League;
 };
 
-type SlotItem =
-  | { type: 'team'; data: TeamCup; index: number }
-  | { type: 'empty'; index: number };
+type SlotItem = { type: 'team'; data: TeamCup; index: number } | { type: 'empty'; index: number };
 
 export function CupTeamsList({ cup }: CupTeamsListProps) {
   const colorTheme = useThemeColor();
@@ -49,154 +47,171 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
     })),
   ];
 
-  const renderTeamCard = (item: TeamCup, seed: number) => {
-    const isPending = !!item.isPending;
+  const renderTeamCard = useCallback(
+    (item: TeamCup, seed: number) => {
+      const isPending = !!item.isPending;
 
-    const cardBg = isPending
-      ? isDark ? '#422006' : '#fffbeb'
-      : isDark ? '#052e16' : '#f0fdf4';
+      const cardBg = isPending ? (isDark ? '#422006' : '#fffbeb') : isDark ? '#052e16' : '#f0fdf4';
 
-    const borderColor = isPending
-      ? isDark ? '#92400e' : '#fde68a'
-      : isDark ? '#14532d' : '#bbf7d0';
+      const borderColor = isPending
+        ? isDark
+          ? '#92400e'
+          : '#fde68a'
+        : isDark
+          ? '#14532d'
+          : '#bbf7d0';
 
-    const seedBg = isPending
-      ? isDark ? '#78350f' : '#fef3c7'
-      : isDark ? '#166534' : '#dcfce7';
+      const seedBg = isPending ? (isDark ? '#78350f' : '#fef3c7') : isDark ? '#166534' : '#dcfce7';
 
-    const seedColor = isPending
-      ? isDark ? '#fbbf24' : '#b45309'
-      : isDark ? '#4ade80' : '#15803d';
+      const seedColor = isPending
+        ? isDark
+          ? '#fbbf24'
+          : '#b45309'
+        : isDark
+          ? '#4ade80'
+          : '#15803d';
 
-    return (
+      return (
+        <View
+          style={{
+            flex: 1,
+            margin: 5,
+            borderRadius: 14,
+            borderWidth: 1.5,
+            borderColor,
+            backgroundColor: cardBg,
+            overflow: 'hidden',
+          }}>
+          {/* Seed badge */}
+          <View
+            style={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              backgroundColor: seedBg,
+              borderRadius: 6,
+              paddingHorizontal: 6,
+              paddingVertical: 2,
+              zIndex: 1,
+            }}>
+            <Text style={{ fontSize: 10, fontWeight: '700', color: seedColor }}>#{seed + 1}</Text>
+          </View>
+
+          {/* Pending badge */}
+          {isPending && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                backgroundColor: isDark ? '#92400e' : '#fef3c7',
+                borderRadius: 6,
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 3,
+                zIndex: 1,
+              }}>
+              <Feather name="clock" size={9} color={isDark ? '#fbbf24' : '#b45309'} />
+              <Text
+                style={{ fontSize: 9, fontWeight: '600', color: isDark ? '#fbbf24' : '#b45309' }}>
+                Aguardando
+              </Text>
+            </View>
+          )}
+
+          {/* Content */}
+          <View
+            style={{
+              alignItems: 'center',
+              paddingTop: 28,
+              paddingBottom: 14,
+              paddingHorizontal: 8,
+              backgroundColor: 'transparent',
+              gap: 6,
+            }}>
+            <View
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: isDark ? '#ffffff10' : '#00000008',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+              <Image
+                source={{ uri: item.url_escudo_png }}
+                style={{ width: 44, height: 44 }}
+                resizeMode="contain"
+                alt={`Escudo ${item.nome}`}
+              />
+            </View>
+
+            <View style={{ alignItems: 'center', backgroundColor: 'transparent', gap: 1 }}>
+              <Text
+                numberOfLines={2}
+                style={{
+                  fontSize: 12,
+                  fontWeight: '700',
+                  textAlign: 'center',
+                  lineHeight: 15,
+                  color: isDark ? '#f0fdf4' : '#14532d',
+                }}>
+                {item.nome}
+              </Text>
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 10,
+                  fontWeight: '400',
+                  textAlign: 'center',
+                  color: isDark ? '#86efac' : '#4d7c0f',
+                  opacity: 0.8,
+                }}>
+                {item.nome_cartola}
+              </Text>
+            </View>
+          </View>
+        </View>
+      );
+    },
+    [isDark]
+  );
+
+  const renderEmptySlot = useCallback(
+    (seed: number) => (
       <View
         style={{
           flex: 1,
           margin: 5,
           borderRadius: 14,
           borderWidth: 1.5,
-          borderColor,
-          backgroundColor: cardBg,
-          overflow: 'hidden',
-        }}>
-        {/* Seed badge */}
-        <View
-          style={{
-            position: 'absolute',
-            top: 8,
-            left: 8,
-            backgroundColor: seedBg,
-            borderRadius: 6,
-            paddingHorizontal: 6,
-            paddingVertical: 2,
-            zIndex: 1,
-          }}>
-          <Text style={{ fontSize: 10, fontWeight: '700', color: seedColor }}>
-            #{seed + 1}
-          </Text>
-        </View>
-
-        {/* Pending badge */}
-        {isPending && (
-          <View
-            style={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              backgroundColor: isDark ? '#92400e' : '#fef3c7',
-              borderRadius: 6,
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 3,
-              zIndex: 1,
-            }}>
-            <Feather name="clock" size={9} color={isDark ? '#fbbf24' : '#b45309'} />
-            <Text style={{ fontSize: 9, fontWeight: '600', color: isDark ? '#fbbf24' : '#b45309' }}>
-              Aguardando
-            </Text>
-          </View>
-        )}
-
-        {/* Content */}
-        <View style={{ alignItems: 'center', paddingTop: 28, paddingBottom: 14, paddingHorizontal: 8, backgroundColor: 'transparent', gap: 6 }}>
-          <View
-            style={{
-              width: 56,
-              height: 56,
-              borderRadius: 28,
-              backgroundColor: isDark ? '#ffffff10' : '#00000008',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <Image
-              source={{ uri: item.url_escudo_png }}
-              style={{ width: 44, height: 44 }}
-              resizeMode="contain"
-              alt={`Escudo ${item.nome}`}
-            />
-          </View>
-
-          <View style={{ alignItems: 'center', backgroundColor: 'transparent', gap: 1 }}>
-            <Text
-              numberOfLines={2}
-              style={{
-                fontSize: 12,
-                fontWeight: '700',
-                textAlign: 'center',
-                lineHeight: 15,
-                color: isDark ? '#f0fdf4' : '#14532d',
-              }}>
-              {item.nome}
-            </Text>
-            <Text
-              numberOfLines={1}
-              style={{
-                fontSize: 10,
-                fontWeight: '400',
-                textAlign: 'center',
-                color: isDark ? '#86efac' : '#4d7c0f',
-                opacity: 0.8,
-              }}>
-              {item.nome_cartola}
-            </Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const renderEmptySlot = (seed: number) => (
-    <View
-      style={{
-        flex: 1,
-        margin: 5,
-        borderRadius: 14,
-        borderWidth: 1.5,
-        borderColor: isDark ? '#1f2937' : '#e5e7eb',
-        borderStyle: 'dashed',
-        backgroundColor: isDark ? '#111827' : '#f9fafb',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 32,
-        gap: 6,
-      }}>
-      <View
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 18,
-          backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
+          borderColor: isDark ? '#1f2937' : '#e5e7eb',
+          borderStyle: 'dashed',
+          backgroundColor: isDark ? '#111827' : '#f9fafb',
           alignItems: 'center',
           justifyContent: 'center',
+          paddingVertical: 32,
+          gap: 6,
         }}>
-        <Feather name="user-plus" size={16} color={isDark ? '#4b5563' : '#9ca3af'} />
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Feather name="user-plus" size={16} color={isDark ? '#4b5563' : '#9ca3af'} />
+        </View>
+        <Text style={{ fontSize: 10, color: isDark ? '#4b5563' : '#9ca3af', fontWeight: '500' }}>
+          #{seed + 1} — Vaga livre
+        </Text>
       </View>
-      <Text style={{ fontSize: 10, color: isDark ? '#4b5563' : '#9ca3af', fontWeight: '500' }}>
-        #{seed + 1} — Vaga livre
-      </Text>
-    </View>
+    ),
+    [isDark]
   );
 
   const renderItem = useCallback(
@@ -204,7 +219,7 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
       if (item.type === 'team') return renderTeamCard(item.data, item.index);
       return renderEmptySlot(item.index);
     },
-    [isDark, teamsByCup, teamsAwatingAcceptInvite]
+    [renderTeamCard, renderEmptySlot]
   );
 
   const keyExtractor = useCallback(
@@ -227,7 +242,14 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
       initialNumToRender={16}
       showsVerticalScrollIndicator={false}
       ListHeaderComponent={
-        <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8, backgroundColor: 'transparent', gap: 12 }}>
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 8,
+            backgroundColor: 'transparent',
+            gap: 12,
+          }}>
           {/* Status bar */}
           <View
             style={{
@@ -242,12 +264,19 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
               borderColor: isDark ? '#1f2937' : '#e5e7eb',
             }}>
             <View style={{ backgroundColor: 'transparent', gap: 2 }}>
-              <Text style={{ fontSize: 12, color: isDark ? '#9ca3af' : '#6b7280', fontWeight: '500' }}>
+              <Text
+                style={{ fontSize: 12, color: isDark ? '#9ca3af' : '#6b7280', fontWeight: '500' }}>
                 Times confirmados
               </Text>
-              <Text style={{ fontSize: 22, fontWeight: '800', color: isDark ? '#f9fafb' : '#111827' }}>
+              <Text
+                style={{ fontSize: 22, fontWeight: '800', color: isDark ? '#f9fafb' : '#111827' }}>
                 {confirmedCount}
-                <Text style={{ fontSize: 14, fontWeight: '400', color: isDark ? '#6b7280' : '#9ca3af' }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: '400',
+                    color: isDark ? '#6b7280' : '#9ca3af',
+                  }}>
                   /{totalSlots}
                 </Text>
               </Text>
@@ -267,7 +296,12 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
                     borderRadius: 20,
                   }}>
                   <Feather name="clock" size={11} color={isDark ? '#fbbf24' : '#b45309'} />
-                  <Text style={{ fontSize: 11, fontWeight: '600', color: isDark ? '#fbbf24' : '#b45309' }}>
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: '600',
+                      color: isDark ? '#fbbf24' : '#b45309',
+                    }}>
                     {pendingCount} aguardando
                   </Text>
                 </View>
@@ -284,7 +318,12 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
                     borderRadius: 20,
                   }}>
                   <Feather name="user-plus" size={11} color={isDark ? '#6b7280' : '#9ca3af'} />
-                  <Text style={{ fontSize: 11, fontWeight: '500', color: isDark ? '#6b7280' : '#9ca3af' }}>
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      fontWeight: '500',
+                      color: isDark ? '#6b7280' : '#9ca3af',
+                    }}>
                     {emptySlots} vagas livres
                   </Text>
                 </View>
@@ -294,7 +333,13 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
 
           {/* Progress bar */}
           {totalSlots > 0 && (
-            <View style={{ backgroundColor: isDark ? '#1f2937' : '#e5e7eb', borderRadius: 4, height: 6, overflow: 'hidden' }}>
+            <View
+              style={{
+                backgroundColor: isDark ? '#1f2937' : '#e5e7eb',
+                borderRadius: 4,
+                height: 6,
+                overflow: 'hidden',
+              }}>
               <View
                 style={{
                   height: '100%',
@@ -334,13 +379,20 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
                 borderColor: isDark ? '#14532d' : '#bbf7d0',
               }}>
               <Feather name="check-circle" size={15} color={isDark ? '#4ade80' : '#16a34a'} />
-              <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#4ade80' : '#16a34a' }}>
+              <Text
+                style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#4ade80' : '#16a34a' }}>
                 Todos os times confirmados — pronto para sorteio!
               </Text>
             </View>
           )}
 
-          <Text style={{ fontSize: 12, fontWeight: '600', color: isDark ? '#6b7280' : '#9ca3af', paddingTop: 4 }}>
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: '600',
+              color: isDark ? '#6b7280' : '#9ca3af',
+              paddingTop: 4,
+            }}>
             PARTICIPANTES
           </Text>
         </View>
