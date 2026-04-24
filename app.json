@@ -17,7 +17,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.zeenparciais",
+      "bundleIdentifier": "com.devzeen.zeenparciais",
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
@@ -28,7 +28,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FF8A00"
       },
-      "package": "com.zeenparciais",
+      "package": "com.devzeen.zeenparciais",
       "versionCode": 1
     },
     "web": {
