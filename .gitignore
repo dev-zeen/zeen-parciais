@@ -49,10 +49,6 @@ buck-out/
 dist/
 web-build/
 
-# EAS
-# Uncomment the following line if you want to ignore EAS credentials
-# eas.json
-
 # Credentials and sensitive files
 google-service-account.json
 *.p12
