@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Zeen Parciais FC",
-    "slug": "zeen-parciais",
+    "slug": "zeen-parciais-4prui4pe-fpzw7jvnpu4",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -50,9 +50,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "bfc2832b-2cc4-4a74-8b21-cea161c2c1f9"
+        "projectId": "ca388080-8960-43c0-9dee-023e49d4a4f5"
       }
     },
-    "owner": "devzeenio"
+    "owner": "devzeen-organization"
   }
 }
