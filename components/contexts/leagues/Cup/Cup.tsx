@@ -2,7 +2,7 @@ import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCallback, useMemo } from 'react';
-import {  RefreshControl } from 'react-native';
+import { Image, RefreshControl } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { CupMatchCard } from '@/components/contexts/leagues/Cup/CupMatchCard';
@@ -17,6 +17,15 @@ import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetAppreciations } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
+
+const STAGE_TYPE_NAMED: Record<string, string> = {
+  P: 'Primeira Fase',
+  O: 'Oitavas',
+  Q: 'Quartas',
+  S: 'Semi-final',
+  F: 'Final',
+  T: '3º Lugar',
+};
 
 interface CupProps {
   league: League;
@@ -33,10 +42,16 @@ export function Cup({ league: cup }: CupProps) {
 
   const { refetch: onRefetchValorizations } = useGetAppreciations(isMarketClose);
 
-  const { isCupInProgress, totalTeamCup, currentTeamsCup, clubsByLeague, onRefetchLeague, isRefetchingLeague } =
-    useLeague({
-      slug: cup.liga.slug,
-    });
+  const {
+    isCupInProgress,
+    totalTeamCup,
+    currentTeamsCup,
+    clubsByLeague,
+    onRefetchLeague,
+    isRefetchingLeague,
+  } = useLeague({
+    slug: cup.liga.slug,
+  });
 
   const partialsByTeamId = useMemo(() => {
     if (!isMarketClose || !playerStats?.atletas || !clubsByLeague) return {};
@@ -108,16 +123,17 @@ export function Cup({ league: cup }: CupProps) {
         />
       );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cup, marketStatus, myClub]
+    [colorTheme, cup, isRefetching, onRefetch, renderCupMatchCard]
   );
 
   const roundTabs: ITab[] | undefined = useMemo(() => {
     if (isCupInProgress && cup && cup.chaves_mata_mata) {
       return Object.keys(cup.chaves_mata_mata).map((round) => {
+        const matches = cup.chaves_mata_mata![round] ?? [];
+        const phase = matches[0]?.tipo_fase ?? 'Q';
         return {
           id: Number(round),
-          title: round,
+          title: STAGE_TYPE_NAMED[phase] ?? round,
           content: () => renderItem(round),
         };
       });
@@ -137,71 +153,96 @@ export function Cup({ league: cup }: CupProps) {
           colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}>
       <View
-        className="mx-2 mb-2"
+        className="mx-2 mb-4 mt-2 rounded-xl flex-row items-center"
         style={{
-          gap: 8,
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         }}>
         <View
-          className="rounded-lg flex-row justify-around items-center p-2"
+          className="rounded-xl flex-row items-center p-3"
           style={{
-            gap: 8,
-            paddingVertical: 8,
+            gap: 12,
+            backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+            borderWidth: 1,
+            borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
           }}>
-          <View
-            className="justify-center items-center"
-            style={{
-              gap: 4,
-            }}>
-            <Text>
-              Início |{' '}
-              {format(new Date(cup?.liga.data_inicio as string), 'dd/MM', {
-                locale: ptBR,
-              })}
-            </Text>
+          {cup?.liga.url_trofeu_png ? (
+            <Image
+              source={{ uri: cup.liga.url_trofeu_png }}
+              style={{ width: 48, height: 48 }}
+              resizeMode="contain"
+            />
+          ) : null}
 
-            <Text className="font-semibold text-sm">{cup?.liga.inicio_rodada}º Radada </Text>
-          </View>
-
-          <View
-            className="justify-center items-center"
-            style={{
-              gap: 4,
-            }}>
-            <Text>
-              Final | {''}
-              {format(new Date(cup?.liga.data_fim as string), 'dd/MM', {
-                locale: ptBR,
-              })}
-            </Text>
-
-            <Text className="font-semibold text-sm">{cup?.liga.fim_rodada}º Radada</Text>
-          </View>
-
-          <View
-            className="justify-center items-center"
-            style={{
-              gap: 4,
-            }}>
-            {!isMarketClose ? (
-              <>
-                <Text>Cartoleiros</Text>
-                <Text className="text-base font-semibold">
-                  {currentTeamsCup} / {totalTeamCup}
+          <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: 'transparent',
+              }}>
+              <View style={{ alignItems: 'center', gap: 2, backgroundColor: 'transparent' }}>
+                <Text
+                  className="text-xs"
+                  style={{ color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                  Início
                 </Text>
-              </>
-            ) : (
-              <>
-                <Text>Cartoleiros</Text>
-                <Text className="text-base font-semibold">{totalTeamCup}</Text>
-              </>
-            )}
+                <Text className="font-bold text-sm">
+                  {format(new Date(cup?.liga.data_inicio as string), 'dd/MM', { locale: ptBR })}
+                </Text>
+                <Text
+                  className="text-xs"
+                  style={{ color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                  Rodada {cup?.liga.inicio_rodada}
+                </Text>
+              </View>
+
+              <View
+                style={{
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: 'transparent',
+                }}>
+                <Text
+                  className="text-xs font-semibold"
+                  style={{ color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                  —
+                </Text>
+              </View>
+
+              <View style={{ alignItems: 'center', gap: 2, backgroundColor: 'transparent' }}>
+                <Text
+                  className="text-xs"
+                  style={{ color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                  Final
+                </Text>
+                <Text className="font-bold text-sm">
+                  {format(new Date(cup?.liga.data_fim as string), 'dd/MM', { locale: ptBR })}
+                </Text>
+                <Text
+                  className="text-xs"
+                  style={{ color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                  Rodada {cup?.liga.fim_rodada}
+                </Text>
+              </View>
+
+              <View style={{ alignItems: 'center', gap: 2, backgroundColor: 'transparent' }}>
+                <Text
+                  className="text-xs"
+                  style={{ color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                  Cartoleiros
+                </Text>
+                <Text className="font-bold text-xl">
+                  {!isMarketClose ? `${currentTeamsCup} / ${totalTeamCup}` : `${totalTeamCup}`}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       </View>
 
-      {!isCupInProgress ? <CupTeamsList cup={cup} /> : <Tabs tabs={roundTabs} />}
+      {!isCupInProgress ? <CupTeamsList cup={cup} /> : <Tabs tabs={roundTabs} variant="pill" />}
     </View>
   );
 }

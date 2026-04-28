@@ -126,7 +126,10 @@ export default () => {
 
   if (!isAutheticated) {
     return (
-      <Login title="Para acessar as informações do seu perfil é necessário efetuar o login." />
+      <SafeAreaViewContainer edges={['top']}>
+        <MarketStatusCard />
+        <Login title="Para acessar as informações do seu perfil é necessário efetuar o login." />
+      </SafeAreaViewContainer>
     );
   }
 

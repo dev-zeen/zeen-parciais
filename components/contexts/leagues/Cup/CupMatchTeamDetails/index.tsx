@@ -31,7 +31,7 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
 
   const {
     data: substitutions,
-    isInitialLoading: isInitialLoadingSubstitutions,
+    isLoading: isInitialLoadingSubstitutions,
     refetch: onRefetchSubstitutions,
     isRefetching: isRefetchingSubstitutions,
   } = useGetMatchSubstitutions({

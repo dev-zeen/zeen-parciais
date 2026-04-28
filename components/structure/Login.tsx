@@ -14,6 +14,9 @@ import { AuthContext } from '@/contexts/Auth.context';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { fetchGloboidClientSettings } from '@/lib/core/auth';
 
+const CHROME_MOBILE_USER_AGENT =
+  'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36';
+
 const INJECT_AUTH_LOGIN = `
   (function() {
     let tokenSent = false;
@@ -162,10 +165,13 @@ export function Login({ title }: LoginProps) {
   // Timeout de segurança: fecha a modal após 10 minutos se não receber resposta
   useEffect(() => {
     if (showModalAuth) {
-      timeoutRef.current = setTimeout(() => {
-        console.log('⏱️ Login timeout - fechando modal');
-        setShowModalAuth(false);
-      }, 10 * 60 * 1000) as any;
+      timeoutRef.current = setTimeout(
+        () => {
+          console.log('⏱️ Login timeout - fechando modal');
+          setShowModalAuth(false);
+        },
+        10 * 60 * 1000
+      ) as any;
     }
 
     return () => {
@@ -173,41 +179,44 @@ export function Login({ title }: LoginProps) {
     };
   }, [showModalAuth]);
 
-  const handleWebViewMessage = useCallback(async (event: WebViewMessageEvent) => {
-    setIsAuthenticating(true);
+  const handleWebViewMessage = useCallback(
+    async (event: WebViewMessageEvent) => {
+      setIsAuthenticating(true);
 
-    let token: string | null = null;
+      let token: string | null = null;
 
-    try {
-      const data = JSON.parse(event.nativeEvent.data);
-      if (data.type === 'AUTH_TOKEN' && data.tokens) {
-        console.log('✅ Tokens recebidos com sucesso');
-        token = JSON.stringify(data.tokens);
+      try {
+        const data = JSON.parse(event.nativeEvent.data);
+        if (data.type === 'AUTH_TOKEN' && data.tokens) {
+          console.log('✅ Tokens recebidos com sucesso');
+          token = JSON.stringify(data.tokens);
+        }
+      } catch {
+        const raw = event.nativeEvent.data;
+        if (raw && typeof raw === 'string' && raw.trim() !== '' && !raw.startsWith('{')) {
+          console.log('✅ Token recebido (formato legado)');
+          token = raw;
+        }
       }
-    } catch {
-      const raw = event.nativeEvent.data;
-      if (raw && typeof raw === 'string' && raw.trim() !== '' && !raw.startsWith('{')) {
-        console.log('✅ Token recebido (formato legado)');
-        token = raw;
-      }
-    }
 
-    if (!token) return;
+      if (!token) return;
 
-    await setItem(token);
-    console.log('🔍 Buscando configurações do cliente Globoid...');
-    await fetchGloboidClientSettings();
+      await setItem(token);
+      console.log('🔍 Buscando configurações do cliente Globoid...');
+      await fetchGloboidClientSettings();
 
-    setTimeout(() => {
-      handleSuccessAuth();
-      setShowModalAuth(false);
-      setIsAuthenticating(false);
-    }, 500);
-  }, [setItem, handleSuccessAuth]);
+      setTimeout(() => {
+        handleSuccessAuth();
+        setShowModalAuth(false);
+        setIsAuthenticating(false);
+      }, 500);
+    },
+    [setItem, handleSuccessAuth]
+  );
 
   return (
-    <>
-      <View className="flex-1 mt-8">
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+      <View className="flex-1 mt-2">
         <ScrollView
           className="flex-1"
           contentContainerStyle={{
@@ -480,6 +489,7 @@ export function Login({ title }: LoginProps) {
                 uri: EXPO_PUBLIC_AUTH_URL,
               }}
               incognito
+              userAgent={CHROME_MOBILE_USER_AGENT}
               injectedJavaScript={INJECT_AUTH_LOGIN}
               onMessage={(e) => handleWebViewMessage(e)}
               onLoadStart={() => {
@@ -560,6 +570,6 @@ export function Login({ title }: LoginProps) {
           </View>
         </Modal>
       )}
-    </>
+    </View>
   );
 }

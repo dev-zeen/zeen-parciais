@@ -15,6 +15,7 @@ import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
 import { LeagueCard } from '@/components/contexts/leagues/LeagueCard';
 import { PointsCompetitionCard } from '@/components/contexts/leagues/PointsCompetitionCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
+import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
@@ -179,7 +180,12 @@ export default function () {
     isRefetchingFinalizedCompetitions;
 
   if (!isAutheticated) {
-    return <Login title="Para acessar suas ligas, é necessário efetuar o login." />;
+    return (
+      <SafeAreaViewContainer edges={['top']}>
+        <MarketStatusCard />
+        <Login title="Para acessar suas ligas, é necessário efetuar o login." />
+      </SafeAreaViewContainer>
+    );
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {

@@ -10,8 +10,14 @@ let onUnauthenticated: (() => void) | null = null;
 
 const api = axios.create({
   baseURL: EXPO_PUBLIC_API_URL,
-  // Evita quedas por timeout curto em redes móveis/instáveis
   timeout: 20000,
+  adapter: 'fetch',
+  headers: {
+    Origin: 'https://cartola.globo.com',
+    Referer: 'https://cartola.globo.com/',
+    'User-Agent':
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+  },
 });
 
 // Função para registrar callback de desautenticação

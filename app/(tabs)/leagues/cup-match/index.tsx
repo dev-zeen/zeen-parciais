@@ -37,20 +37,18 @@ export default () => {
 
   const { playerStats } = usePlayerStats();
 
-  if (!cupMatch || !leagueSlug || !marketStatus) return <Loading />;
-
   const { team: homeTeam } = useTeam({
-    teamId: cupMatch.time_mandante_id ?? 0,
-    round: cupMatch.rodada_id,
+    teamId: cupMatch?.time_mandante_id ?? 0,
+    round: cupMatch?.rodada_id ?? 0,
   });
 
   const { team: awayTeam } = useTeam({
-    teamId: cupMatch.time_visitante_id ?? 0,
-    round: cupMatch.rodada_id,
+    teamId: cupMatch?.time_visitante_id ?? 0,
+    round: cupMatch?.rodada_id ?? 0,
   });
 
   const tabs: ITab[] = useMemo(() => {
-    if (!homeTeam || !awayTeam || !playerStats) return [];
+    if (!cupMatch || !homeTeam || !awayTeam || !playerStats) return [];
     return [
       {
         id: 1,
@@ -69,6 +67,7 @@ export default () => {
     ];
   }, [awayTeam, cupMatch, homeTeam, playerStats]);
 
+  if (!cupMatch || !leagueSlug || !marketStatus) return <Loading />;
   if (!homeTeam || !awayTeam || !playerStats) return <Loading />;
 
   return (
@@ -94,7 +93,7 @@ export default () => {
         />
       </View>
 
-      <Tabs tabs={tabs} />
+      <Tabs tabs={tabs} variant="pill" />
     </View>
   );
 };

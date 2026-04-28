@@ -7,7 +7,6 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { TopPlayer } from '@/models/Player';
 import { useGetTopPlayers, useGetTopReservePlayers } from '@/queries/players.query';
-import { numberToString } from '@/utils/parseTo';
 
 export function PlayerHighlightsCarousel() {
   const colorTheme = useThemeColor();
@@ -130,7 +129,9 @@ function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: numb
             className="w-full items-center pt-1 border-t border-gray-200 dark:border-gray-700"
             style={{ gap: 4, backgroundColor: 'transparent' }}>
             <Text className="text-xs text-gray-500 dark:text-gray-400">Escalações</Text>
-            <Text className="font-bold text-sm">{numberToString(player.escalacoes)}</Text>
+            <Text className="font-bold text-sm">
+              {new Intl.NumberFormat('pt-BR').format(player.escalacoes)}
+            </Text>
           </View>
         </View>
       </View>

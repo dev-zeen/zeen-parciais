@@ -13,6 +13,7 @@ import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
 import { onGetPlayersPlayed } from '@/components/contexts/players/_players.helper';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
+import { ErrorScreen } from '@/components/structure/ErrorScreen';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import Colors from '@/constants/Colors';
@@ -40,7 +41,7 @@ export default function RodadaScreen() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('jogadores');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
+  const { isMarketClose, allowRequest, isLoadingMarketStatus, isErrorMarketStatus, onRefetchMarketStatus } = useMarketStatus();
   const { data: market } = useGetMarket();
   const { playerStats, onRefetchStats, isRefetchingPlayerStats, isLoadingPlayerStats } =
     usePlayerStats();
@@ -121,7 +122,16 @@ export default function RodadaScreen() {
     [myClub?.atletas, matches?.clubes, allowRequest]
   );
 
-  const isLoading = !marketStatus || isLoadingPlayerStats || isLoadingMatches;
+  const isLoading = isLoadingMarketStatus || isLoadingPlayerStats || isLoadingMatches;
+
+  if (isErrorMarketStatus) {
+    return (
+      <ErrorScreen
+        message="Não foi possível carregar os dados do mercado."
+        onRetry={onRefetchMarketStatus}
+      />
+    );
+  }
 
   if (isLoading) {
     return <LoadingScreen title="Carregando Rodada" />;
@@ -185,8 +195,18 @@ export default function RodadaScreen() {
                   value={searchQuery}
                   placeholder="Buscar Jogador"
                   placeholderTextColor={GRAY_OPACITY}
-                  className="rounded-lg p-3 border-2 border-gray-300 bg-white mx-4 mt-1"
                   autoCorrect={false}
+                  style={{
+                    marginTop: 4,
+                    marginBottom: 4,
+                    padding: 12,
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor: colorTheme === 'dark' ? '#1f2937' : '#d1d5db',
+                    backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
+                    color: colorTheme === 'dark' ? '#f9fafb' : '#111827',
+                    fontFamily: 'Satoshi-Variable',
+                  }}
                 />
                 <FlatList
                   refreshControl={

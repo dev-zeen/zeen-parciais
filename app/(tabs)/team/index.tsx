@@ -22,6 +22,7 @@ import {
   onGetPlayersOnChangePositionSell,
 } from '@/components/contexts/team/_team.helpers';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
+import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import type { BottomSheetRef } from '@/components/structure/BottomSheet';
 import { BottomSheet } from '@/components/structure/BottomSheet';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
@@ -66,7 +67,7 @@ export default () => {
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
 
-  const { data: substitutions, isInitialLoading: isInitialLoadingSubstitutions } =
+  const { data: substitutions, isLoading: isInitialLoadingSubstitutions } =
     useGetMatchSubstitutions({
       id: myClub?.time.time_id,
     });
@@ -403,7 +404,12 @@ export default () => {
   }, [captain, formation, lineup]);
 
   if (!isAutheticated) {
-    return <Login title="Para acessar o seu time, é necessário efetuar o login." />;
+    return (
+      <SafeAreaViewContainer edges={['top']}>
+        <MarketStatusCard />
+        <Login title="Para acessar o seu time, é necessário efetuar o login." />
+      </SafeAreaViewContainer>
+    );
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {

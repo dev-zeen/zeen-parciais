@@ -16,6 +16,15 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "track": "production"
+      },
+      "ios": {
+        "appleId": "clizioguedes@gmail.com",
+        "ascAppId": "6763764840",
+        "appleTeamId": "T6VFZHK9UB"
+      }
+    }
   }
 }

@@ -10,6 +10,7 @@ const useMarketStatus = () => {
   const {
     data: marketStatus,
     isLoading: isLoadingMarketStatus,
+    isError: isErrorMarketStatus,
     refetch: onRefetchMarketStatus,
     isRefetching: isRefetchingMarketStatus,
   } = useGetMarketStatus();
@@ -83,6 +84,7 @@ const useMarketStatus = () => {
   return {
     marketStatus,
     isLoadingMarketStatus,
+    isErrorMarketStatus,
     onRefetchMarketStatus,
     isRefetchingMarketStatus,
     isMarketClose,

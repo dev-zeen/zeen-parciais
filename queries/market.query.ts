@@ -10,6 +10,7 @@ export const useGetMarketStatus = () =>
     queryFn: () => api.get<MarketStatus>(GET_MARKET_STATUS).then((r) => r.data),
     refetchInterval: 1000 * 60,
     refetchIntervalInBackground: true,
+    retry: 1,
   });
 
 export const useGetMarket = () =>

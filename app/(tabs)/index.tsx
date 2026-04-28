@@ -11,6 +11,7 @@ import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
 import { InvitesAlert } from '@/components/contexts/utils/InvitesAlert';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
+import { ErrorScreen } from '@/components/structure/ErrorScreen';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
@@ -29,6 +30,7 @@ export default () => {
   const {
     marketStatus,
     isLoadingMarketStatus,
+    isErrorMarketStatus,
     onRefetchMarketStatus,
     isMarketClose,
     allowRequest,
@@ -71,7 +73,7 @@ export default () => {
   ]);
 
   const isLoading = allowRequest
-    ? isLoadingMarketStatus || isLoadingPositions || isLoadingMarketStatus || isLoadingMyClub
+    ? isLoadingMarketStatus || isLoadingPositions || isLoadingMyClub
     : isLoadingMarketStatus || isLoadingPositions;
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
@@ -80,6 +82,15 @@ export default () => {
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (isErrorMarketStatus) {
+    return (
+      <ErrorScreen
+        message="Não foi possível carregar os dados do mercado."
+        onRetry={onRefetchMarketStatus}
+      />
+    );
   }
 
   return (

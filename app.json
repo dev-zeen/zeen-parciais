@@ -20,7 +20,16 @@
       "bundleIdentifier": "com.devzeen.zeenparciais",
       "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSExceptionDomains": {
+            "api.cartola.globo.com": {
+              "NSExceptionRequiresForwardSecrecy": false,
+              "NSExceptionMinimumTLSVersion": "TLSv1.0",
+              "NSIncludesSubdomains": true
+            }
+          }
+        }
       }
     },
     "android": {

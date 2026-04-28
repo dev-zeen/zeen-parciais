@@ -1,12 +1,11 @@
 import { Feather } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useCallback, useMemo } from 'react';
-import {  TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { TeamCupMatch } from '@/components/contexts/leagues/Cup/TeamCupMatch/TeamCupMatch';
 import { Loading } from '@/components/structure/Loading';
-import Colors from '@/constants/Colors';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch as CupMatchModel } from '@/models/Leagues';
@@ -21,15 +20,6 @@ interface CupMatchProps {
   partialsByTeamId?: Record<number, { partialScore: number; playersPlayed: number }>;
 }
 
-const STAGE_TYPE_NAMED = {
-  P: 'Primeira Fase',
-  O: 'Oitavas',
-  Q: 'Quartas',
-  S: 'Semi-final',
-  F: 'Final',
-  T: 'Terceiro Lugar',
-};
-
 export function CupMatchCard({
   match,
   myTeam,
@@ -42,6 +32,8 @@ export function CupMatchCard({
 
   const homeTeamId = match.time_mandante_id ?? 0;
   const awayTeamId = match.time_visitante_id ?? 0;
+
+  const isTbd = !match.time_mandante_id || !match.time_visitante_id;
 
   const homePartial = partialsByTeamId?.[homeTeamId];
   const awayPartial = partialsByTeamId?.[awayTeamId];
@@ -58,9 +50,10 @@ export function CupMatchCard({
 
   const showScore = useMemo(
     () =>
-      match.rodada_id < (currentRound ?? 0) ||
-      (match.rodada_id === currentRound && !!isMarketClose),
-    [currentRound, isMarketClose, match.rodada_id]
+      !isTbd &&
+      (match.rodada_id < (currentRound ?? 0) ||
+        (match.rodada_id === currentRound && !!isMarketClose)),
+    [currentRound, isMarketClose, isTbd, match.rodada_id]
   );
 
   const colorScore = useCallback((team: number, compare: number) => {
@@ -93,75 +86,117 @@ export function CupMatchCard({
       <TouchableOpacity
         activeOpacity={0.6}
         key={match.time_mandante_id}
-        disabled={!leagueSlug || !match.time_mandante_id || !showScore}>
+        disabled={!leagueSlug || isTbd || !showScore}>
         <View
-          className="flex-row rounded-lg justify-center items-center py-2"
           style={{
             borderColor: customBorder,
             borderWidth: 2,
-            gap: 4,
+            borderRadius: 12,
+            paddingVertical: 16,
+            paddingHorizontal: 12,
+            gap: 12,
           }}>
-          <TeamCupMatch
-            match={match}
-            teamId={match.time_mandante_id}
-            opacity={match.time_mandante_pontuacao > match.time_visitante_pontuacao ? 1 : 0.3}
-          />
-
-          <View className="justify-center items-center rounded z-40 mb-3" style={{}}>
-            <Text className="text-sm">{STAGE_TYPE_NAMED[match.tipo_fase]}</Text>
+          {isTbd ? (
             <View
-              className="flex-row justify-center items-center"
+              style={{ alignItems: 'center', paddingVertical: 8, backgroundColor: 'transparent' }}>
+              <Text style={{ fontSize: 13, color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
+                A definir
+              </Text>
+            </View>
+          ) : (
+            <View
               style={{
-                gap: 8,
-                width: '40%',
+                flexDirection: 'row',
+                alignItems: 'center',
+                backgroundColor: 'transparent',
               }}>
-              <View className="items-center justify-center">
-                <Text
-                  className="font-semibold text-sm"
-                  style={{
-                    color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
-                  }}>
-                  {showScore ? numberToString(scoreHomeTeam) : '-'}
-                </Text>
-                {showScore && currentRound === match.rodada_id ? (
-                  <Text className="font-semibold text-xs">
-                    {homePartial?.playersPlayed ?? 0}/12
-                  </Text>
-                ) : (
-                  <></>
-                )}
-              </View>
-
-              <Feather
-                name="x"
-                size={10}
-                color={colorTheme === 'dark' ? Colors.light.background : Colors.dark.background}
+              <TeamCupMatch
+                match={match}
+                teamId={match.time_mandante_id}
+                isWinner={match.vencedor_id === match.time_mandante_id}
+                hasWinner={!!match.vencedor_id}
               />
 
-              <View className="items-center justify-center">
-                <Text
-                  className="font-semibold text-sm"
+              <View style={{ alignItems: 'center', gap: 6, backgroundColor: 'transparent' }}>
+                <View
                   style={{
-                    color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 12,
+                    backgroundColor: 'transparent',
                   }}>
-                  {showScore ? numberToString(scoreAwayTeam) : '-'}
-                </Text>
-                {showScore && currentRound === match.rodada_id ? (
-                  <Text className="font-semibold text-xs">
-                    {awayPartial?.playersPlayed ?? 0}/12
-                  </Text>
-                ) : (
-                  <></>
-                )}
-              </View>
-            </View>
-          </View>
+                  <View
+                    style={{ alignItems: 'center', minWidth: 28, backgroundColor: 'transparent' }}>
+                    <Text
+                      style={{
+                        fontWeight: '700',
+                        fontSize: 18,
+                        color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
+                      }}>
+                      {showScore ? numberToString(scoreHomeTeam) : '-'}
+                    </Text>
+                    {showScore && currentRound === match.rodada_id ? (
+                      <Text
+                        style={{
+                          fontSize: 10,
+                          color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                        }}>
+                        {homePartial?.playersPlayed ?? 0}/12
+                      </Text>
+                    ) : null}
+                  </View>
 
-          <TeamCupMatch
-            match={match}
-            teamId={match.time_visitante_id}
-            opacity={match.time_visitante_pontuacao > match.time_mandante_pontuacao ? 1 : 0.3}
-          />
+                  <Feather
+                    name="x"
+                    size={10}
+                    color={colorTheme === 'dark' ? '#6B7280' : '#9CA3AF'}
+                  />
+
+                  <View
+                    style={{ alignItems: 'center', minWidth: 28, backgroundColor: 'transparent' }}>
+                    <Text
+                      style={{
+                        fontWeight: '700',
+                        fontSize: 18,
+                        color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
+                      }}>
+                      {showScore ? numberToString(scoreAwayTeam) : '-'}
+                    </Text>
+                    {showScore && currentRound === match.rodada_id ? (
+                      <Text
+                        style={{
+                          fontSize: 10,
+                          color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280',
+                        }}>
+                        {awayPartial?.playersPlayed ?? 0}/12
+                      </Text>
+                    ) : null}
+                  </View>
+                </View>
+
+                {match.vencedor_id ? (
+                  <View
+                    style={{
+                      backgroundColor: '#00E09420',
+                      borderRadius: 99,
+                      paddingHorizontal: 8,
+                      paddingVertical: 2,
+                    }}>
+                    <Text style={{ fontSize: 10, fontWeight: '600', color: '#00E094' }}>
+                      Encerrado
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+
+              <TeamCupMatch
+                match={match}
+                teamId={match.time_visitante_id}
+                isWinner={match.vencedor_id === match.time_visitante_id}
+                hasWinner={!!match.vencedor_id}
+              />
+            </View>
+          )}
         </View>
       </TouchableOpacity>
     </Link>

@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useCallback } from 'react';
-import {  FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
+import { FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
@@ -21,7 +21,7 @@ export default () => {
 
   const {
     data: league,
-    isInitialLoading: isInitialLoadingLeague,
+    isLoading: isInitialLoadingLeague,
     refetch: onRefetchLeague,
     isRefetching: isRefetchingLeague,
   } = useGetLeague(slug as string, allowRequest);

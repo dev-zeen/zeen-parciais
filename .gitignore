@@ -51,6 +51,8 @@ web-build/
 
 # Credentials and sensitive files
 google-service-account.json
+credentials.json
+expo-play-submit.json
 *.p12
 *.mobileprovision
 

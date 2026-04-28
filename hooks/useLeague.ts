@@ -17,12 +17,12 @@ const useLeague = ({ slug }: UseLeagueProps) => {
 
   const {
     data: league,
-    isInitialLoading: isLoadingLeague,
+    isLoading: isLoadingLeague,
     refetch: onRefetchLeague,
     isRefetching: isRefetchingLeague,
   } = useGetLeague(slug as string, allowRequest);
 
-  const { data: clubsByLeague, isInitialLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
+  const { data: clubsByLeague, isLoading: isLoadingClubsByLeague } = useGetClubsByLeagueId(
     league?.liga.liga_id
   );
 
