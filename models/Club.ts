@@ -60,12 +60,14 @@ export interface MyClubDetails {
 }
 
 export interface FullClubInfo {
-  atletas?: FullPlayer[]; // Opcional quando time não escalado
-  capitao_id?: number; // Opcional quando time não escalado
-  esquema_id?: number; // Opcional quando time não escalado
-  patrimonio?: number; // Opcional quando time não escalado
-  pontos?: number; // Opcional quando time não escalado
-  pontos_campeonato?: number; // Opcional quando time não escalado
+  atletas?: FullPlayer[];
+  capitao_id?: number;
+  reserva_luxo_id?: number | null;
+  extra_id?: number | null;
+  esquema_id?: number;
+  patrimonio?: number;
+  pontos?: number;
+  pontos_campeonato?: number;
   ranking: {
     anterior: {
       mes: number;
@@ -79,16 +81,16 @@ export interface FullClubInfo {
     };
     melhor_ranking_id: number;
   };
-  reservas?: FullPlayer[]; // Opcional quando time não escalado
+  reservas?: FullPlayer[];
   rodada_atual: number;
   servicos?: any[];
   time: MyClubDetails;
-  total_ligas?: number; // Opcional quando time não escalado
-  total_ligas_matamata?: number; // Opcional quando time não escalado
-  valor_time?: number; // Opcional quando time não escalado
-  variacao_patrimonio?: number; // Opcional quando time não escalado
-  variacao_pontos?: number; // Opcional quando time não escalado
-  mensagem?: string; // Mensagem quando time não foi escalado
+  total_ligas?: number;
+  total_ligas_matamata?: number;
+  valor_time?: number;
+  variacao_patrimonio?: number;
+  variacao_pontos?: number;
+  mensagem?: string;
 }
 
 export interface TeamHistoryRound {

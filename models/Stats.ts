@@ -59,15 +59,8 @@ export interface FullPlayer {
   foto: string;
   posicao_id: number;
   clube_id: number;
-  gato_mestre: GatoMestre;
-  scouts: {
-    mandante: IScout;
-    media: IScout;
-    visitante: IScout;
-  };
   jogos_num: number;
   media_num: number;
-  minimo_para_valorizar: number;
   pontos_num: number;
   preco_num: number;
   rodada_id: number;

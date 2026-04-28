@@ -79,25 +79,32 @@ export type PointsCompetitionFinalizedItem = {
 
 /**
  * Listagem de Pontos Corridos (GET /auth/competicoes/pontoscorridos).
- * Campos exatos podem variar; mantemos um core mínimo usado na UI.
  */
 export type PointsCompetitionListItem = {
-  id: number;
-  slug: string;
-  nome: string;
-  descricao: string;
+  ranking_time: { posicao: number; variacao: number };
   privacidade: CompetitionPrivacy;
+  url_taca_svg: string;
+  url_taca_png: string;
+  nome: string;
+  criacao: string;
+  slug: string;
+  descricao: string;
+  patrocinador_id: number | null;
+  id: number;
+  time_dono_id: number;
+  tipo_taca_id: number;
+  sorteada: boolean;
+  rodada_inicial: number;
+  rodada_final: number;
+  tem_returno: boolean;
+  cor_taca_id: number;
+  finalizada: boolean;
   quantidade_participantes: number;
   quantidade_times: number;
-  membro: boolean;
-  time_dono_id: number;
-  url_taca_png?: string;
-  url_taca_svg?: string;
+  membro?: boolean;
 };
 
-export type PointsCompetitionListResponse = {
-  competicoes: PointsCompetitionListItem[];
-};
+export type PointsCompetitionListResponse = PointsCompetitionListItem[];
 
 /**
  * Convites de Pontos Corridos (GET /auth/competicoes/convites)

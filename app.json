@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splashscreen.png",
-      "resizeMode": "cover",
+      "resizeMode": "contain",
       "backgroundColor": "#0D1117"
     },
     "assetBundlePatterns": ["**/*"],
@@ -51,7 +51,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splashscreen.png",
-          "resizeMode": "cover",
+          "resizeMode": "contain",
           "backgroundColor": "#0D1117"
         }
       ]
