@@ -7,13 +7,14 @@ import {
   PlayerStatusFilter,
 } from './FilterMarketByStatus/FilterMarketByStatus';
 import { OrderMarket, OrderSelectedProps } from './OrderMarket/OrderMarket';
-import { sortedOptions, statusPlayerOptions } from './filters.helper';
+import { getSortedOptions, statusPlayerOptions } from './filters.helper';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
 import { FilterMarketByTeam } from '@/components/contexts/market/MarketFilters/FilterMarketByTeam';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullPlayer } from '@/models/Stats';
 import { useGetMarket } from '@/queries/market.query';
+import { useGetGatoMestreAtletas } from '@/queries/players.query';
 
 type MarketFilterProps = {
   applyFilter: (players: FullPlayer[]) => void;
@@ -25,9 +26,18 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
   const colorTheme = useThemeColor();
   const { data: market } = useGetMarket();
 
-  const [showOrderMarket, setShowOrderMarket] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<OrderSelectedProps>(sortedOptions[0]);
+  const { data: gatoMestre } = useGetGatoMestreAtletas();
 
+  const sortedOptions = useMemo(() => getSortedOptions(gatoMestre), [gatoMestre]);
+
+  const [selectedOrderId, setSelectedOrderId] = useState<number>(sortedOptions[0].id);
+
+  const selectedOrder = useMemo(
+    () => sortedOptions.find((option) => option.id === selectedOrderId) ?? sortedOptions[0],
+    [selectedOrderId, sortedOptions]
+  );
+
+  const [showOrderMarket, setShowOrderMarket] = useState(false);
   const [showFilterByStatusMarket, setShowFilterByStatusMarket] = useState(false);
   const [selectedFilterByStatusMarket, setSelectedFilterByStatusMarket] =
     useState<PlayerStatusFilter[]>(statusPlayerOptions);
@@ -73,26 +83,25 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
 
   const defaultFilters = useCallback(() => {
     handleIsLoading();
-    setSelectedOrder(sortedOptions[0]);
+    setSelectedOrderId(sortedOptions[0].id);
     setSelectedFilterByStatusMarket(statusPlayerOptions);
     setTeamsSelectedFilter([]);
 
     const data = onGetPlayersFiltered(sortedOptions[0], statusPlayerOptions, []);
     applyFilter(data);
     setShowFilterMarketByTeam(false);
-  }, [handleIsLoading, applyFilter, onGetPlayersFiltered]);
-
+  }, [handleIsLoading, applyFilter, onGetPlayersFiltered, sortedOptions]);
   const applyOrderMarket = useCallback(
     (option: OrderSelectedProps) => {
-      if (option.id === selectedOrder.id) return;
+      if (option.id === selectedOrderId) return;
       handleIsLoading();
-      setSelectedOrder(option);
+      setSelectedOrderId(option.id);
       const data = onGetPlayersFiltered(option, selectedFilterByStatusMarket, teamsSelectedFilter);
       applyFilter(data);
       setShowOrderMarket(false);
     },
     [
-      selectedOrder,
+      selectedOrderId,
       handleIsLoading,
       onGetPlayersFiltered,
       selectedFilterByStatusMarket,
@@ -151,14 +160,14 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
       teamsSelectedFilter.length > 1
         ? `${market?.clubes[teamsSelectedFilter[0]].nome} + ${teamsSelectedFilter.length - 1}`
         : teamsSelectedFilter.length === 1
-        ? market?.clubes[teamsSelectedFilter[0]].nome
-        : 'Times',
+          ? market?.clubes[teamsSelectedFilter[0]].nome
+          : 'Times',
     [market, teamsSelectedFilter]
   );
 
   return (
     <>
-      <View 
+      <View
         className="flex-row rounded-lg items-center p-2 justify-center"
         style={{
           backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
@@ -175,12 +184,12 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
             borderWidth: 1,
             borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
           }}>
-          <Feather 
-            name="bar-chart" 
-            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
+          <Feather
+            name="bar-chart"
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'}
             size={18}
           />
-          <Text 
+          <Text
             className="text-xs font-semibold"
             style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}
             numberOfLines={1}>
@@ -198,13 +207,13 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
             borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
           }}
           onPress={() => setShowFilterByStatusMarket(true)}>
-          <Feather 
-            name="user-check" 
-            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
-            size={18} 
+          <Feather
+            name="user-check"
+            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'}
+            size={18}
           />
-          <Text 
-            className="text-xs font-semibold" 
+          <Text
+            className="text-xs font-semibold"
             style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}
             numberOfLines={1}>
             {titleFilterByStatus}
@@ -221,12 +230,8 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
             borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
           }}
           onPress={() => setShowFilterMarketByTeam(true)}>
-          <Feather 
-            name="filter" 
-            color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} 
-            size={18} 
-          />
-          <Text 
+          <Feather name="filter" color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'} size={18} />
+          <Text
             className="text-xs font-semibold"
             style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}
             numberOfLines={1}>
@@ -243,6 +248,7 @@ export function MarketFilters({ applyFilter, handleIsLoading, maximumPrice }: Ma
           onRequestClose={() => setShowOrderMarket(false)}>
           <OrderMarket
             currentOrder={selectedOrder as OrderSelectedProps}
+            orderOptions={sortedOptions}
             applyOrderMarket={applyOrderMarket}
             handleClose={() => setShowOrderMarket(false)}
           />

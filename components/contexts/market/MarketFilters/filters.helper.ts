@@ -1,26 +1,33 @@
-import { FullPlayer } from '@/models/Stats';
+import { FullPlayer, GatoMestreAtletas } from '@/models/Stats';
 
-export const sortedOptions = [
+const getMinimoParaValorizar = (player: FullPlayer, gatoMestre?: GatoMestreAtletas) => {
+  const value = gatoMestre?.[player.atleta_id]?.minimo_para_valorizar;
+  return typeof value === 'number' ? value : Number.POSITIVE_INFINITY;
+};
+
+export const getSortedOptions = (gatoMestre?: GatoMestreAtletas) => [
   {
     id: 1,
     title: 'Mais Caros',
-    onSort: (data: FullPlayer[]) => data.sort((a, b) => b.preco_num - a.preco_num),
+    onSort: (data: FullPlayer[]) => [...data].sort((a, b) => b.preco_num - a.preco_num),
   },
   {
     id: 2,
     title: 'Mais Baratos',
-    onSort: (data: FullPlayer[]) => data.sort((a, b) => a.preco_num - b.preco_num),
+    onSort: (data: FullPlayer[]) => [...data].sort((a, b) => a.preco_num - b.preco_num),
   },
   {
     id: 3,
     title: 'Maior Média',
-    onSort: (data: FullPlayer[]) => data.sort((a, b) => b.media_num - a.media_num),
+    onSort: (data: FullPlayer[]) => [...data].sort((a, b) => b.media_num - a.media_num),
   },
   {
     id: 4,
     title: 'Min. Val.',
     onSort: (data: FullPlayer[]) =>
-      data.sort((a, b) => a.minimo_para_valorizar - b.minimo_para_valorizar),
+      [...data].sort(
+        (a, b) => getMinimoParaValorizar(a, gatoMestre) - getMinimoParaValorizar(b, gatoMestre)
+      ),
   },
 ];
 
