@@ -340,6 +340,24 @@ function StandingRow({
               </Text>
             </RNView>
           )}
+
+          <TouchableOpacity
+            activeOpacity={0.75}
+            onPress={() => router.push(`/leagues/club/${entry.time_id}`)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+              borderRadius: 10,
+              paddingVertical: 9,
+              backgroundColor: '#22c55e18',
+              borderWidth: 1,
+              borderColor: '#22c55e40',
+            }}>
+            <Text style={{ fontSize: 12, fontWeight: '700', color: '#22c55e' }}>Ver time</Text>
+            <Feather name="arrow-right" size={13} color="#22c55e" />
+          </TouchableOpacity>
         </RNView>
       )}
     </TouchableOpacity>
