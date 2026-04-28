@@ -38,11 +38,16 @@ export interface PlayerStats {
 }
 
 export interface GatoMestre {
-  media_minutos_jogados: number;
-  media_pontos_mandante: number;
-  media_pontos_visitante: number;
-  minutos_jogados: number;
+  scouts: { media: IScout; mandante: IScout; visitante: IScout };
+  minimos_para_valorizar: Record<string, number>;
+  media_pontos_mandante: number | null;
+  media_pontos_visitante: number | null;
+  media_minutos_jogados: number | null;
+  minutos_jogados: number | null;
+  minimo_para_valorizar: number;
 }
+
+export type GatoMestreAtletas = Record<string, GatoMestre>;
 
 export interface FullPlayer {
   atleta_id: number;

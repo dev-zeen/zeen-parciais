@@ -23,6 +23,7 @@ export const GET_TOP_RANKED_PLAYERS = 'auth/mercado/destaques';
 export const GET_TOP_RESERVE_PLAYERS = 'auth/mercado/destaques/reservas';
 export const GET_TOP_PLAYERS = 'auth/mercado/selecao';
 export const GET_PLAYER_STATS_BY_ID = '/auth/mercado/atleta/:playerId/pontuacao';
+export const GET_GATO_MESTRE_ATLETAS = '/auth/gatomestre/atletas';
 
 export const GET_LEAGUE_BY_SLUG = '/auth/liga/:slug'; // @Controller('/api/v1/leagues/:slug')
 export const GET_ALL_LEAGUES = '/auth/ligas'; // @Controller('/api/v1/leagues')

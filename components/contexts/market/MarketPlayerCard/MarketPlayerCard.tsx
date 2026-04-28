@@ -8,14 +8,17 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
-import { FullPlayer, IPositions } from '@/models/Stats';
+import { FullPlayer, GatoMestreAtletas, IPositions } from '@/models/Stats';
+import { useGetGatoMestreAtletas } from '@/queries/players.query';
 import { numberToString } from '@/utils/parseTo';
+import { useCallback } from 'react';
 
 type MarketPlayerCardProps = {
   player: FullPlayer;
   market: Market;
   matches: Matches;
   positions: IPositions;
+  gatoMestre?: GatoMestreAtletas;
   onPressAddPlayerToLineup: (player: FullPlayer) => void;
   onPressRemovePlayerFromLineup: (player: FullPlayer) => void;
   isButtonDisabled: boolean;
@@ -35,6 +38,29 @@ export function MarketPlayerCard({
   const colorTheme = useThemeColor();
 
   const { isMarketClose } = useMarketStatus();
+
+  const { data: gatoMestre } = useGetGatoMestreAtletas();
+
+  const min = useCallback(
+    (player?: FullPlayer) => {
+      const playerId = player?.atleta_id;
+
+      if (!gatoMestre) {
+        return '-';
+      }
+
+      if (!player) {
+        return '-';
+      }
+
+      const minGatoMestre = gatoMestre[playerId as number]?.minimo_para_valorizar;
+
+      return minGatoMestre != null ? numberToString(minGatoMestre) : '-';
+    },
+    [gatoMestre]
+  );
+
+  const minVal = min(player);
 
   const match = matches?.partidas.find(
     (match) =>
@@ -220,9 +246,7 @@ export function MarketPlayerCard({
               <Text
                 className="font-bold text-xs"
                 style={{ color: colorTheme === 'dark' ? '#5B8EFF' : '#0057FF' }}>
-                {player.minimo_para_valorizar === null
-                  ? '-'
-                  : numberToString(player.minimo_para_valorizar)}
+                {minVal}
               </Text>
             </View>
           </View>

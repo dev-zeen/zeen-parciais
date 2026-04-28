@@ -10,7 +10,7 @@ import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { useGetPositions } from '@/queries/players.query';
+import { useGetGatoMestreAtletas, useGetPositions } from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 import { onRemovePlayerFromLineup, onRemovePlayerFromSellPlayers } from '@/utils/team';
@@ -29,6 +29,7 @@ export function ListPlayersSale({
   const colorTheme = useThemeColor();
 
   const { data: positions } = useGetPositions();
+  const { data: gatoMestre } = useGetGatoMestreAtletas();
 
   const lineup = useTeamLineupStore((state) => state.lineup);
 
@@ -43,6 +44,25 @@ export function ListPlayersSale({
   useEffect(() => {
     handleCloseSuccessSellPlayersRef.current = handleCloseSuccessSellPlayers;
   });
+
+  const min = useCallback(
+    (player?: LineupPlayer | FullPlayer) => {
+      const playerId = player?.atleta_id;
+
+      if (!gatoMestre) {
+        return '-';
+      }
+
+      if (!player) {
+        return '-';
+      }
+
+      const minGatoMestre = gatoMestre[playerId as number]?.minimo_para_valorizar;
+
+      return minGatoMestre != null ? numberToString(minGatoMestre) : '-';
+    },
+    [gatoMestre]
+  );
 
   const handleSellPlayer = useCallback(
     (player: FullPlayer | LineupPlayer) => {
@@ -118,6 +138,8 @@ export function ListPlayersSale({
                     {players
                       .filter((item) => item.player)
                       .map(({ player }) => {
+                        const minVal = min(player);
+
                         return (
                           <View
                             className="rounded-lg border-b border-gray-200 flex-row items-center justify-between p-2"
@@ -232,7 +254,7 @@ export function ListPlayersSale({
                                           style={{
                                             color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280',
                                           }}>
-                                          {numberToString(player?.minimo_para_valorizar)}
+                                          {minVal}
                                         </Text>
                                       </View>
                                     </View>

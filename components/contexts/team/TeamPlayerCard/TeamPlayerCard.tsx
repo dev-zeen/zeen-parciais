@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Image, ScrollView } from 'react-native';
 
 import { Text, TouchableOpacity, View } from '@/components/Themed';
@@ -10,7 +10,11 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LineupPlayer } from '@/models/Formations';
 import { useGetMarket } from '@/queries/market.query';
-import { useGetPlayerHistory, useGetPositions } from '@/queries/players.query';
+import {
+  useGetGatoMestreAtletas,
+  useGetPlayerHistory,
+  useGetPositions,
+} from '@/queries/players.query';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { numberToString } from '@/utils/parseTo';
 
@@ -32,6 +36,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
 
   const { data: positions } = useGetPositions();
   const { data: market } = useGetMarket();
+  const { data: gatoMestre } = useGetGatoMestreAtletas();
   const { data: playerHistory } = useGetPlayerHistory(player.atleta_id);
 
   const { marketStatus, isMarketClose } = useMarketStatus();
@@ -44,6 +49,27 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
     removePlayerFromLineup(player);
     onClose();
   }, [onClose, player, removePlayerFromLineup]);
+
+  const min = useCallback(
+    (player?: LineupPlayer) => {
+      const playerId = player?.atleta_id;
+
+      if (!gatoMestre) {
+        return '-';
+      }
+
+      if (!player) {
+        return '-';
+      }
+
+      const minGatoMestre = gatoMestre[playerId as number]?.minimo_para_valorizar;
+
+      return minGatoMestre != null ? numberToString(minGatoMestre) : '-';
+    },
+    [gatoMestre]
+  );
+
+  const minVal = useMemo(() => min(player), [player, min]);
 
   if (!positions || !market || !marketStatus) return <Loading />;
 
@@ -202,9 +228,7 @@ export function TeamPlayerCard({ player, isReservePlayer, onClose }: TeamPlayerC
                 style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
                 Min
               </Text>
-              <Text className="text-base font-bold mt-0.5">
-                {numberToString(player.minimo_para_valorizar)}
-              </Text>
+              <Text className="text-base font-bold mt-0.5">{minVal}</Text>
             </View>
 
             <View

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import {
   GET_APPRECIATIONS,
+  GET_GATO_MESTRE_ATLETAS,
   GET_PLAYER_STATS_BY_ID,
   GET_POSITIONS,
   GET_TOP_PLAYERS,
@@ -10,7 +11,7 @@ import {
 } from '@/constants/Endpoits';
 import { APPRECIATIONS } from '@/constants/Keys';
 import { Appreciations, PlayerHistoryStats, TopPlayer } from '@/models/Player';
-import { IPositions } from '@/models/Stats';
+import { GatoMestreAtletas, IPositions } from '@/models/Stats';
 import api from '@/services/api';
 import { onSaveStorage } from '@/utils/asyncStorage';
 
@@ -58,6 +59,14 @@ export const useGetAppreciations = (allowRequest: boolean) =>
       if (data.atletas && Object.keys(data.atletas).length > 0) onSaveStorage(APPRECIATIONS, data);
       return data;
     },
+  });
+
+export const useGetGatoMestreAtletas = () =>
+  useQuery<GatoMestreAtletas>({
+    queryKey: [GET_GATO_MESTRE_ATLETAS],
+    queryFn: () => api.get<GatoMestreAtletas>(GET_GATO_MESTRE_ATLETAS).then((r) => r.data),
+    retry: 0,
+    staleTime: 1000 * 60 * 5,
   });
 
 export const useGetPlayerHistory = (playerId: number | null) => {
