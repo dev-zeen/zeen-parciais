@@ -81,9 +81,13 @@ export function MatchCard({
         style={{
           backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
           borderWidth: 1,
-          borderColor: !match.valida 
-            ? (colorTheme === 'dark' ? '#991b1b' : '#fca5a5')
-            : (colorTheme === 'dark' ? '#1f2937' : '#f3f4f6'),
+          borderColor: !match.valida
+            ? colorTheme === 'dark'
+              ? '#991b1b'
+              : '#fca5a5'
+            : colorTheme === 'dark'
+              ? '#1f2937'
+              : '#f3f4f6',
           opacity: !match.valida ? 0.85 : 1,
         }}>
         <Text
@@ -235,24 +239,24 @@ export function MatchCard({
         {match.valida ? (
           <>
             {match.status_transmissao_tr === 'ENCERRADA' && (
-              <View 
+              <View
                 className="mt-3 mx-2 rounded-xl p-3"
                 style={{
                   backgroundColor: colorTheme === 'dark' ? '#1e293b' : '#f1f5f9',
                   borderWidth: 1,
                   borderColor: colorTheme === 'dark' ? '#334155' : '#e2e8f0',
                 }}>
-                <View 
+                <View
                   className="flex-row items-center justify-center"
                   style={{ gap: 8, backgroundColor: 'transparent' }}>
-                  <Feather 
-                    name="check-circle" 
-                    size={16} 
-                    color={colorTheme === 'dark' ? '#94a3b8' : '#64748b'} 
+                  <Feather
+                    name="check-circle"
+                    size={16}
+                    color={colorTheme === 'dark' ? '#94a3b8' : '#64748b'}
                   />
-                  <Text 
+                  <Text
                     className="text-xs font-semibold"
-                    style={{ 
+                    style={{
                       color: colorTheme === 'dark' ? '#cbd5e1' : '#475569',
                     }}>
                     Partida Encerrada
@@ -262,41 +266,41 @@ export function MatchCard({
             )}
           </>
         ) : (
-          <View 
+          <View
             className="mt-3 mx-2 rounded-xl p-3"
             style={{
               backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
               borderWidth: 1,
               borderColor: colorTheme === 'dark' ? '#991b1b' : '#fecaca',
             }}>
-            <View 
+            <View
               className="flex-row items-start"
               style={{ gap: 10, backgroundColor: 'transparent' }}>
-              <View 
+              <View
                 className="w-7 h-7 rounded-full items-center justify-center mt-0.5"
                 style={{
                   backgroundColor: colorTheme === 'dark' ? '#991b1b' : '#fecaca',
                 }}>
-                <Feather 
-                  name="alert-circle" 
-                  size={16} 
-                  color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} 
+                <Feather
+                  name="alert-circle"
+                  size={16}
+                  color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'}
                 />
               </View>
               <View className="flex-1" style={{ backgroundColor: 'transparent' }}>
-                <Text 
+                <Text
                   className="text-sm font-semibold mb-1"
-                  style={{ 
+                  style={{
                     color: colorTheme === 'dark' ? '#fca5a5' : '#dc2626',
                   }}>
                   Partida Inválida
                 </Text>
-                <Text 
+                <Text
                   className="text-xs leading-4"
-                  style={{ 
+                  style={{
                     color: colorTheme === 'dark' ? '#fecaca' : '#ef4444',
                   }}>
-                  Esta partida não conta pontos para a rodada atual do Cartola FC
+                  Esta partida não conta pontos para a rodada atual
                 </Text>
               </View>
             </View>

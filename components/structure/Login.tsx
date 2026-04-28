@@ -108,18 +108,17 @@ const FEATURES = [
   {
     icon: 'activity',
     title: 'Parciais em Tempo Real',
-    description:
-      'Acompanhe a pontuação dos seus jogadores ao vivo durante as rodadas do Cartola FC',
+    description: 'Acompanhe a pontuação dos seus jogadores ao vivo durante as rodadas',
   },
   {
     icon: 'users',
-    title: 'Escale seu time no Cartola FC',
+    title: 'Escale seu time',
     description:
       'Escolha seus jogadores, troque capitão e veja o desempenho do seu time em tempo real',
   },
   {
     icon: 'award',
-    title: 'Gerencie suas ligas no Cartola FC',
+    title: 'Gerencie suas ligas',
     description: 'Participe de ligas clássicas, mata-mata e pontos corridos com amigos',
   },
 ];
@@ -248,7 +247,7 @@ export function Login({ title }: LoginProps) {
                 fontFamily: 'Satoshi-Variable',
                 lineHeight: 20,
               }}>
-              Acompanhamento em tempo real do Cartola FC
+              Acompanhamento em tempo real
             </Text>
           </Animated.View>
 
@@ -292,30 +291,10 @@ export function Login({ title }: LoginProps) {
                     color: Colors.light.background,
                     fontFamily: 'Satoshi-Variable',
                   }}>
-                  {isAuthenticating ? 'Autenticando...' : 'Entrar com Cartola FC'}
+                  {isAuthenticating ? 'Autenticando...' : 'Entrar'}
                 </Text>
               </View>
             </TouchableOpacity>
-
-            {/* Texto de Segurança */}
-            <View
-              className="flex-row items-center justify-center mt-3 px-4"
-              style={{
-                gap: 6,
-              }}>
-              <Feather
-                name="shield"
-                size={12}
-                color={isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)'}
-              />
-              <Text
-                className="text-xs text-center opacity-50"
-                style={{
-                  fontFamily: 'Satoshi-Variable',
-                }}>
-                Login seguro via Globo ID • Cartola FC Oficial
-              </Text>
-            </View>
           </Animated.View>
 
           {/* Alert Info (se houver) */}
