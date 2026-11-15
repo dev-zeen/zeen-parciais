@@ -1,102 +1,127 @@
+import { Feather } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Loading } from '@/components/structure/Loading';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { useCountdown } from '@/hooks/useCountdown';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTokens } from '@/hooks/useTokens';
+
+const numberFormat = new Intl.NumberFormat('pt-BR');
+
+const MARKET_STATUS_NAMED = {
+  1: 'Mercado aberto',
+  2: 'Mercado fechado',
+  3: 'Mercado em atualização',
+  4: 'Mercado em manutenção',
+} as const;
 
 export function MarketStatusCard() {
+  const { colors, spacing } = useTokens();
   const { marketStatus, isBallRolling, currentRoundInfo } = useMarketStatus();
 
-  const MARKET_STATUS_COLOR_NAMED = {
-    1: 'bg-green-500',
-    2: '',
-    3: 'bg-yellow-500',
-    4: 'bg-orange-500',
-  };
+  const isOpen = marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO;
+  const countdown = useCountdown(isOpen ? currentRoundInfo?.fechamento.timestamp : undefined);
 
-  const MARKET_STATUS_NAMED = {
-    1: 'Mercado Aberto',
-    2: 'Mercado Fechado',
-    3: 'Mercado em Atualização',
-    4: 'Mercado em Manutenção',
-  };
-
-  const marketClosingDate: string | undefined = useMemo(() => {
-    if (marketStatus) {
-      const { dia, mes, ano, hora, minuto } = marketStatus.fechamento;
-      const date = new Date(ano, mes - 1, dia, hora, minuto);
-      return format(date, "EEEE 'ás' HH:mm", {
-        locale: ptBR,
-      });
-    }
+  const closingDate = useMemo(() => {
+    if (!marketStatus) return undefined;
+    const { dia, mes, ano, hora, minuto } = marketStatus.fechamento;
+    return format(new Date(ano, mes - 1, dia, hora, minuto), "EEEE 'às' HH:mm", { locale: ptBR });
   }, [marketStatus]);
-
-  const isFinalRound = useMemo(() => {
-    return currentRoundInfo?.numero === currentRoundInfo?.rodadaFinal;
-  }, [currentRoundInfo]);
 
   if (!marketStatus) {
     return <Loading />;
   }
 
+  const isFinalRound = currentRoundInfo?.numero === currentRoundInfo?.rodadaFinal;
+  const roundName = currentRoundInfo?.nome || `Rodada ${marketStatus.rodada_atual}`;
+
+  const statusLabel =
+    marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO && isBallRolling
+      ? 'Bola rolando'
+      : MARKET_STATUS_NAMED[marketStatus.status_mercado];
+
+  const dotColor = isOpen
+    ? colors.positiveFill
+    : isBallRolling
+      ? colors.negativeFill
+      : colors.warningFill;
+
+  const countdownTone = countdown.isLastHour ? 'negative' : countdown.isLastDay ? 'warning' : 'text';
+
   return (
     <AnimatedCard delay={100} variant="flat">
-      <View
-        className="flex-row items-center justify-between"
-        style={{ backgroundColor: 'transparent' }}>
-        {/* Status Indicator */}
-        <View className="flex-row items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
+      <View style={{ gap: spacing.xs }}>
+        <View style={styles.row}>
+          <View style={styles.status}>
+            <View style={[styles.dot, { backgroundColor: dotColor }]} />
+            <AppText variant="body" weight="bold">
+              {statusLabel}
+            </AppText>
+          </View>
+          <View style={styles.status}>
+            {isFinalRound ? <Badge label="Rodada final" tone="brand" /> : null}
+            <AppText variant="label" weight="medium" color="textMuted">
+              {roundName}
+            </AppText>
+          </View>
+        </View>
+
+        {isOpen && countdown.label ? (
           <View
-            className={`rounded-full h-2.5 w-2.5 ${
-              MARKET_STATUS_COLOR_NAMED[marketStatus.status_mercado]
-            }`}
-          />
+            accessible
+            accessibilityLabel={`Mercado fecha em ${countdown.label}, ${closingDate}`}
+            style={styles.row}>
+            <View style={styles.status}>
+              <Feather name="clock" size={16} color={colors[countdownTone]} />
+              <AppText variant="title" weight="bold" color={countdownTone}>
+                Fecha em {countdown.label}
+              </AppText>
+            </View>
+            <AppText variant="label" color="textMuted">
+              {closingDate}
+            </AppText>
+          </View>
+        ) : null}
 
-          <Text className="font-semibold text-sm">
-            {marketStatus.status_mercado === MARKET_STATUS_NAME.ABERTO
-              ? 'Mercado Aberto'
-              : marketStatus.status_mercado === MARKET_STATUS_NAME.FECHADO
-                ? isBallRolling
-                  ? 'Bola Rolando'
-                  : 'Mercado Fechado'
-                : MARKET_STATUS_NAMED[marketStatus.status_mercado]}
-          </Text>
-        </View>
+        {isBallRolling ? (
+          <AppText variant="label" color="textMuted">
+            Parciais atualizadas em tempo real
+          </AppText>
+        ) : null}
 
-        {/* Time/Round Info */}
-        <Text className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-          {marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO
-            ? marketClosingDate
-            : currentRoundInfo?.nome || `Rodada ${marketStatus?.rodada_atual}`}
-        </Text>
+        {marketStatus.times_escalados > 0 ? (
+          <AppText variant="label" color="textMuted">
+            {numberFormat.format(marketStatus.times_escalados)} times escalados nesta rodada
+          </AppText>
+        ) : null}
       </View>
-
-      {/* Additional Info Row */}
-      {(isBallRolling || isFinalRound) && (
-        <View
-          className="flex-row items-center justify-between mt-2 pt-2 border-t border-gray-200 dark:border-gray-700"
-          style={{ backgroundColor: 'transparent' }}>
-          {isBallRolling && (
-            <View
-              className="flex-row items-center"
-              style={{ gap: 4, backgroundColor: 'transparent' }}>
-              <View className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              <Text className="text-xs text-gray-600 dark:text-gray-400">
-                Atualização em tempo real
-              </Text>
-            </View>
-          )}
-          {isFinalRound && (
-            <View className="bg-yellow-500 px-2 py-0.5 rounded-full">
-              <Text className="text-xs font-bold text-black">Rodada Final</Text>
-            </View>
-          )}
-        </View>
-      )}
     </AnimatedCard>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  status: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+});

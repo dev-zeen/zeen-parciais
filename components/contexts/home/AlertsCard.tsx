@@ -4,8 +4,10 @@ import { Pressable } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
+import { MARKET_STATUS_NAME } from '@/constants/Market';
+import { useCountdown } from '@/hooks/useCountdown';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 import { FullPlayer } from '@/models/Stats';
 
 type Alert = {
@@ -23,26 +25,25 @@ type AlertsCardProps = {
 
 export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardProps) {
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
-  const colorTheme = useThemeColor();
+  const tokens = useTokens();
   const { marketStatus, currentRoundInfo } = useMarketStatus();
+  const isMarketOpen = marketStatus?.status_mercado === MARKET_STATUS_NAME.ABERTO;
+  const countdown = useCountdown(
+    isMarketOpen ? currentRoundInfo?.fechamento.timestamp : undefined
+  );
 
   const alerts: Alert[] = useMemo(() => {
     const alertsList: Alert[] = [];
 
-    // Market closing soon alert
-    if (marketStatus && currentRoundInfo) {
-      const timeUntilClose = currentRoundInfo.fechamento.timestamp * 1000 - Date.now();
-      const hoursRemaining = Math.floor(timeUntilClose / (1000 * 60 * 60));
-
-      if (hoursRemaining < 24 && hoursRemaining > 0) {
-        alertsList.push({
-          id: 'market-closing',
-          type: 'warning',
-          title: 'Mercado fechando em breve',
-          message: `Faltam ${hoursRemaining} horas para o fechamento`,
-          icon: 'clock',
-        });
-      }
+    // Mercado fecha em menos de 24h
+    if (countdown.isLastDay && countdown.label) {
+      alertsList.push({
+        id: 'market-closing',
+        type: 'warning',
+        title: 'Mercado fechando em breve',
+        message: `Faltam ${countdown.label} para o fechamento`,
+        icon: 'clock',
+      });
     }
 
     // Unlikely players alert
@@ -57,35 +58,21 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
     }
 
     return alertsList.filter((alert) => !dismissedAlerts.includes(alert.id));
-  }, [marketStatus, currentRoundInfo, lineupPlayersUnlikely, dismissedAlerts]);
+  }, [countdown.isLastDay, countdown.label, lineupPlayersUnlikely, dismissedAlerts]);
 
   const handleDismiss = (alertId: string) => {
     setDismissedAlerts((prev) => [...prev, alertId]);
   };
 
   const getAlertColors = (type: Alert['type']) => {
+    const { colors } = tokens;
     switch (type) {
       case 'error':
-        return {
-          bg: colorTheme === 'dark' ? '#7F1D1D' : '#FEE2E2',
-          border: 'border-red-500',
-          text: 'text-red-700 dark:text-red-300',
-          icon: '#EF4444',
-        };
+        return { bg: colors.negativeContainer, accent: colors.negative };
       case 'warning':
-        return {
-          bg: colorTheme === 'dark' ? '#78350F' : '#FEF3C7',
-          border: 'border-orange-500',
-          text: 'text-orange-700 dark:text-orange-300',
-          icon: '#F59E0B',
-        };
+        return { bg: colors.warningContainer, accent: colors.warning };
       default:
-        return {
-          bg: colorTheme === 'dark' ? '#0A1F4A' : '#DDEEFF',
-          border: 'border-secondary',
-          text: 'text-blue-700 dark:text-blue-300',
-          icon: '#0057FF',
-        };
+        return { bg: colors.accentContainer, accent: colors.accent };
     }
   };
 
@@ -98,40 +85,34 @@ export function AlertsCard({ lineupPlayersUnlikely, hasNoCaptain }: AlertsCardPr
       {alerts.map((alert, index) => {
         const colors = getAlertColors(alert.type);
         return (
-          <AnimatedCard key={alert.id} delay={400 + index * 50} variant="flat">
+          <AnimatedCard key={alert.id} delay={400 + index * 50} variant="flat" className="p-0">
             <View
-              className={`rounded-xl p-3 border-l-4 ${colors.border}`}
-              style={{ backgroundColor: colors.bg }}>
-              <View
-                className="flex-row items-center justify-between"
-                style={{ backgroundColor: 'transparent' }}>
-                <View
-                  className="flex-row items-center flex-1"
-                  style={{ gap: 10, backgroundColor: 'transparent' }}>
-                  <View
-                    className="w-8 h-8 rounded-full items-center justify-center"
-                    style={{ backgroundColor: `${colors.icon}20` }}>
-                    <Feather name={alert.icon} size={16} color={colors.icon} />
-                  </View>
-                  <View className="flex-1" style={{ backgroundColor: 'transparent' }}>
-                    <Text className={`font-bold text-sm ${colors.text}`} numberOfLines={1}>
-                      {alert.title}
-                    </Text>
-                    <Text
-                      className="text-xs text-gray-600 dark:text-gray-400 mt-0.5"
-                      numberOfLines={2}>
-                      {alert.message}
-                    </Text>
-                  </View>
-                </View>
-                <Pressable onPress={() => handleDismiss(alert.id)} hitSlop={12} className="ml-2">
-                  <Feather
-                    name="x"
-                    size={18}
-                    color={colorTheme === 'dark' ? '#9CA3AF' : '#6B7280'}
-                  />
-                </Pressable>
+              style={{
+                backgroundColor: colors.bg,
+                borderRadius: 12,
+                padding: 12,
+                borderLeftWidth: 4,
+                borderLeftColor: colors.accent,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 10,
+              }}>
+              <Feather name={alert.icon} size={18} color={colors.accent} />
+              <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+                <Text style={{ fontWeight: '700', fontSize: 14, color: tokens.colors.text }}>
+                  {alert.title}
+                </Text>
+                <Text style={{ fontSize: 12, marginTop: 2, color: tokens.colors.textMuted }}>
+                  {alert.message}
+                </Text>
               </View>
+              <Pressable
+                onPress={() => handleDismiss(alert.id)}
+                hitSlop={14}
+                accessibilityRole="button"
+                accessibilityLabel={`Dispensar alerta: ${alert.title}`}>
+                <Feather name="x" size={18} color={tokens.colors.textMuted} />
+              </Pressable>
             </View>
           </AnimatedCard>
         );
