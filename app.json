@@ -7,12 +7,9 @@
     "icon": "./assets/images/icon.png",
     "scheme": "zeenparciais",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splashscreen.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0D1117"
-    },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.devzeen.zeenparciais",
@@ -50,11 +47,17 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splashscreen.png",
+          "image": "./assets/images/splash-logo.png",
+          "imageWidth": 227,
           "resizeMode": "contain",
-          "backgroundColor": "#0D1117"
+          "backgroundColor": "#F8F9FA",
+          "dark": {
+            "image": "./assets/images/splash-logo.png",
+            "backgroundColor": "#F8F9FA"
+          }
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "experiments": {
       "tsconfigPaths": true,
