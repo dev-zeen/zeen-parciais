@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import {  TouchableOpacity } from 'react-native';
 
 import { Text } from '@/components/Themed';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 
 interface ButtonProps {
   onPress?: () => void;
@@ -13,6 +13,8 @@ interface ButtonProps {
   colorIcon?: string;
   onlyIcon?: boolean;
   disabled?: boolean;
+  /** Obrigatório para leitores de tela quando `onlyIcon` */
+  accessibilityLabel?: string;
 }
 
 export function Button({
@@ -23,39 +25,44 @@ export function Button({
   hasIcon,
   onlyIcon,
   disabled,
+  accessibilityLabel,
 }: ButtonProps) {
-  const colorTheme = useThemeColor();
+  const { colors, radius, minTouch } = useTokens();
 
   const variants = {
-    primary: 'bg-blue-500',
-    secondary: 'bg-violet-500',
-    warning: 'bg-orange-500',
-    error: 'bg-red-500',
-    success: 'bg-green-600',
-    disabled: colorTheme === 'dark' ? 'bg-gray-400' : 'bg-gray-300',
+    primary: { bg: colors.accentFill, fg: colors.onAccentFill },
+    secondary: { bg: colors.brand, fg: colors.onBrand },
+    warning: { bg: colors.warningFill, fg: colors.onWarningFill },
+    error: { bg: colors.negativeFill, fg: colors.onNegativeFill },
+    success: { bg: colors.positiveFill, fg: colors.onPositiveFill },
+    disabled: { bg: colors.disabledFill, fg: colors.onDisabledFill },
   };
+
+  const current = disabled ? variants.disabled : variants[variant];
 
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`flex-row px-2 ${
-        hasIcon && !onlyIcon && 'pr-4'
-      } py-3 items-center justify-center rounded-lg ${
-        disabled ? variants.disabled : variants[variant]
-      }`}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? title}
+      accessibilityState={{ disabled: !!disabled }}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: minTouch,
+        minWidth: minTouch,
+        paddingHorizontal: onlyIcon ? 8 : 16,
+        gap: 6,
+        borderRadius: radius.md,
+        backgroundColor: current.bg,
+      }}
       activeOpacity={0.6}
       disabled={disabled}>
-      {hasIcon && (
-        <Feather
-          name={iconName}
-          color={'white'}
-          size={18}
-          style={{
-            paddingHorizontal: 4,
-          }}
-        />
+      {hasIcon && <Feather name={iconName} color={current.fg} size={18} />}
+      {!onlyIcon && (
+        <Text style={{ fontSize: 14, fontWeight: '700', color: current.fg }}>{title}</Text>
       )}
-      {!onlyIcon && <Text className="text-sm font-bold text-white">{title}</Text>}
     </TouchableOpacity>
   );
 }

@@ -1,11 +1,12 @@
-import { forwardRef, useImperativeHandle, useState } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
+import { Modal, Platform, Pressable, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import Colors from '@/constants/Colors';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 
 type BottomSheetProps = {
   children: React.ReactNode;
+  /** Mantido por compatibilidade; a altura é definida pela plataforma. */
   snapPoints?: string[];
   enablePanDownToClose?: boolean;
   onClose?: () => void;
@@ -16,10 +17,21 @@ export type BottomSheetRef = {
   close: () => void;
 };
 
+/**
+ * iOS: sheet nativo do sistema (pageSheet), com gesto de arrastar para fechar e o
+ * material da versão do iOS em uso.
+ * Android: painel inferior com alça, fechado pelo botão/gesto de voltar ou toque fora.
+ */
 export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
   ({ children, onClose }, ref) => {
-    const colorTheme = useThemeColor();
+    const { colors, radius } = useTokens();
+    const insets = useSafeAreaInsets();
     const [visible, setVisible] = useState(false);
+
+    const handleClose = useCallback(() => {
+      setVisible(false);
+      if (onClose) onClose();
+    }, [onClose]);
 
     useImperativeHandle(ref, () => ({
       snapToIndex: (index: number) => {
@@ -27,38 +39,55 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
           setVisible(true);
         }
       },
-      close: () => {
-        setVisible(false);
-        if (onClose) onClose();
-      },
+      close: handleClose,
     }));
+
+    const handle = (
+      <View style={styles.handleArea}>
+        <View style={[styles.handle, { backgroundColor: colors.border }]} />
+      </View>
+    );
+
+    if (Platform.OS === 'ios') {
+      return (
+        <Modal
+          animationType="slide"
+          presentationStyle="pageSheet"
+          visible={visible}
+          onRequestClose={handleClose}>
+          <View style={[styles.page, { backgroundColor: colors.bg }]}>
+            {handle}
+            {children}
+          </View>
+        </Modal>
+      );
+    }
 
     return (
       <Modal
         animationType="slide"
-        transparent={true}
+        transparent
         visible={visible}
-        statusBarTranslucent={false}
-        onRequestClose={() => {
-          setVisible(false);
-          if (onClose) onClose();
-        }}>
-        <View style={styles.overlay}>
+        statusBarTranslucent
+        onRequestClose={handleClose}>
+        <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
           <Pressable
             style={StyleSheet.absoluteFill}
-            onPress={() => {
-              setVisible(false);
-              if (onClose) onClose();
-            }}
+            onPress={handleClose}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar"
           />
           <View
             style={[
               styles.container,
               {
-                backgroundColor:
-                  colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
+                backgroundColor: colors.bg,
+                borderTopLeftRadius: radius.lg,
+                borderTopRightRadius: radius.lg,
+                paddingBottom: insets.bottom,
               },
             ]}>
+            {handle}
             {children}
           </View>
         </View>
@@ -70,23 +99,26 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
 BottomSheet.displayName = 'BottomSheet';
 
 const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+  },
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
   container: {
     height: '90%',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: -3,
-    },
-    shadowOpacity: 0.27,
-    shadowRadius: 4.65,
     elevation: 6,
+  },
+  handleArea: {
+    alignItems: 'center',
+    paddingTop: 8,
+    paddingBottom: 4,
+  },
+  handle: {
+    width: 36,
+    height: 5,
+    borderRadius: 3,
   },
 });

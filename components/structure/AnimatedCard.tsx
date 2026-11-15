@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { Animated, Pressable, ViewStyle } from 'react-native';
+import { Animated, Pressable, View, ViewStyle } from 'react-native';
 
-import { View } from '@/components/Themed';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 
 type AnimatedCardProps = {
   children: React.ReactNode;
@@ -26,7 +25,7 @@ export function AnimatedCard({
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.95)).current;
   const delayRef = useRef(delay);
-  const colorTheme = useThemeColor();
+  const { colors, radius, isDark } = useTokens();
 
   useEffect(() => {
     Animated.parallel([
@@ -47,15 +46,27 @@ export function AnimatedCard({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only entrance animation; delay captured via ref
   }, []);
 
-  const variantStyle = useMemo(() => {
-    const isDark = colorTheme === 'dark';
-    const styles = {
-      elevated: isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100 shadow-md',
-      flat:     isDark ? 'bg-gray-900' : 'bg-gray-50',
-      default:  isDark ? 'bg-gray-800/50' : 'bg-white/50',
-    } as const;
+  const variantStyle = useMemo<ViewStyle>(() => {
+    const styles: Record<NonNullable<AnimatedCardProps['variant']>, ViewStyle> = {
+      elevated: {
+        backgroundColor: colors.surface,
+        borderWidth: 1,
+        borderColor: colors.border,
+        ...(isDark
+          ? {}
+          : {
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 6,
+              elevation: 3,
+            }),
+      },
+      flat: { backgroundColor: colors.surface },
+      default: { backgroundColor: colors.surface },
+    };
     return styles[variant];
-  }, [variant, colorTheme]);
+  }, [variant, colors, isDark]);
 
   const content = (
     <Animated.View
@@ -68,7 +79,14 @@ export function AnimatedCard({
         },
         style,
       ]}>
-      <View className={`rounded-lg p-4 ${variantStyle} ${className}`}>
+      <View
+        className={className}
+        style={[
+          // `p-0` é o único ajuste de padding usado pelos chamadores; o estilo inline
+          // teria precedência sobre a classe, então tratamos aqui.
+          { borderRadius: radius.md, padding: /\bp-0\b/.test(className) ? 0 : 16 },
+          variantStyle,
+        ]}>
         {children}
       </View>
     </Animated.View>
