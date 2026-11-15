@@ -39,17 +39,18 @@ export function useRespondPointsCompetitionInvite(
 ) {
   const queryClient = useQueryClient();
   return useMutation<RespondInviteResponse, AxiosError<{ mensagem?: string }>, RespondCompetitionInviteInput>({
+    ...options,
     mutationFn: respondCompetitionInviteRequest,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: [INVITES_POINTS_COMPETITIONS] });
-      queryClient.invalidateQueries({ queryKey: [GET_POINTS_COMPETITIONS] });
-      queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      // Espera a lista atualizar: o botão segue em "enviando" até o convite sumir da tela.
+      await queryClient.invalidateQueries({ queryKey: [INVITES_POINTS_COMPETITIONS] });
+      await queryClient.invalidateQueries({ queryKey: [GET_POINTS_COMPETITIONS] });
+      await queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
     onError: (error, variables, onMutateResult, context) => {
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }

@@ -61,21 +61,29 @@ export const useGetAppreciations = (allowRequest: boolean) =>
     },
   });
 
-export const useGetGatoMestreAtletas = () =>
+/**
+ * Recurso PRO do Cartola. Rota opcional: um 401 aqui (ex.: usuário sem PRO) não deve
+ * encerrar a sessão; as telas só mostram os dados quando eles existem.
+ */
+export const useGetGatoMestreAtletas = (allowRequest?: boolean) =>
   useQuery<GatoMestreAtletas>({
     queryKey: [GET_GATO_MESTRE_ATLETAS],
-    queryFn: () => api.get<GatoMestreAtletas>(GET_GATO_MESTRE_ATLETAS).then((r) => r.data),
+    queryFn: () =>
+      api
+        .get<GatoMestreAtletas>(GET_GATO_MESTRE_ATLETAS, { optionalAuth: true })
+        .then((r) => r.data),
+    enabled: !!allowRequest,
     retry: 0,
     staleTime: 1000 * 60 * 5,
   });
 
-export const useGetPlayerHistory = (playerId: number | null) => {
+export const useGetPlayerHistory = (playerId: number | null, allowRequest?: boolean) => {
   const url = GET_PLAYER_STATS_BY_ID.replace(':playerId', String(playerId ?? ''));
 
   return useQuery<PlayerHistoryStats>({
     queryKey: [url],
     queryFn: () => api.get<PlayerHistoryStats>(url).then((r) => r.data),
-    enabled: !!playerId,
+    enabled: !!playerId && !!allowRequest,
     staleTime: 1000 * 60 * 5,
   });
 };

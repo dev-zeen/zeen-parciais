@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 
+import useMarketStatus from '@/hooks/useMarketStatus';
 import { useGetMatchs } from '@/queries/matches.query';
 import { useGetGatoMestreAtletas } from '@/queries/players.query';
 import { buildPlayerInsight } from '@/utils/insights';
@@ -12,7 +13,10 @@ type InsightPlayer = Parameters<typeof buildPlayerInsight>[0];
  * As duas consultas já são usadas no app; aqui só reaproveitamos o cache.
  */
 export function usePlayerInsights() {
-  const { data: gatoMestre, isLoading: isLoadingGatoMestre } = useGetGatoMestreAtletas();
+  const { allowRequest } = useMarketStatus();
+  const { data: gatoMestre, isLoading: isLoadingGatoMestre } = useGetGatoMestreAtletas(
+    !!allowRequest
+  );
   const { data: matches, isLoading: isLoadingMatches } = useGetMatchs();
 
   const getInsight = useCallback(

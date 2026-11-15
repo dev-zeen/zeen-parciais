@@ -3,7 +3,14 @@ import { View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
 import { useTokens } from '@/hooks/useTokens';
 
-export type BadgeTone = 'neutral' | 'brand' | 'accent' | 'positive' | 'negative' | 'warning';
+export type BadgeTone =
+  | 'neutral'
+  | 'brand'
+  | 'accent'
+  | 'info'
+  | 'positive'
+  | 'negative'
+  | 'warning';
 
 type BadgeProps = {
   label: string;
@@ -17,6 +24,7 @@ export function Badge({ label, tone = 'neutral' }: BadgeProps) {
     neutral: { bg: colors.surfaceAlt, text: 'textMuted' },
     brand: { bg: colors.brandContainer, text: 'text' },
     accent: { bg: colors.accentContainer, text: 'accent' },
+    info: { bg: colors.infoContainer, text: 'info' },
     positive: { bg: colors.positiveContainer, text: 'positive' },
     negative: { bg: colors.negativeContainer, text: 'negative' },
     warning: { bg: colors.warningContainer, text: 'warning' },

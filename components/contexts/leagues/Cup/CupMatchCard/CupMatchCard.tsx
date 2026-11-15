@@ -1,204 +1,238 @@
 import { Feather } from '@expo/vector-icons';
-import { Link } from 'expo-router';
-import { useCallback, useMemo } from 'react';
-import { TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
+import { memo } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
-import { TeamCupMatch } from '@/components/contexts/leagues/Cup/TeamCupMatch/TeamCupMatch';
-import { Loading } from '@/components/structure/Loading';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { FullClubInfo } from '@/models/Club';
-import { CupMatch as CupMatchModel } from '@/models/Leagues';
-import { numberToString } from '@/utils/parseTo';
+import { CUP_STAGE_LABEL, formatPoints } from '@/components/contexts/leagues/leagueKinds';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
+import { useTokens } from '@/hooks/useTokens';
+import { CupMatch, TeamLeague } from '@/models/Leagues';
+import { useGetClub } from '@/queries/club.query';
 
-interface CupMatchProps {
-  match: CupMatchModel;
-  myTeam?: FullClubInfo;
-  leagueSlug?: string;
+export type CupPartials = Record<number, { partialScore: number; playersPlayed: number }>;
+
+type CupMatchCardProps = {
+  match: CupMatch;
+  /** Times da liga; evita uma requisição por time */
+  teamsById: Map<number, TeamLeague>;
+  myTeamId?: number;
   currentRound?: number;
   isMarketClose?: boolean;
-  partialsByTeamId?: Record<number, { partialScore: number; playersPlayed: number }>;
-}
+  partialsByTeamId?: CupPartials;
+  /** Sem slug o card não navega (ex.: já na tela do confronto) */
+  leagueSlug?: string;
+};
 
-export function CupMatchCard({
-  match,
-  myTeam,
-  leagueSlug,
-  currentRound,
-  isMarketClose,
-  partialsByTeamId,
-}: CupMatchProps) {
-  const colorTheme = useThemeColor();
+/**
+ * Confronto em formato de chave: um time por linha, pontuação à direita, vencedor em
+ * destaque e perdedor esmaecido. Rodada atual com bola rolando mostra a parcial.
+ */
+export const CupMatchCard = memo(
+  ({
+    match,
+    teamsById,
+    myTeamId,
+    currentRound,
+    isMarketClose,
+    partialsByTeamId,
+    leagueSlug,
+  }: CupMatchCardProps) => {
+    const { colors, spacing, radius } = useTokens();
 
-  const homeTeamId = match.time_mandante_id ?? 0;
-  const awayTeamId = match.time_visitante_id ?? 0;
+    const homeId = match.time_mandante_id;
+    const awayId = match.time_visitante_id;
+    const isTbd = !homeId || !awayId;
+    const isCurrent = match.rodada_id === currentRound;
+    const isLive = isCurrent && !!isMarketClose && !match.vencedor_id;
+    const isPlayed = !!match.vencedor_id || (currentRound ?? 0) > match.rodada_id;
+    const showScore = !isTbd && (isPlayed || isLive);
+    const isMine = !!myTeamId && (homeId === myTeamId || awayId === myTeamId);
 
-  const isTbd = !match.time_mandante_id || !match.time_visitante_id;
+    const scoreOf = (teamId: number, official: number) =>
+      isLive && partialsByTeamId?.[teamId] ? partialsByTeamId[teamId].partialScore : official;
 
-  const homePartial = partialsByTeamId?.[homeTeamId];
-  const awayPartial = partialsByTeamId?.[awayTeamId];
+    const home = { id: homeId, score: scoreOf(homeId, match.time_mandante_pontuacao) };
+    const away = { id: awayId, score: scoreOf(awayId, match.time_visitante_pontuacao) };
+    // Vencedor oficial; durante o jogo, quem está na frente.
+    const leaderId =
+      match.vencedor_id ??
+      (isLive && home.score !== away.score
+        ? home.score > away.score
+          ? homeId
+          : awayId
+        : undefined);
 
-  const scoreHomeTeam = useMemo(() => {
-    if (currentRound === match.rodada_id && homePartial) return homePartial.partialScore;
-    return match.time_mandante_pontuacao;
-  }, [currentRound, homePartial, match.rodada_id, match.time_mandante_pontuacao]);
+    const status = isTbd
+      ? { label: 'A definir', tone: 'neutral' as const }
+      : isLive
+        ? { label: 'Ao vivo', tone: 'negative' as const }
+        : match.vencedor_id
+          ? { label: 'Encerrado', tone: 'neutral' as const }
+          : { label: `Rodada ${match.rodada_id}`, tone: 'neutral' as const };
 
-  const scoreAwayTeam = useMemo(() => {
-    if (currentRound === match.rodada_id && awayPartial) return awayPartial.partialScore;
-    return match.time_visitante_pontuacao;
-  }, [awayPartial, currentRound, match.rodada_id, match.time_visitante_pontuacao]);
+    const canOpen = !!leagueSlug && !isTbd && showScore;
 
-  const showScore = useMemo(
-    () =>
-      !isTbd &&
-      (match.rodada_id < (currentRound ?? 0) ||
-        (match.rodada_id === currentRound && !!isMarketClose)),
-    [currentRound, isMarketClose, isTbd, match.rodada_id]
-  );
+    return (
+      <Pressable
+        disabled={!canOpen}
+        onPress={() =>
+          router.push({
+            pathname: '/(tabs)/leagues/cup-match',
+            params: { slug: leagueSlug ?? '', chaveId: String(match.chave_id) },
+          })
+        }
+        accessibilityRole={canOpen ? 'button' : undefined}
+        accessibilityHint={canOpen ? 'Abre as escalações do confronto' : undefined}
+        android_ripple={{ color: colors.border }}
+        style={({ pressed }) => [
+          {
+            gap: spacing.xs,
+            padding: spacing.sm,
+            borderRadius: radius.md,
+            backgroundColor: isMine ? colors.accentContainer : colors.surface,
+            borderWidth: 1,
+            borderColor: isMine ? colors.accentFill : 'transparent',
+            overflow: 'hidden',
+            opacity: pressed ? 0.85 : 1,
+          },
+        ]}>
+        <View style={styles.header}>
+          <AppText variant="caption" weight="bold" color="textMuted">
+            {CUP_STAGE_LABEL[match.tipo_fase]?.toUpperCase()}
+            {isMine ? ' · SEU CONFRONTO' : ''}
+          </AppText>
+          <Badge label={status.label} tone={status.tone} />
+        </View>
 
-  const colorScore = useCallback((team: number, compare: number) => {
-    return team > compare ? '#00E094' : '#ef4444';
-  }, []);
+        {[home, away].map((side) => (
+          <TeamLine
+            key={`${match.chave_id}-${side.id}`}
+            teamId={side.id}
+            round={match.rodada_id}
+            team={side.id ? teamsById.get(side.id) : undefined}
+            score={showScore ? side.score : undefined}
+            playersPlayed={isLive ? partialsByTeamId?.[side.id]?.playersPlayed : undefined}
+            isWinner={!!leaderId && leaderId === side.id}
+            isOfficial={!!match.vencedor_id}
+            isLoser={!!match.vencedor_id && match.vencedor_id !== side.id}
+            isMine={side.id === myTeamId}
+          />
+        ))}
 
-  const customBorder = useMemo(
-    () =>
-      myTeam?.time?.time_id === match.time_mandante_id ||
-      myTeam?.time?.time_id === match.time_visitante_id
-        ? '#0057FF'
-        : 'transparent',
-    [match.time_mandante_id, match.time_visitante_id, myTeam?.time?.time_id]
-  );
+        {canOpen ? (
+          <View style={[styles.footer]}>
+            <AppText variant="caption" color="textMuted">
+              Ver escalações
+            </AppText>
+            <Feather name="chevron-right" size={12} color={colors.textMuted} />
+          </View>
+        ) : null}
+      </Pressable>
+    );
+  }
+);
 
-  if (!currentRound) {
-    return <Loading />;
+function TeamLine({
+  teamId,
+  round,
+  team,
+  score,
+  playersPlayed,
+  isWinner,
+  isOfficial,
+  isLoser,
+  isMine,
+}: {
+  teamId: number;
+  round: number;
+  team?: TeamLeague;
+  score?: number;
+  playersPlayed?: number;
+  isWinner: boolean;
+  /** Resultado final: só então o vencedor ganha o ✓ (ao vivo é só quem está na frente) */
+  isOfficial: boolean;
+  isLoser: boolean;
+  isMine: boolean;
+}) {
+  const { colors, spacing } = useTokens();
+  // Só busca o time se ele não veio na liga (ex.: time que saiu depois do sorteio).
+  const { data: fetched } = useGetClub(teamId && !team ? teamId : undefined, round);
+  const name = team?.nome ?? fetched?.time?.nome;
+  const shield = team?.url_escudo_png ?? fetched?.time?.url_escudo_png;
+
+  if (!teamId) {
+    return (
+      <View style={[styles.line, { gap: spacing.xs }]}>
+        <View style={[styles.shield, { backgroundColor: colors.surfaceAlt }]} />
+        <AppText variant="body" color="textMuted">
+          A definir
+        </AppText>
+      </View>
+    );
   }
 
   return (
-    <Link
-      href={{
-        pathname: '/(tabs)/leagues/cup-match',
-        params: {
-          slug: leagueSlug ?? '',
-          chaveId: String(match.chave_id),
-        },
-      }}
-      asChild>
-      <TouchableOpacity
-        activeOpacity={0.6}
-        key={match.time_mandante_id}
-        disabled={!leagueSlug || isTbd || !showScore}>
-        <View
-          style={{
-            borderColor: customBorder,
-            borderWidth: 2,
-            borderRadius: 12,
-            paddingVertical: 16,
-            paddingHorizontal: 12,
-            gap: 12,
-          }}>
-          {isTbd ? (
-            <View
-              style={{ alignItems: 'center', paddingVertical: 8, backgroundColor: 'transparent' }}>
-              <Text style={{ fontSize: 13, color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280' }}>
-                A definir
-              </Text>
-            </View>
-          ) : (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                backgroundColor: 'transparent',
-              }}>
-              <TeamCupMatch
-                match={match}
-                teamId={match.time_mandante_id}
-                isWinner={match.vencedor_id === match.time_mandante_id}
-                hasWinner={!!match.vencedor_id}
-              />
-
-              <View style={{ alignItems: 'center', gap: 6, backgroundColor: 'transparent' }}>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 12,
-                    backgroundColor: 'transparent',
-                  }}>
-                  <View
-                    style={{ alignItems: 'center', minWidth: 28, backgroundColor: 'transparent' }}>
-                    <Text
-                      style={{
-                        fontWeight: '700',
-                        fontSize: 18,
-                        color: showScore ? colorScore(scoreHomeTeam, scoreAwayTeam) : '#a8a29e',
-                      }}>
-                      {showScore ? numberToString(scoreHomeTeam) : '-'}
-                    </Text>
-                    {showScore && currentRound === match.rodada_id ? (
-                      <Text
-                        style={{
-                          fontSize: 10,
-                          color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                        }}>
-                        {homePartial?.playersPlayed ?? 0}/12
-                      </Text>
-                    ) : null}
-                  </View>
-
-                  <Feather
-                    name="x"
-                    size={10}
-                    color={colorTheme === 'dark' ? '#6B7280' : '#9CA3AF'}
-                  />
-
-                  <View
-                    style={{ alignItems: 'center', minWidth: 28, backgroundColor: 'transparent' }}>
-                    <Text
-                      style={{
-                        fontWeight: '700',
-                        fontSize: 18,
-                        color: showScore ? colorScore(scoreAwayTeam, scoreHomeTeam) : '#a8a29e',
-                      }}>
-                      {showScore ? numberToString(scoreAwayTeam) : '-'}
-                    </Text>
-                    {showScore && currentRound === match.rodada_id ? (
-                      <Text
-                        style={{
-                          fontSize: 10,
-                          color: colorTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                        }}>
-                        {awayPartial?.playersPlayed ?? 0}/12
-                      </Text>
-                    ) : null}
-                  </View>
-                </View>
-
-                {match.vencedor_id ? (
-                  <View
-                    style={{
-                      backgroundColor: '#00E09420',
-                      borderRadius: 99,
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                    }}>
-                    <Text style={{ fontSize: 10, fontWeight: '600', color: '#00E094' }}>
-                      Encerrado
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-
-              <TeamCupMatch
-                match={match}
-                teamId={match.time_visitante_id}
-                isWinner={match.vencedor_id === match.time_visitante_id}
-                hasWinner={!!match.vencedor_id}
-              />
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
-    </Link>
+    <View
+      style={[styles.line, { gap: spacing.xs, opacity: isLoser ? 0.45 : 1 }]}
+      accessible
+      accessibilityLabel={`${name ?? 'Time'}${isMine ? ', seu time' : ''}${
+        score != null ? `, ${formatPoints(score)} pontos` : ''
+      }${isWinner ? (isOfficial ? ', vencedor' : ', na frente') : ''}`}>
+      <Image
+        source={{ uri: shield }}
+        style={[styles.shield, { backgroundColor: colors.surfaceAlt }]}
+      />
+      <AppText
+        variant="body"
+        weight={isWinner || isMine ? 'bold' : 'medium'}
+        numberOfLines={1}
+        style={{ flex: 1 }}>
+        {name ?? '...'}
+      </AppText>
+      {playersPlayed != null ? (
+        <AppText variant="caption" color="textMuted">
+          {playersPlayed}/12
+        </AppText>
+      ) : null}
+      {score != null ? (
+        <AppText variant="title" weight="bold" color={isWinner ? 'positive' : 'text'}>
+          {formatPoints(score)}
+        </AppText>
+      ) : null}
+      <View style={styles.check}>
+        {isWinner && isOfficial ? (
+          <Feather name="check-circle" size={16} color={colors.positive} />
+        ) : null}
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  line: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    minHeight: 36,
+  },
+  shield: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+  },
+  check: {
+    width: 18,
+    alignItems: 'flex-end',
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 2,
+  },
+});

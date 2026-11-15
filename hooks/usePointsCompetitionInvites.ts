@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Alert } from 'react-native';
 
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -6,32 +6,29 @@ import {
   useGetPointsCompetitionInvites,
   useRespondPointsCompetitionInvite,
 } from '@/queries/competitionsInvites.query';
+import { haptics } from '@/utils/haptics';
+
+const EMPTY: never[] = [];
 
 const usePointsCompetitionInvites = () => {
   const { allowRequest } = useMarketStatus();
 
   const { data, isLoading, refetch, isRefetching } = useGetPointsCompetitionInvites(allowRequest);
 
-  const alertResponse = (title: string, subtitle: string) => {
-    return Alert.alert(title, subtitle, [{ text: 'Ok', style: 'cancel' }]);
-  };
-
-  const { mutate: respondInvite } = useRespondPointsCompetitionInvite({
-    onSuccess: (data, variables) => {
-      const message =
-        typeof data?.mensagem === 'string'
-          ? data.mensagem
-          : variables.decision === 'accept'
-            ? 'Convite aceito!'
-            : 'Convite recusado!';
-      alertResponse('Tudo Certo!', message);
-    },
+  const {
+    mutate: respondInvite,
+    isPending,
+    variables,
+  } = useRespondPointsCompetitionInvite({
+    // Sucesso: o convite sai da lista (a mutação espera a lista atualizar)
+    onSuccess: () => haptics.success(),
     onError: (error) => {
+      haptics.error();
       const message =
         typeof error?.response?.data?.mensagem === 'string'
           ? error.response.data.mensagem
-          : 'Não foi possível responder o convite.';
-      alertResponse('Alerta!', message);
+          : 'Não foi possível responder o convite. Confira a conexão e tente de novo.';
+      Alert.alert('Convite não respondido', message);
     },
   });
 
@@ -46,14 +43,15 @@ const usePointsCompetitionInvites = () => {
   );
 
   return {
-    invites: useMemo(() => data ?? [], [data]),
-    isLoading: useMemo(() => isLoading, [isLoading]),
-    refetch: useMemo(() => refetch, [refetch]),
-    isRefetching: useMemo(() => isRefetching, [isRefetching]),
+    invites: data ?? EMPTY,
+    isLoading,
+    refetch,
+    isRefetching,
+    /** Convite sendo respondido agora, para bloquear o card e mostrar progresso */
+    pending: isPending && variables ? variables : undefined,
     handleAccept,
     handleDecline,
   };
 };
 
 export default usePointsCompetitionInvites;
-

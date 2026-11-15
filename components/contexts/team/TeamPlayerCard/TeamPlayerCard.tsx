@@ -55,10 +55,10 @@ export function TeamPlayerCard({
 
   const { data: positions } = useGetPositions();
   const { data: market } = useGetMarket();
-  const { data: playerHistory } = useGetPlayerHistory(player.atleta_id);
+  const { allowRequest, marketStatus, isMarketClose } = useMarketStatus();
+  const { data: playerHistory } = useGetPlayerHistory(player.atleta_id, !!allowRequest);
   const { getInsight } = usePlayerInsights();
 
-  const { marketStatus, isMarketClose } = useMarketStatus();
 
   const canEdit = !isViewOnly && !isMarketClose;
   const isCaptain = !isViewOnly && captain === player.atleta_id;

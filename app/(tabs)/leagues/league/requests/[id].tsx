@@ -1,81 +1,112 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useCallback } from 'react';
-import { FlatList, ListRenderItemInfo, RefreshControl } from 'react-native';
+import { Alert, FlatList, RefreshControl, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
-import { EmptyInviteList } from '@/components/contexts/leagues/EmptyInviteList';
-import { RequestCard } from '@/components/contexts/leagues/RequestCard';
-import { Loading } from '@/components/structure/Loading';
-import Colors from '@/constants/Colors';
+import { InviteCard } from '@/components/contexts/leagues/InviteCard';
+import { LoadingScreen } from '@/components/structure/LoadingScreen';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { ScreenHeader } from '@/components/structure/ScreenHeader';
+import { StateView } from '@/components/ui/StateView';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 import { Invite } from '@/models/Invites';
+import { useAcceptInvite, useDeclineInvitation } from '@/queries/invites.query';
 import { useGetLeague } from '@/queries/leagues.query';
+import { haptics } from '@/utils/haptics';
 
-export default () => {
-  const colorTheme = useThemeColor();
+const keyExtractor = (item: Invite) => `${item.mensagem_id}`;
+
+const showError = (message?: string) => {
+  haptics.error();
+  Alert.alert(
+    'Pedido não respondido',
+    message ?? 'Não foi possível responder o pedido. Confira a conexão e tente de novo.'
+  );
+};
+
+/** Pedidos para entrar na liga (só o dono chega aqui). */
+export default function LeagueRequestsScreen() {
+  const { spacing } = useTokens();
   const tabBarSpacing = useTabBarSpacing();
-
-  const { id: slug } = useLocalSearchParams();
-
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { allowRequest } = useMarketStatus();
 
   const {
     data: league,
-    isLoading: isInitialLoadingLeague,
+    isLoading,
     refetch: onRefetchLeague,
-    isRefetching: isRefetchingLeague,
-  } = useGetLeague(slug as string, allowRequest);
+    isRefetching,
+  } = useGetLeague(id ?? '', allowRequest);
 
-  const onRefetch = useCallback(async () => {
-    await Promise.all([onRefetchLeague()]);
-  }, [onRefetchLeague]);
+  // A liga é buscada de novo depois da resposta, para o pedido sair da lista.
+  const accept = useAcceptInvite({
+    onSuccess: () => {
+      haptics.success();
+      return onRefetchLeague();
+    },
+    onError: (error) => showError(error?.response?.data?.mensagem),
+  });
+  const decline = useDeclineInvitation({
+    onSuccess: () => {
+      haptics.selection();
+      return onRefetchLeague();
+    },
+    onError: (error) => showError(error?.response?.data?.mensagem),
+  });
 
-  const keyExtractor = useCallback((item: Invite) => `${item.mensagem_id}`, []);
+  if (isLoading) return <LoadingScreen title="Carregando pedidos" />;
 
-  const renderItem = useCallback(
-    ({ item: request }: ListRenderItemInfo<Invite>) => (
-      <RequestCard request={request} onRefetchLeague={onRefetchLeague} />
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  if (isInitialLoadingLeague) return <Loading title="Carregando solicitações" />;
+  const requests = league?.pedidos ?? [];
 
   return (
-    <View
-      className="flex-1"
-      style={{
-        backgroundColor:
-          colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-      }}>
-      <View
-        className="items-center py-2"
-        style={{
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        }}>
-        <Text className="text-lg font-semibold"> Solicitações </Text>
-      </View>
+    <SafeAreaViewContainer edges={['top']}>
+      <ScreenHeader title="Pedidos para entrar" subtitle={league?.liga.nome} />
       <FlatList
-        ListEmptyComponent={<EmptyInviteList />}
-        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
+        data={requests}
         keyExtractor={keyExtractor}
-        data={league?.pedidos}
-        renderItem={renderItem}
-        initialNumToRender={10}
-        maxToRenderPerBatch={5}
-        contentContainerStyle={{
-          marginHorizontal: 8,
-          paddingTop: 8,
-          paddingBottom: tabBarSpacing.contentBottom,
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          gap: 8,
+        renderItem={({ item }) => {
+          const messageId = String(item.mensagem_id);
+          return (
+            <InviteCard
+              title={item.time?.nome ?? 'Time'}
+              subtitle={item.time?.nome_cartola}
+              date={item.data}
+              imageUrl={item.time?.url_escudo_png}
+              roundImage
+              pending={
+                accept.isPending && accept.variables === messageId
+                  ? 'accept'
+                  : decline.isPending && decline.variables === messageId
+                    ? 'decline'
+                    : undefined
+              }
+              onAccept={() => accept.mutate(messageId)}
+              onDecline={() => decline.mutate(messageId)}
+            />
+          );
         }}
+        ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: spacing.md,
+          paddingBottom: tabBarSpacing.contentBottom,
+        }}
+        refreshControl={
+          <RefreshControl
+            onRefresh={() => {
+              onRefetchLeague();
+            }}
+            refreshing={isRefetching}
+          />
+        }
+        ListEmptyComponent={
+          <StateView
+            icon="user-check"
+            title="Nenhum pedido pendente"
+            message="Quando alguém pedir para entrar na sua liga, o pedido aparece aqui."
+          />
+        }
       />
-    </View>
+    </SafeAreaViewContainer>
   );
-};
+}

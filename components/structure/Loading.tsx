@@ -2,6 +2,7 @@ import {  ActivityIndicator } from 'react-native';
 
 import { Text, View } from '@/components/Themed';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import Colors from '@/constants/Colors';
 
 type LoadingProps = {
   title?: string;
@@ -19,7 +20,7 @@ export function Loading({ title }: LoadingProps) {
         gap: 8,
       }}>
       <ActivityIndicator 
-        color={colorTheme === 'dark' ? '#60a5fa' : '#3b82f6'}
+        color={Colors[colorTheme === 'dark' ? 'dark' : 'light'].tint}
       />
       {title && (
         <Text 

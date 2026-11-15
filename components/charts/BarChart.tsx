@@ -46,7 +46,7 @@ export function BarChart({ data, labels, height = 180 }: BarChartProps) {
             top: -40,
             left: selectedIndex * (barWidth + 4) + barWidth / 2 - 40,
             borderWidth: 2,
-            borderColor: '#3b82f6',
+            borderColor: '#FF8A00',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.25,
@@ -86,9 +86,9 @@ export function BarChart({ data, labels, height = 180 }: BarChartProps) {
                   width: '100%',
                   height: Math.max(barHeight, 4),
                   backgroundColor: isSelected 
-                    ? '#60a5fa' 
+                    ? '#C76A00'
                     : isPositive 
-                    ? colorTheme === 'dark' ? '#3b82f6' : '#2563eb'
+                    ? '#FF8A00'
                     : '#ef4444',
                   borderRadius: 4,
                   opacity: isSelected ? 1 : 0.9,

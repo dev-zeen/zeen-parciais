@@ -9,7 +9,18 @@ type BottomSheetProps = {
   /** Mantido por compatibilidade; a altura é definida pela plataforma. */
   snapPoints?: string[];
   enablePanDownToClose?: boolean;
+  /** Chamado assim que o fechamento é pedido (botão, gesto ou toque fora). */
   onClose?: () => void;
+  /**
+   * Chamado quando o sheet terminou de sair da tela. No iOS um modal novo só pode
+   * ser apresentado depois disso; no Android é chamado junto com `onClose`.
+   */
+  onDismissed?: () => void;
+  /**
+   * `compact`: painel com a altura do conteúdo (até 90%) nas duas plataformas, para menus
+   * curtos. `large` (padrão): sheet de página inteira no iOS e 90% no Android.
+   */
+  size?: 'large' | 'compact';
 };
 
 export type BottomSheetRef = {
@@ -23,7 +34,7 @@ export type BottomSheetRef = {
  * Android: painel inferior com alça, fechado pelo botão/gesto de voltar ou toque fora.
  */
 export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
-  ({ children, onClose }, ref) => {
+  ({ children, onClose, onDismissed, size = 'large' }, ref) => {
     const { colors, radius } = useTokens();
     const insets = useSafeAreaInsets();
     const [visible, setVisible] = useState(false);
@@ -31,7 +42,9 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
     const handleClose = useCallback(() => {
       setVisible(false);
       if (onClose) onClose();
-    }, [onClose]);
+      // Android não tem evento de fim de fechamento.
+      if (Platform.OS !== 'ios' && onDismissed) onDismissed();
+    }, [onClose, onDismissed]);
 
     useImperativeHandle(ref, () => ({
       snapToIndex: (index: number) => {
@@ -48,13 +61,14 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
       </View>
     );
 
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'ios' && size === 'large') {
       return (
         <Modal
           animationType="slide"
           presentationStyle="pageSheet"
           visible={visible}
-          onRequestClose={handleClose}>
+          onRequestClose={handleClose}
+          onDismiss={onDismissed}>
           <View style={[styles.page, { backgroundColor: colors.bg }]}>
             {handle}
             {children}
@@ -69,8 +83,9 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
         transparent
         visible={visible}
         statusBarTranslucent
-        onRequestClose={handleClose}>
-        <View style={[styles.overlay, { backgroundColor: colors.overlay }]}>
+        onRequestClose={handleClose}
+        onDismiss={onDismissed}>
+        <View style={styles.overlay}>
           <Pressable
             style={StyleSheet.absoluteFill}
             onPress={handleClose}
@@ -79,11 +94,13 @@ export const BottomSheet = forwardRef<BottomSheetRef, BottomSheetProps>(
           />
           <View
             style={[
-              styles.container,
+              size === 'compact' ? styles.compact : styles.container,
               {
                 backgroundColor: colors.bg,
                 borderTopLeftRadius: radius.lg,
                 borderTopRightRadius: radius.lg,
+                // Sem escurecer o fundo: a borda e a sombra separam o painel da tela.
+                borderColor: colors.border,
                 paddingBottom: insets.bottom,
               },
             ]}>
@@ -108,8 +125,21 @@ const styles = StyleSheet.create({
   },
   container: {
     height: '90%',
-    overflow: 'hidden',
-    elevation: 6,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: -4 },
+  },
+  compact: {
+    maxHeight: '90%',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    elevation: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: -4 },
   },
   handleArea: {
     alignItems: 'center',

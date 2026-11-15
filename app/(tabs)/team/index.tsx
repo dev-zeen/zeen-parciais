@@ -23,7 +23,6 @@ import {
   onGetPlayersOnChangePositionSell,
 } from '@/components/contexts/team/_team.helpers';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
-import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import type { BottomSheetRef } from '@/components/structure/BottomSheet';
 import { BottomSheet } from '@/components/structure/BottomSheet';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
@@ -43,6 +42,7 @@ import { FullPlayer } from '@/models/Stats';
 import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore, { FieldStat } from '@/store/useTeamLineupStore';
+import { debugLog } from '@/utils/debugLog';
 import { haptics } from '@/utils/haptics';
 import { onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
 
@@ -212,11 +212,16 @@ export default () => {
 
   const handleOpenMarket = useCallback(
     (position: LineupPosition, index: number, lowestPrice?: LineupPosition) => {
+      debugLog('mercado', 'abrir', {
+        posicao: position.position,
+        indice: index,
+        reservaMaisBarato: lowestPrice?.player?.atleta_id ?? null,
+      });
       setPositionMarketSearch(position);
       setPlayerIndex(index);
-      if (lowestPrice) {
-        setPlayerLowestPrice(lowestPrice);
-      }
+      // Sempre sobrescreve: sem isso, o "reserva mais barato" de uma abertura anterior
+      // continuaria filtrando a lista (e marcando a compra como reserva).
+      setPlayerLowestPrice(lowestPrice);
       marketSheetRef.current?.snapToIndex(1);
     },
     []
@@ -236,6 +241,7 @@ export default () => {
       const index = lineup?.starting.findIndex(
         (item) => item.player?.atleta_id === player.atleta_id
       );
+      debugLog('trocar', 'jogador', player.atleta_id, 'encontrado no índice', index);
       if (!lineup || index === undefined || index < 0) return;
 
       const slot = lineup.starting[index];
@@ -245,11 +251,16 @@ export default () => {
     [lineup, removePlayerFromLineup, handleOpenMarket]
   );
 
-  const handleCloseMarket = useCallback(() => {
-    marketSheetRef.current?.close();
+  // Limpa o contexto do mercado em qualquer fechamento: botão, compra ou arrastar para baixo.
+  const resetMarketState = useCallback(() => {
+    debugLog('mercado', 'fechou, estado limpo');
     setPositionMarketSearch(undefined);
     setPlayerIndex(0);
     setPlayerLowestPrice(undefined);
+  }, []);
+
+  const handleCloseMarket = useCallback(() => {
+    marketSheetRef.current?.close();
   }, []);
 
   const handleClearAll = useCallback(() => {
@@ -459,12 +470,7 @@ export default () => {
   }, [captain, formation, lineup]);
 
   if (!isAutheticated) {
-    return (
-      <SafeAreaViewContainer edges={['top']}>
-        <MarketStatusCard />
-        <Login title="Para acessar o seu time, é necessário efetuar o login." />
-      </SafeAreaViewContainer>
-    );
+    return <Login reason="Entre para escalar seu time e acompanhar as parciais." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
@@ -573,7 +579,11 @@ export default () => {
         onReplace={isMarketClose ? undefined : handleReplacePlayer}
       />
 
-      <BottomSheet key={bottomSheetKey} ref={marketSheetRef} snapPoints={['70%', '95%']}>
+      <BottomSheet
+        key={bottomSheetKey}
+        ref={marketSheetRef}
+        snapPoints={['70%', '95%']}
+        onClose={resetMarketState}>
         <Market
           position={positionMarketSearch}
           handleCloseMarketModal={handleCloseMarket}
@@ -582,7 +592,7 @@ export default () => {
         />
       </BottomSheet>
 
-      <BottomSheet ref={formationModalRef} onClose={handleFormationModalClose}>
+      <BottomSheet ref={formationModalRef} size="compact" onClose={handleFormationModalClose}>
         <FormationChangeModal
           playersToSellData={playersToSellData}
           selectedPlayersToRemove={selectedPlayersToRemove}

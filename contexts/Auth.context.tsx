@@ -30,15 +30,23 @@ export function AuthContextProvider({ children }: { children: ReactNode }): Reac
   }, []);
 
   const handleUnautenticated = useCallback(async () => {
+    // Antes de limpar o token: assim as consultas da conta (enabled por `allowRequest`)
+    // já estão desligadas e não disparam requisições sem token no meio da saída.
+    setIsAutheticated(false);
     await removeItem();
     await clearGloboidClientSettings();
-    setIsAutheticated(false);
   }, [removeItem]);
 
   const handleLogout = useCallback(() => {
     resetStore();
-    queryClient.clear();
+    // Remove só o que é da conta (rotas /auth/...). `clear()` apagava também o mercado e
+    // as partidas, e as telas abertas ficavam carregando para sempre, sem buscar de novo.
+    const isAccountQuery = ({ queryKey }: { queryKey: readonly unknown[] }) =>
+      typeof queryKey[0] === 'string' && /^\/?auth\//.test(queryKey[0]);
+    // Desliga primeiro, para a remoção do cache não fazer as telas buscarem de novo.
     handleUnautenticated();
+    queryClient.cancelQueries({ predicate: isAccountQuery });
+    queryClient.removeQueries({ predicate: isAccountQuery });
   }, [handleUnautenticated, queryClient, resetStore]);
 
   useEffect(() => {

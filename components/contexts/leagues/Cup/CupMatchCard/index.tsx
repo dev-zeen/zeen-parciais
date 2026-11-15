@@ -1,1 +1,1 @@
-export { CupMatchCard } from './CupMatchCard';
+export { CupMatchCard, type CupPartials } from './CupMatchCard';

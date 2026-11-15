@@ -1,32 +1,32 @@
 import { Feather } from '@expo/vector-icons';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { RefreshControl, ScrollView } from 'react-native';
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useContext, useMemo, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
-import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { LeagueSummaryCard } from '@/components/contexts/leagues/LeagueSummaryCard';
+import { RoundBars } from '@/components/contexts/leagues/RoundBars';
+import { formatPoints } from '@/components/contexts/leagues/leagueKinds';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { onGetFillLineupDefaultPlayers } from '@/components/contexts/team/_team.helpers';
-import { StatsClubCard } from '@/components/contexts/utils/StatsClubCard';
-import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
+import { ScreenHeader } from '@/components/structure/ScreenHeader';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import useTeam from '@/hooks/useTeam';
+import usePartialScore from '@/hooks/usePartialScore';
 import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import useTeam from '@/hooks/useTeam';
+import { useTeamSeason } from '@/hooks/useTeamSeason';
+import { useTokens } from '@/hooks/useTokens';
 import useValorization from '@/hooks/useValorization';
 import { FullPlayer } from '@/models/Stats';
-import { useGetMatchSubstitutions } from '@/queries/club.query';
+import { useGetHistoricMyClub, useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
-import { BACKGROUND_DEFAULT_DARK, BACKGROUND_DEFAULT_LIGHT } from '@/styles/colors';
-
-const TYPE_VIEW = {
-  FIELD: 'FIELD',
-  LIST: 'LIST',
-};
+import { Palette } from '@/styles/tokens';
 
 export interface PlayerClub extends FullPlayer {
   isReplaced?: boolean;
@@ -34,326 +34,450 @@ export interface PlayerClub extends FullPlayer {
   isReserve?: boolean;
 }
 
-export default () => {
-  const colorTheme = useThemeColor();
+const signed = (value: number) => `${value >= 0 ? '+' : '−'}${formatPoints(Math.abs(value))}`;
+
+const toneOf = (value?: number): keyof Palette =>
+  value == null || value === 0 ? 'textMuted' : value > 0 ? 'positive' : 'negative';
+
+/**
+ * Desempenho de um adversário. Ordem pensada para acompanhar a liga: temporada (acumulado,
+ * média e histórico por rodada, que se explicam juntos), o confronto direto com o seu
+ * time e, por último, a escalação da rodada escolhida.
+ */
+export default function ClubScreen() {
+  const { colors, spacing } = useTokens();
   const tabBarSpacing = useTabBarSpacing();
-
   const { isAutheticated } = useContext(AuthContext);
+  const params = useLocalSearchParams<{ id: string; posicao?: string; liga?: string }>();
+  const teamId = Number(params.id);
 
-  const isFirstRender = useRef(true);
-
-  const { id } = useLocalSearchParams();
-
-  const { marketStatus, isLoadingMarketStatus, isMarketClose } = useMarketStatus();
-
-  const typeViewDefault = TYPE_VIEW.FIELD;
-
-  // const onChangeViewField = useCallback(() => {
-  //   setView(TYPE_VIEW.FIELD);
-  // }, []);
-
-  // const onChangeViewList = useCallback(() => {
-  //   setView(TYPE_VIEW.LIST);
-  // }, []);
-
+  const { marketStatus, isLoadingMarketStatus, isMarketClose, allowRequest } = useMarketStatus();
   const {
     data: playerStats,
     isLoading: isLoadingPlayerStats,
     isRefetching: isRefetchingPlayerStats,
     refetch: onRefetchStats,
   } = useGetScoredPlayers(isMarketClose);
+  const { onRefetchValorizations } = useValorization();
+  const { data: myClub } = useGetMyClub(allowRequest);
+  const { data: myHistory } = useGetHistoricMyClub(!!allowRequest);
 
-  // const { valorizations, onRefetchValorizations, isRefetchingValorizations } = useValorization();
+  const marketRound = marketStatus?.rodada_atual ?? 0;
+  // Rodada em andamento (bola rolando) ou, com mercado aberto, a última encerrada.
+  const latestRound = Math.max(1, isMarketClose ? marketRound : marketRound - 1);
+  const [selectedRound, setSelectedRound] = useState<number | undefined>();
+  const round = selectedRound ?? latestRound;
+  const isLiveRound = isMarketClose && round === marketRound;
 
-  const { onRefetchValorizations, isRefetchingValorizations } = useValorization();
-
-  const marketRound = useMemo(() => marketStatus?.rodada_atual ?? 0, [marketStatus?.rodada_atual]);
-
-  const [currentRound, setCurrentRound] = useState(0);
-
-  const { team } = useTeam({
-    teamId: Number(id),
-    round: currentRound,
+  const { team } = useTeam({ teamId, round: marketStatus ? round : 0 });
+  const { data: substitutions, refetch: onRefetchSubstitutions } = useGetMatchSubstitutions({
+    id: teamId,
+    round,
   });
-
-  const {
-    data: substitutions,
-    refetch: onRefetchSubstitutions,
-    isRefetching: isRefetchingSubstitutions,
-  } = useGetMatchSubstitutions({
-    id: Number(id),
-    round: currentRound,
-  });
-
-  // const onGetPlayersTab = (team: FullClubInfo) => {
-  //   const { playersUpdated, reservesUpdated } = onUpdateTeamWithSubstitutedPlayers(
-  //     team,
-  //     substitutions
-  //   );
-
-  //   return [
-  //     {
-  //       title: 'Titulares',
-  //       data: playersUpdated,
-  //     },
-  //     {
-  //       title: 'Reservas',
-  //       data: reservesUpdated.map((item) => {
-  //         return {
-  //           ...item,
-  //           isReserve: true,
-  //         };
-  //       }),
-  //     },
-  //   ];
-  // };
+  const partial = usePartialScore({ teamId });
+  const season = useTeamSeason(teamId, marketRound - 1);
 
   const lineup = useMemo(() => {
     if (!team) return undefined;
-
-    const formationIdCandidate =
-      isMarketClose && currentRound === marketRound
-        ? (team.time?.esquema_id ?? team.esquema_id)
-        : team.esquema_id;
-
+    const formationId = isLiveRound ? (team.time?.esquema_id ?? team.esquema_id) : team.esquema_id;
     return onGetFillLineupDefaultPlayers({
       lineupStart: team.atletas ?? [],
       reserves: team.reservas ?? [],
-      formationId: formationIdCandidate ?? 4,
+      formationId: formationId ?? 4,
       playerStats,
       isMarketClose,
     });
-  }, [currentRound, isMarketClose, marketRound, playerStats, team]);
+  }, [isLiveRound, isMarketClose, playerStats, team]);
 
-  useEffect(() => {
-    if (marketStatus && isFirstRender.current) {
-      // Mercado aberto costuma mostrar a rodada anterior, mas na 1ª rodada isso vira 0 e
-      // deixa a tela em loading infinito. Garante mínimo 1.
-      const roundCandidate = isMarketClose
-        ? marketStatus.rodada_atual
-        : marketStatus.rodada_atual - 1;
-      const round = Math.max(1, roundCandidate);
-      setCurrentRound(round);
-
-      isFirstRender.current = false;
-    }
-  }, [isMarketClose, marketStatus]);
-
-  const onRefetch = useCallback(async () => {
-    await Promise.allSettled([
-      onRefetchStats(),
-      onRefetchValorizations(),
-      onRefetchSubstitutions(),
-    ]);
-  }, [onRefetchStats, onRefetchSubstitutions, onRefetchValorizations]);
-
-  const isRefetching = useMemo(
-    () => isRefetchingPlayerStats && isRefetchingValorizations && isRefetchingSubstitutions,
-    [isRefetchingPlayerStats, isRefetchingSubstitutions, isRefetchingValorizations]
+  // Confronto direto: só rodadas em que os dois times pontuaram.
+  const myTeamId = myClub?.time?.time_id;
+  const isMine = !!myTeamId && myTeamId === teamId;
+  const myPoints = useMemo(
+    () => new Map((myHistory ?? []).map((r) => [r.rodada_id, r.pontos])),
+    [myHistory]
   );
+  const headToHead = useMemo(() => {
+    if (isMine || !myPoints.size) return undefined;
+    const shared = season.played.filter((r) => myPoints.has(r.round));
+    if (!shared.length) return undefined;
+    const myTotal = shared.reduce((sum, r) => sum + (myPoints.get(r.round) ?? 0), 0);
+    const theirTotal = shared.reduce((sum, r) => sum + r.points, 0);
+    return {
+      rounds: shared.length,
+      myTotal,
+      theirTotal,
+      myAverage: myTotal / shared.length,
+      theirAverage: theirTotal / shared.length,
+      myWins: shared.filter((r) => (myPoints.get(r.round) ?? 0) > r.points).length,
+      theirWins: shared.filter((r) => (myPoints.get(r.round) ?? 0) < r.points).length,
+    };
+  }, [isMine, myPoints, season.played]);
 
-  // const renderItem = useCallback(
-  //   ({ item: player }: ListRenderItemInfo<PlayerClub>) => {
-  //     return (
-  //       <ClubPlayerCard
-  //         player={player}
-  //         isCaptain={team?.capitao_id === player.atleta_id}
-  //         currentRound={currentRound}
-  //         marketStatus={marketStatus as MarketStatus}
-  //         playerStats={playerStats}
-  //         isReserve={player.isReserve}
-  //         appreciation={valorizations?.atletas[player.atleta_id]?.variacao_num}
-  //         isReplacePlayer={substitutions?.some(
-  //           (item) =>
-  //             item.entrou.atleta_id === player.atleta_id || item.saiu.atleta_id === player.atleta_id
-  //         )}
-  //       />
-  //     );
-  //   },
-  //   [
-  //     currentRound,
-  //     marketStatus,
-  //     playerStats,
-  //     substitutions,
-  //     team?.capitao_id,
-  //     valorizations?.atletas,
-  //   ]
-  // );
+  const onRefetch = useCallback(() => {
+    Promise.allSettled([onRefetchStats(), onRefetchValorizations(), onRefetchSubstitutions()]);
+  }, [onRefetchStats, onRefetchSubstitutions, onRefetchValorizations]);
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
 
-  // const keyExtractor = useCallback((item: PlayerClub) => `${item.atleta_id}`, []);
-
-  const isLoading = isMarketClose
-    ? isLoadingPlayerStats || isLoadingMarketStatus
-    : isLoadingMarketStatus;
-
-  if (isLoading || !marketStatus || !team || !currentRound || !lineup) {
-    return <LoadingScreen />;
+  const isLoading = isLoadingMarketStatus || (isMarketClose && isLoadingPlayerStats);
+  if (isLoading || !marketStatus || !team || !lineup) {
+    return <LoadingScreen title="Carregando time" />;
   }
 
-  // Rodada máxima disponível para visualização
-  const maxAvailableRound = isMarketClose
-    ? marketStatus.rodada_atual
-    : marketStatus.rodada_atual - 1;
+  const selected = season.rounds.find((r) => r.round === round);
+  const previous = season.rounds.find((r) => r.round === round - 1);
+  const roundPoints = selected?.points;
+  const vsPrevious =
+    roundPoints != null && previous?.points != null ? roundPoints - previous.points : undefined;
+  const vsAverage =
+    roundPoints != null && season.average != null ? roundPoints - season.average : undefined;
+  const isBest = season.best?.round === round && season.played.length > 1;
+  const trend =
+    season.recentAverage != null && season.average != null
+      ? season.recentAverage - season.average
+      : undefined;
+  const myRoundPoints = myPoints.get(round);
 
-  // Botão de próxima rodada só habilitado se currentRound < maxAvailableRound
-  const nextRoundDisabled = currentRound >= maxAvailableRound;
+  const position = Number(params.posicao);
+  const subtitle = [
+    isMine ? 'Seu time' : team.time?.nome_cartola,
+    position > 0 ? `${position}º${params.liga ? ` em ${params.liga}` : ''}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <SafeAreaViewContainer edges={['top']}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor:
-            colorTheme === 'dark' ? BACKGROUND_DEFAULT_DARK : BACKGROUND_DEFAULT_LIGHT,
-        }}>
-        {/* Header */}
-        <View
-          className="px-4 pt-3 pb-3"
-          style={{
-            gap: 12,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}>
-          <View
-            className="flex-row items-center justify-between"
-            style={{ backgroundColor: 'transparent' }}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-                borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-              }}>
-              <Feather
-                name="chevron-left"
-                size={20}
-                color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'}
-              />
-            </TouchableOpacity>
+      <ScreenHeader
+        title={team.time?.nome ?? 'Time'}
+        subtitle={subtitle}
+        imageUrl={team.time?.url_escudo_png}
+      />
 
-            <View style={{ flex: 1, paddingHorizontal: 12, backgroundColor: 'transparent' }}>
-              <Text className="text-xl font-extrabold" numberOfLines={1}>
-                {team.time?.nome}
-              </Text>
-              <Text className="text-xs text-gray-500" numberOfLines={1}>
-                {team.time?.nome_cartola}
-              </Text>
+      <ScrollView
+        refreshControl={
+          <RefreshControl onRefresh={onRefetch} refreshing={isRefetchingPlayerStats} />
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          gap: spacing.sm,
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.xs,
+          paddingBottom: tabBarSpacing.contentBottom,
+        }}>
+        {/* Rodada em andamento: a parcial é o que importa agora */}
+        {isLiveRound ? (
+          <LeagueSummaryCard
+            title={`Rodada ${round} · ao vivo`}
+            stats={[
+              { label: 'Parcial', value: formatPoints(partial.partialScore), tone: 'accent' },
+              { label: 'Pontuados', value: `${partial.playersHaveAlreadyPlayed ?? 0}/12` },
+              { label: 'Acumulado', value: formatPoints(partial.totalPartialScore) },
+            ]}
+          />
+        ) : null}
+
+        {/* Temporada: acumulado, média e histórico juntos */}
+        {marketRound > 1 ? (
+          <Card padding={spacing.md} style={{ gap: spacing.md }}>
+            <AppText variant="label" weight="bold" color="textMuted" accessibilityRole="header">
+              TEMPORADA
+            </AppText>
+            {season.isLoading && season.played.length === 0 ? (
+              <AppText variant="body" color="textMuted">
+                Carregando as rodadas...
+              </AppText>
+            ) : season.played.length === 0 ? (
+              <AppText variant="body" color="textMuted">
+                Este time ainda não pontuou em nenhuma rodada encerrada.
+              </AppText>
+            ) : (
+              <>
+                <View style={styles.row}>
+                  <Metric
+                    label="Acumulado"
+                    value={formatPoints(season.total)}
+                    hint={`${season.played.length} rodadas`}
+                    large
+                  />
+                  <Metric
+                    label="Média"
+                    value={formatPoints(season.average)}
+                    hint={
+                      trend != null
+                        ? `${trend >= 0 ? '▲' : '▼'} últimas 5: ${formatPoints(season.recentAverage)}`
+                        : 'por rodada'
+                    }
+                    hintTone={toneOf(trend)}
+                    large
+                  />
+                </View>
+
+                <RoundBars
+                  rounds={season.rounds}
+                  selected={round}
+                  bestRound={season.best?.round}
+                  average={season.average}
+                  live={
+                    isMarketClose
+                      ? { round: marketRound, points: partial.partialScore ?? 0 }
+                      : undefined
+                  }
+                  onSelect={setSelectedRound}
+                />
+
+                {/* Rodada escolhida, sempre comparada com a média e com a anterior */}
+                <View
+                  style={[
+                    styles.selected,
+                    { gap: spacing.xs, paddingTop: spacing.sm, borderTopColor: colors.border },
+                  ]}>
+                  <View style={[styles.row, { justifyContent: 'space-between' }]}>
+                    <View style={[styles.row, { gap: spacing.xs }]}>
+                      <AppText variant="title" weight="bold">
+                        Rodada {round}
+                      </AppText>
+                      {round === latestRound ? (
+                        <Badge label={isLiveRound ? 'Ao vivo' : 'Mais recente'} tone="accent" />
+                      ) : null}
+                      {isBest ? <Badge label="Melhor" tone="positive" /> : null}
+                    </View>
+                    <AppText variant="title" weight="bold">
+                      {isLiveRound
+                        ? formatPoints(partial.partialScore)
+                        : roundPoints != null
+                          ? formatPoints(roundPoints)
+                          : 'Não escalou'}
+                    </AppText>
+                  </View>
+                  {!isLiveRound && roundPoints != null ? (
+                    <View style={[styles.row, styles.wrap, { columnGap: spacing.sm }]}>
+                      {vsAverage != null ? (
+                        <AppText variant="label" color={toneOf(vsAverage)}>
+                          {signed(vsAverage)} vs média
+                        </AppText>
+                      ) : null}
+                      {vsPrevious != null ? (
+                        <AppText variant="label" color={toneOf(vsPrevious)}>
+                          {signed(vsPrevious)} vs rodada {round - 1}
+                        </AppText>
+                      ) : null}
+                      <AppText variant="label" color="textMuted">
+                        acumulado {formatPoints(selected?.cumulative)}
+                      </AppText>
+                    </View>
+                  ) : null}
+                </View>
+
+                <View style={[styles.row, { gap: spacing.md }]}>
+                  <AppText variant="caption" color="textMuted">
+                    Melhor{' '}
+                    <AppText variant="caption" weight="bold" color="positive">
+                      {formatPoints(season.best?.points)}
+                    </AppText>{' '}
+                    (rodada {season.best?.round})
+                  </AppText>
+                  <AppText variant="caption" color="textMuted">
+                    Pior{' '}
+                    <AppText variant="caption" weight="bold">
+                      {formatPoints(season.worst?.points)}
+                    </AppText>{' '}
+                    (rodada {season.worst?.round})
+                  </AppText>
+                </View>
+              </>
+            )}
+          </Card>
+        ) : null}
+
+        {/* Confronto direto com o seu time */}
+        {headToHead ? (
+          <Card padding={spacing.md} style={{ gap: spacing.sm }}>
+            <AppText variant="label" weight="bold" color="textMuted" accessibilityRole="header">
+              VOCÊ × ESTE TIME
+            </AppText>
+            <AppText variant="body">
+              {headToHead.myTotal === headToHead.theirTotal ? (
+                `Empatados em ${headToHead.rounds} rodadas.`
+              ) : (
+                <>
+                  Você está{' '}
+                  <AppText
+                    variant="body"
+                    weight="bold"
+                    color={headToHead.myTotal > headToHead.theirTotal ? 'positive' : 'negative'}>
+                    {formatPoints(Math.abs(headToHead.myTotal - headToHead.theirTotal))}{' '}
+                    {headToHead.myTotal > headToHead.theirTotal ? 'à frente' : 'atrás'}
+                  </AppText>{' '}
+                  nas {headToHead.rounds} rodadas em que os dois jogaram.
+                </>
+              )}
+            </AppText>
+            <View style={styles.row}>
+              <Metric
+                label="Rodadas"
+                value={`${headToHead.myWins} × ${headToHead.theirWins}`}
+                hint="vencidas: você × ele"
+              />
+              <Metric
+                label="Sua média"
+                value={formatPoints(headToHead.myAverage)}
+                hint={`${signed(headToHead.myAverage - headToHead.theirAverage)} que ele`}
+                hintTone={toneOf(headToHead.myAverage - headToHead.theirAverage)}
+              />
+              {!isLiveRound && roundPoints != null && myRoundPoints != null ? (
+                <Metric
+                  label={`Você na rodada ${round}`}
+                  value={formatPoints(myRoundPoints)}
+                  hint={`${signed(myRoundPoints - roundPoints)} que ele`}
+                  hintTone={toneOf(myRoundPoints - roundPoints)}
+                />
+              ) : null}
             </View>
+          </Card>
+        ) : null}
+
+        {/* Escalação da rodada escolhida */}
+        <View style={[styles.row, { justifyContent: 'space-between', marginTop: spacing.xs }]}>
+          <RoundStep
+            icon="chevron-left"
+            label="Rodada anterior"
+            disabled={round <= 1}
+            onPress={() => setSelectedRound(round - 1)}
+          />
+          <View style={{ alignItems: 'center' }}>
+            <AppText variant="caption" weight="bold" color="textMuted">
+              ESCALAÇÃO
+            </AppText>
+            <AppText variant="title" weight="bold">
+              Rodada {round}
+            </AppText>
           </View>
+          <RoundStep
+            icon="chevron-right"
+            label="Próxima rodada"
+            disabled={round >= latestRound}
+            onPress={() => setSelectedRound(round + 1)}
+          />
         </View>
 
-        <ScrollView
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingHorizontal: 8,
-            paddingBottom: tabBarSpacing.contentBottom,
-            gap: 12,
-          }}>
-          <StatsClubCard team={team} round={currentRound} />
+        {team.atletas?.length ? (
+          <View style={{ gap: spacing.sm }}>
+            <SoccerField
+              lineup={lineup}
+              substitutions={substitutions}
+              captain={team.capitao_id ?? 0}
+              round={round}
+              isViewOnly
+              onOpenMarket={() => {}}
+            />
+            <ListReservePlayers
+              lineup={lineup}
+              substitutions={substitutions}
+              round={round}
+              isViewOnly
+              onOpenMarket={() => {}}
+            />
+          </View>
+        ) : (
+          <Card padding={spacing.md} style={[styles.row, { gap: spacing.sm }]}>
+            <Feather name="slash" size={18} color={colors.textMuted} />
+            <AppText variant="body" color="textMuted" style={{ flex: 1 }}>
+              O time não escalou na rodada {round}.
+            </AppText>
+          </Card>
+        )}
 
-          {/* Seletor de Rodada */}
-          <AnimatedCard variant="flat" className="p-0">
-            <View
-              className="flex-row items-center justify-between px-3 py-2"
-              style={{ backgroundColor: 'transparent' }}>
-              <TouchableOpacity
-                activeOpacity={0.7}
-                disabled={currentRound === 1}
-                onPress={() => setCurrentRound((previous) => previous - 1)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor:
-                    currentRound === 1
-                      ? colorTheme === 'dark'
-                        ? '#1f2937'
-                        : '#f3f4f6'
-                      : '#3b82f620',
-                  borderWidth: 1,
-                  borderColor:
-                    currentRound === 1
-                      ? colorTheme === 'dark'
-                        ? '#374151'
-                        : '#e5e7eb'
-                      : '#3b82f6',
-                }}>
-                <Feather
-                  name="chevron-left"
-                  size={18}
-                  color={currentRound === 1 ? '#9ca3af' : '#3b82f6'}
-                />
-              </TouchableOpacity>
-
-              <View style={{ alignItems: 'center', backgroundColor: 'transparent' }}>
-                <Text className="text-xs text-gray-500 dark:text-gray-400">Rodada</Text>
-                <Text className="text-lg font-bold">{currentRound}</Text>
-              </View>
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                disabled={nextRoundDisabled}
-                onPress={() => setCurrentRound((previous) => previous + 1)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: nextRoundDisabled
-                    ? colorTheme === 'dark'
-                      ? '#1f2937'
-                      : '#f3f4f6'
-                    : '#3b82f620',
-                  borderWidth: 1,
-                  borderColor: nextRoundDisabled
-                    ? colorTheme === 'dark'
-                      ? '#374151'
-                      : '#e5e7eb'
-                    : '#3b82f6',
-                }}>
-                <Feather
-                  name="chevron-right"
-                  size={18}
-                  color={nextRoundDisabled ? '#9ca3af' : '#3b82f6'}
-                />
-              </TouchableOpacity>
-            </View>
-          </AnimatedCard>
-
-          {/* Campo e Reservas */}
-          {typeViewDefault === TYPE_VIEW.FIELD && (
-            <View style={{ gap: 12, backgroundColor: 'transparent' }}>
-              <SoccerField
-                lineup={lineup}
-                substitutions={substitutions}
-                captain={team.capitao_id ?? 0}
-                round={currentRound}
-                isViewOnly
-                onOpenMarket={() => {}}
-              />
-              <ListReservePlayers
-                lineup={lineup}
-                substitutions={substitutions}
-                round={currentRound}
-                isViewOnly
-                onOpenMarket={() => {}}
-              />
-            </View>
-          )}
-        </ScrollView>
-      </View>
+        {!isLiveRound && team.patrimonio != null ? (
+          <AppText variant="caption" color="textMuted" align="center">
+            Patrimônio na rodada {round}: C$ {formatPoints(team.patrimonio)}
+          </AppText>
+        ) : null}
+      </ScrollView>
     </SafeAreaViewContainer>
   );
-};
+}
+
+function RoundStep({
+  icon,
+  label,
+  disabled,
+  onPress,
+}: {
+  icon: 'chevron-left' | 'chevron-right';
+  label: string;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const { colors, radius, minTouch } = useTokens();
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      style={({ pressed }) => [
+        styles.step,
+        {
+          width: minTouch,
+          height: minTouch,
+          borderRadius: radius.full,
+          backgroundColor: colors.surface,
+          opacity: disabled ? 0.35 : pressed ? 0.7 : 1,
+        },
+      ]}>
+      <Feather name={icon} size={20} color={colors.text} />
+    </Pressable>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  hint,
+  hintTone = 'textMuted',
+  large,
+}: {
+  label: string;
+  value: string;
+  hint?: string;
+  hintTone?: keyof Palette;
+  large?: boolean;
+}) {
+  return (
+    <View
+      style={{ flex: 1 }}
+      accessible
+      accessibilityLabel={`${label}: ${value}${hint ? `, ${hint}` : ''}`}>
+      <AppText variant="label" color="textMuted" numberOfLines={1}>
+        {label}
+      </AppText>
+      <AppText variant={large ? 'heading' : 'title'} weight="bold">
+        {value}
+      </AppText>
+      {hint ? (
+        <AppText variant="caption" color={hintTone} numberOfLines={1}>
+          {hint}
+        </AppText>
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  wrap: {
+    flexWrap: 'wrap',
+  },
+  selected: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  step: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

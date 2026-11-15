@@ -29,17 +29,18 @@ export function useAcceptInvite(
 ) {
   const queryClient = useQueryClient();
   return useMutation<InviteResponse, AxiosError<{ mensagem?: string }>, string>({
+    ...options,
     mutationFn: acceptInviteRequest,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: [INVITES] });
-      queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      // Espera a lista atualizar: o botão segue em "enviando" até o convite sumir da tela.
+      await queryClient.invalidateQueries({ queryKey: [INVITES] });
+      await queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
     onError: (error, variables, onMutateResult, context) => {
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -53,15 +54,16 @@ export function useDeclineInvitation(
 ) {
   const queryClient = useQueryClient();
   return useMutation<InviteResponse, AxiosError<{ mensagem?: string }>, string>({
+    ...options,
     mutationFn: declineInvitationRequest,
-    onSuccess: (data, variables, onMutateResult, context) => {
-      queryClient.invalidateQueries({ queryKey: [INVITES] });
-      options?.onSuccess?.(data, variables, onMutateResult, context);
+    onSuccess: async (data, variables, onMutateResult, context) => {
+      // Espera a lista atualizar: o botão segue em "enviando" até o convite sumir da tela.
+      await queryClient.invalidateQueries({ queryKey: [INVITES] });
+      await options?.onSuccess?.(data, variables, onMutateResult, context);
     },
     onError: (error, variables, onMutateResult, context) => {
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }

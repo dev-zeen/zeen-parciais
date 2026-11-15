@@ -2,14 +2,13 @@ import { Feather } from '@expo/vector-icons';
 import { Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui/AppText';
-import { Card } from '@/components/ui/Card';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useTokens } from '@/hooks/useTokens';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
 import { FullPlayer, IPositions } from '@/models/Stats';
-import type { PlayerInsight } from '@/utils/insights';
+import { findPlayerMatch, type PlayerInsight } from '@/utils/insights';
 import { numberToString } from '@/utils/parseTo';
 
 type MarketPlayerCardProps = {
@@ -17,7 +16,7 @@ type MarketPlayerCardProps = {
   market: Market;
   matches: Matches;
   positions: IPositions;
-  /** Confronto e médias casa/fora, calculados uma vez pela lista */
+  /** Confronto e mínimo para valorizar, calculados uma vez pela lista */
   insight?: PlayerInsight;
   onPressAddPlayerToLineup: (player: FullPlayer) => void;
   onPressRemovePlayerFromLineup: (player: FullPlayer) => void;
@@ -27,6 +26,10 @@ type MarketPlayerCardProps = {
   isSellPlayer?: boolean;
 };
 
+/**
+ * Card do mercado. Hierarquia: nome e preço em destaque; posição, clube e confronto
+ * numa linha; média, última e mínimo para valorizar numa linha de números.
+ */
 export function MarketPlayerCard({
   market,
   matches,
@@ -43,9 +46,9 @@ export function MarketPlayerCard({
   const { isMarketClose } = useMarketStatus();
 
   const status = OBJECT_STATUS_MARKET_PLAYER[player.status_id];
-  const match = insight?.match?.match;
+  const matchInfo = insight?.match ?? findPlayerMatch(player.clube_id, matches);
   const club = market?.clubes?.[player.clube_id];
-  const position = positions?.[player.posicao_id];
+  const position = positions?.[player.posicao_id]?.abreviacao?.toUpperCase();
   const price = `C$ ${numberToString(player.preco_num)}`;
 
   const disabled = isMarketClose || (!isSellPlayer && isButtonDisabled);
@@ -58,22 +61,27 @@ export function MarketPlayerCard({
         : 'Comprar';
 
   const button = disabled
-    ? { bg: colors.disabledFill, fg: colors.onDisabledFill }
+    ? { bg: colors.surfaceAlt, fg: colors.textMuted, icon: 'slash' as const }
     : isSellPlayer
-      ? { bg: colors.negativeFill, fg: colors.onNegativeFill }
-      : { bg: colors.accentFill, fg: colors.onAccentFill };
+      ? { bg: colors.negativeContainer, fg: colors.negative, icon: 'minus' as const }
+      : { bg: colors.accentFill, fg: colors.onAccentFill, icon: 'plus' as const };
 
-  const venue = (label: string, value: number | null, active: boolean) => (
-    <AppText variant="label" weight={active ? 'bold' : 'regular'} color={active ? 'accent' : 'textMuted'}>
-      {label} {value != null ? numberToString(value) : '-'}
-    </AppText>
-  );
+  const opponent = matchInfo?.opponent;
+  const minToValorize = insight?.minToValorize;
 
   return (
-    <Card style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderRadius: radius.md,
+          borderColor: isSellPlayer ? colors.accentFill : 'transparent',
+        },
+      ]}>
       <View>
         <Image
-          source={{ uri: player.foto?.replace('FORMATO', '220x220') }}
+          source={{ uri: player.foto?.replace('FORMATO', '140x140') }}
           style={[styles.photo, { backgroundColor: colors.surfaceAlt }]}
           accessible={false}
         />
@@ -81,111 +89,124 @@ export function MarketPlayerCard({
           <View
             accessible
             accessibilityLabel={status.name}
-            style={[styles.status, { backgroundColor: status.background, borderColor: colors.surface }]}>
+            style={[
+              styles.status,
+              { backgroundColor: status.background, borderColor: colors.surface },
+            ]}>
             <Feather
               name={status.icon as keyof typeof Feather.glyphMap}
               color={status.color}
-              size={12}
+              size={10}
             />
           </View>
         ) : null}
       </View>
 
       <View style={styles.info}>
-        <AppText variant="title" weight="bold" numberOfLines={1}>
-          {player.apelido_abreviado}
-        </AppText>
-
-        <View style={styles.meta}>
-          <AppText variant="label" color="textMuted" numberOfLines={1}>
-            {position?.abreviacao?.toUpperCase()} · {club?.abreviacao} · {player.jogos_num} jogos
+        <View style={styles.titleRow}>
+          <AppText variant="title" weight="bold" numberOfLines={1} style={{ flexShrink: 1 }}>
+            {player.apelido_abreviado}
           </AppText>
-          {match ? (
-            <View
-              accessible
-              accessibilityLabel={`${matches?.clubes?.[match.clube_casa_id]?.nome ?? 'mandante'} contra ${
-                matches?.clubes?.[match.clube_visitante_id]?.nome ?? 'visitante'
-              }`}
-              style={styles.fixture}>
-              <Image
-                source={{ uri: matches?.clubes?.[match.clube_casa_id]?.escudos?.['60x60'] }}
-                style={styles.shield}
-              />
-              <Feather name="x" size={10} color={colors.textMuted} />
-              <Image
-                source={{ uri: matches?.clubes?.[match.clube_visitante_id]?.escudos?.['60x60'] }}
-                style={styles.shield}
-              />
-            </View>
+          {isSellPlayer ? (
+            <AppText variant="caption" weight="bold" color="accent">
+              NO TIME
+            </AppText>
+          ) : null}
+        </View>
+
+        <View
+          style={styles.meta}
+          accessible
+          accessibilityLabel={`${position ?? ''}, ${club?.nome ?? ''}${
+            matchInfo
+              ? `, joga ${matchInfo.isHome ? 'em casa' : 'fora'} contra ${opponent?.nome ?? 'adversário'}`
+              : ''
+          }`}>
+          <AppText variant="label" weight="bold" color="textMuted">
+            {position}
+          </AppText>
+          <AppText variant="label" color="textMuted" numberOfLines={1}>
+            {club?.abreviacao}
+          </AppText>
+          {matchInfo ? (
+            <>
+              <AppText variant="label" color="textMuted">
+                {matchInfo.isHome ? 'vs' : '@'}
+              </AppText>
+              {opponent?.escudos?.['30x30'] ? (
+                <Image source={{ uri: opponent.escudos['30x30'] }} style={styles.shield} />
+              ) : null}
+              <AppText variant="label" color="textMuted" numberOfLines={1}>
+                {opponent?.abreviacao}
+              </AppText>
+            </>
           ) : null}
         </View>
 
         <View style={styles.stats}>
-          <Stat label="Média" value={numberToString(player.media_num)} tone={player.media_num > 0 ? 'positive' : 'negative'} />
-          <Stat label="Última" value={numberToString(player.pontos_num)} tone={player.pontos_num > 0 ? 'positive' : 'negative'} />
+          <Stat label="Méd" value={numberToString(player.media_num)} />
           <Stat
-            label="Mín. val."
-            value={insight?.minToValorize != null ? numberToString(insight.minToValorize) : '-'}
-            tone="accent"
+            label="Últ"
+            value={numberToString(player.pontos_num)}
+            tone={player.pontos_num > 0 ? 'positive' : player.pontos_num < 0 ? 'negative' : 'text'}
+          />
+          <Stat
+            label="Mín"
+            value={minToValorize != null ? numberToString(minToValorize) : '-'}
+            accessibleLabel="Mínimo para valorizar"
           />
         </View>
-
-        {insight?.hasGatoMestre ? (
-          <View
-            accessible
-            accessibilityLabel={`Média em casa ${
-              insight.avgHome != null ? numberToString(insight.avgHome) : 'indisponível'
-            }, fora ${insight.avgAway != null ? numberToString(insight.avgAway) : 'indisponível'}`}
-            style={styles.venues}>
-            {venue('Casa', insight.avgHome, insight.match?.isHome === true)}
-            <AppText variant="label" color="textMuted">
-              ·
-            </AppText>
-            {venue('Fora', insight.avgAway, insight.match?.isHome === false)}
-          </View>
-        ) : null}
       </View>
 
-      <Pressable
-        disabled={disabled}
-        onPress={() =>
-          isSellPlayer ? onPressRemovePlayerFromLineup(player) : onPressAddPlayerToLineup(player)
-        }
-        accessibilityRole="button"
-        accessibilityLabel={`${actionLabel} ${player.apelido}, ${price}`}
-        accessibilityState={{ disabled }}
-        android_ripple={{ color: colors.border }}
-        style={({ pressed }) => [
-          styles.button,
-          {
-            minHeight: Math.max(minTouch, 60),
-            borderRadius: radius.md,
-            backgroundColor: button.bg,
-            opacity: pressed ? 0.8 : 1,
-          },
-        ]}>
-        <AppText variant="label" weight="bold" color={button.fg} align="center" numberOfLines={2}>
-          {actionLabel}
-        </AppText>
-        <AppText variant="body" weight="bold" color={button.fg} numberOfLines={1}>
+      <View style={styles.side}>
+        <AppText variant="title" weight="bold" numberOfLines={1}>
           {price}
         </AppText>
-      </Pressable>
-    </Card>
+        <Pressable
+          disabled={disabled}
+          onPress={() =>
+            isSellPlayer ? onPressRemovePlayerFromLineup(player) : onPressAddPlayerToLineup(player)
+          }
+          accessibilityRole="button"
+          accessibilityLabel={`${actionLabel} ${player.apelido}, ${price}`}
+          accessibilityState={{ disabled }}
+          android_ripple={{ color: colors.border }}
+          hitSlop={{ top: 4, bottom: 4 }}
+          style={({ pressed }) => [
+            styles.button,
+            {
+              minHeight: minTouch - 8,
+              borderRadius: radius.full,
+              backgroundColor: button.bg,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}>
+          <Feather name={button.icon} size={14} color={button.fg} />
+          <AppText variant="label" weight="bold" color={button.fg} numberOfLines={1}>
+            {actionLabel}
+          </AppText>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 function Stat({
   label,
   value,
-  tone,
+  tone = 'text',
+  accessibleLabel,
 }: {
   label: string;
   value: string;
-  tone: 'positive' | 'negative' | 'accent';
+  tone?: 'text' | 'positive' | 'negative';
+  accessibleLabel?: string;
 }) {
   return (
-    <View accessible accessibilityLabel={`${label}: ${value}`}>
+    <View
+      style={styles.stat}
+      accessible
+      accessibilityLabel={`${accessibleLabel ?? label}: ${value}`}>
       <AppText variant="caption" color="textMuted">
         {label}
       </AppText>
@@ -200,58 +221,65 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+    padding: 12,
+    borderWidth: 1.5,
   },
   photo: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   status: {
     position: 'absolute',
-    right: -4,
+    right: -3,
     bottom: -2,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   info: {
     flex: 1,
-    gap: 4,
+    gap: 3,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   meta: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  fixture: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 2,
+    gap: 5,
   },
   shield: {
-    width: 16,
-    height: 16,
+    width: 14,
+    height: 14,
   },
   stats: {
     flexDirection: 'row',
     gap: 12,
+    marginTop: 1,
   },
-  venues: {
+  stat: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
+    alignItems: 'baseline',
+    gap: 3,
+  },
+  side: {
+    alignItems: 'flex-end',
+    gap: 6,
   },
   button: {
-    width: 92,
-    paddingHorizontal: 6,
-    paddingVertical: 8,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: 14,
+    minWidth: 104,
     overflow: 'hidden',
   },
 });

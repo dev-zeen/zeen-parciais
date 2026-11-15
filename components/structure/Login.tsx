@@ -1,17 +1,29 @@
 import { Feather } from '@expo/vector-icons';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, Modal, Platform, ScrollView } from 'react-native';
+import {
+  ActivityIndicator,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 
-import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { Logo } from '@/components/structure/Logo';
-import Colors from '@/constants/Colors';
+import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
 import { EXPO_PUBLIC_AUTH_URL } from '@/constants/Endpoits';
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { AuthContext } from '@/contexts/Auth.context';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
+import { useTokens } from '@/hooks/useTokens';
 import { fetchGloboidClientSettings } from '@/lib/core/auth';
 import { env } from '@/lib/env';
 
@@ -103,32 +115,36 @@ const INJECT_AUTH_LOGIN = `
 `;
 
 type LoginProps = {
-  title?: string;
+  /** O que a aba mostra depois de entrar (ex.: "Entre para escalar seu time.") */
+  reason?: string;
 };
 
-// Feature cards data
 const FEATURES = [
   {
     icon: 'activity',
-    title: 'Parciais em Tempo Real',
-    description: 'Acompanhe a pontuação dos seus jogadores ao vivo durante as rodadas',
+    title: 'Parciais em tempo real',
+    description: 'Pontuação dos seus jogadores ao vivo durante a rodada.',
   },
   {
     icon: 'users',
-    title: 'Escale seu time',
+    title: 'Escalação completa',
     description:
-      'Escolha seus jogadores, troque capitão e veja o desempenho do seu time em tempo real',
+      'Monte o time, escolha o capitão e veja quanto cada jogador precisa para valorizar.',
   },
   {
     icon: 'award',
-    title: 'Gerencie suas ligas',
-    description: 'Participe de ligas clássicas, mata-mata e pontos corridos com amigos',
+    title: 'Suas ligas',
+    description: 'Clássicas, mata-mata e pontos corridos com seus amigos.',
   },
-];
+] as const;
 
-export function Login({ title }: LoginProps) {
-  const colorTheme = useThemeColor();
-  const isDark = colorTheme === 'dark';
+/**
+ * Tela única para quem não entrou: Início, Time, Ligas e Perfil mostram exatamente esta
+ * estrutura (só a frase de contexto muda). A Rodada é pública e não usa este componente.
+ */
+export function Login({ reason }: LoginProps) {
+  const { colors, spacing, radius, minTouch, isDark } = useTokens();
+  const tabBarSpacing = useTabBarSpacing();
   const insets = useSafeAreaInsets();
 
   const { handleSuccessAuth } = useContext(AuthContext);
@@ -137,21 +153,7 @@ export function Login({ title }: LoginProps) {
   const [showModalAuth, setShowModalAuth] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [webViewLoading, setWebViewLoading] = useState(true);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Animações
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const scaleAnim = useRef(new Animated.Value(0.95)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }),
-      Animated.timing(slideAnim, { toValue: 0, duration: 600, useNativeDriver: true }),
-      Animated.spring(scaleAnim, { toValue: 1, tension: 50, friction: 7, useNativeDriver: true }),
-    ]).start();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleGetLoginPage = useCallback(() => {
     setShowModalAuth(true);
@@ -173,7 +175,7 @@ export function Login({ title }: LoginProps) {
           setShowModalAuth(false);
         },
         10 * 60 * 1000
-      ) as any;
+      );
     }
 
     return () => {
@@ -217,341 +219,244 @@ export function Login({ title }: LoginProps) {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      <View className="flex-1 mt-2">
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{
-            paddingHorizontal: 24,
-            paddingTop: 32,
-            paddingBottom: 24,
-          }}
-          showsVerticalScrollIndicator={false}>
-          {/* Hero Section com Animação - Compacto */}
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            }}
-            className="items-center mb-6">
-            {/* Logo Zeen */}
-            <Animated.View
-              style={{
-                transform: [{ scale: scaleAnim }],
-                marginBottom: 20,
-              }}>
-              <Logo variant="with-name" width={160} height={100} />
-            </Animated.View>
+    <SafeAreaViewContainer edges={['top']}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          flexGrow: 1,
+          padding: spacing.md,
+          paddingBottom: tabBarSpacing.contentBottom + spacing.sm,
+          gap: spacing.lg,
+        }}>
+        <MarketStatusCard />
 
-            {/* Subtítulo */}
-            <Text
-              className="text-sm text-center opacity-70 px-4"
-              style={{
-                fontFamily: 'Satoshi-Variable',
-                lineHeight: 20,
-              }}>
-              Acompanhamento em tempo real
-            </Text>
-          </Animated.View>
+        {/* Apresentação */}
+        <View style={[styles.hero, { gap: spacing.xs }]}>
+          <Logo variant="with-name" width={144} height={61} />
+          <AppText
+            variant="heading"
+            weight="bold"
+            align="center"
+            accessibilityRole="header"
+            style={{ marginTop: spacing.sm }}>
+            Seu Cartola em tempo real
+          </AppText>
+          <AppText variant="body" color="textMuted" align="center">
+            {reason ?? 'Entre com a sua conta do Cartola para acompanhar o seu time.'}
+          </AppText>
+        </View>
 
-          {/* Botão de Login Principal - TOPO */}
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            }}
-            className="mb-6">
-            <TouchableOpacity
-              onPress={handleGetLoginPage}
-              activeOpacity={0.8}
-              disabled={isAuthenticating}
-              className="rounded-2xl overflow-hidden"
-              style={{
-                backgroundColor: Colors.light.tint,
-                shadowColor: Colors.light.tint,
-                shadowOffset: {
-                  width: 0,
-                  height: 8,
-                },
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                elevation: 8,
-              }}>
+        {/* O que a pessoa ganha ao entrar */}
+        <Card padding={spacing.md} style={{ gap: spacing.md }}>
+          {FEATURES.map((feature) => (
+            <View key={feature.title} style={[styles.feature, { gap: spacing.sm }]}>
               <View
-                className="flex-row items-center justify-center py-4 px-6"
-                style={{
-                  backgroundColor: Colors.light.tint,
-                  gap: 12,
-                }}>
-                {isAuthenticating ? (
-                  <ActivityIndicator color={Colors.light.background} size="small" />
-                ) : (
-                  <Feather name="log-in" size={22} color={Colors.light.background} />
-                )}
-                <Text
-                  className="text-base font-bold"
-                  style={{
-                    color: Colors.light.background,
-                    fontFamily: 'Satoshi-Variable',
-                  }}>
-                  {isAuthenticating ? 'Autenticando...' : 'Entrar'}
-                </Text>
+                style={[
+                  styles.featureIcon,
+                  { backgroundColor: colors.brandContainer, borderRadius: radius.full },
+                ]}>
+                <Feather
+                  name={feature.icon}
+                  size={18}
+                  color={isDark ? colors.brand : colors.brandText}
+                />
               </View>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Alert Info (se houver) */}
-          {title && (
-            <Animated.View
-              className="mb-4 p-3 rounded-xl"
-              style={{
-                opacity: fadeAnim,
-                backgroundColor: isDark ? 'rgba(255, 138, 0, 0.15)' : 'rgba(255, 138, 0, 0.1)',
-                borderWidth: 1,
-                borderColor: isDark ? 'rgba(255, 138, 0, 0.3)' : 'rgba(255, 138, 0, 0.2)',
-              }}>
-              <View
-                className="flex-row items-start"
-                style={{
-                  gap: 10,
-                  backgroundColor: 'transparent',
-                }}>
-                <Feather name="info" size={16} color={Colors.light.tint} />
-                <Text
-                  className="flex-1 text-xs"
-                  style={{
-                    fontFamily: 'Satoshi-Variable',
-                    lineHeight: 18,
-                  }}>
-                  {title}
-                </Text>
+              <View style={{ flex: 1, gap: 2 }}>
+                <AppText variant="body" weight="bold">
+                  {feature.title}
+                </AppText>
+                <AppText variant="label" color="textMuted">
+                  {feature.description}
+                </AppText>
               </View>
-            </Animated.View>
-          )}
+            </View>
+          ))}
+        </Card>
 
-          {/* Divider */}
-          <View
-            className="flex-row items-center my-4"
-            style={{
-              gap: 12,
-            }}>
-            <View
-              className="flex-1 h-px"
-              style={{
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-              }}
-            />
-            <Text
-              className="text-xs opacity-50"
-              style={{
-                fontFamily: 'Satoshi-Variable',
-              }}>
-              RECURSOS PRINCIPAIS
-            </Text>
-            <View
-              className="flex-1 h-px"
-              style={{
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-              }}
-            />
-          </View>
+        {/* Ações: empurradas para baixo em telas altas, perto do polegar */}
+        <View style={{ flexGrow: 1 }} />
+        <View style={{ gap: spacing.sm }}>
+          <Pressable
+            onPress={handleGetLoginPage}
+            disabled={isAuthenticating}
+            accessibilityRole="button"
+            accessibilityLabel="Entrar com a conta Globo"
+            accessibilityState={{ disabled: isAuthenticating, busy: isAuthenticating }}
+            android_ripple={{ color: colors.brandContainer }}
+            style={({ pressed }) => [
+              styles.primary,
+              {
+                minHeight: minTouch + 8,
+                borderRadius: radius.full,
+                backgroundColor: colors.brand,
+                opacity: pressed ? 0.85 : 1,
+              },
+            ]}>
+            {isAuthenticating ? (
+              <ActivityIndicator color={colors.onBrand} size="small" />
+            ) : (
+              <Feather name="log-in" size={20} color={colors.onBrand} />
+            )}
+            <AppText variant="title" weight="bold" color="onBrand">
+              {isAuthenticating ? 'Entrando...' : 'Entrar com conta Globo'}
+            </AppText>
+          </Pressable>
 
-          {/* Feature Cards - Compactos */}
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              gap: 8,
-              marginBottom: 16,
-            }}>
-            {FEATURES.map((feature) => (
-              <View
-                key={feature.title}
-                className="flex-row items-center p-3 rounded-lg"
-                style={{
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
-                  borderWidth: 1,
-                  borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
-                  gap: 12,
-                }}>
-                {/* Icon Container - Menor */}
-                <View
-                  className="w-10 h-10 rounded-full items-center justify-center"
-                  style={{
-                    backgroundColor: isDark ? 'rgba(255, 138, 0, 0.2)' : 'rgba(255, 138, 0, 0.15)',
-                  }}>
-                  <Feather name={feature.icon as any} size={18} color={Colors.light.tint} />
-                </View>
+          <AppText variant="label" color="textMuted" align="center">
+            Não tem conta? Você cria uma grátis na própria tela de login.
+          </AppText>
 
-                {/* Text Content - Compacto */}
-                <View className="flex-1 bg-transparent">
-                  <Text
-                    className="text-sm font-semibold mb-0.5"
-                    style={{
-                      fontFamily: 'Satoshi-Variable',
-                    }}>
-                    {feature.title}
-                  </Text>
-                  <Text
-                    className="text-xs opacity-70"
-                    style={{
-                      fontFamily: 'Satoshi-Variable',
-                      lineHeight: 16,
-                    }}>
-                    {feature.description}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </Animated.View>
-        </ScrollView>
-      </View>
+          <Pressable
+            onPress={() => router.navigate('/(tabs)/rodada')}
+            accessibilityRole="button"
+            accessibilityHint="Abre a aba Rodada, que não precisa de login"
+            style={({ pressed }) => [
+              styles.secondary,
+              { minHeight: minTouch, opacity: pressed ? 0.6 : 1 },
+            ]}>
+            <AppText variant="body" weight="bold" color="accent">
+              Ver a rodada sem entrar
+            </AppText>
+            <Feather name="chevron-right" size={18} color={colors.accent} />
+          </Pressable>
+        </View>
+      </ScrollView>
 
       {/* Modal de Autenticação */}
       {showModalAuth && (
-        <Modal animationType="slide" visible={showModalAuth} presentationStyle="fullScreen">
-          <View className="flex-1" style={{ position: 'relative' }}>
-            {/* Header da Modal */}
+        <Modal
+          animationType="slide"
+          visible={showModalAuth}
+          presentationStyle="fullScreen"
+          onRequestClose={handleCloseModal}>
+          <View style={{ flex: 1, backgroundColor: colors.bg }}>
             <View
-              className="px-4 py-3 border-b"
-              style={{
-                paddingTop: Platform.OS === 'ios' ? insets.top + 12 : 12,
-                backgroundColor: isDark ? Colors.dark.background : Colors.light.background,
-                borderBottomColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}>
-              <View
-                className="flex-row items-center"
-                style={{
-                  gap: 12,
-                }}>
-                <Feather
-                  name="shield"
-                  size={20}
-                  color={isDark ? Colors.dark.text : Colors.light.text}
-                />
+              style={[
+                styles.modalHeader,
+                {
+                  paddingTop: (Platform.OS === 'ios' ? insets.top : 0) + spacing.xs,
+                  paddingHorizontal: spacing.md,
+                  paddingBottom: spacing.xs,
+                  borderBottomColor: colors.border,
+                  backgroundColor: colors.surface,
+                },
+              ]}>
+              <View style={[styles.feature, { gap: spacing.sm }]}>
+                <Feather name="lock" size={18} color={colors.text} />
                 <View>
-                  <Text
-                    className="text-base font-bold"
-                    style={{
-                      fontFamily: 'Satoshi-Variable',
-                    }}>
-                    Login Seguro
-                  </Text>
-                  <Text
-                    className="text-xs opacity-60"
-                    style={{
-                      fontFamily: 'Satoshi-Variable',
-                    }}>
-                    Via Globo.com
-                  </Text>
+                  <AppText variant="body" weight="bold" accessibilityRole="header">
+                    Login seguro
+                  </AppText>
+                  <AppText variant="label" color="textMuted">
+                    globo.com
+                  </AppText>
                 </View>
               </View>
 
-              <TouchableOpacity
-                activeOpacity={0.7}
-                className="rounded-full p-2"
+              <Pressable
                 onPress={handleCloseModal}
                 disabled={isAuthenticating}
-                style={{
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-                }}>
-                <Feather name="x" size={24} color={isDark ? Colors.dark.text : Colors.light.text} />
-              </TouchableOpacity>
+                accessibilityRole="button"
+                accessibilityLabel="Fechar login"
+                style={({ pressed }) => [
+                  styles.close,
+                  {
+                    width: minTouch,
+                    height: minTouch,
+                    borderRadius: minTouch / 2,
+                    backgroundColor: colors.surfaceAlt,
+                    opacity: pressed ? 0.7 : 1,
+                  },
+                ]}>
+                <Feather name="x" size={20} color={colors.text} />
+              </Pressable>
             </View>
 
-            {/* WebView */}
-            <WebView
-              style={{
-                flex: 1,
-                backgroundColor: isDark ? Colors.dark.background : Colors.light.background,
-              }}
-              source={{
-                uri: EXPO_PUBLIC_AUTH_URL,
-              }}
-              incognito
-              userAgent={CHROME_MOBILE_USER_AGENT}
-              injectedJavaScript={INJECT_AUTH_LOGIN}
-              onMessage={(e) => handleWebViewMessage(e)}
-              onLoadStart={() => {
-                console.log('🌐 WebView iniciando carregamento');
-                setWebViewLoading(true);
-              }}
-              onLoadEnd={() => {
-                console.log('✅ WebView carregada - aguardando login');
-                setWebViewLoading(false);
-              }}
-              onError={(syntheticEvent) => {
-                const { nativeEvent } = syntheticEvent;
-                console.warn('❌ WebView error: ', nativeEvent);
-                setWebViewLoading(false);
-              }}
-              javaScriptEnabled
-              domStorageEnabled
-              sharedCookiesEnabled={false}
-              cacheEnabled={false}
-            />
+            {/* A sobreposição cobre só a página, para o botão de fechar continuar acessível */}
+            <View style={{ flex: 1 }}>
+              <WebView
+                style={{ flex: 1, backgroundColor: colors.bg }}
+                source={{ uri: EXPO_PUBLIC_AUTH_URL }}
+                incognito
+                userAgent={CHROME_MOBILE_USER_AGENT}
+                injectedJavaScript={INJECT_AUTH_LOGIN}
+                onMessage={handleWebViewMessage}
+                onLoadStart={() => setWebViewLoading(true)}
+                onLoadEnd={() => setWebViewLoading(false)}
+                onError={({ nativeEvent }) => {
+                  console.warn('❌ WebView error: ', nativeEvent);
+                  setWebViewLoading(false);
+                }}
+                javaScriptEnabled
+                domStorageEnabled
+                sharedCookiesEnabled={false}
+                cacheEnabled={false}
+              />
 
-            {/* Loading Overlay durante autenticação */}
-            {isAuthenticating && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 10,
-                }}>
-                <ActivityIndicator size="large" color={Colors.light.tint} />
-                <Text
-                  className="text-lg font-semibold mt-4 mb-2"
-                  style={{
-                    fontFamily: 'Satoshi-Variable',
-                  }}>
-                  Autenticando...
-                </Text>
-                <Text
-                  className="text-sm opacity-60"
-                  style={{
-                    fontFamily: 'Satoshi-Variable',
-                  }}>
-                  Aguarde um momento
-                </Text>
-              </View>
-            )}
-
-            {/* Loading inicial da WebView */}
-            {webViewLoading && !isAuthenticating && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  backgroundColor: isDark ? Colors.dark.background : Colors.light.background,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 5,
-                }}>
-                <ActivityIndicator size="large" color={Colors.light.tint} />
-                <Text
-                  className="text-sm opacity-60 mt-4"
-                  style={{
-                    fontFamily: 'Satoshi-Variable',
-                  }}>
-                  Carregando página de login...
-                </Text>
-              </View>
-            )}
+              {isAuthenticating || webViewLoading ? (
+                <View
+                  style={[styles.overlay, { backgroundColor: colors.bg, top: 0, gap: spacing.xs }]}>
+                  <ActivityIndicator size="large" color={colors.brand} />
+                  <AppText variant="title" weight="bold" style={{ marginTop: spacing.xs }}>
+                    {isAuthenticating ? 'Entrando...' : 'Carregando login'}
+                  </AppText>
+                  <AppText variant="body" color="textMuted">
+                    {isAuthenticating ? 'Aguarde um momento' : 'Conectando à globo.com'}
+                  </AppText>
+                </View>
+              ) : null}
+            </View>
           </View>
         </Modal>
       )}
-    </View>
+    </SafeAreaViewContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  hero: {
+    alignItems: 'center',
+  },
+  feature: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  featureIcon: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  primary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: 24,
+    overflow: 'hidden',
+  },
+  secondary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  close: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

@@ -22,8 +22,10 @@ import usePartialScore from '@/hooks/usePartialScore';
 import { TeamHistoryRound } from '@/models/Club';
 import theme from '@/styles/theme';
 import { numberToString } from '@/utils/parseTo';
+import { useTokens } from '@/hooks/useTokens';
 
 export default () => {
+  const { colors: tk } = useTokens();
   const { themeMode, colorScheme: colorTheme, setThemeMode } = useTheme();
   const tabBarSpacing = useTabBarSpacing();
 
@@ -127,12 +129,7 @@ export default () => {
   );
 
   if (!isAutheticated) {
-    return (
-      <SafeAreaViewContainer edges={['top']}>
-        <MarketStatusCard />
-        <Login title="Para acessar as informações do seu perfil é necessário efetuar o login." />
-      </SafeAreaViewContainer>
-    );
+    return <Login reason="Entre para ver seu histórico, patrimônio e pontuação." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
@@ -148,7 +145,8 @@ export default () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-        contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom }}
+        // + altura do botão de sair (56) e sua margem, para ele não cobrir o último card
+        contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom + 72 }}
         className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
@@ -165,7 +163,7 @@ export default () => {
               <View
                 className="flex-row items-center"
                 style={{ gap: 8, backgroundColor: 'transparent' }}>
-                <Feather name="bar-chart-2" size={20} color="#3b82f6" />
+                <Feather name="bar-chart-2" size={20} color={tk.accent} />
                 <Text className="text-base font-bold">Estatísticas Gerais</Text>
               </View>
               <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
@@ -184,8 +182,8 @@ export default () => {
                     </Text>
                     <View
                       className="w-7 h-7 rounded-full items-center justify-center"
-                      style={{ backgroundColor: '#3B82F620' }}>
-                      <Feather name="award" size={14} color="#3B82F6" />
+                      style={{ backgroundColor: tk.accentContainer }}>
+                      <Feather name="award" size={14} color={tk.accent} />
                     </View>
                   </View>
                   <Text className="font-bold text-xl mb-1" numberOfLines={1}>
@@ -300,8 +298,8 @@ export default () => {
                       </Text>
                       <View
                         className="w-7 h-7 rounded-full items-center justify-center"
-                        style={{ backgroundColor: '#3B82F620' }}>
-                        <Feather name="hash" size={14} color="#3B82F6" />
+                        style={{ backgroundColor: tk.accentContainer }}>
+                        <Feather name="hash" size={14} color={tk.accent} />
                       </View>
                     </View>
                     <Text 
@@ -503,8 +501,8 @@ export default () => {
                       </Text>
                       <View
                         className="w-7 h-7 rounded-full items-center justify-center"
-                        style={{ backgroundColor: '#3B82F620' }}>
-                        <Feather name="activity" size={14} color="#3B82F6" />
+                        style={{ backgroundColor: tk.accentContainer }}>
+                        <Feather name="activity" size={14} color={tk.accent} />
                       </View>
                     </View>
                     <Text className="font-bold text-xl mb-1" numberOfLines={1}>
@@ -553,7 +551,7 @@ export default () => {
                     <View
                       className="flex-row items-center"
                       style={{ gap: 8, backgroundColor: 'transparent', marginBottom: 4 }}>
-                      <Feather name="trending-up" size={20} color="#3b82f6" />
+                      <Feather name="trending-up" size={20} color={tk.accent} />
                       <Text className="text-base font-bold">Histórico de Pontuação</Text>
                     </View>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">
@@ -632,8 +630,8 @@ export default () => {
                       </Text>
                       <View
                         className="w-7 h-7 rounded-full items-center justify-center"
-                        style={{ backgroundColor: '#3B82F620' }}>
-                        <Feather name="flag" size={14} color="#3B82F6" />
+                        style={{ backgroundColor: tk.accentContainer }}>
+                        <Feather name="flag" size={14} color={tk.accent} />
                       </View>
                     </View>
                     <Text className="font-bold text-xl mb-1" numberOfLines={1}>
@@ -689,7 +687,7 @@ export default () => {
                     backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
                     gap: 6,
                   }}>
-                  <Feather name="calendar" size={14} color="#3B82F6" />
+                  <Feather name="calendar" size={14} color={tk.accent} />
                   <Text className="text-sm font-semibold">
                     Desde {myClub?.time.temporada_inicial ?? '—'}
                   </Text>
@@ -746,7 +744,7 @@ export default () => {
               <View
                 className="flex-row items-center"
                 style={{ gap: 8, backgroundColor: 'transparent' }}>
-                <Feather name="moon" size={20} color="#3b82f6" />
+                <Feather name="moon" size={20} color={tk.accent} />
                 <Text className="text-base font-bold">Tema do Aplicativo</Text>
               </View>
               <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
@@ -758,7 +756,7 @@ export default () => {
                   style={{
                     backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
                     borderWidth: 2,
-                    borderColor: themeMode === 'light' ? '#3B82F6' : 'transparent',
+                    borderColor: themeMode === 'light' ? tk.accent : 'transparent',
                   }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
@@ -768,16 +766,16 @@ export default () => {
                     </Text>
                     <View
                       className="w-6 h-6 rounded-full items-center justify-center"
-                      style={{ backgroundColor: '#3B82F620' }}>
-                      <Feather name="sun" size={12} color="#3B82F6" />
+                      style={{ backgroundColor: tk.accentContainer }}>
+                      <Feather name="sun" size={12} color={tk.accent} />
                     </View>
                   </View>
                   {themeMode === 'light' && (
                     <View
                       className="flex-row items-center"
                       style={{ gap: 4, backgroundColor: 'transparent' }}>
-                      <Feather name="check" size={12} color="#3B82F6" />
-                      <Text className="text-xs font-semibold" style={{ color: '#3B82F6' }}>
+                      <Feather name="check" size={12} color={tk.accent} />
+                      <Text className="text-xs font-semibold" style={{ color: tk.accent }}>
                         Ativo
                       </Text>
                     </View>
@@ -792,7 +790,7 @@ export default () => {
                   style={{
                     backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
                     borderWidth: 2,
-                    borderColor: themeMode === 'dark' ? '#3B82F6' : 'transparent',
+                    borderColor: themeMode === 'dark' ? tk.accent : 'transparent',
                   }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
@@ -802,16 +800,16 @@ export default () => {
                     </Text>
                     <View
                       className="w-6 h-6 rounded-full items-center justify-center"
-                      style={{ backgroundColor: '#3B82F620' }}>
-                      <Feather name="moon" size={12} color="#3B82F6" />
+                      style={{ backgroundColor: tk.accentContainer }}>
+                      <Feather name="moon" size={12} color={tk.accent} />
                     </View>
                   </View>
                   {themeMode === 'dark' && (
                     <View
                       className="flex-row items-center"
                       style={{ gap: 4, backgroundColor: 'transparent' }}>
-                      <Feather name="check" size={12} color="#3B82F6" />
-                      <Text className="text-xs font-semibold" style={{ color: '#3B82F6' }}>
+                      <Feather name="check" size={12} color={tk.accent} />
+                      <Text className="text-xs font-semibold" style={{ color: tk.accent }}>
                         Ativo
                       </Text>
                     </View>
@@ -826,7 +824,7 @@ export default () => {
                   style={{
                     backgroundColor: colorTheme === 'dark' ? '#1F293730' : '#F3F4F6',
                     borderWidth: 2,
-                    borderColor: themeMode === 'auto' ? '#3B82F6' : 'transparent',
+                    borderColor: themeMode === 'auto' ? tk.accent : 'transparent',
                   }}>
                   <View
                     className="flex-row items-center justify-between mb-2"
@@ -836,16 +834,16 @@ export default () => {
                     </Text>
                     <View
                       className="w-6 h-6 rounded-full items-center justify-center"
-                      style={{ backgroundColor: '#3B82F620' }}>
-                      <Feather name="smartphone" size={12} color="#3B82F6" />
+                      style={{ backgroundColor: tk.accentContainer }}>
+                      <Feather name="smartphone" size={12} color={tk.accent} />
                     </View>
                   </View>
                   {themeMode === 'auto' && (
                     <View
                       className="flex-row items-center"
                       style={{ gap: 4, backgroundColor: 'transparent' }}>
-                      <Feather name="check" size={12} color="#3B82F6" />
-                      <Text className="text-xs font-semibold" style={{ color: '#3B82F6' }}>
+                      <Feather name="check" size={12} color={tk.accent} />
+                      <Text className="text-xs font-semibold" style={{ color: tk.accent }}>
                         Ativo
                       </Text>
                     </View>
@@ -868,7 +866,8 @@ export default () => {
         style={{
           position: 'absolute',
           right: 16,
-          bottom: 24,
+          // Acima da tab bar nativa, que no iOS fica sobre o conteúdo
+          bottom: tabBarSpacing.overlap + 16,
           width: 56,
           height: 56,
           borderRadius: 28,
@@ -884,7 +883,9 @@ export default () => {
           shadowRadius: 8,
           elevation: 8,
         }}
-        onPress={handleLogout}>
+        onPress={handleLogout}
+        accessibilityRole="button"
+        accessibilityLabel="Sair da conta">
         <Feather name="log-out" size={24} color={colorTheme === 'dark' ? '#ef4444' : '#dc2626'} />
       </TouchableOpacity>
     </SafeAreaViewContainer>

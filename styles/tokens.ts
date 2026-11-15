@@ -30,6 +30,9 @@ export type Palette = {
   accentFill: string;
   onAccentFill: string;
   accentContainer: string;
+  /** Azul secundário (identidade do mata-mata, avisos informativos) */
+  info: string;
+  infoContainer: string;
   /** Verde legível como texto */
   positive: string;
   positiveFill: string;
@@ -61,10 +64,13 @@ export const palette: Record<ThemeName, Palette> = {
     onBrand: '#1A1200',
     brandText: '#964B00',
     brandContainer: '#FFE3C2',
-    accent: '#0050EB',
-    accentFill: '#0057FF',
-    onAccentFill: '#FFFFFF',
-    accentContainer: '#DDEAFF',
+    // Primária = laranja da logo. `accent` é o laranja escurecido para texto (AA sobre fundo claro).
+    accent: '#8F4700',
+    accentFill: '#FF8A00',
+    onAccentFill: '#1A1200',
+    accentContainer: '#FFE8CC',
+    info: '#0050EB',
+    infoContainer: '#DDEAFF',
     positive: '#00704A',
     positiveFill: '#00E094',
     onPositiveFill: '#00301F',
@@ -92,10 +98,12 @@ export const palette: Record<ThemeName, Palette> = {
     onBrand: '#1A1200',
     brandText: '#FFA940',
     brandContainer: '#4A2B00',
-    accent: '#7AA5FF',
-    accentFill: '#5B8EFF',
-    onAccentFill: '#0D1117',
-    accentContainer: '#12264D',
+    accent: '#FFA940',
+    accentFill: '#FF8A00',
+    onAccentFill: '#1A1200',
+    accentContainer: '#3D2400',
+    info: '#7AA5FF',
+    infoContainer: '#12264D',
     positive: '#00E094',
     positiveFill: '#00E094',
     onPositiveFill: '#00301F',
@@ -190,6 +198,10 @@ export const contrastPairs: [keyof Palette, keyof Palette, number][] = [
   ['text', 'brandContainer', 4.5],
   ['onAccentFill', 'accentFill', 4.5],
   ['accent', 'accentContainer', 4.5],
+  ['text', 'accentContainer', 4.5],
+  ['info', 'bg', 4.5],
+  ['info', 'surface', 4.5],
+  ['info', 'infoContainer', 4.5],
   ['onPositiveFill', 'positiveFill', 4.5],
   ['positive', 'positiveContainer', 4.5],
   ['onNegativeFill', 'negativeFill', 4.5],

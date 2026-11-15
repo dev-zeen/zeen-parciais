@@ -7,6 +7,7 @@ import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { PlayerHistoryStats } from '@/models/Player';
 import { numberToString } from '@/utils/parseTo';
+import { useTokens } from '@/hooks/useTokens';
 
 type PlayerStatsViewProps = {
   stats: PlayerHistoryStats | undefined;
@@ -14,6 +15,7 @@ type PlayerStatsViewProps = {
 };
 
 export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
+  const { colors: tk } = useTokens();
   const colorTheme = useThemeColor();
 
   const processedStats = useMemo(() => {
@@ -80,7 +82,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
       <View
         className="items-center justify-center"
         style={{ gap: 4, backgroundColor: 'transparent' }}>
-        <Feather name="trending-up" size={24} color="#0057FF" />
+        <Feather name="trending-up" size={24} color={tk.accent} />
         <Text className="text-lg font-bold">Estatísticas por Rodada</Text>
       </View>
 
@@ -95,7 +97,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               borderBottomWidth: 1,
               borderBottomColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
             }}>
-            <Feather name="activity" size={16} color="#0057FF" />
+            <Feather name="activity" size={16} color={tk.accent} />
             <Text className="text-sm font-semibold">Resumo de Desempenho</Text>
           </View>
 
@@ -166,25 +168,25 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
               }`}
               style={{
                 borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#0A1F4A' : '#5B8EFF',
+                borderColor: tk.accent,
               }}>
               <View
                 className="flex-row items-center justify-between"
                 style={{ backgroundColor: 'transparent' }}>
                 <Text
                   className="text-xs font-medium"
-                  style={{ color: colorTheme === 'dark' ? '#5B8EFF' : '#0057FF' }}>
+                  style={{ color: tk.accent }}>
                   Total
                 </Text>
                 <Feather
                   name="award"
                   size={14}
-                  color={colorTheme === 'dark' ? '#5B8EFF' : '#0057FF'}
+                  color={tk.accent}
                 />
               </View>
               <Text
                 className="text-xl font-bold mt-1"
-                style={{ color: colorTheme === 'dark' ? '#0057FF' : '#0057FF' }}>
+                style={{ color: tk.accent }}>
                 {numberToString(processedStats.totalPoints)}
               </Text>
             </View>
@@ -228,7 +230,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
             <View
               className="flex-row items-center"
               style={{ gap: 6, backgroundColor: 'transparent' }}>
-              <Feather name="bar-chart-2" size={16} color="#0057FF" />
+              <Feather name="bar-chart-2" size={16} color={tk.accent} />
               <Text className="text-sm font-semibold">Pontos por Rodada</Text>
             </View>
             <BarChart
@@ -246,7 +248,7 @@ export function PlayerStatsView({ stats, isLoading }: PlayerStatsViewProps) {
           <View
             className="flex-row items-center"
             style={{ gap: 6, backgroundColor: 'transparent' }}>
-            <Feather name="list" size={16} color="#0057FF" />
+            <Feather name="list" size={16} color={tk.accent} />
             <Text className="text-sm font-semibold">Rodadas Detalhadas</Text>
           </View>
 

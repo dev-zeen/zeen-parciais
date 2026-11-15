@@ -1,10 +1,10 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react';
-import { Platform } from 'react-native';
 
 import { TeamPlayerCard } from '@/components/contexts/team/TeamPlayerCard';
 import { BottomSheet, BottomSheetRef } from '@/components/structure/BottomSheet';
 import { LineupPlayer } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
+import { debugLog } from '@/utils/debugLog';
 
 type SheetPlayer = LineupPlayer | FullPlayer;
 
@@ -17,9 +17,6 @@ type PlayerSheetProps = {
   isViewOnly?: boolean;
   onReplace?: (player: SheetPlayer) => void;
 };
-
-/** No iOS um modal só pode abrir depois que o anterior terminou de fechar. */
-const DISMISS_DELAY = Platform.OS === 'ios' ? 450 : 0;
 
 /** Uma única ficha de jogador por tela, aberta por referência. */
 export const PlayerSheet = forwardRef<PlayerSheetRef, PlayerSheetProps>(
@@ -37,16 +34,35 @@ export const PlayerSheet = forwardRef<PlayerSheetRef, PlayerSheetProps>(
       close,
     }));
 
+    // "Trocar" abre o mercado, que é outro modal. No iOS ele só pode ser apresentado
+    // depois que a ficha terminou de sair; por isso a troca fica pendente até o
+    // `onDismissed`. Se a tela desmontar antes, o evento não chega e nada é executado.
+    const pendingReplace = useRef<SheetPlayer | null>(null);
+    const onReplaceRef = useRef(onReplace);
+    onReplaceRef.current = onReplace;
+
     const handleReplace = useCallback(
       (player: SheetPlayer) => {
+        debugLog('trocar', 'pedido para', player.atleta_id, '— aguardando a ficha fechar');
+        pendingReplace.current = player;
         close();
-        setTimeout(() => onReplace?.(player), DISMISS_DELAY);
       },
-      [close, onReplace]
+      [close]
     );
 
+    const handleDismissed = useCallback(() => {
+      const player = pendingReplace.current;
+      pendingReplace.current = null;
+      debugLog(
+        'trocar',
+        'ficha fechou',
+        player ? `— abrindo mercado para ${player.atleta_id}` : '(sem troca pendente)'
+      );
+      if (player) onReplaceRef.current?.(player);
+    }, []);
+
     return (
-      <BottomSheet ref={sheetRef}>
+      <BottomSheet ref={sheetRef} onDismissed={handleDismissed}>
         {current ? (
           <TeamPlayerCard
             key={current.player.atleta_id}

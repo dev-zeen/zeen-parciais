@@ -1,7 +1,6 @@
-import { GlassView, isLiquidGlassAvailable } from 'expo-glass-effect';
-import { Platform, Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
-import { AppText } from '@/components/ui/AppText';
+import { Chip } from '@/components/ui/Chip';
 import { useTokens } from '@/hooks/useTokens';
 
 export type SegmentOption<T extends string> = {
@@ -16,67 +15,30 @@ type SegmentedControlProps<T extends string> = {
   onChange: (value: T) => void;
 };
 
-/** Vidro só existe no iOS com Liquid Glass; fora disso a trilha é sólida. */
-const useGlass = Platform.OS === 'ios' && isLiquidGlassAvailable();
-
+/**
+ * Alternância entre abas no mesmo padrão dos chips de filtro: selecionada em laranja,
+ * as demais em superfície sólida com texto normal (legível nos dois temas).
+ */
 export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
 }: SegmentedControlProps<T>) {
-  const { colors, radius, minTouch } = useTokens();
-
-  const segments = options.map((option) => {
-    const selected = option.value === value;
-
-    return (
-      <Pressable
-        key={option.value}
-        onPress={() => onChange(option.value)}
-        accessibilityRole="tab"
-        accessibilityLabel={option.accessibilityLabel ?? option.label}
-        accessibilityState={{ selected }}
-        android_ripple={{ color: colors.border }}
-        style={({ pressed }) => ({
-          flex: 1,
-          minHeight: minTouch - 8,
-          borderRadius: radius.full,
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingHorizontal: 4,
-          backgroundColor: selected ? colors.surface : 'transparent',
-          opacity: pressed ? 0.75 : 1,
-          overflow: 'hidden',
-        })}>
-        <AppText
-          variant="label"
-          weight={selected ? 'bold' : 'medium'}
-          color={selected ? 'text' : 'textMuted'}
-          numberOfLines={1}>
-          {option.label}
-        </AppText>
-      </Pressable>
-    );
-  });
-
-  const trackStyle = {
-    flexDirection: 'row' as const,
-    padding: 4,
-    gap: 2,
-    borderRadius: radius.full,
-  };
-
-  if (useGlass) {
-    return (
-      <GlassView accessibilityRole="tablist" style={trackStyle}>
-        {segments}
-      </GlassView>
-    );
-  }
+  const { spacing } = useTokens();
 
   return (
-    <View accessibilityRole="tablist" style={[trackStyle, { backgroundColor: colors.surfaceAlt }]}>
-      {segments}
+    <View accessibilityRole="tablist" style={{ flexDirection: 'row', gap: spacing.xs }}>
+      {options.map((option) => (
+        <Chip
+          key={option.value}
+          label={option.label}
+          accessibilityLabel={option.accessibilityLabel}
+          accessibilityRole="tab"
+          selected={option.value === value}
+          onPress={() => onChange(option.value)}
+          fill
+        />
+      ))}
     </View>
   );
 }

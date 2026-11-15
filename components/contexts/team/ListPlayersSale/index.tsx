@@ -1,1 +1,0 @@
-export { ListPlayersSale } from './ListPlayersSale';

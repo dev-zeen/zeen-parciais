@@ -125,7 +125,7 @@ export function PlayerInsights({ insight, clubName }: PlayerInsightsProps) {
                     styles.venue,
                     {
                       backgroundColor: venue.active ? colors.accentContainer : colors.surface,
-                      borderColor: venue.active ? colors.accent : colors.border,
+                      borderColor: venue.active ? colors.accentFill : colors.border,
                     },
                   ]}>
                   <AppText variant="label" color="textMuted">

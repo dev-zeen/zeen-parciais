@@ -1,10 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { AlertsCard } from '@/components/contexts/home/AlertsCard';
 import { PlayerHighlightsCarousel } from '@/components/contexts/home/PlayerHighlightsCarousel';
-import { QuickActionsGrid } from '@/components/contexts/home/QuickActionsGrid';
 import { StatsOverviewCard } from '@/components/contexts/home/StatsOverviewCard';
 import { TeamSummaryCard } from '@/components/contexts/home/TeamSummaryCard';
 import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
@@ -17,6 +16,7 @@ import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
@@ -28,6 +28,7 @@ import theme from '@/styles/theme';
 export default () => {
   const colorTheme = useThemeColor();
   const tabBarSpacing = useTabBarSpacing();
+  const { isAutheticated } = useContext(AuthContext);
 
   const {
     marketStatus,
@@ -78,6 +79,11 @@ export default () => {
     ? isLoadingMarketStatus || isLoadingPositions || isLoadingMyClub
     : isLoadingMarketStatus || isLoadingPositions;
 
+  // Mesmo padrão das demais abas protegidas (Time, Ligas, Perfil)
+  if (!isAutheticated) {
+    return <Login />;
+  }
+
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
     return <MaintenanceMarket />;
   }
@@ -119,9 +125,6 @@ export default () => {
               {/* Team Summary */}
               <TeamSummaryCard team={myClub} />
 
-              {/* Quick Actions Grid */}
-              <QuickActionsGrid />
-
               {/* Stats Overview with Chart */}
               <StatsOverviewCard />
 
@@ -134,9 +137,7 @@ export default () => {
               {/* Player Highlights Carousel */}
               <PlayerHighlightsCarousel />
             </>
-          ) : (
-            <Login />
-          )}
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaViewContainer>

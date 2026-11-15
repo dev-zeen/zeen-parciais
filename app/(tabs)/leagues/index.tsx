@@ -1,31 +1,33 @@
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useCallback, useContext, useMemo, useState } from 'react';
-import {
-  Image,
-  ListRenderItemInfo,
-  RefreshControl,
-  SectionList,
-  TextInput,
-  TouchableOpacity,
-} from 'react-native';
+import { Pressable, RefreshControl, ScrollView, SectionList, StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
-import { EmptyLeagueList } from '@/components/contexts/leagues/EmptyLeagueList';
-import { LeagueCard } from '@/components/contexts/leagues/LeagueCard';
-import { PointsCompetitionCard } from '@/components/contexts/leagues/PointsCompetitionCard';
+import {
+  LEAGUE_KIND,
+  LeagueKind,
+  PRIVACY_LABEL,
+  pluralTeams,
+} from '@/components/contexts/leagues/leagueKinds';
+import { LeagueListCard, LeagueListItem } from '@/components/contexts/leagues/LeagueListCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
-import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
+import { AppText } from '@/components/ui/AppText';
+import { Chip } from '@/components/ui/Chip';
+import { SearchField } from '@/components/ui/SearchField';
+import { StateView } from '@/components/ui/StateView';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
+import type {
+  PointsCompetitionFinalizedItem,
+  PointsCompetitionListItem,
+} from '@/models/Competition';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
 import {
@@ -34,426 +36,441 @@ import {
 } from '@/queries/competitions.query';
 import { useGetInvites } from '@/queries/invites.query';
 import { useGetLeagues } from '@/queries/leagues.query';
+import { normalizeQuery } from '@/utils/format';
 
-type SectionLeagueProps = {
-  title: string;
-  subtitle?: string;
-  data: LeagueUserDetails[];
+type Filter = 'all' | LeagueKind;
+
+type Section = { title: string; subtitle?: string; data: LeagueListItem[] };
+
+/** A partir de quantas ligas a busca aparece */
+const SEARCH_THRESHOLD = 6;
+
+const keyExtractor = (item: LeagueListItem) => item.key;
+
+const fromLeague = (league: LeagueUserDetails, myTeamId?: number): LeagueListItem => {
+  const privacy = PRIVACY_LABEL[league.tipo];
+
+  if (league.mata_mata) {
+    const total = league.quantidade_times;
+    const filled = league.total_times_liga;
+    const status = league.vencedor
+      ? { label: 'Encerrada', tone: 'neutral' as const }
+      : !league.sorteada
+        ? total && filled < total
+          ? { label: `Faltam ${total - filled} times`, tone: 'warning' as const }
+          : { label: 'Aguardando sorteio', tone: 'warning' as const }
+        : undefined;
+    return {
+      key: `league-${league.liga_id}`,
+      kind: 'cup',
+      name: league.nome,
+      imageUrl: league.url_trofeu_png ?? league.imagem,
+      meta: [privacy, total ? `${filled}/${total} times` : pluralTeams(filled)]
+        .filter(Boolean)
+        .join(' · '),
+      isOwner: !!myTeamId && league.time_dono_id === myTeamId,
+      status,
+      href: `/leagues/league/${league.slug}`,
+    };
+  }
+
+  return {
+    key: `league-${league.liga_id}`,
+    kind: 'classic',
+    name: league.nome,
+    imageUrl: league.url_flamula_png ?? league.imagem,
+    meta: [privacy, pluralTeams(league.total_times_liga), league.sem_capitao ? null : 'com capitão']
+      .filter(Boolean)
+      .join(' · '),
+    position: league.camp_ranking_num,
+    variation: league.camp_variacao_num,
+    isOwner: !!myTeamId && league.time_dono_id === myTeamId,
+    href: `/leagues/league/${league.slug}`,
+  };
 };
 
-export default function () {
-  const colorTheme = useThemeColor();
+const fromPoints = (
+  competition: PointsCompetitionListItem | PointsCompetitionFinalizedItem,
+  myTeamId?: number
+): LeagueListItem => ({
+  key: `points-${competition.id}`,
+  kind: 'points',
+  name: competition.nome,
+  imageUrl: competition.url_taca_png,
+  meta: [
+    PRIVACY_LABEL[competition.privacidade],
+    `${competition.quantidade_participantes}/${competition.quantidade_times} times`,
+    `rodadas ${competition.rodada_inicial}–${competition.rodada_final}`,
+  ].join(' · '),
+  position: competition.sorteada ? competition.ranking_time?.posicao : undefined,
+  variation: competition.finalizada ? undefined : competition.ranking_time?.variacao,
+  isOwner: !!myTeamId && competition.time_dono_id === myTeamId,
+  status: competition.finalizada
+    ? { label: 'Encerrada', tone: 'neutral' }
+    : !competition.sorteada
+      ? { label: 'Aguardando times', tone: 'warning' }
+      : undefined,
+  href: `/leagues/points/${competition.slug}`,
+});
+
+export default function LeaguesScreen() {
+  const { colors, spacing, radius, minTouch } = useTokens();
   const tabBarSpacing = useTabBarSpacing();
-
   const { isAutheticated } = useContext(AuthContext);
-
   const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
 
-  const {
-    data: myClub,
-    isRefetching: isRefetchingMyClub,
-    refetch: onRefetchMyClub,
-  } = useGetMyClub(allowRequest);
-
-  const {
-    data: invites,
-    isLoading: isLoadingInvites,
-    refetch: onRefetchInvites,
-    isRefetching: isRefetchingInvites,
-  } = useGetInvites(allowRequest);
-
-  const { invites: pointsInvites } = usePointsCompetitionInvites();
-
-  const invitesCount = useMemo(
-    () => (invites?.convites?.length ?? 0) + (pointsInvites?.length ?? 0),
-    [invites?.convites?.length, pointsInvites?.length]
-  );
-
+  const [filter, setFilter] = useState<Filter>('all');
   const [search, setSearch] = useState('');
 
+  const { data: myClub, refetch: onRefetchMyClub } = useGetMyClub(allowRequest);
+  const { data: invites, refetch: onRefetchInvites } = useGetInvites(allowRequest);
+  const { invites: pointsInvites, refetch: onRefetchPointsInvites } = usePointsCompetitionInvites();
   const {
     data: leagues,
+    isError: isErrorLeagues,
     refetch: onRefetchLeagues,
-    isRefetching: isRefetchingLeagues,
+    isRefetching,
   } = useGetLeagues(!!allowRequest);
+  const { data: pointsCompetitions, refetch: onRefetchPoints } =
+    useGetPointsCompetitions(!!allowRequest);
+  const { data: finalizedCompetitions, refetch: onRefetchFinalized } =
+    useGetFinalizedPointsCompetitions(!!allowRequest);
 
-  const {
-    data: pointsCompetitions,
-    refetch: onRefetchPointsCompetitions,
-    isRefetching: isRefetchingPointsCompetitions,
-  } = useGetPointsCompetitions(!!allowRequest);
+  const invitesCount = (invites?.convites?.length ?? 0) + pointsInvites.length;
+  const myTeamId = myClub?.time?.time_id;
+  const isPro = !!myClub?.time?.assinante;
 
-  const {
-    data: finalizedCompetitions,
-    refetch: onRefetchFinalizedCompetitions,
-    isRefetching: isRefetchingFinalizedCompetitions,
-  } = useGetFinalizedPointsCompetitions(!!allowRequest);
+  // Todas as ligas normalizadas num formato só; filtros e busca atuam sobre isso.
+  const groups = useMemo(() => {
+    const ligas = leagues?.ligas ?? [];
+    return {
+      classic: ligas
+        .filter((l) => l.time_dono_id && !l.mata_mata)
+        .map((l) => fromLeague(l, myTeamId)),
+      cup: ligas.filter((l) => l.mata_mata).map((l) => fromLeague(l, myTeamId)),
+      // Ligas do próprio Cartola (sem dono); só fazem sentido com o mercado aberto, como antes.
+      official: isMarketClose
+        ? []
+        : ligas.filter((l) => !l.time_dono_id).map((l) => fromLeague(l, myTeamId)),
+      points: (pointsCompetitions ?? []).map((c) => fromPoints(c, myTeamId)),
+      finished: (finalizedCompetitions ?? []).map((c) => fromPoints(c, myTeamId)),
+    };
+  }, [finalizedCompetitions, isMarketClose, leagues?.ligas, myTeamId, pointsCompetitions]);
 
-  const sectionLeaguesList = useMemo(() => {
-    if (!leagues) return [];
+  const counts = {
+    all:
+      groups.classic.length +
+      groups.cup.length +
+      groups.official.length +
+      groups.points.length +
+      groups.finished.length,
+    classic: groups.classic.length + groups.official.length,
+    cup: groups.cup.length,
+    points: groups.points.length + groups.finished.length,
+  };
 
-    const { ligas } = leagues;
-    const query = search.trim().toLowerCase();
-    const matchesQuery = (league: LeagueUserDetails) =>
-      !query || league.nome.toLowerCase().includes(query);
+  const sections = useMemo(() => {
+    const query = normalizeQuery(search.trim());
+    const match = (item: LeagueListItem) => !query || normalizeQuery(item.name).includes(query);
+    const limit = (max?: number) => (max ? `limite ${max}` : undefined);
+    const show = (kind: LeagueKind) => filter === 'all' || filter === kind;
 
-    const max_ligas_pro = marketStatus?.max_ligas_pro ?? 0;
-    const max_ligas_free = marketStatus?.max_ligas_free ?? 0;
-    const max_ligas_matamata_pro = marketStatus?.max_ligas_matamata_pro ?? 0;
-    const max_ligas_matamata_free = marketStatus?.max_ligas_matamata_free ?? 0;
+    const candidates: (Section | false)[] = [
+      show('classic') && {
+        title: 'Clássicas',
+        subtitle: limit(isPro ? marketStatus?.max_ligas_pro : marketStatus?.max_ligas_free),
+        data: groups.classic,
+      },
+      show('cup') && {
+        title: 'Mata-mata',
+        subtitle: limit(
+          isPro ? marketStatus?.max_ligas_matamata_pro : marketStatus?.max_ligas_matamata_free
+        ),
+        data: groups.cup,
+      },
+      show('points') && { title: 'Pontos corridos', data: groups.points },
+      show('classic') && { title: 'Ligas do Cartola', data: groups.official },
+      show('points') && { title: 'Encerradas', data: groups.finished },
+    ];
 
-    const privateLeaguesAll = ligas.filter((item) => item.time_dono_id && !item.mata_mata);
-    const cupsAll = ligas.filter((item) => item.mata_mata);
-    const defaultLeaguesAll = ligas.filter((item) => !item.time_dono_id);
+    return candidates
+      .filter((section): section is Section => !!section)
+      .map((section) => ({ ...section, data: section.data.filter(match) }))
+      .filter((section) => section.data.length > 0);
+  }, [filter, groups, isPro, marketStatus, search]);
 
-    const privateLeagues = privateLeaguesAll.filter(matchesQuery);
-    const cups = cupsAll.filter(matchesQuery);
-    const defaultLeagues = defaultLeaguesAll.filter(matchesQuery);
-
-    const isProAssinante = myClub?.time.assinante;
-
-    const toSection = (
-      title: string,
-      subtitle: string | undefined,
-      data: LeagueUserDetails[]
-    ): SectionLeagueProps | null => (data.length > 0 ? { title, subtitle, data } : null);
-
-    return [
-      toSection(
-        'Clássicas',
-        query
-          ? `${privateLeagues.length} de ${privateLeaguesAll.length} · ${privateLeaguesAll.length} / ${
-              isProAssinante ? max_ligas_pro : max_ligas_free
-            }`
-          : `${privateLeaguesAll.length} / ${isProAssinante ? max_ligas_pro : max_ligas_free}`,
-        privateLeagues
-      ),
-      toSection(
-        'Mata-mata',
-        query
-          ? `${cups.length} de ${cupsAll.length} · ${cupsAll.length} / ${
-              isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free
-            }`
-          : `${cupsAll.length} / ${isProAssinante ? max_ligas_matamata_pro : max_ligas_matamata_free}`,
-        cups
-      ),
-      !isMarketClose
-        ? toSection(
-            'Padrão',
-            query
-              ? `${defaultLeagues.length} de ${defaultLeaguesAll.length}`
-              : `${defaultLeaguesAll.length}`,
-            defaultLeagues
-          )
-        : null,
-    ].filter((s): s is SectionLeagueProps => s !== null);
-  }, [leagues, isMarketClose, marketStatus, myClub?.time.assinante, search]);
-
-  const keyExtractor = useCallback((item: LeagueUserDetails) => `${item.liga_id}`, []);
-
-  const renderItem = useCallback(
-    ({ item: league }: ListRenderItemInfo<LeagueUserDetails>) => {
-      return <LeagueCard key={league.liga_id} league={league} myTeamId={myClub?.time?.time_id} />;
-    },
-    [myClub?.time?.time_id]
-  );
-
-  const onRefetch = useCallback(async () => {
+  const onRefetch = useCallback(() => {
     Promise.allSettled([
-      onRefetchMyClub && onRefetchMyClub(),
+      onRefetchMyClub(),
       onRefetchLeagues(),
       onRefetchInvites(),
-      onRefetchPointsCompetitions(),
-      onRefetchFinalizedCompetitions(),
+      onRefetchPointsInvites(),
+      onRefetchPoints(),
+      onRefetchFinalized(),
     ]);
   }, [
+    onRefetchFinalized,
     onRefetchInvites,
     onRefetchLeagues,
     onRefetchMyClub,
-    onRefetchPointsCompetitions,
-    onRefetchFinalizedCompetitions,
+    onRefetchPoints,
+    onRefetchPointsInvites,
   ]);
 
-  const isRefetching =
-    isRefetchingMyClub ||
-    isRefetchingLeagues ||
-    isRefetchingInvites ||
-    isRefetchingPointsCompetitions ||
-    isRefetchingFinalizedCompetitions;
+  const openLeague = useCallback((href: string) => router.push(href as never), []);
 
   if (!isAutheticated) {
-    return (
-      <SafeAreaViewContainer edges={['top']}>
-        <MarketStatusCard />
-        <Login title="Para acessar suas ligas, é necessário efetuar o login." />
-      </SafeAreaViewContainer>
-    );
+    return <Login reason="Entre para ver suas ligas, convites e o mata-mata." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
     return <MaintenanceMarket hasHeader />;
   }
 
-  if (!leagues || !myClub || isLoadingInvites) {
-    return <LoadingScreen title="Carregando minhas ligas" />;
+  if (isErrorLeagues && !leagues) {
+    return (
+      <SafeAreaViewContainer edges={['top']}>
+        <StateView
+          icon="wifi-off"
+          title="Não deu para carregar suas ligas"
+          message="Confira a conexão e tente de novo."
+          actionLabel="Tentar de novo"
+          onAction={onRefetch}
+        />
+      </SafeAreaViewContainer>
+    );
   }
 
-  const pointsList = pointsCompetitions ?? [];
-  const pointsQuery = search.trim().toLowerCase();
-  const pointsFiltered =
-    pointsQuery.length > 0
-      ? pointsList.filter((c) => c.nome.toLowerCase().includes(pointsQuery))
-      : pointsList;
+  if (!leagues) {
+    return <LoadingScreen title="Carregando suas ligas" />;
+  }
 
-  const finalizedList = finalizedCompetitions ?? [];
-  const finalizedFiltered =
-    pointsQuery.length > 0
-      ? finalizedList.filter((c) => c.nome.toLowerCase().includes(pointsQuery))
-      : finalizedList;
+  const filters: { value: Filter; label: string }[] = [
+    { value: 'all', label: `Todas · ${counts.all}` },
+    { value: 'classic', label: `${LEAGUE_KIND.classic.plural} · ${counts.classic}` },
+    { value: 'cup', label: `${LEAGUE_KIND.cup.plural} · ${counts.cup}` },
+    { value: 'points', label: `${LEAGUE_KIND.points.plural} · ${counts.points}` },
+  ];
+
+  const isSearching = search.trim().length > 0;
+
+  const listHeader = (
+    <View style={{ paddingTop: spacing.sm, gap: spacing.sm }}>
+      {invitesCount > 0 ? (
+        <Pressable
+          onPress={() => router.push('/leagues/invites')}
+          accessibilityRole="button"
+          accessibilityLabel={`Você tem ${invitesCount} ${
+            invitesCount === 1 ? 'convite' : 'convites'
+          } para ligas. Abrir convites`}
+          android_ripple={{ color: colors.border }}
+          style={({ pressed }) => [
+            styles.banner,
+            {
+              gap: spacing.sm,
+              padding: spacing.sm,
+              borderRadius: radius.md,
+              backgroundColor: colors.accentContainer,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}>
+          <View
+            style={[
+              styles.bannerIcon,
+              { backgroundColor: colors.accentFill, borderRadius: radius.full },
+            ]}>
+            <Feather name="mail" size={18} color={colors.onAccentFill} />
+          </View>
+          <View style={{ flex: 1 }}>
+            <AppText variant="body" weight="bold" color="accent">
+              {invitesCount === 1 ? '1 convite esperando' : `${invitesCount} convites esperando`}
+            </AppText>
+            <AppText variant="label" color="accent">
+              Aceite para começar a disputar
+            </AppText>
+          </View>
+          <Feather name="chevron-right" size={18} color={colors.accent} />
+        </Pressable>
+      ) : null}
+    </View>
+  );
 
   return (
     <SafeAreaViewContainer edges={['top']}>
-      <View
-        style={{
-          flex: 1,
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        }}>
-        {/* Header (fixo) */}
-        <View className="px-2 pt-3 pb-2" style={{ gap: 10, backgroundColor: 'transparent' }}>
-          <View
-            style={{
-              backgroundColor: 'transparent',
-              gap: 10,
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-            }}>
-            <View
-              className="flex-row items-center rounded-xl px-3 flex-1"
-              style={{
-                gap: 10,
-                height: 48,
-                backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-                borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-              }}>
-              <Feather
-                name="search"
-                size={18}
-                color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
-              />
-              <TextInput
-                value={search}
-                onChangeText={setSearch}
-                placeholder="Buscar liga..."
-                placeholderTextColor={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
-                style={{
-                  flex: 1,
-                  color: colorTheme === 'dark' ? '#f9fafb' : '#111827',
-                  fontSize: 15,
-                }}
-              />
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.push('/leagues/invites')}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                borderRadius: 999,
-                backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-                borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-              }}>
-              <Feather
-                name="mail"
-                size={16}
-                color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'}
-              />
-              <Text className="text-sm font-semibold">Convites</Text>
-              {invitesCount > 0 && (
-                <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ef4444' }}>
-                  <Text className="text-xs font-bold" style={{ color: '#ffffff' }}>
-                    {invitesCount}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
+      {/* Cabeçalho fixo: título e convites, busca e filtros, com o mesmo respiro entre eles */}
+      <View style={{ gap: spacing.sm, paddingTop: spacing.xs, paddingBottom: spacing.xs }}>
+        <View style={[styles.header, { paddingHorizontal: spacing.md }]}>
+          <View style={{ flex: 1 }}>
+            <AppText variant="display" weight="bold" accessibilityRole="header">
+              Ligas
+            </AppText>
+            <AppText variant="label" color="textMuted">
+              {counts.all === 1 ? 'Você está em 1 liga' : `Você está em ${counts.all} ligas`}
+            </AppText>
           </View>
+          <Pressable
+            onPress={() => router.push('/leagues/invites')}
+            accessibilityRole="button"
+            accessibilityLabel={invitesCount ? `Convites, ${invitesCount} pendentes` : 'Convites'}
+            style={({ pressed }) => [
+              styles.iconButton,
+              {
+                width: minTouch,
+                height: minTouch,
+                borderRadius: minTouch / 2,
+                backgroundColor: colors.surface,
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}>
+            <Feather name="mail" size={20} color={colors.text} />
+            {invitesCount > 0 ? (
+              <View
+                style={[
+                  styles.count,
+                  { backgroundColor: colors.negativeFill, borderColor: colors.bg },
+                ]}>
+                <AppText variant="caption" weight="bold" color="onNegativeFill">
+                  {invitesCount > 9 ? '9+' : invitesCount}
+                </AppText>
+              </View>
+            ) : null}
+          </Pressable>
         </View>
 
-        <SectionList
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          sections={sectionLeaguesList}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          showsVerticalScrollIndicator={false}
-          ItemSeparatorComponent={() => (
-            <View style={{ height: 10, backgroundColor: 'transparent' }} />
-          )}
-          ListHeaderComponent={
-            pointsFiltered.length > 0 ? (
-              <View style={{ paddingBottom: 8, backgroundColor: 'transparent' }}>
-                <View
-                  className="py-3"
-                  style={{
-                    backgroundColor:
-                      colorTheme === 'dark'
-                        ? Colors.dark.backgroundFull
-                        : Colors.light.backgroundFull,
-                  }}>
-                  <View
-                    className="flex-row items-end justify-between"
-                    style={{ backgroundColor: 'transparent' }}>
-                    <Text className="font-bold text-base">Pontos Corridos</Text>
-                    <Text className="text-xs text-gray-500">
-                      {pointsFiltered.length}
-                      {pointsQuery ? ` de ${pointsList.length}` : ''}
-                    </Text>
-                  </View>
-                </View>
-                <View style={{ gap: 10, backgroundColor: 'transparent' }}>
-                  {pointsFiltered.map((competition) => (
-                    <PointsCompetitionCard
-                      key={competition.slug}
-                      competition={competition}
-                      myTeamId={myClub?.time?.time_id}
-                    />
-                  ))}
-                </View>
-              </View>
-            ) : null
-          }
-          contentContainerStyle={{
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-            paddingHorizontal: 8,
-            paddingBottom: tabBarSpacing.contentBottom,
-          }}
-          renderSectionHeader={({ section: { title, subtitle } }) => (
-            <View
-              className="py-3"
-              style={{
-                backgroundColor:
-                  colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-              }}>
-              <View
-                className="flex-row items-end justify-between"
-                style={{ backgroundColor: 'transparent' }}>
-                <Text className="font-bold text-base">{title}</Text>
-                {subtitle && <Text className="text-xs text-gray-500">{subtitle}</Text>}
-              </View>
-            </View>
-          )}
-          ListEmptyComponent={<EmptyLeagueList />}
-          stickySectionHeadersEnabled={false}
-          ListFooterComponent={
-            finalizedFiltered.length > 0 ? (
-              <View style={{ paddingTop: 8, backgroundColor: 'transparent' }}>
-                <View
-                  className="py-3"
-                  style={{
-                    backgroundColor:
-                      colorTheme === 'dark'
-                        ? Colors.dark.backgroundFull
-                        : Colors.light.backgroundFull,
-                  }}>
-                  <View
-                    className="flex-row items-end justify-between"
-                    style={{ backgroundColor: 'transparent' }}>
-                    <Text className="font-bold text-base">Finalizadas</Text>
-                    <Text className="text-xs text-gray-500">{finalizedFiltered.length}</Text>
-                  </View>
-                </View>
-                <View style={{ gap: 10, backgroundColor: 'transparent' }}>
-                  {finalizedFiltered.map((competition) => (
-                    <TouchableOpacity
-                      key={competition.slug}
-                      activeOpacity={0.7}
-                      onPress={() => router.push(`/leagues/points/${competition.slug}`)}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: 12,
-                        padding: 12,
-                        borderRadius: 12,
-                        backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-                        borderWidth: 1,
-                        borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-                      }}>
-                      {competition.url_taca_png ? (
-                        <View
-                          style={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: 24,
-                            backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}>
-                          <Image
-                            source={{ uri: competition.url_taca_png }}
-                            style={{ width: 48, height: 48, borderRadius: 24 }}
-                          />
-                        </View>
-                      ) : null}
-                      <View style={{ flex: 1, backgroundColor: 'transparent', gap: 4 }}>
-                        <Text className="text-base font-bold" numberOfLines={1}>
-                          {competition.nome}
-                        </Text>
-                        <Text className="text-xs text-gray-500" numberOfLines={1}>
-                          {competition.privacidade === 'A' ? 'Aberta' : 'Fechada'} ·{' '}
-                          {competition.quantidade_participantes} times · Rd{' '}
-                          {competition.rodada_inicial}–{competition.rodada_final}
-                        </Text>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            gap: 6,
-                            backgroundColor: 'transparent',
-                            flexWrap: 'wrap',
-                          }}>
-                          <View
-                            className="px-2 py-1 rounded-full"
-                            style={{
-                              backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#e5e7eb',
-                            }}>
-                            <Text
-                              className="text-[11px] font-semibold"
-                              style={{ color: '#9ca3af' }}>
-                              Finalizada
-                            </Text>
-                          </View>
-                          <View
-                            className="px-2 py-1 rounded-full"
-                            style={{
-                              backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#e5e7eb',
-                            }}>
-                            <Text
-                              className="text-[11px] font-semibold"
-                              style={{ color: '#f59e0b' }}>
-                              #{competition.ranking_time.posicao}º lugar
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                      <Feather
-                        name="chevron-right"
-                        size={16}
-                        color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
-                      />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ) : null
-          }
-        />
+        {counts.all >= SEARCH_THRESHOLD ? (
+          <View style={{ paddingHorizontal: spacing.md }}>
+            <SearchField value={search} onChangeText={setSearch} placeholder="Buscar liga" />
+          </View>
+        ) : null}
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.filters}
+          contentContainerStyle={{ gap: spacing.xs, paddingHorizontal: spacing.md }}>
+          {filters.map((option) => (
+            <Chip
+              key={option.value}
+              label={option.label}
+              selected={filter === option.value}
+              onPress={() => setFilter(option.value)}
+            />
+          ))}
+        </ScrollView>
       </View>
+
+      <SectionList
+        sections={sections}
+        keyExtractor={keyExtractor}
+        renderItem={({ item }) => <LeagueListCard item={item} onPress={openLeague} />}
+        renderSectionHeader={({ section }) => (
+          <View
+            style={[styles.sectionHeader, { paddingTop: spacing.md, paddingBottom: spacing.xs }]}>
+            <AppText variant="label" weight="bold" color="textMuted" accessibilityRole="header">
+              {section.title.toUpperCase()} · {section.data.length}
+            </AppText>
+            {section.subtitle ? (
+              <AppText variant="caption" color="textMuted">
+                {section.subtitle}
+              </AppText>
+            ) : null}
+          </View>
+        )}
+        ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={
+          isSearching ? (
+            <StateView
+              icon="search"
+              title="Nenhuma liga encontrada"
+              message={`Nada com "${search.trim()}".`}
+              actionLabel="Limpar busca"
+              onAction={() => setSearch('')}
+            />
+          ) : counts.all === 0 ? (
+            <StateView
+              icon="award"
+              title="Você ainda não está em nenhuma liga"
+              message="Quando você entrar em uma liga do Cartola ou aceitar um convite, ela aparece aqui com sua posição."
+              actionLabel={invitesCount ? 'Ver convites' : undefined}
+              onAction={invitesCount ? () => router.push('/leagues/invites') : undefined}
+            />
+          ) : (
+            <StateView
+              icon="filter"
+              title="Nenhuma liga nesta modalidade"
+              message={`Você não participa de ligas ${
+                filter === 'cup'
+                  ? 'mata-mata'
+                  : filter === 'points'
+                    ? 'de pontos corridos'
+                    : 'clássicas'
+              }.`}
+              actionLabel="Ver todas"
+              onAction={() => setFilter('all')}
+            />
+          )
+        }
+        stickySectionHeadersEnabled={false}
+        showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingHorizontal: spacing.md,
+          paddingBottom: tabBarSpacing.contentBottom,
+        }}
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+      />
     </SafeAreaViewContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  count: {
+    position: 'absolute',
+    top: -2,
+    right: -2,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filters: {
+    flexGrow: 0,
+  },
+  banner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  bannerIcon: {
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pulse: {
+    flexDirection: 'row',
+  },
+  pulseItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
+});
