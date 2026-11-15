@@ -2,15 +2,20 @@ import { Feather } from '@expo/vector-icons';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Pressable, View as RNView } from 'react-native';
 
-import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { View } from '@/components/Themed';
 import { MarketFilters } from '@/components/contexts/market/MarketFilters';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { PlayerLowestCard } from '@/components/contexts/market/PlayerLowestCard.tsx';
 import { onGetEmptyPositions } from '@/components/contexts/team/_team.helpers';
+import { Card } from '@/components/ui/Card';
+import { StatItem } from '@/components/ui/StatItem';
+import { StateView } from '@/components/ui/StateView';
 import Colors from '@/constants/Colors';
+import { usePlayerInsights } from '@/hooks/usePlayerInsights';
 import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
@@ -40,6 +45,8 @@ export default ({
   const isFirstRender = useRef(true);
 
   const colorTheme = useThemeColor();
+  const { colors, minTouch } = useTokens();
+  const { getInsight } = usePlayerInsights();
 
   const { data: myClub } = useGetMyClub();
 
@@ -143,21 +150,28 @@ export default ({
   const keyExtractor = useCallback((item: FullPlayer) => `${item.atleta_id}`, []);
 
   const renderItem = useCallback(
-    ({ item: player }: ListRenderItemInfo<FullPlayer>) => (
-      <MarketPlayerCard
-        player={player}
-        positions={positions as IPositions}
-        market={market as Market}
-        matches={matches as Matches}
-        onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
-        onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
-        isButtonDisabled={
-          (!playerLowestPrice && player.preco_num > currentBalancePrice) ||
-          (!playerLowestPrice && !emptyPositions?.has(player.posicao_id))
-        }
-        isSellPlayer={lineup?.starting.some((item) => item.player?.atleta_id === player.atleta_id)}
-      />
-    ),
+    ({ item: player }: ListRenderItemInfo<FullPlayer>) => {
+      // Reservas (playerLowestPrice) seguem a regra do mais barato da posição, sem checar saldo/vaga.
+      const hasNoSlot = !playerLowestPrice && !emptyPositions?.has(player.posicao_id);
+      const hasNoBalance = !playerLowestPrice && player.preco_num > currentBalancePrice;
+
+      return (
+        <MarketPlayerCard
+          player={player}
+          positions={positions as IPositions}
+          market={market as Market}
+          matches={matches as Matches}
+          insight={getInsight(player)}
+          onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player, playerIndex)}
+          onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
+          isButtonDisabled={hasNoBalance || hasNoSlot}
+          disabledReason={hasNoSlot ? 'Sem vaga' : 'Sem saldo'}
+          isSellPlayer={lineup?.starting.some(
+            (item) => item.player?.atleta_id === player.atleta_id
+          )}
+        />
+      );
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       currentBalancePrice,
@@ -168,6 +182,7 @@ export default ({
       positions,
       market,
       matches,
+      getInsight,
     ]
   );
 
@@ -187,56 +202,32 @@ export default ({
         backgroundColor:
           colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
       }}>
-      <View
-        className="justify-between items-center flex-row rounded-lg mb-2 py-3 px-4"
-        style={{
-          backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-          borderWidth: 1,
-          borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
-        }}>
-        <View
-          className="flex-row items-center"
-          style={{
-            gap: 16,
-            backgroundColor: 'transparent',
-          }}>
-          <View
-            className="justify-center items-center gap-1"
-            style={{ backgroundColor: 'transparent' }}>
-            <Text
-              className="text-xs"
-              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-              Valor atual
-            </Text>
-            <Text className="font-bold text-xs text-green-500">{numberToString(price)}</Text>
-          </View>
+      <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <RNView style={{ flex: 1, flexDirection: 'row', gap: 4 }}>
+          <StatItem label="Valor do time" value={numberToString(price)} />
+          <StatItem
+            label="Saldo"
+            value={numberToString(currentBalancePrice)}
+            tone={currentBalancePrice < 0 ? 'negative' : 'positive'}
+          />
+        </RNView>
 
-          <View
-            className="justify-center items-center gap-1"
-            style={{ backgroundColor: 'transparent' }}>
-            <Text
-              className="text-xs"
-              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-              Restante
-            </Text>
-            <Text className="font-bold text-xs text-green-500">
-              {numberToString(currentBalancePrice)}
-            </Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          activeOpacity={0.6}
+        <Pressable
           onPress={handleCloseMarket}
-          className="p-2 rounded-full"
-          style={{
-            backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
-            borderWidth: 1,
-            borderColor: colorTheme === 'dark' ? '#dc2626' : '#fca5a5',
-          }}>
-          <Feather name="x" size={20} color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'} />
-        </TouchableOpacity>
-      </View>
+          accessibilityRole="button"
+          accessibilityLabel="Fechar mercado"
+          style={({ pressed }) => ({
+            width: minTouch,
+            height: minTouch,
+            borderRadius: minTouch / 2,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: colors.surfaceAlt,
+            opacity: pressed ? 0.7 : 1,
+          })}>
+          <Feather name="x" size={20} color={colors.text} />
+        </Pressable>
+      </Card>
 
       <MarketFilters
         applyFilter={applyFilter}
@@ -250,6 +241,13 @@ export default ({
         data={marketPlayers}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
+        ListEmptyComponent={
+          <StateView
+            icon="search"
+            title="Nenhum jogador encontrado"
+            message="Ajuste os filtros para ver mais opções."
+          />
+        }
         ItemSeparatorComponent={() => (
           <View
             style={{

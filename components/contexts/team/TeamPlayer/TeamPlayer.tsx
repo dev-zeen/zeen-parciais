@@ -1,28 +1,36 @@
 import { Feather } from '@expo/vector-icons';
-import { useCallback, useMemo, useRef } from 'react';
-import { Image, TouchableOpacity } from 'react-native';
+import { useMemo } from 'react';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import captainImage from '@/assets/images/letter-c.png';
-import { Text, View } from '@/components/Themed';
-import { TeamPlayerCard } from '@/components/contexts/team/TeamPlayerCard';
-import { BottomSheet, BottomSheetRef } from '@/components/structure/BottomSheet';
+import { AppText } from '@/components/ui/AppText';
 import { ENUM_STATUS_MARKET_PLAYER, OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { MIN_TOUCH, useTokens } from '@/hooks/useTokens';
 import { LineupPlayer } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import useTeamLineupStore from '@/store/useTeamLineupStore';
+import type { FieldStat } from '@/store/useTeamLineupStore';
+import type { PlayerInsight } from '@/utils/insights';
 import { numberToString } from '@/utils/parseTo';
 
+export const PLAYER_SLOT_MAX_WIDTH = 76;
+export const PLAYER_AVATAR_SIZE = 44;
+/** Altura reservada para a etiqueta acima do avatar; a vaga vazia usa o mesmo valor para alinhar. */
+export const PLAYER_LABEL_HEIGHT = 20;
+
 type TeamPlayerProps = {
-  player?: LineupPlayer;
+  player?: LineupPlayer | FullPlayer;
   isCaptain?: boolean;
-  handleCaptain?: (id: number) => void;
   isPlayed?: boolean;
   isReplaced?: boolean;
   isEnteredInMatch?: boolean;
   isReservePlayer?: boolean;
   isViewOnly: boolean;
   round?: number;
+  width?: number;
+  /** Dado exibido na etiqueta com o mercado aberto */
+  fieldStat?: FieldStat;
+  insight?: PlayerInsight;
+  onPress?: (player: LineupPlayer | FullPlayer) => void;
 };
 
 export function TeamPlayer({
@@ -34,180 +42,225 @@ export function TeamPlayer({
   isReservePlayer = false,
   isViewOnly = false,
   round,
+  width = PLAYER_SLOT_MAX_WIDTH,
+  fieldStat = 'price',
+  insight,
+  onPress,
 }: TeamPlayerProps) {
+  const { colors, field } = useTokens();
   const { isMarketClose, marketStatus } = useMarketStatus();
 
-  const bottomSheetRef = useRef<BottomSheetRef>(null);
+  const showScore = isMarketClose || isViewOnly;
 
-  const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
+  const scoreLabel = useMemo(() => {
+    if (isReplaced) return '-';
 
-  const handleModalPlayerCard = useCallback(() => {
-    if (!player) return;
-    if (bottomSheetRef.current) {
-      bottomSheetRef.current.snapToIndex(0);
+    const multiplier = isCaptain ? 1.5 : 1;
+
+    if (round === marketStatus?.rodada_atual) {
+      if (!isMarketClose || !isPlayed) return '-';
+      return numberToString(((player as LineupPlayer)?.pontuacao ?? 0) * multiplier);
     }
-  }, [player]);
 
-  const handleSheetClose = useCallback(() => {
-    // Callback quando o sheet fecha
-  }, []);
+    const points = player?.pontos_num;
+    if (points === null) return '-';
+    const score = (points ?? 0) * multiplier;
+    return isNaN(score) ? '-' : numberToString(score);
+  }, [isCaptain, isMarketClose, isPlayed, isReplaced, marketStatus?.rodada_atual, player, round]);
 
-  const handleRemovePlayerFromLayout = useCallback(
-    (player: LineupPlayer | FullPlayer) => {
-      if (isMarketClose) return;
-      removePlayerFromLineup(player);
-    },
-    [isMarketClose, removePlayerFromLineup]
-  );
-
-  const partialScore = useMemo(() => {
-    if (isPlayed) {
-      const pontuacao = (player as LineupPlayer)?.pontuacao ?? 0;
-      return isCaptain ? pontuacao * 1.5 : pontuacao;
+  const statLabel = useMemo(() => {
+    switch (fieldStat) {
+      case 'average':
+        return numberToString(player?.media_num);
+      case 'min':
+        return insight?.minToValorize != null ? numberToString(insight.minToValorize) : '-';
+      case 'match':
+        if (!insight?.match) return '-';
+        return insight.match.isHome ? 'Casa' : 'Fora';
+      default:
+        return `C$ ${numberToString(player?.preco_num)}`;
     }
-  }, [isCaptain, isPlayed, player]);
+  }, [fieldStat, insight, player?.media_num, player?.preco_num]);
 
-  const score = useMemo(() => {
-    if (player?.pontos_num !== null) {
-      return isCaptain
-        ? (player as LineupPlayer)?.pontos_num * 1.5 || 0
-        : ((player as LineupPlayer)?.pontos_num ?? 0);
-    }
-  }, [isCaptain, player]);
+  if (!player) return null;
 
-  const scorePartialFormated = useMemo(
-    () => (isMarketClose && isPlayed ? numberToString(partialScore) : '-'),
-    [isMarketClose, isPlayed, partialScore]
-  );
+  const status = OBJECT_STATUS_MARKET_PLAYER[player.status_id];
+  const isUnlikely = player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL;
+  const isDimmed = isReplaced || (isReservePlayer && !isEnteredInMatch && isMarketClose);
+  const label = showScore ? scoreLabel : statLabel;
+  const opponentShield =
+    !showScore && fieldStat === 'match' ? insight?.match?.opponent?.escudos?.['30x30'] : undefined;
 
-  const scoreFormated = useMemo(() => {
-    if (!isNaN(score as number)) {
-      return numberToString(score);
-    }
-    return '-';
-  }, [score]);
-
-  const scoreFinal = useMemo(
-    () => (round === marketStatus?.rodada_atual ? scorePartialFormated : scoreFormated),
-    [marketStatus?.rodada_atual, round, scoreFormated, scorePartialFormated]
-  );
-
-  const playerPrice = useMemo(() => numberToString(player?.preco_num), [player?.preco_num]);
+  const accessibilityLabel = [
+    player.apelido,
+    isCaptain ? 'capitão' : null,
+    !isViewOnly && status ? status.name : null,
+    showScore ? `pontuação ${label}` : accessibleStat(fieldStat, label, insight),
+    isReplaced ? 'substituído' : null,
+    isEnteredInMatch ? 'entrou na partida' : null,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
   return (
-    <View
-      className={`items-center justify-center ${
-        isReplaced || (isReservePlayer && !isEnteredInMatch && isMarketClose) ? 'opacity-60' : ''
-      }`}
-      style={{
-        gap: 2,
-        maxWidth: 76,
-        minWidth: 76,
-        backgroundColor: 'transparent',
-      }}>
-      {isMarketClose || isViewOnly ? (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
-          <Text numberOfLines={1} className="text-blue-500 font-semibold text-center text-xs">
-            {isReplaced ? '-' : scoreFinal}
-          </Text>
-        </View>
-      ) : (
-        <View className="border border-neutral-200 items-center justify-center rounded-lg w-14 bg-neutral-50">
-          <Text numberOfLines={1} className="font-semibold text-xs text-blue-500">
-            $ {playerPrice}
-          </Text>
-        </View>
-      )}
-
-      <TouchableOpacity
-        activeOpacity={0.6}
-        onPress={handleModalPlayerCard}
-        onLongPress={() =>
-          !isViewOnly ? handleRemovePlayerFromLayout(player as LineupPlayer | FullPlayer) : null
-        }
-        className={`justify-center items-center border-2 rounded-full ${
-          player?.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL && !isViewOnly
-            ? 'border-red-500 bg-red-500'
-            : 'border-neutral-200'
-        }`}
-        key={player?.foto}>
-        <Image
-          source={{
-            uri: player?.foto?.replace('FORMATO', '220x220'),
-          }}
-          className="w-11 h-11 rounded-full bg-neutral-100 overflow-hidden"
-          alt={`Foto do ${player?.apelido}`}
-        />
-        {isCaptain && (
-          <View
-            className="relative w-0.5 h-0.5 justify-center items-center"
-            style={{
-              bottom: '80%',
-              right: '25%',
-              backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.background,
-            }}>
-            <Image
-              source={captainImage}
-              className="w-5 h-5 rounded-full overflow-hidden"
-              alt={`Foto do ${player?.apelido}`}
-            />
-          </View>
-        )}
-        {!isViewOnly ? (
-          <View
-            className="absolute w-4 h-4 rounded-xl justify-center items-center"
-            style={{
-              bottom: -2,
-              right: 0,
-              backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.background,
-            }}>
-            <Feather
-              name={
-                OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]
-                  ?.icon as keyof typeof Feather.glyphMap
-              }
-              color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id as number]?.color}
-              size={14}
-            />
-          </View>
-        ) : (
-          <></>
-        )}
-        {isReplaced || isEnteredInMatch ? (
-          <View
-            className="absolute w-4 h-4 rounded-xl justify-center items-center"
-            style={{
-              bottom: -2,
-              right: 30,
-              backgroundColor: isReplaced ? '#ef4444' : '#00E094',
-            }}>
-            <Feather name={isReplaced ? 'arrow-down' : 'arrow-up'} color={'#fafafa'} size={14} />
-          </View>
-        ) : (
-          <></>
-        )}
-      </TouchableOpacity>
-      <View className="bg-neutral-50 items-center justify-center rounded py-0.5">
-        <Text
+    <Pressable
+      onPress={() => onPress?.(player)}
+      disabled={!onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint="Abre a ficha do jogador"
+      style={({ pressed }) => [
+        styles.slot,
+        { width, minHeight: MIN_TOUCH, opacity: isDimmed ? 0.6 : pressed ? 0.7 : 1 },
+      ]}>
+      <View
+        style={[
+          styles.label,
+          { backgroundColor: field.chipBg, borderColor: field.chipBorder, maxWidth: width - 2 },
+        ]}>
+        {opponentShield ? (
+          <Image source={{ uri: opponentShield }} style={styles.shield} accessible={false} />
+        ) : null}
+        <AppText
+          variant="caption"
+          weight="bold"
+          color={field.chipText}
           numberOfLines={1}
-          className="font-semibold text-center text-gray-600"
-          style={{
-            fontSize: 11,
-            paddingHorizontal: 3,
-          }}>
-          {player?.apelido_abreviado}
-        </Text>
+          maxFontSizeMultiplier={1.3}>
+          {label}
+        </AppText>
       </View>
 
-      <BottomSheet ref={bottomSheetRef} onClose={handleSheetClose}>
-        {player ? (
-          <TeamPlayerCard
-            player={player}
-            onClose={() => bottomSheetRef.current?.close()}
-            isReservePlayer={isReservePlayer}
-          />
+      <View>
+        <Image
+          source={{ uri: player.foto?.replace('FORMATO', '220x220') }}
+          style={[
+            styles.avatar,
+            {
+              borderColor: isUnlikely && !isViewOnly ? colors.negativeFill : field.slotBorder,
+              backgroundColor: field.chipBg,
+            },
+          ]}
+          accessible={false}
+        />
+
+        {isCaptain ? (
+          <View style={[styles.badge, styles.badgeTopLeft, { backgroundColor: colors.brand }]}>
+            <AppText variant="caption" weight="bold" color="onBrand" maxFontSizeMultiplier={1}>
+              C
+            </AppText>
+          </View>
         ) : null}
-      </BottomSheet>
-    </View>
+
+        {!isViewOnly && status ? (
+          <View
+            style={[
+              styles.badge,
+              styles.badgeBottomRight,
+              { backgroundColor: status.background },
+            ]}>
+            <Feather
+              name={status.icon as keyof typeof Feather.glyphMap}
+              color={status.color}
+              size={12}
+            />
+          </View>
+        ) : null}
+
+        {isReplaced || isEnteredInMatch ? (
+          <View
+            style={[
+              styles.badge,
+              styles.badgeBottomLeft,
+              { backgroundColor: isReplaced ? colors.negativeFill : colors.positiveFill },
+            ]}>
+            <Feather
+              name={isReplaced ? 'arrow-down' : 'arrow-up'}
+              color={isReplaced ? colors.onNegativeFill : colors.onPositiveFill}
+              size={12}
+            />
+          </View>
+        ) : null}
+      </View>
+
+      <View style={[styles.name, { backgroundColor: field.chipBg, maxWidth: width - 2 }]}>
+        <AppText
+          variant="caption"
+          weight="bold"
+          color={field.chipText}
+          numberOfLines={1}
+          maxFontSizeMultiplier={1.3}>
+          {player.apelido_abreviado}
+        </AppText>
+      </View>
+    </Pressable>
   );
 }
+
+function accessibleStat(fieldStat: FieldStat, label: string, insight?: PlayerInsight) {
+  switch (fieldStat) {
+    case 'average':
+      return `média ${label}`;
+    case 'min':
+      return `mínimo para valorizar ${label}`;
+    case 'match':
+      if (!insight?.match) return 'sem jogo na rodada';
+      return `joga ${insight.match.isHome ? 'em casa' : 'fora'} contra ${
+        insight.match.opponent?.nome ?? 'adversário'
+      }`;
+    default:
+      return `preço ${label}`;
+  }
+}
+
+const styles = StyleSheet.create({
+  slot: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+  },
+  label: {
+    minHeight: PLAYER_LABEL_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  shield: {
+    width: 14,
+    height: 14,
+  },
+  avatar: {
+    width: PLAYER_AVATAR_SIZE,
+    height: PLAYER_AVATAR_SIZE,
+    borderRadius: PLAYER_AVATAR_SIZE / 2,
+    borderWidth: 2,
+  },
+  badge: {
+    position: 'absolute',
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeTopLeft: {
+    top: -3,
+    left: -5,
+  },
+  badgeBottomRight: {
+    bottom: -3,
+    right: -5,
+  },
+  badgeBottomLeft: {
+    bottom: -3,
+    left: -5,
+  },
+  name: {
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 4,
+  },
+});

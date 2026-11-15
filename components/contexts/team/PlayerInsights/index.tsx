@@ -1,0 +1,1 @@
+export { PlayerInsights } from './PlayerInsights';
