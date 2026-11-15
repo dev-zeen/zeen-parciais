@@ -16,6 +16,7 @@ import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import { useTheme } from '@/contexts/Theme.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import useMyClub from '@/hooks/useMyClub';
 import usePartialScore from '@/hooks/usePartialScore';
 import { TeamHistoryRound } from '@/models/Club';
@@ -24,6 +25,7 @@ import { numberToString } from '@/utils/parseTo';
 
 export default () => {
   const { themeMode, colorScheme: colorTheme, setThemeMode } = useTheme();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { isAutheticated, handleLogout } = useContext(AuthContext);
 
@@ -146,6 +148,7 @@ export default () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+        contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom }}
         className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}

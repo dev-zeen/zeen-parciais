@@ -18,6 +18,7 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
@@ -26,6 +27,7 @@ import theme from '@/styles/theme';
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const {
     marketStatus,
@@ -98,6 +100,7 @@ export default () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingMyClub} />}
+        contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom }}
         className={`rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}

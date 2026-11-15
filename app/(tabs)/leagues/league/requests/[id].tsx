@@ -8,12 +8,14 @@ import { RequestCard } from '@/components/contexts/leagues/RequestCard';
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Invite } from '@/models/Invites';
 import { useGetLeague } from '@/queries/leagues.query';
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { id: slug } = useLocalSearchParams();
 
@@ -68,7 +70,7 @@ export default () => {
         contentContainerStyle={{
           marginHorizontal: 8,
           paddingTop: 8,
-          paddingVertical: 8,
+          paddingBottom: tabBarSpacing.contentBottom,
           backgroundColor:
             colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
           gap: 8,

@@ -17,6 +17,7 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import type { PointsCompetitionInvite } from '@/models/Competition';
 import { Invite } from '@/models/Invites';
@@ -38,6 +39,7 @@ const alertResponseInvite = (title: string, subtitle: string) => {
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { allowRequest } = useMarketStatus();
 
@@ -214,7 +216,7 @@ export default () => {
           contentContainerStyle={{
             paddingHorizontal: 16,
             paddingTop: 8,
-            paddingBottom: 16,
+            paddingBottom: tabBarSpacing.contentBottom,
             backgroundColor:
               colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
             gap: 10,

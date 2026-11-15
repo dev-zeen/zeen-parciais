@@ -24,6 +24,7 @@ import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { ClubByLeague } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
@@ -245,6 +246,7 @@ function ClassicRow({
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
   const isDark = colorTheme === 'dark';
   const { isAutheticated } = useContext(AuthContext);
   const { id: slug } = useLocalSearchParams();
@@ -491,7 +493,7 @@ export default () => {
             data={sortedClubs}
             keyExtractor={(item) => `${item.time_id}`}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 16 }}
+            contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom, paddingHorizontal: 16 }}
             refreshControl={
               <RefreshControl onRefresh={onRefetchLeague} refreshing={isRefetchingLeague} />
             }

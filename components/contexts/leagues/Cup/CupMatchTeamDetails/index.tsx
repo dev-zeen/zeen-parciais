@@ -8,6 +8,7 @@ import { onGetFillLineupDefaultPlayers } from '@/components/contexts/team/_team.
 import { Loading } from '@/components/structure/Loading';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
@@ -23,6 +24,7 @@ type CupMatchTeamDetailsProps = {
 
 export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDetailsProps) {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
@@ -72,6 +74,7 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom }}
       refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
       <View
         className="items-center justify-center pt-2 pb-2 mb-2"

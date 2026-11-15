@@ -14,6 +14,7 @@ import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import useValorization from '@/hooks/useValorization';
 import { Market } from '@/models/Market';
@@ -44,6 +45,7 @@ interface FullPlayerPartials extends FullPlayer {
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -238,7 +240,7 @@ export default () => {
         <FlatList
           style={{ paddingHorizontal: 8, backgroundColor: 'transparent' }}
           refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          contentContainerStyle={{ gap: 8, paddingVertical: 8 }}
+          contentContainerStyle={{ gap: 8, paddingTop: 8, paddingBottom: tabBarSpacing.contentBottom }}
           data={teamPlayers}
           renderItem={isMarketClose ? renderItemWithPartials : renderItem}
           keyExtractor={keyExtractor}

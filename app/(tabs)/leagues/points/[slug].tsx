@@ -17,6 +17,7 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import type {
   Confronto,
@@ -383,6 +384,7 @@ function TableHeader({ isDark }: { isDark: boolean }) {
 
 export default function () {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
   const { isAutheticated } = useContext(AuthContext);
   const { allowRequest } = useMarketStatus();
   const params = useLocalSearchParams();
@@ -480,7 +482,7 @@ export default function () {
         <FlatList
           data={standings}
           keyExtractor={(item) => `${item.time_id}`}
-          contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 16 }}
+          contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom, paddingHorizontal: 16 }}
           ListHeaderComponent={
             <>
               <Text style={{ fontSize: 13, fontWeight: '700', color: statColor, marginBottom: 2, marginTop: 4 }}>

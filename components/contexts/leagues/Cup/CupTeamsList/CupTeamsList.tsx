@@ -5,6 +5,7 @@ import { FlatList, Image, ListRenderItemInfo, RefreshControl } from 'react-nativ
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useLeague, { TeamCup } from '@/hooks/useLeague';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { League } from '@/models/Leagues';
 
@@ -16,6 +17,7 @@ type SlotItem = { type: 'team'; data: TeamCup; index: number } | { type: 'empty'
 
 export function CupTeamsList({ cup }: CupTeamsListProps) {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
   const isDark = colorTheme === 'dark';
 
   const {
@@ -400,7 +402,7 @@ export function CupTeamsList({ cup }: CupTeamsListProps) {
       contentContainerStyle={{
         backgroundColor: isDark ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
         paddingHorizontal: 11,
-        paddingBottom: 32,
+        paddingBottom: tabBarSpacing.contentBottom,
       }}
     />
   );

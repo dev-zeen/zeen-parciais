@@ -1,85 +1,103 @@
-import { Feather } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
-import { Platform, View } from 'react-native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { NativeTabs } from 'expo-router/native-tabs';
+import { Platform } from 'react-native';
 
-import Colors from '@/constants/Colors';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTabBadges } from '@/hooks/useTabBadges';
+import { useTokens } from '@/hooks/useTokens';
 
-function TabBarIcon(props: { name: React.ComponentProps<typeof Feather>['name']; color: string }) {
-  return <Feather size={28} style={{ marginBottom: -4 }} {...props} />;
+const { Trigger } = NativeTabs;
+const { Icon, Label, Badge, VectorIcon } = Trigger;
+
+/**
+ * iOS: o espaço da barra de abas é aplicado em cada scroll por useTabBarSpacing,
+ * então o ajuste automático do sistema fica desligado para não somar duas vezes.
+ * Android: mantém o comportamento padrão (área segura inferior aplicada pelas abas).
+ */
+const manualInsets = Platform.OS === 'ios';
+
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+
+/** Android: contorno quando inativo, preenchido quando ativo (Material 3). */
+function androidIcon(outline: IconName, filled: IconName) {
+  return {
+    default: <VectorIcon family={MaterialCommunityIcons} name={outline} />,
+    selected: <VectorIcon family={MaterialCommunityIcons} name={filled} />,
+  };
 }
 
+/**
+ * Barra de abas nativa.
+ * iOS 26+: o sistema desenha o material (Liquid Glass) e respeita a preferência de
+ * transparência do usuário; por isso não definimos fundo nem blur aqui.
+ * Android: NavigationBar do Material 3 com indicador em pill e rótulos sempre visíveis.
+ */
 export default function TabLayout() {
-  const colorScheme = useThemeColor();
-
-  // Ensure colorScheme is valid
-  const validColorScheme =
-    colorScheme === 'dark' || colorScheme === 'light' ? colorScheme : 'light';
+  const { colors } = useTokens();
+  const { hasUnsavedLineup, invitesCount, isBallRolling } = useTabBadges();
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[validColorScheme].tint,
-        tabBarInactiveTintColor: Colors[validColorScheme].tabIconDefault,
-        headerStyle: {
-          backgroundColor:
-            validColorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        },
-        tabBarStyle: {
-          backgroundColor:
-            validColorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          borderTopWidth: 1,
-          borderTopColor: validColorScheme === 'dark' ? '#21262D' : '#e5e7eb',
-          ...(Platform.OS === 'android' ? { paddingBottom: 4 } : {}),
-        },
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Início',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="team"
-        options={{
-          tabBarLabel: 'Time',
-          headerTitle: 'Time',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="shield" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="rodada"
-        options={{
-          tabBarLabel: 'Rodada',
-          headerShown: false,
-          tabBarIcon: ({ color }) => {
-            return (
-              <View>
-                <TabBarIcon name="zap" color={color} />
-              </View>
-            );
-          },
-        }}
-      />
-      <Tabs.Screen
-        name="leagues"
-        options={{
-          tabBarLabel: 'Ligas',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="bar-chart-2" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile/index"
-        options={{
-          tabBarLabel: 'Perfil',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-        }}
-      />
-    </Tabs>
+    <NativeTabs
+      tintColor={colors.brandText}
+      // Sempre visível: não retrai ao rolar (iOS 26+)
+      minimizeBehavior="never"
+      badgeBackgroundColor={colors.negativeFill}
+      badgeTextColor={colors.onNegativeFill}
+      // Só Android: no iOS 26+ o fundo é do sistema e estas props não têm efeito.
+      backgroundColor={Platform.OS === 'android' ? colors.surface : undefined}
+      indicatorColor={colors.brandContainer}
+      rippleColor={colors.brandContainer}
+      labelVisibilityMode="labeled"
+      iconColor={
+        Platform.OS === 'android' ? { default: colors.textMuted, selected: colors.text } : undefined
+      }
+      labelStyle={
+        Platform.OS === 'android'
+          ? { default: { color: colors.textMuted }, selected: { color: colors.text } }
+          : undefined
+      }>
+      <Trigger name="index" disableAutomaticContentInsets={manualInsets}>
+        <Icon
+          sf={{ default: 'house', selected: 'house.fill' }}
+          src={androidIcon('home-outline', 'home')}
+        />
+        <Label>Início</Label>
+      </Trigger>
+
+      <Trigger name="team" disableAutomaticContentInsets={manualInsets}>
+        <Icon
+          sf={{ default: 'shield', selected: 'shield.fill' }}
+          src={androidIcon('shield-outline', 'shield')}
+        />
+        <Label>Time</Label>
+        {/* Alterações na escalação ainda não salvas */}
+        {hasUnsavedLineup ? <Badge>1</Badge> : null}
+      </Trigger>
+
+      <Trigger name="rodada" disableAutomaticContentInsets={manualInsets}>
+        <Icon
+          sf={{ default: 'bolt', selected: 'bolt.fill' }}
+          src={androidIcon('lightning-bolt-outline', 'lightning-bolt')}
+        />
+        <Label>Rodada</Label>
+        {isBallRolling ? <Badge>{Platform.OS === 'ios' ? 'AO VIVO' : '•'}</Badge> : null}
+      </Trigger>
+
+      <Trigger name="leagues" disableAutomaticContentInsets={manualInsets}>
+        <Icon
+          sf={{ default: 'trophy', selected: 'trophy.fill' }}
+          src={androidIcon('trophy-outline', 'trophy')}
+        />
+        <Label>Ligas</Label>
+        {invitesCount > 0 ? <Badge>{String(invitesCount)}</Badge> : null}
+      </Trigger>
+
+      <Trigger name="profile/index" disableAutomaticContentInsets={manualInsets}>
+        <Icon
+          sf={{ default: 'person', selected: 'person.fill' }}
+          src={androidIcon('account-outline', 'account')}
+        />
+        <Label>Perfil</Label>
+      </Trigger>
+    </NativeTabs>
   );
 }

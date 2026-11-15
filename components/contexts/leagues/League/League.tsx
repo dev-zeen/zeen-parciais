@@ -14,6 +14,7 @@ import { DialogComponent } from '@/components/structure/Dialog';
 import { View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { ClubByLeague, League as LeagueModel } from '@/models/Leagues';
 import { FullPlayer } from '@/models/Stats';
@@ -30,6 +31,7 @@ interface LeagueProps {
 
 export function League({ league, clubsByLeague }: LeagueProps) {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
 
@@ -203,7 +205,10 @@ export function League({ league, clubsByLeague }: LeagueProps) {
           renderItem={renderItem}
           initialNumToRender={30}
           maxToRenderPerBatch={15}
-          contentContainerStyle={[styles.listContent, { backgroundColor: bgColor }]}
+          contentContainerStyle={[
+            styles.listContent,
+            { backgroundColor: bgColor, paddingBottom: tabBarSpacing.contentBottom },
+          ]}
         />
       )}
 

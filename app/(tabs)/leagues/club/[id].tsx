@@ -15,6 +15,7 @@ import Colors from '@/constants/Colors';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import useTeam from '@/hooks/useTeam';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import useValorization from '@/hooks/useValorization';
 import { FullPlayer } from '@/models/Stats';
@@ -35,6 +36,7 @@ export interface PlayerClub extends FullPlayer {
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -253,7 +255,7 @@ export default () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingHorizontal: 8,
-            paddingBottom: 16,
+            paddingBottom: tabBarSpacing.contentBottom,
             gap: 12,
           }}>
           <StatsClubCard team={team} round={currentRound} />

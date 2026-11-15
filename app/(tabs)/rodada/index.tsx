@@ -19,6 +19,7 @@ import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContai
 import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import useValorization from '@/hooks/useValorization';
 import { Match } from '@/models/Matches';
@@ -38,6 +39,7 @@ export interface ScorePlayersProps extends Player {
 
 export default function RodadaScreen() {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
   const [activeTab, setActiveTab] = useState<ActiveTab>('jogadores');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -221,7 +223,11 @@ export default function RodadaScreen() {
                     <View className={`h-2 ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`} />
                   )}
                   renderItem={renderPlayer}
-                  contentContainerStyle={{ paddingVertical: 4, backgroundColor: bgColor }}
+                  contentContainerStyle={{
+                    paddingTop: 4,
+                    paddingBottom: tabBarSpacing.contentBottom,
+                    backgroundColor: bgColor,
+                  }}
                   initialNumToRender={20}
                   maxToRenderPerBatch={20}
                 />
@@ -233,7 +239,7 @@ export default function RodadaScreen() {
         {/* Partidas */}
         {!isPlayers && (
           <FlatList
-            contentContainerStyle={{ gap: 8, paddingBottom: 8 }}
+            contentContainerStyle={{ gap: 8, paddingBottom: tabBarSpacing.contentBottom }}
             refreshControl={
               <RefreshControl onRefresh={onRefetchMatches} refreshing={isRefetchingMatches} />
             }

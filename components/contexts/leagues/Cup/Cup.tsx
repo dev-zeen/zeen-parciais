@@ -12,6 +12,7 @@ import { ITab, Tabs } from '@/components/structure/Tabs';
 import Colors from '@/constants/Colors';
 import useLeague from '@/hooks/useLeague';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { CupMatch, League } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
@@ -33,6 +34,7 @@ interface CupProps {
 
 export function Cup({ league: cup }: CupProps) {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
@@ -118,12 +120,12 @@ export function Cup({ league: cup }: CupProps) {
           contentContainerStyle={{
             paddingTop: 8,
             paddingHorizontal: 8,
-            paddingBottom: 8,
+            paddingBottom: tabBarSpacing.contentBottom,
           }}
         />
       );
     },
-    [colorTheme, cup, isRefetching, onRefetch, renderCupMatchCard]
+    [colorTheme, cup, isRefetching, onRefetch, renderCupMatchCard, tabBarSpacing.contentBottom]
   );
 
   const roundTabs: ITab[] | undefined = useMemo(() => {

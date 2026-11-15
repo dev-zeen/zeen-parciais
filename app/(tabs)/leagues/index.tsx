@@ -24,6 +24,7 @@ import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { LeagueUserDetails } from '@/models/Leagues';
 import { useGetMyClub } from '@/queries/club.query';
@@ -42,6 +43,7 @@ type SectionLeagueProps = {
 
 export default function () {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -330,7 +332,7 @@ export default function () {
             backgroundColor:
               colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
             paddingHorizontal: 8,
-            paddingBottom: 16,
+            paddingBottom: tabBarSpacing.contentBottom,
           }}
           renderSectionHeader={({ section: { title, subtitle } }) => (
             <View
