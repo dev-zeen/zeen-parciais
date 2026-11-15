@@ -13,14 +13,17 @@ import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { AuthContext } from '@/contexts/Auth.context';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { fetchGloboidClientSettings } from '@/lib/core/auth';
+import { env } from '@/lib/env';
 
 const CHROME_MOBILE_USER_AGENT =
   'Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36';
 
+const GLOBOID_TOKEN_KEY_LOCAL_STORAGE = env.EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE;
+
 const INJECT_AUTH_LOGIN = `
   (function() {
     let tokenSent = false;
-    const TOKEN_KEY = 'globoid-tokens-cartola-web@apps.globoid';
+    const TOKEN_KEY = '${GLOBOID_TOKEN_KEY_LOCAL_STORAGE}';
 
     function checkAndSendToken() {
       // Se já enviou o token, não faz nada

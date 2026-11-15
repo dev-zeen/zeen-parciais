@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
 import { ACCESS_TOKEN_KEY_STORAGE, GLOBOID_CLIENT_SETTINGS_KEY } from '@/constants/Keys';
+import { env } from '@/lib/env';
 
 type TokenData = {
   access_token: string;
@@ -20,9 +21,10 @@ type GloboidClientSettings = {
   enableRefreshTokenMode: boolean;
 };
 
-const DEFAULT_CLIENT_ID = 'cartola-web@apps.globoid';
-const GLOBOID_REFRESH_URL = 'https://web-api.globoid.globo.com/v1/refresh-token';
-const GLOBOID_CLIENT_SETTINGS_URL = `https://web-api.globoid.globo.com/v1/clients/${DEFAULT_CLIENT_ID}/settings`;
+const DEFAULT_CLIENT_ID = env.EXPO_PUBLIC_GLOBOID_CLIENT_ID;
+const GLOBOID_BASE_URL = env.EXPO_PUBLIC_GLOBOID_BASE_URL;
+const GLOBOID_REFRESH_URL = `${GLOBOID_BASE_URL}/v1/refresh-token`;
+const GLOBOID_CLIENT_SETTINGS_URL = `${GLOBOID_BASE_URL}/v1/clients/${DEFAULT_CLIENT_ID}/settings`;
 
 // ============================================
 // GLOBOID CLIENT SETTINGS
