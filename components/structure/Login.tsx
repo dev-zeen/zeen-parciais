@@ -222,9 +222,11 @@ export function Login({ reason }: LoginProps) {
     <SafeAreaViewContainer edges={['top']}>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        // Mesmo respiro das outras abas: 16 nas laterais, 8 no topo
         contentContainerStyle={{
           flexGrow: 1,
-          padding: spacing.md,
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.xs,
           paddingBottom: tabBarSpacing.contentBottom + spacing.sm,
           gap: spacing.lg,
         }}>

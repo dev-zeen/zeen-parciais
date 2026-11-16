@@ -1,9 +1,12 @@
 import { useCallback, useRef } from 'react';
-import { Alert, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
 import { PlayerSheet, PlayerSheetRef } from '@/components/contexts/team/PlayerSheet';
-import { PLAYER_SLOT_MAX_WIDTH, TeamPlayer } from '@/components/contexts/team/TeamPlayer/TeamPlayer';
+import {
+  PLAYER_SLOT_MAX_WIDTH,
+  TeamPlayer,
+} from '@/components/contexts/team/TeamPlayer/TeamPlayer';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -14,6 +17,7 @@ import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations
 import { FullPlayer } from '@/models/Stats';
 import type { FieldStat } from '@/store/useTeamLineupStore';
 import { onGetPlayerLowestPrice } from '@/utils/team';
+import { appAlert } from '@/components/ui/AppAlert';
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
@@ -63,7 +67,7 @@ export function ListReservePlayers({
         .every((item) => item.player);
 
       if (!isPositionFilled) {
-        Alert.alert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
+        appAlert('Atenção', 'Você deve preencher todos os titulares para a posição.', [
           { text: 'OK' },
         ]);
         return;

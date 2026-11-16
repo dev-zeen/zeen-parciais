@@ -111,8 +111,10 @@ export default () => {
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
           style={{
-            gap: theme.Tokens.SPACING.xs,
-            marginHorizontal: theme.Tokens.SPACING.xs,
+            // Padrão das abas: 16 nas laterais, 8 no topo, 12 entre blocos
+            gap: theme.Tokens.SPACING.sm,
+            marginHorizontal: theme.Tokens.SPACING.md,
+            paddingTop: theme.Tokens.SPACING.xs,
           }}>
           {/* Market Status Bar */}
           <MarketStatusCard />

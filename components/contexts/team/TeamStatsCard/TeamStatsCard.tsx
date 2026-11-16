@@ -1,10 +1,11 @@
 import { Feather } from '@expo/vector-icons';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Card } from '@/components/ui/Card';
 import { StatItem } from '@/components/ui/StatItem';
 import { useTokens } from '@/hooks/useTokens';
 import { numberToString } from '@/utils/parseTo';
+import { appAlert } from '@/components/ui/AppAlert';
 
 type TeamStatsCardProps = {
   patrimonio: number;
@@ -27,7 +28,7 @@ export function TeamStatsCard({
   const { colors, minTouch } = useTokens();
 
   const handleClearAll = () => {
-    Alert.alert(
+    appAlert(
       'Limpar escalação',
       'Tem certeza que deseja remover todos os jogadores? Esta ação não pode ser desfeita.',
       [

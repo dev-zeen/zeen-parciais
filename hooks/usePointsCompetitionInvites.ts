@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { Alert } from 'react-native';
 
 import useMarketStatus from '@/hooks/useMarketStatus';
 import {
@@ -7,6 +6,7 @@ import {
   useRespondPointsCompetitionInvite,
 } from '@/queries/competitionsInvites.query';
 import { haptics } from '@/utils/haptics';
+import { appAlert } from '@/components/ui/AppAlert';
 
 const EMPTY: never[] = [];
 
@@ -28,7 +28,7 @@ const usePointsCompetitionInvites = () => {
         typeof error?.response?.data?.mensagem === 'string'
           ? error.response.data.mensagem
           : 'Não foi possível responder o convite. Confira a conexão e tente de novo.';
-      Alert.alert('Convite não respondido', message);
+      appAlert('Convite não respondido', message);
     },
   });
 

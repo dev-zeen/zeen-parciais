@@ -3,7 +3,6 @@ import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
   Image,
   ListRenderItemInfo,
@@ -28,6 +27,7 @@ import { useInvitePointsCompetition } from '@/queries/competitions.mutations';
 import { useInviteLeague } from '@/queries/leagues.mutations';
 import { SearchTeamItem, useSearchTeams } from '@/queries/teams.query';
 import { haptics } from '@/utils/haptics';
+import { appAlert } from '@/components/ui/AppAlert';
 
 type InviteType = 'classic' | 'matamata' | 'points';
 
@@ -65,14 +65,14 @@ export default function InviteTeamsScreen() {
     haptics.success();
     const count = selected.size;
     setSelected(new Map());
-    Alert.alert(
+    appAlert(
       'Convites enviados',
       `${count} ${count === 1 ? 'time foi convidado' : 'times foram convidados'}. Eles aparecem como "Aguardando" até aceitarem.`
     );
   };
   const onFailed = (message?: string) => {
     haptics.error();
-    Alert.alert(
+    appAlert(
       'Convites não enviados',
       typeof message === 'string' ? message : 'Confira a conexão e tente de novo.'
     );

@@ -12,6 +12,7 @@ import { AnimatedCard } from '@/components/structure/AnimatedCard';
 import { Loading } from '@/components/structure/Loading';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { appAlert } from '@/components/ui/AppAlert';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import { useTheme } from '@/contexts/Theme.context';
@@ -151,8 +152,10 @@ export default () => {
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
           style={{
-            gap: theme.Tokens.SPACING.xs,
-            marginHorizontal: theme.Tokens.SPACING.xs,
+            // Padrão das abas: 16 nas laterais, 8 no topo, 12 entre blocos
+            gap: theme.Tokens.SPACING.sm,
+            marginHorizontal: theme.Tokens.SPACING.md,
+            paddingTop: theme.Tokens.SPACING.xs,
           }}>
           <MarketStatusCard />
           <TeamSummaryCard team={myClub} />
@@ -883,7 +886,16 @@ export default () => {
           shadowRadius: 8,
           elevation: 8,
         }}
-        onPress={handleLogout}
+        onPress={() =>
+          appAlert(
+            'Sair da conta?',
+            'Para ver seu time, as parciais e suas ligas de novo, será preciso entrar com a conta Globo.',
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              { text: 'Sair', style: 'destructive', onPress: handleLogout },
+            ]
+          )
+        }
         accessibilityRole="button"
         accessibilityLabel="Sair da conta">
         <Feather name="log-out" size={24} color={colorTheme === 'dark' ? '#ef4444' : '#dc2626'} />

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { Alert, ListRenderItemInfo, RefreshControl, SectionList, View } from 'react-native';
+import { ListRenderItemInfo, RefreshControl, SectionList, View } from 'react-native';
 
 import { InviteCard } from '@/components/contexts/leagues/InviteCard';
 import { LEAGUE_KIND, PRIVACY_LABEL } from '@/components/contexts/leagues/leagueKinds';
@@ -16,6 +16,7 @@ import type { PointsCompetitionInvite } from '@/models/Competition';
 import { Invite } from '@/models/Invites';
 import { useAcceptInvite, useDeclineInvitation, useGetInvites } from '@/queries/invites.query';
 import { haptics } from '@/utils/haptics';
+import { appAlert } from '@/components/ui/AppAlert';
 
 type InviteRow =
   | { kind: 'league'; invite: Invite }
@@ -25,7 +26,7 @@ type InviteSection = { title: string; data: InviteRow[] };
 
 const showError = (message?: string) => {
   haptics.error();
-  Alert.alert(
+  appAlert(
     'Convite não respondido',
     message ?? 'Não foi possível responder o convite. Confira a conexão e tente de novo.'
   );

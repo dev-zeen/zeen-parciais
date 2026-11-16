@@ -1,9 +1,9 @@
-import { Alert } from 'react-native';
 
 import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
 import { FullPlayer, PlayerStats } from '@/models/Stats';
+import { appAlert } from '@/components/ui/AppAlert';
 
 type FillPlayersInLineup = {
   players: FullPlayer[];
@@ -239,7 +239,7 @@ export function listDefaultLineups() {
 }
 
 export const emptyReservePlayers = (onSuccess: () => void) =>
-  Alert.alert(
+  appAlert(
     'Atenção',
     'Seu time ainda não possui todos os reservas selecionados, deseja escalar mesmo assim',
     [
@@ -252,7 +252,7 @@ export const emptyReservePlayers = (onSuccess: () => void) =>
   );
 
 export const emptyCaptain = () =>
-  Alert.alert('Atenção', 'Selecione um capitão', [
+  appAlert('Atenção', 'Selecione um capitão', [
     {
       text: 'Ok',
       style: 'cancel',
@@ -260,7 +260,7 @@ export const emptyCaptain = () =>
   ]);
 
 export const emptyLineupFormation = () =>
-  Alert.alert('Atenção', 'Selecione uma formação', [
+  appAlert('Atenção', 'Selecione uma formação', [
     {
       text: 'Ok',
       style: 'cancel',

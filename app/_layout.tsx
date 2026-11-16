@@ -9,7 +9,7 @@ import { View } from 'react-native';
 import Providers from './_providers';
 
 import { AnimatedSplash } from '@/components/structure/AnimatedSplash';
-import Colors from '@/constants/Colors';
+import { AppAlertHost } from '@/components/ui/AppAlert';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export const unstable_settings = {
@@ -48,14 +48,11 @@ function RootLayoutNav() {
   return (
     <Providers>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <StatusBar
-          backgroundColor={
-            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull
-          }
-        />
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
+        <AppAlertHost />
       </ThemeProvider>
     </Providers>
   );

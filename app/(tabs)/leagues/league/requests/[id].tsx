@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { Alert, FlatList, RefreshControl, View } from 'react-native';
+import { FlatList, RefreshControl, View } from 'react-native';
 
 import { InviteCard } from '@/components/contexts/leagues/InviteCard';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
@@ -13,12 +13,13 @@ import { Invite } from '@/models/Invites';
 import { useAcceptInvite, useDeclineInvitation } from '@/queries/invites.query';
 import { useGetLeague } from '@/queries/leagues.query';
 import { haptics } from '@/utils/haptics';
+import { appAlert } from '@/components/ui/AppAlert';
 
 const keyExtractor = (item: Invite) => `${item.mensagem_id}`;
 
 const showError = (message?: string) => {
   haptics.error();
-  Alert.alert(
+  appAlert(
     'Pedido não respondido',
     message ?? 'Não foi possível responder o pedido. Confira a conexão e tente de novo.'
   );
