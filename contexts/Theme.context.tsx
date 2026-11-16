@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ReactNode, createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useColorScheme as useSystemColorScheme } from 'react-native';
+import { Appearance, useColorScheme as useSystemColorScheme } from 'react-native';
 
 export type ThemeMode = 'light' | 'dark' | 'auto';
 export type ColorScheme = 'light' | 'dark';
@@ -50,6 +50,13 @@ export function ThemeContextProvider({ children }: { children: ReactNode }): Rea
       console.log('Error saving theme:', error);
     }
   }, []);
+
+  // Elementos nativos (barra de abas, sheets, teclado) seguem a aparência do sistema.
+  // Repassar a escolha do app evita barra clara sobre tela escura (e vice-versa).
+  useEffect(() => {
+    if (isLoading) return;
+    Appearance.setColorScheme(themeMode === 'auto' ? 'unspecified' : themeMode);
+  }, [isLoading, themeMode]);
 
   const colorScheme: ColorScheme =
     themeMode === 'auto' ? (systemColorScheme ?? 'light') : themeMode;
