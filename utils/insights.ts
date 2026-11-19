@@ -102,6 +102,10 @@ export type LineupProjection<T extends InsightPlayer = InsightPlayer> = {
   /** Titulares com status diferente de Provável */
   unlikely: T[];
   filled: number;
+  /** Titulares com mínimo para valorizar conhecido (Gato Mestre) */
+  withMinimum: number;
+  /** Desses, quantos têm projeção maior ou igual ao mínimo: devem valorizar */
+  likelyToValorize: number;
 };
 
 export function buildLineupProjection<T extends InsightPlayer>(
@@ -116,6 +120,8 @@ export function buildLineupProjection<T extends InsightPlayer>(
     withoutMatch: 0,
     unlikely: [],
     filled: 0,
+    withMinimum: 0,
+    likelyToValorize: 0,
   };
 
   for (const player of starters) {
@@ -125,6 +131,11 @@ export function buildLineupProjection<T extends InsightPlayer>(
     result.filled += 1;
     result.projected +=
       insight.projected * (player.atleta_id === captainId ? CAPTAIN_MULTIPLIER : 1);
+
+    if (insight.minToValorize !== null) {
+      result.withMinimum += 1;
+      if (insight.projected >= insight.minToValorize) result.likelyToValorize += 1;
+    }
 
     if (!insight.match) result.withoutMatch += 1;
     else if (insight.match.isHome) result.home += 1;
@@ -136,6 +147,26 @@ export function buildLineupProjection<T extends InsightPlayer>(
   }
 
   return result;
+}
+
+/**
+ * Capitão sugerido: o titular com maior projeção que é Provável e tem jogo na rodada.
+ * Com o multiplicador de 1,5, a escolha certa é simplesmente quem deve pontuar mais.
+ */
+export function suggestCaptain<T extends InsightPlayer>(
+  starters: (T | undefined)[],
+  getInsight: (player: T) => PlayerInsight
+): { player: T; projected: number } | undefined {
+  let best: { player: T; projected: number } | undefined;
+  for (const player of starters) {
+    if (!player || player.status_id !== STATUS_PROVAVEL) continue;
+    const insight = getInsight(player);
+    if (!insight.match) continue;
+    if (!best || insight.projected > best.projected) {
+      best = { player, projected: insight.projected };
+    }
+  }
+  return best;
 }
 
 /** Porcentagem de times que escalaram o jogador (0 a 100). */

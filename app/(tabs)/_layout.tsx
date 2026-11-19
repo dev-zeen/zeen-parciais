@@ -2,6 +2,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { NativeTabs } from 'expo-router/native-tabs';
 import { Platform } from 'react-native';
 
+import { useMarketCloseReminders } from '@/hooks/useMarketCloseReminders';
 import { useTabBadges } from '@/hooks/useTabBadges';
 import { useTokens } from '@/hooks/useTokens';
 
@@ -34,6 +35,7 @@ function androidIcon(outline: IconName, filled: IconName) {
 export default function TabLayout() {
   const { colors } = useTokens();
   const { hasUnsavedLineup, invitesCount, isBallRolling } = useTabBadges();
+  useMarketCloseReminders();
 
   return (
     <NativeTabs

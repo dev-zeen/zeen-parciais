@@ -11,7 +11,8 @@ import { usePlayerInsights } from '@/hooks/usePlayerInsights';
 import { useTokens } from '@/hooks/useTokens';
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { buildLineupProjection } from '@/utils/insights';
+import useTeamLineupStore from '@/store/useTeamLineupStore';
+import { buildLineupProjection, suggestCaptain } from '@/utils/insights';
 import { numberToString } from '@/utils/parseTo';
 
 type LineupInsightsCardProps = {
@@ -36,6 +37,17 @@ export function LineupInsightsCard({ lineup, captain, onReplace }: LineupInsight
     [lineup.starting, captain, getInsight]
   );
 
+  const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
+  const suggestion = useMemo(
+    () =>
+      suggestCaptain(
+        lineup.starting.map((item) => item.player),
+        getInsight
+      ),
+    [lineup.starting, getInsight]
+  );
+  const isSuggestedCaptain = suggestion?.player.atleta_id === captain;
+
   if (projection.filled === 0) return null;
 
   return (
@@ -58,7 +70,54 @@ export function LineupInsightsCard({ lineup, captain, onReplace }: LineupInsight
         />
         <StatItem label="Em casa" value={String(projection.home)} />
         <StatItem label="Fora" value={String(projection.away)} />
+        {projection.withMinimum > 0 ? (
+          <StatItem
+            label="Valorizam"
+            value={`${projection.likelyToValorize}/${projection.withMinimum}`}
+            hint="projeção ≥ mínimo"
+          />
+        ) : null}
       </View>
+
+      {suggestion ? (
+        <View
+          style={[
+            styles.alert,
+            styles.alertRow,
+            { backgroundColor: colors.accentContainer, borderRadius: radius.md },
+          ]}>
+          <Feather name="award" size={16} color={colors.accent} />
+          <View style={{ flex: 1 }}>
+            <AppText variant="body" weight="bold" numberOfLines={1}>
+              {isSuggestedCaptain ? 'Capitão certo' : 'Capitão sugerido'}:{' '}
+              {suggestion.player.apelido}
+            </AppText>
+            <AppText variant="label" color="textMuted" numberOfLines={1}>
+              Maior projeção do time: {numberToString(suggestion.projected)} pts (×1,5 ={' '}
+              {numberToString(suggestion.projected * 1.5)})
+            </AppText>
+          </View>
+          {!isSuggestedCaptain ? (
+            <Pressable
+              onPress={() => updateCaptain(suggestion.player.atleta_id)}
+              accessibilityRole="button"
+              accessibilityLabel={`Tornar ${suggestion.player.apelido} capitão`}
+              style={({ pressed }) => [
+                styles.replace,
+                {
+                  minHeight: minTouch,
+                  borderRadius: radius.full,
+                  backgroundColor: colors.accentFill,
+                  opacity: pressed ? 0.75 : 1,
+                },
+              ]}>
+              <AppText variant="body" weight="bold" color="onAccentFill">
+                Escolher
+              </AppText>
+            </Pressable>
+          ) : null}
+        </View>
+      ) : null}
 
       {projection.withoutMatch > 0 ? (
         <AppText variant="label" color="warning">

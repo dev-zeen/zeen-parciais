@@ -17,6 +17,13 @@ import {
   LeagueAdminSheetRef,
 } from '@/components/contexts/leagues/LeagueAdminSheet';
 import { LeagueSummaryCard, SummaryStat } from '@/components/contexts/leagues/LeagueSummaryCard';
+import {
+  SHARE_TABLE_ROWS,
+  ShareLeagueCard,
+  ShareLeagueCardRef,
+  ShareStatus,
+  ShareTableRow,
+} from '@/components/contexts/leagues/ShareLeagueCard';
 import { StandingHeader, StandingRow } from '@/components/contexts/leagues/StandingRow';
 import {
   LEAGUE_KIND,
@@ -76,6 +83,12 @@ const variationOf = (club: ClubByLeague, period: OrderByOptions) =>
 const formatValue = (value: number, period: OrderByOptions) =>
   period === OrderByOptions.PATRIMONIO ? `C$ ${formatPoints(value)}` : formatPoints(value);
 
+const byPeriod = (period: OrderByOptions) => (a: ClubByLeague, b: ClubByLeague) =>
+  valueOf(b, period) - valueOf(a, period) || (b.patrimonio ?? 0) - (a.patrimonio ?? 0);
+
+/** Períodos acumulados em que faz sentido comparar a posição ao vivo com a de antes da rodada. */
+const LIVE_MOVE_PERIODS = [OrderByOptions.MES, OrderByOptions.TURNO, OrderByOptions.CAMPEONATO];
+
 const keyExtractor = (item: ClubByLeague) => `${item.time_id}`;
 
 export default function LeagueScreen() {
@@ -97,6 +110,7 @@ export default function LeagueScreen() {
   );
   const listRef = useRef<FlatList<ClubByLeague>>(null);
   const adminRef = useRef<LeagueAdminSheetRef>(null);
+  const shareRef = useRef<ShareLeagueCardRef>(null);
 
   const isLive = !!(isMarketClose && clubsByLeague && playerStats && marketStatus && league);
 
@@ -104,19 +118,36 @@ export default function LeagueScreen() {
     const base: ClubByLeague[] = isLive
       ? onGetLeagueWithPartials(league!, clubsByLeague!, playerStats!, marketStatus!)
       : (league?.times ?? []);
-    return [...base].sort(
-      (a, b) => valueOf(b, period) - valueOf(a, period) || (b.patrimonio ?? 0) - (a.patrimonio ?? 0)
-    );
+    return [...base].sort(byPeriod(period));
   }, [clubsByLeague, isLive, league, marketStatus, period, playerStats]);
+
+  // Ao vivo: posição de cada time antes da rodada, para mostrar quantas ele ganha ou perde.
+  // No 1º jogo do returno o turno recomeça do zero, então não há base para comparar.
+  const rankBeforeRound = useMemo(() => {
+    const isNewTurn = period === OrderByOptions.TURNO && marketStatus?.rodada_atual === 20;
+    if (!isLive || !LIVE_MOVE_PERIODS.includes(period) || isNewTurn) return undefined;
+    const before = [...(league?.times ?? [])].sort(byPeriod(period));
+    return new Map(before.map((club, index) => [club.time_id, index]));
+  }, [isLive, league?.times, marketStatus?.rodada_atual, period]);
 
   const myTeamId = myClub?.time?.time_id ?? 0;
   const myIndex = clubs.findIndex((club) => club.time_id === myTeamId);
   const showVariation = !isMarketClose;
 
+  // Mercado aberto: variação oficial do período; ao vivo: posições ganhas na rodada.
+  const moveOf = useCallback(
+    (item: ClubByLeague, index: number) => {
+      if (showVariation) return variationOf(item, period);
+      const before = rankBeforeRound?.get(item.time_id);
+      return before !== undefined ? before - index : undefined;
+    },
+    [period, rankBeforeRound, showVariation]
+  );
+
   const renderItem = useCallback(
     ({ item, index }: ListRenderItemInfo<ClubByLeague>) => {
       const value = valueOf(item, period);
-      const variation = showVariation ? variationOf(item, period) : undefined;
+      const variation = moveOf(item, index);
       const isMine = item.time_id === myTeamId;
       return (
         <StandingRow
@@ -160,7 +191,7 @@ export default function LeagueScreen() {
         </StandingRow>
       );
     },
-    [colors.negative, colors.positive, league?.liga.nome, myTeamId, period, showVariation]
+    [colors.negative, colors.positive, league?.liga.nome, moveOf, myTeamId, period]
   );
 
   const locateMyTeam = useCallback(() => {
@@ -197,6 +228,56 @@ export default function LeagueScreen() {
   const canManage = canInvite || requestsCount > 0 || (isOwner && pendingInvites.length > 0);
   const kind = LEAGUE_KIND[isCup ? 'cup' : 'classic'];
 
+  // Imagem da classificação (clássica). O mata-mata monta a própria imagem no <Cup>.
+  const round = marketStatus?.rodada_atual ?? 0;
+  const shareStatus: ShareStatus = isFinished
+    ? { tone: 'finished', label: 'Encerrada' }
+    : liga.inicio_rodada > round
+      ? { tone: 'pending', label: `Começa na R${liga.inicio_rodada}` }
+      : isLive && period !== OrderByOptions.PATRIMONIO
+        ? { tone: 'live', label: `Ao vivo · R${round}` }
+        : isMarketClose
+          ? { tone: 'open', label: `Rodada ${round}` }
+          : { tone: 'open', label: `Após a R${Math.max(round - 1, 1)}` };
+  const toShareRow = (club: ClubByLeague, index: number): ShareTableRow => ({
+    rank: index + 1,
+    name: club.nome,
+    owner: club.nome_cartola,
+    shieldUrl: club.url_escudo_png,
+    values: [formatValue(valueOf(club, period), period)],
+    move: moveOf(club, index),
+    isMine: club.time_id === myTeamId,
+  });
+  const champion = liga.vencedor?.time;
+  const shareCard = isCup ? null : (
+    <ShareLeagueCard
+      ref={shareRef}
+      data={{
+        kind: 'classic',
+        name: liga.nome,
+        imageUrl: liga.url_flamula_png,
+        context: `Classificação · ${PERIOD_LABEL[period]}`,
+        status: shareStatus,
+        champion: champion
+          ? {
+              name: champion.nome,
+              owner: champion.nome_cartola,
+              shieldUrl: champion.url_escudo_png,
+            }
+          : undefined,
+        table: clubs.length
+          ? {
+              columns: [{ label: period === OrderByOptions.PATRIMONIO ? 'C$' : 'PTS', width: 76 }],
+              rows: clubs.slice(0, SHARE_TABLE_ROWS).map(toShareRow),
+              myRow: myIndex >= SHARE_TABLE_ROWS ? toShareRow(clubs[myIndex], myIndex) : undefined,
+            }
+          : undefined,
+        emptyMessage: clubs.length ? undefined : 'A liga ainda não tem times.',
+        totalTeams: liga.total_times_liga ?? clubs.length,
+      }}
+    />
+  );
+
   const header = (
     <ScreenHeader
       title={liga.nome}
@@ -210,18 +291,23 @@ export default function LeagueScreen() {
         .filter(Boolean)
         .join(' · ')}
       imageUrl={isCup ? liga.url_trofeu_png : liga.url_flamula_png}
-      actions={
-        canManage
+      actions={[
+        {
+          icon: 'share-2' as const,
+          accessibilityLabel: isCup ? 'Compartilhar mata-mata' : 'Compartilhar classificação',
+          onPress: () => shareRef.current?.share(),
+        },
+        ...(canManage
           ? [
               {
-                icon: 'settings',
+                icon: 'settings' as const,
                 accessibilityLabel: 'Gerenciar liga',
                 onPress: () => adminRef.current?.open(),
                 badge: requestsCount || undefined,
               },
             ]
-          : undefined
-      }
+          : []),
+      ]}
     />
   );
 
@@ -252,7 +338,7 @@ export default function LeagueScreen() {
     return (
       <SafeAreaViewContainer edges={['top']}>
         {header}
-        <Cup league={league} />
+        <Cup league={league} shareRef={shareRef} />
         {adminSheet}
       </SafeAreaViewContainer>
     );
@@ -391,7 +477,7 @@ export default function LeagueScreen() {
         data={clubs}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
-        extraData={period}
+        extraData={rankBeforeRound ?? period}
         ListHeaderComponent={listHeader}
         ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
         ListEmptyComponent={
@@ -424,6 +510,7 @@ export default function LeagueScreen() {
         }
       />
       {adminSheet}
+      {shareCard}
     </SafeAreaViewContainer>
   );
 }

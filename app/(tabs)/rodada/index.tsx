@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { FixtureTicker } from '@/components/contexts/matches/FixtureTicker';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
 import { onGetPlayersPlayed } from '@/components/contexts/players/_players.helper';
@@ -35,7 +36,7 @@ import { useGetMarket } from '@/queries/market.query';
 import { useGetMatchs } from '@/queries/matches.query';
 import { normalizeQuery } from '@/utils/format';
 
-type ActiveTab = 'jogadores' | 'partidas';
+type ActiveTab = 'jogadores' | 'partidas' | 'calendario';
 
 export interface ScorePlayersProps extends Player {
   valorization?: number;
@@ -161,6 +162,7 @@ export default function RodadaScreen() {
               value: 'partidas',
               label: matches?.partidas ? `Partidas · ${matches.partidas.length}` : 'Partidas',
             },
+            { value: 'calendario', label: 'Calendário' },
           ]}
           value={activeTab}
           onChange={setActiveTab}
@@ -175,7 +177,9 @@ export default function RodadaScreen() {
         ) : null}
       </View>
 
-      {isPlayers ? (
+      {activeTab === 'calendario' ? (
+        <FixtureTicker contentContainerStyle={listStyle} />
+      ) : isPlayers ? (
         <FlatList
           data={filteredPlayers}
           keyExtractor={keyExtractorPlayer}

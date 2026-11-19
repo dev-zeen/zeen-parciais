@@ -2,14 +2,12 @@
   "expo": {
     "name": "Zeen Parciais",
     "slug": "zeen-parciais-4prui4pe-fpzw7jvnpu4",
-    "version": "1.1.5",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "zeenparciais",
     "userInterfaceStyle": "automatic",
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.devzeen.zeenparciais",
@@ -30,6 +28,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
+        "monochromeImage": "./assets/images/adaptive-icon-monochrome.png",
         "backgroundColor": "#FF8A00"
       },
       "package": "com.devzeen.zeenparciais",
@@ -57,7 +56,9 @@
           }
         }
       ],
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-sharing",
+      "expo-notifications"
     ],
     "experiments": {
       "tsconfigPaths": true,

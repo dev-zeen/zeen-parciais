@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Animated, Pressable, View, ViewStyle } from 'react-native';
 
 import { useTokens } from '@/hooks/useTokens';
@@ -22,9 +22,11 @@ export function AnimatedCard({
   style,
   disabled = false,
 }: AnimatedCardProps) {
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.95)).current;
-  const delayRef = useRef(delay);
+  // Valores estáveis criados uma vez (useState evita ler ref durante o render).
+  const [fadeAnim] = useState(() => new Animated.Value(0));
+  const [scaleAnim] = useState(() => new Animated.Value(0.95));
+  // A animação de entrada usa o atraso do primeiro render.
+  const [initialDelay] = useState(delay);
   const { colors, radius, isDark } = useTokens();
 
   useEffect(() => {
@@ -32,19 +34,18 @@ export function AnimatedCard({
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 400,
-        delay: delayRef.current,
+        delay: initialDelay,
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
         toValue: 1,
-        delay: delayRef.current,
+        delay: initialDelay,
         useNativeDriver: true,
         tension: 50,
         friction: 7,
       }),
     ]).start();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only entrance animation; delay captured via ref
-  }, []);
+  }, [fadeAnim, initialDelay, scaleAnim]);
 
   const variantStyle = useMemo<ViewStyle>(() => {
     const styles: Record<NonNullable<AnimatedCardProps['variant']>, ViewStyle> = {

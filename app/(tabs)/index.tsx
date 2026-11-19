@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
 import { View } from '@/components/Themed';
@@ -15,7 +15,6 @@ import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
@@ -49,12 +48,6 @@ export default () => {
   const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const { refetch: onRefetchTopPlayers } = useGetTopPlayers();
-
-  const lineupPlayersUnlikely = useMemo(
-    () =>
-      myClub?.atletas?.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
-    [myClub?.atletas]
-  );
 
   const { isLoading: isLoadingPositions, refetch: onRefetchPositions } = useGetPositions();
 
@@ -134,7 +127,7 @@ export default () => {
               <CaptainCard />
 
               {/* Alerts & Notices */}
-              <AlertsCard lineupPlayersUnlikely={lineupPlayersUnlikely} />
+              <AlertsCard players={myClub.atletas} hasNoCaptain={!myClub.capitao_id} />
 
               {/* Player Highlights Carousel */}
               <PlayerHighlightsCarousel />

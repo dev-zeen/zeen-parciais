@@ -5,6 +5,7 @@ import { EXPO_PUBLIC_API_URL, EXPO_PUBLIC_AUTH_URL } from '@/constants/Endpoits'
 import { ACCESS_TOKEN_KEY_STORAGE } from '@/constants/Keys';
 import { getTokenFromStorage, updateTokenInStorage } from '@/lib/core/auth';
 import { debugLog } from '@/utils/debugLog';
+import { REFRESH_REJECTED } from '@/utils/globoid';
 
 declare module 'axios' {
   interface AxiosRequestConfig {
@@ -13,10 +14,35 @@ declare module 'axios' {
      * O erro volta para quem chamou, sem tentar refresh nem deslogar.
      */
     optionalAuth?: boolean;
+    /** Marca a repetição após o refresh, para não entrar em loop se o 401 persistir. */
+    _retried?: boolean;
   }
 }
 
-let isRefreshing = false;
+// Refresh em andamento, compartilhado: requisições que levam 401 ao mesmo tempo
+// aguardam o mesmo refresh e são repetidas, em vez de falharem.
+let refreshPromise: Promise<unknown> | null = null;
+
+const refreshSession = () => {
+  refreshPromise ??= updateTokenInStorage()
+    .catch(async (refreshError) => {
+      // Sessão sem refresh possível: desloga uma única vez, não uma por requisição.
+      if (
+        refreshError instanceof Error &&
+        (refreshError.message === 'No refresh token available' ||
+          refreshError.message === 'Refresh token mode disabled' ||
+          refreshError.message === REFRESH_REJECTED)
+      ) {
+        await AsyncStorage.removeItem(ACCESS_TOKEN_KEY_STORAGE);
+        onUnauthenticated?.();
+      }
+      throw refreshError;
+    })
+    .finally(() => {
+      refreshPromise = null;
+    });
+  return refreshPromise;
+};
 
 let onUnauthenticated: (() => void) | null = null;
 
@@ -55,40 +81,16 @@ api.interceptors.response.use(
     const originalConfig = error.config;
 
     if (
-      error.response &&
-      error.response.status === 401 &&
+      error.response?.status === 401 &&
       originalConfig &&
       !originalConfig.optionalAuth &&
+      !originalConfig._retried &&
       // Sem token enviado não há sessão para renovar (ex.: requisição durante a saída)
-      !!originalConfig.headers?.Authorization &&
-      !isRefreshing
+      !!originalConfig.headers?.Authorization
     ) {
-      isRefreshing = true;
-      try {
-        await updateTokenInStorage();
-        isRefreshing = false;
-        return await api(originalConfig);
-      } catch (refreshError) {
-        isRefreshing = false;
-
-        // Se o erro for "No refresh token available" ou "Refresh token mode disabled"
-        if (refreshError instanceof Error) {
-          if (
-            refreshError.message === 'No refresh token available' ||
-            refreshError.message === 'Refresh token mode disabled'
-          ) {
-            console.log('Reason:', refreshError.message);
-            await AsyncStorage.removeItem(ACCESS_TOKEN_KEY_STORAGE);
-
-            // Chama callback de desautenticação se estiver registrado
-            if (onUnauthenticated) {
-              onUnauthenticated();
-            }
-          }
-        }
-
-        return Promise.reject(refreshError);
-      }
+      originalConfig._retried = true;
+      await refreshSession();
+      return api(originalConfig);
     }
     return Promise.reject(error);
   }

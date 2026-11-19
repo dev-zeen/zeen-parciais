@@ -4,6 +4,7 @@ import { useCallback, useContext, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 import { LeagueSummaryCard } from '@/components/contexts/leagues/LeagueSummaryCard';
+import { RivalDiffCard } from '@/components/contexts/leagues/RivalDiffCard';
 import { RoundBars } from '@/components/contexts/leagues/RoundBars';
 import { formatPoints } from '@/components/contexts/leagues/leagueKinds';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
@@ -27,6 +28,7 @@ import { FullPlayer } from '@/models/Stats';
 import { useGetHistoricMyClub, useGetMatchSubstitutions, useGetMyClub } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import { Palette } from '@/styles/tokens';
+import { compareLineups } from '@/utils/rivals';
 
 export interface PlayerClub extends FullPlayer {
   isReplaced?: boolean;
@@ -112,6 +114,27 @@ export default function ClubScreen() {
       theirWins: shared.filter((r) => (myPoints.get(r.round) ?? 0) < r.points).length,
     };
   }, [isMine, myPoints, season.played]);
+
+  // Diferenciais: a minha escalação na mesma rodada contra a dele.
+  const { team: myTeamInRound } = useTeam({
+    teamId: isMine ? 0 : (myTeamId ?? 0),
+    round: marketStatus ? round : 0,
+  });
+  const comparison = useMemo(() => {
+    if (isMine || !team?.atletas?.length || !myTeamInRound?.atletas?.length) return undefined;
+    // Ao vivo a pontuação vem das parciais; em rodada encerrada, do próprio time.
+    const pointsOf = (player: FullPlayer) =>
+      isLiveRound
+        ? (playerStats?.atletas[player.atleta_id]?.pontuacao ?? 0)
+        : (player.pontos_num ?? 0);
+    return compareLineups(
+      myTeamInRound.atletas,
+      team.atletas,
+      myTeamInRound.capitao_id,
+      team.capitao_id,
+      pointsOf
+    );
+  }, [isLiveRound, isMine, myTeamInRound, playerStats, team]);
 
   const onRefetch = useCallback(() => {
     Promise.allSettled([onRefetchStats(), onRefetchValorizations(), onRefetchSubstitutions()]);
@@ -336,6 +359,8 @@ export default function ClubScreen() {
             </View>
           </Card>
         ) : null}
+
+        {comparison ? <RivalDiffCard round={round} comparison={comparison} /> : null}
 
         {/* Escalação da rodada escolhida */}
         <View style={[styles.row, { justifyContent: 'space-between', marginTop: spacing.xs }]}>

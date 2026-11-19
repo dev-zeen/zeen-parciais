@@ -21,6 +21,12 @@ import {
 } from '@/components/contexts/leagues/LeagueAdminSheet';
 import { LeagueSummaryCard } from '@/components/contexts/leagues/LeagueSummaryCard';
 import {
+  SHARE_TABLE_ROWS,
+  ShareLeagueCard,
+  ShareLeagueCardRef,
+  ShareTableRow,
+} from '@/components/contexts/leagues/ShareLeagueCard';
+import {
   STAT_COLUMN,
   StandingHeader,
   StandingRow,
@@ -94,6 +100,7 @@ export default function PointsCompetitionScreen() {
   const [selectedRound, setSelectedRound] = useState<number | undefined>();
   const listRef = useRef<FlatList<StandingEntry>>(null);
   const adminRef = useRef<LeagueAdminSheetRef>(null);
+  const shareRef = useRef<ShareLeagueCardRef>(null);
 
   const standings = useMemo(
     () => computeStandings(data?.participantes ?? {}, data?.confrontos),
@@ -359,6 +366,62 @@ export default function PointsCompetitionScreen() {
     </View>
   );
 
+  // Imagem da tabela: todos os times da lista (até o limite de segurança).
+  const toShareRow = (entry: StandingEntry, index: number): ShareTableRow => ({
+    rank: index + 1,
+    name: entry.nome,
+    owner: entry.nome_cartola,
+    shieldUrl: entry.url_escudo_png,
+    values: [
+      String(entry.jogos),
+      `${entry.vitorias}-${entry.empates}-${entry.derrotas}`,
+      `${entry.saldo > 0 ? '+' : ''}${Math.round(entry.saldo)}`,
+      String(entry.pontos),
+    ],
+    isMine: entry.time_id === myTeamId,
+  });
+  const champion = data.finalizada ? standings[0] : undefined;
+  const shareCard = (
+    <ShareLeagueCard
+      ref={shareRef}
+      data={{
+        kind: 'points',
+        name: data.nome,
+        imageUrl: data.url_taca_png,
+        context: `Rodadas ${data.rodada_inicial}–${data.rodada_final}${
+          data.tem_returno ? ' com returno' : ''
+        }`,
+        status: data.finalizada
+          ? { tone: 'finished', label: 'Encerrada' }
+          : !data.sorteada
+            ? { tone: 'pending', label: 'Aguardando sorteio' }
+            : { tone: 'open', label: `Rodada ${defaultRound ?? data.rodada_inicial}` },
+        champion: champion
+          ? {
+              name: champion.nome,
+              owner: champion.nome_cartola,
+              shieldUrl: champion.url_escudo_png,
+            }
+          : undefined,
+        table: standings.length
+          ? {
+              columns: [
+                { label: 'J', width: 24 },
+                { label: 'V-E-D', width: 52 },
+                { label: 'SG', width: 44 },
+                { label: 'P', width: 30 },
+              ],
+              rows: standings.slice(0, SHARE_TABLE_ROWS).map(toShareRow),
+              myRow:
+                myIndex >= SHARE_TABLE_ROWS ? toShareRow(standings[myIndex], myIndex) : undefined,
+            }
+          : undefined,
+        emptyMessage: standings.length ? undefined : 'A liga ainda não tem times.',
+        totalTeams: data.quantidade_participantes,
+      }}
+    />
+  );
+
   return (
     <SafeAreaViewContainer edges={['top']}>
       <ScreenHeader
@@ -370,17 +433,22 @@ export default function PointsCompetitionScreen() {
           `rodadas ${data.rodada_inicial}–${data.rodada_final}${data.tem_returno ? ' com returno' : ''}`,
         ].join(' · ')}
         imageUrl={data.url_taca_png}
-        actions={
-          canInvite
+        actions={[
+          {
+            icon: 'share-2',
+            accessibilityLabel: 'Compartilhar tabela',
+            onPress: () => shareRef.current?.share(),
+          },
+          ...(canInvite
             ? [
                 {
-                  icon: 'settings',
+                  icon: 'settings' as const,
                   accessibilityLabel: 'Gerenciar liga',
                   onPress: () => adminRef.current?.open(),
                 },
               ]
-            : undefined
-        }
+            : []),
+        ]}
       />
 
       {view === 'table' ? (
@@ -450,6 +518,7 @@ export default function PointsCompetitionScreen() {
           }))}
         />
       ) : null}
+      {shareCard}
     </SafeAreaViewContainer>
   );
 }

@@ -29,6 +29,21 @@ export const useGetTopPlayers = (allowRequest?: boolean) =>
     select: (data) => data?.slice(0, 5),
   });
 
+/**
+ * Mais escalados da rodada por id (mesma consulta dos destaques da home, sem cortar
+ * nos 5 primeiros). Serve para mostrar no mercado quem é "seguro" e quem é aposta.
+ */
+export const useGetMostSelected = (allowRequest?: boolean) =>
+  useQuery<TopPlayer[], Error, Map<number, number>>({
+    queryKey: [GET_TOP_RANKED_PLAYERS],
+    queryFn: () => api.get<TopPlayer[]>(GET_TOP_RANKED_PLAYERS).then((r) => r.data),
+    enabled: !!allowRequest,
+    select: selectMostSelected,
+  });
+
+const selectMostSelected = (data: TopPlayer[]) =>
+  new Map((data ?? []).map((item) => [item.Atleta.atleta_id, item.escalacoes]));
+
 export const useGetTopReservePlayers = (allowRequest?: boolean) =>
   useQuery<TopPlayer[]>({
     queryKey: [GET_TOP_RESERVE_PLAYERS],

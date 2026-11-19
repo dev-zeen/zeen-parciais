@@ -19,13 +19,11 @@ const useValorization = () => {
   } = useGetAppreciations(!!allowRequest);
 
   const [storedValorizations, setStoredValorizations] = useState<Appreciations | null>(null);
-  const [isStorageLoading, setIsStorageLoading] = useState(isMarketClose);
+  const [isStorageLoading, setIsStorageLoading] = useState(true);
 
   useEffect(() => {
-    if (!isMarketClose) {
-      setIsStorageLoading(false);
-      return;
-    }
+    // Mercado aberto não usa o cache: o carregamento é derivado abaixo.
+    if (!isMarketClose) return;
     onGetFromStorage<Appreciations>(APPRECIATIONS).then((res) => {
       setStoredValorizations(res ?? null);
       setIsStorageLoading(false);
@@ -54,7 +52,7 @@ const useValorization = () => {
 
   return {
     valorizations,
-    isLoadingValorizations: isLoadingValorizations || isStorageLoading,
+    isLoadingValorizations: isLoadingValorizations || (isMarketClose && isStorageLoading),
     onRefetchValorizations: allowRequest ? onRefetchValorizations : () => null,
     isRefetchingValorizations,
   };

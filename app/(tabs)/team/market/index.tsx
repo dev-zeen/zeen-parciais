@@ -2,14 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { FlashList, ListRenderItemInfo } from '@shopify/flash-list';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  Platform,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { Platform, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MarketFiltersSheet } from '@/components/contexts/market/MarketFilters';
@@ -18,15 +11,17 @@ import {
   MarketFilterState,
   applyMarketFilters,
   countActiveFilters,
+  getActiveFilterChips,
   getSortedOptions,
-  statusPlayerOptions,
 } from '@/components/contexts/market/MarketFilters/filters.helper';
+import { MarketHeader } from '@/components/contexts/market/MarketHeader';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
+import { MarketToolbar } from '@/components/contexts/market/MarketToolbar';
+import { PlayerCompare } from '@/components/contexts/market/PlayerCompare';
 import { onGetEmptyPositions } from '@/components/contexts/team/_team.helpers';
 import { BottomSheet, BottomSheetRef } from '@/components/structure/BottomSheet';
 import { SkeletonLoader } from '@/components/structure/SkeletonLoader';
 import { AppText } from '@/components/ui/AppText';
-import { Chip } from '@/components/ui/Chip';
 import { SearchField } from '@/components/ui/SearchField';
 import { StateView } from '@/components/ui/StateView';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -36,7 +31,8 @@ import { LineupPlayer, LineupPosition } from '@/models/Formations';
 import { FullPlayer, IPositions } from '@/models/Stats';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetMarket } from '@/queries/market.query';
-import { useGetPositions } from '@/queries/players.query';
+import { useGetMostSelected, useGetPositions } from '@/queries/players.query';
+import { selectionRate } from '@/utils/insights';
 import useTeamLineupStore from '@/store/useTeamLineupStore';
 import { debugLog } from '@/utils/debugLog';
 import { haptics } from '@/utils/haptics';
@@ -55,12 +51,14 @@ const DOUBLE_TAP_GUARD_MS = 600;
 const SKELETON_ROWS = 6;
 
 export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketProps) => {
-  const { colors, spacing, radius, minTouch } = useTokens();
+  const { colors, spacing, radius } = useTokens();
   const insets = useSafeAreaInsets();
   const { getInsight, gatoMestre, matches } = usePlayerInsights();
 
-  const { allowRequest } = useMarketStatus();
+  const { allowRequest, marketStatus } = useMarketStatus();
   const { data: myClub } = useGetMyClub(allowRequest);
+  const { data: mostSelected } = useGetMostSelected(allowRequest);
+  const totalTeams = marketStatus?.times_escalados;
   const {
     data: market,
     isLoading: isLoadingMarket,
@@ -77,6 +75,9 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
 
   const [filters, setFilters] = useState<MarketFilterState>(DEFAULT_MARKET_FILTERS);
   const filterSheetRef = useRef<BottomSheetRef>(null);
+  const compareSheetRef = useRef<BottomSheetRef>(null);
+  // Jogadores marcados para comparar (segurando o card); o segundo abre a comparação.
+  const [compared, setCompared] = useState<FullPlayer[]>([]);
   const lastAction = useRef<{ id: number; at: number } | null>(null);
 
   const balance = myClub ? (myClub.patrimonio ?? 0) - price : 0;
@@ -157,6 +158,26 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
     [isRepeatedTap, removePlayerFromLineup]
   );
 
+  const handleCompare = useCallback(
+    (player: FullPlayer) => {
+      haptics.selection();
+      const next = compared.some((item) => item.atleta_id === player.atleta_id)
+        ? compared.filter((item) => item.atleta_id !== player.atleta_id)
+        : [...compared.slice(-1), player];
+      setCompared(next);
+      if (next.length === 2) compareSheetRef.current?.snapToIndex(0);
+    },
+    [compared]
+  );
+
+  const closeCompare = useCallback(() => {
+    compareSheetRef.current?.close();
+    setCompared([]);
+  }, []);
+
+  const comparedIds = useMemo(() => new Set(compared.map((item) => item.atleta_id)), [compared]);
+  const listExtraData = useMemo(() => [startingIds, comparedIds], [startingIds, comparedIds]);
+
   const clearFilters = useCallback(() => {
     haptics.selection();
     setFilters((current) => ({ ...DEFAULT_MARKET_FILTERS, sortId: current.sortId }));
@@ -177,11 +198,14 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
           market={market!}
           matches={matches!}
           insight={getInsight(player)}
+          selection={selectionRate(mostSelected?.get(player.atleta_id), totalTeams)}
           onPressAddPlayerToLineup={handleBuy}
           onPressRemovePlayerFromLineup={handleSell}
           isButtonDisabled={hasNoSlot || hasNoBalance}
           disabledReason={!myClub ? 'Aguarde' : hasNoSlot ? 'Sem vaga' : 'Sem saldo'}
           isSellPlayer={startingIds.has(player.atleta_id)}
+          isCompared={comparedIds.has(player.atleta_id)}
+          onLongPress={handleCompare}
         />
       );
     },
@@ -194,51 +218,22 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
       market,
       matches,
       getInsight,
+      mostSelected,
+      totalTeams,
       handleBuy,
       handleSell,
       startingIds,
+      comparedIds,
+      handleCompare,
     ]
   );
 
   const sortOptions = useMemo(() => getSortedOptions(gatoMestre), [gatoMestre]);
 
-  /** Filtros ativos como chips removíveis individualmente. */
-  const activeChips = useMemo(() => {
-    const chips: { key: string; label: string; remove: Partial<MarketFilterState> }[] = [];
-    const defaultStatuses = DEFAULT_MARKET_FILTERS.statuses;
-    const statusChanged =
-      filters.statuses.length !== defaultStatuses.length ||
-      filters.statuses.some((id) => !defaultStatuses.includes(id));
-
-    if (statusChanged) {
-      const names = statusPlayerOptions
-        .filter((status) => filters.statuses.includes(status.id))
-        .map((status) => status.title);
-      chips.push({
-        key: 'status',
-        label: names.length ? names.join(', ') : 'Todos os status',
-        remove: { statuses: defaultStatuses },
-      });
-    }
-    if (filters.maxPrice !== null)
-      chips.push({ key: 'price', label: `Até C$ ${filters.maxPrice}`, remove: { maxPrice: null } });
-    if (filters.fitsBalance)
-      chips.push({ key: 'balance', label: 'Cabe no saldo', remove: { fitsBalance: false } });
-    if (filters.minAverage !== null)
-      chips.push({
-        key: 'average',
-        label: `Média ${filters.minAverage}+`,
-        remove: { minAverage: null },
-      });
-    if (filters.clubs.length > 0) {
-      const label =
-        filters.clubs.length === 1
-          ? (market?.clubes?.[filters.clubs[0]]?.abreviacao ?? '1 clube')
-          : `${filters.clubs.length} clubes`;
-      chips.push({ key: 'clubs', label, remove: { clubs: [] } });
-    }
-    return chips;
-  }, [filters, market?.clubes]);
+  const activeChips = useMemo(
+    () => getActiveFilterChips(filters, (id) => market?.clubes?.[id]?.abreviacao),
+    [filters, market?.clubes]
+  );
 
   const subtitle = playerLowestPrice
     ? `Reserva${positionName ? ` · ${positionName}` : ''}`
@@ -249,56 +244,12 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
   // ---------- Estados de tela inteira ----------
 
   const header = (
-    <View style={[styles.header, { paddingHorizontal: spacing.md, gap: spacing.sm }]}>
-      <View style={styles.titleRow}>
-        <View style={{ flex: 1 }}>
-          <AppText variant="heading" weight="bold" accessibilityRole="header">
-            Mercado
-          </AppText>
-          <AppText variant="label" color="textMuted" numberOfLines={1}>
-            {subtitle}
-          </AppText>
-        </View>
-        <Pressable
-          onPress={handleCloseMarket}
-          accessibilityRole="button"
-          accessibilityLabel="Fechar mercado"
-          style={({ pressed }) => [
-            styles.iconButton,
-            {
-              width: minTouch,
-              height: minTouch,
-              borderRadius: minTouch / 2,
-              backgroundColor: colors.surfaceAlt,
-              opacity: pressed ? 0.7 : 1,
-            },
-          ]}>
-          <Feather name="x" size={20} color={colors.text} />
-        </Pressable>
-      </View>
-
-      <View
-        accessible
-        accessibilityLabel={
-          myClub
-            ? `Saldo C$ ${numberToString(balance)}, valor do time C$ ${numberToString(price)}`
-            : 'Carregando saldo'
-        }
-        style={styles.budget}>
-        <AppText variant="label" color="textMuted">
-          Saldo
-        </AppText>
-        <AppText
-          variant="heading"
-          weight="bold"
-          color={!myClub ? 'textMuted' : balance < 0 ? 'negative' : 'positive'}>
-          {myClub ? `C$ ${numberToString(balance)}` : '—'}
-        </AppText>
-        <AppText variant="label" color="textMuted" style={{ marginLeft: 'auto' }}>
-          Time C$ {numberToString(price)}
-        </AppText>
-      </View>
-    </View>
+    <MarketHeader
+      subtitle={subtitle}
+      balance={myClub ? balance : undefined}
+      price={price}
+      onClose={handleCloseMarket}
+    />
   );
 
   if (isErrorMarket && !market) {
@@ -345,93 +296,16 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
         />
       </View>
 
-      {/* Filtros e ordenação */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.toolbar}
-        contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.xs }}>
-        <Pressable
-          onPress={() => filterSheetRef.current?.snapToIndex(0)}
-          accessibilityRole="button"
-          accessibilityLabel={activeFilters ? `Filtros, ${activeFilters} ativos` : 'Filtros'}
-          style={({ pressed }) => [
-            styles.filterButton,
-            {
-              minHeight: minTouch,
-              borderRadius: radius.full,
-              backgroundColor: activeFilters ? colors.accentContainer : colors.surfaceAlt,
-              borderColor: activeFilters ? colors.accentFill : 'transparent',
-              opacity: pressed ? 0.75 : 1,
-            },
-          ]}>
-          <Feather name="sliders" size={16} color={activeFilters ? colors.accent : colors.text} />
-          <AppText variant="body" weight="bold" color={activeFilters ? 'accent' : 'text'}>
-            Filtros
-          </AppText>
-          {activeFilters ? (
-            <View style={[styles.count, { backgroundColor: colors.accentFill }]}>
-              <AppText variant="caption" weight="bold" color="onAccentFill">
-                {activeFilters}
-              </AppText>
-            </View>
-          ) : null}
-        </Pressable>
-
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-        {sortOptions.map((option) => (
-          <Chip
-            key={option.id}
-            label={option.title}
-            selected={filters.sortId === option.id}
-            accessibilityLabel={`Ordenar por ${option.title}`}
-            onPress={() => {
-              haptics.selection();
-              setFilters((current) => ({ ...current, sortId: option.id }));
-            }}
-          />
-        ))}
-      </ScrollView>
-
-      {/* Filtros ativos, removíveis um a um */}
-      {activeChips.length > 0 ? (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ flexGrow: 0 }}
-          contentContainerStyle={{ paddingHorizontal: spacing.md, gap: spacing.xs }}>
-          {activeChips.map((chip) => (
-            <Pressable
-              key={chip.key}
-              onPress={() => {
-                haptics.selection();
-                setFilters((current) => ({ ...current, ...chip.remove }));
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={`Remover filtro ${chip.label}`}
-              hitSlop={{ top: 6, bottom: 6 }}
-              style={({ pressed }) => [
-                styles.activeChip,
-                {
-                  borderRadius: radius.full,
-                  borderColor: colors.border,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}>
-              <AppText variant="label" weight="medium" numberOfLines={1}>
-                {chip.label}
-              </AppText>
-              <Feather name="x" size={14} color={colors.textMuted} />
-            </Pressable>
-          ))}
-          <Pressable onPress={clearFilters} accessibilityRole="button" hitSlop={10}>
-            <AppText variant="label" weight="bold" color="accent" style={{ paddingVertical: 6 }}>
-              Limpar tudo
-            </AppText>
-          </Pressable>
-        </ScrollView>
-      ) : null}
+      <MarketToolbar
+        sortOptions={sortOptions}
+        sortId={filters.sortId}
+        activeCount={activeFilters}
+        chips={activeChips}
+        onOpenFilters={() => filterSheetRef.current?.snapToIndex(0)}
+        onSort={(sortId) => setFilters((current) => ({ ...current, sortId }))}
+        onRemoveChip={(chip) => setFilters((current) => ({ ...current, ...chip.remove }))}
+        onClearAll={clearFilters}
+      />
 
       {/* Modo reserva: limite de preço vem do titular mais barato */}
       {playerLowestPrice ? (
@@ -461,11 +335,14 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
         style={{ paddingHorizontal: spacing.md, paddingTop: spacing.xs }}
         accessibilityLiveRegion="polite">
         {players.length === 1 ? '1 jogador' : `${players.length} jogadores`}
+        {compared.length === 1
+          ? ` · segure outro jogador para comparar com ${compared[0].apelido_abreviado}`
+          : ' · segure um jogador para comparar'}
       </AppText>
 
       <FlashList
         data={players}
-        extraData={startingIds}
+        extraData={listExtraData}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
         keyboardDismissMode="on-drag"
@@ -507,6 +384,27 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
         }
       />
 
+      <BottomSheet ref={compareSheetRef} onDismissed={() => setCompared([])}>
+        {compared.length === 2 ? (
+          <PlayerCompare
+            players={[
+              {
+                player: compared[0],
+                insight: getInsight(compared[0]),
+                selection: selectionRate(mostSelected?.get(compared[0].atleta_id), totalTeams),
+              },
+              {
+                player: compared[1],
+                insight: getInsight(compared[1]),
+                selection: selectionRate(mostSelected?.get(compared[1].atleta_id), totalTeams),
+              },
+            ]}
+            clubs={market.clubes}
+            onClose={closeCompare}
+          />
+        ) : null}
+      </BottomSheet>
+
       <BottomSheet ref={filterSheetRef}>
         <MarketFiltersSheet
           filters={filters}
@@ -529,54 +427,6 @@ export default ({ position, handleCloseMarketModal, playerLowestPrice }: MarketP
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    paddingTop: 4,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  budget: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-  },
-  toolbar: {
-    flexGrow: 0,
-    paddingVertical: 10,
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    borderWidth: 1,
-  },
-  count: {
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    paddingHorizontal: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  divider: {
-    width: StyleSheet.hairlineWidth,
-    marginVertical: 8,
-  },
-  activeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: 1,
   },
   banner: {
     flexDirection: 'row',

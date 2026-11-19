@@ -1,12 +1,18 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useCallback, useMemo, useState } from 'react';
+import { Ref, useCallback, useMemo, useState } from 'react';
 import { FlatList, Image, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 
 import { CupMatchCard, CupPartials } from '@/components/contexts/leagues/Cup/CupMatchCard';
 import { CupTeamsList } from '@/components/contexts/leagues/Cup/CupTeamsList';
 import { LeagueSummaryCard, SummaryStat } from '@/components/contexts/leagues/LeagueSummaryCard';
-import { CUP_STAGE_LABEL } from '@/components/contexts/leagues/leagueKinds';
+import {
+  ShareLeagueCard,
+  ShareLeagueCardRef,
+  ShareLeagueData,
+  ShareTeam,
+} from '@/components/contexts/leagues/ShareLeagueCard';
+import { CUP_STAGE_LABEL, formatPoints } from '@/components/contexts/leagues/leagueKinds';
 import { AppText } from '@/components/ui/AppText';
 import { Chip } from '@/components/ui/Chip';
 import useLeague from '@/hooks/useLeague';
@@ -18,7 +24,11 @@ import { useGetMyClub } from '@/queries/club.query';
 import { useGetAppreciations } from '@/queries/players.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 
-type CupProps = { league: League };
+type CupProps = {
+  league: League;
+  /** Botão de compartilhar do cabeçalho da liga */
+  shareRef?: Ref<ShareLeagueCardRef>;
+};
 
 const formatDay = (value?: string) => {
   if (!value) return undefined;
@@ -30,7 +40,7 @@ const formatDay = (value?: string) => {
  * Mata-mata: antes do sorteio mostra as vagas; depois, a situação do usuário, as fases
  * em ordem (navegáveis) e os confrontos da fase escolhida, com o do usuário primeiro.
  */
-export function Cup({ league: cup }: CupProps) {
+export function Cup({ league: cup, shareRef }: CupProps) {
   const { colors, spacing } = useTokens();
   const tabBarSpacing = useTabBarSpacing();
   const { marketStatus, isMarketClose, allowRequest } = useMarketStatus();
@@ -101,14 +111,89 @@ export function Cup({ league: cup }: CupProps) {
     Promise.allSettled([onRefetchLeague(), onRefetchStats(), onRefetchValorizations()]);
   }, [onRefetchLeague, onRefetchStats, onRefetchValorizations]);
 
+  // Imagem para compartilhar: inscritos antes do sorteio; depois, a fase escolhida.
+  const toShareTeam = (id: number): ShareTeam => {
+    const team = teamsById.get(id);
+    return {
+      name: team?.nome ?? 'A definir',
+      owner: team?.nome_cartola,
+      shieldUrl: team?.url_escudo_png,
+    };
+  };
+  const finalMatch = rounds
+    .flatMap((r) => brackets?.[String(r)] ?? [])
+    .find((match) => match.tipo_fase === 'F' && !!match.vencedor_id);
+  const isLiveRound = !!isMarketClose && round === currentRound;
+  const stage = round != null ? brackets?.[String(round)]?.[0]?.tipo_fase : undefined;
+  const scoreOf = (match: CupMatch, teamId: number, official: number) => {
+    if (isLiveRound) return formatPoints(partialsByTeamId[teamId]?.partialScore ?? 0);
+    const played = !!match.vencedor_id || (round ?? 0) < (currentRound ?? 0);
+    return played ? formatPoints(official) : undefined;
+  };
+  const shareData: ShareLeagueData = {
+    kind: 'cup',
+    name: cup.liga.nome,
+    imageUrl: cup.liga.url_trofeu_png,
+    totalTeams: cup.liga.total_times_liga,
+    champion: finalMatch ? toShareTeam(finalMatch.vencedor_id!) : undefined,
+    ...(rounds.length
+      ? {
+          context: `${stage ? CUP_STAGE_LABEL[stage] : 'Fase'} · rodada ${round}`,
+          status: finalMatch
+            ? { tone: 'finished', label: 'Encerrado' }
+            : isLiveRound
+              ? { tone: 'live', label: `Ao vivo · R${round}` }
+              : (round ?? 0) > (currentRound ?? 0)
+                ? { tone: 'pending', label: `Começa na R${round}` }
+                : { tone: 'open', label: `Rodada ${round}` },
+          matches: matches.map((match) => ({
+            isMine:
+              !!myTeamId &&
+              (match.time_mandante_id === myTeamId || match.time_visitante_id === myTeamId),
+            home: {
+              ...toShareTeam(match.time_mandante_id),
+              score: scoreOf(match, match.time_mandante_id, match.time_mandante_pontuacao),
+              isWinner: match.vencedor_id === match.time_mandante_id,
+            },
+            away: {
+              ...toShareTeam(match.time_visitante_id),
+              score: scoreOf(match, match.time_visitante_id, match.time_visitante_pontuacao),
+              isWinner: match.vencedor_id === match.time_visitante_id,
+            },
+          })),
+        }
+      : {
+          context: `Inscrições · ${cup.liga.total_times_liga}/${cup.liga.quantidade_times ?? '?'} times`,
+          status: { tone: 'pending', label: 'Aguardando sorteio' },
+          table: cup.times?.length
+            ? {
+                columns: [],
+                rows: cup.times.map((team, index) => ({
+                  rank: index + 1,
+                  name: team.nome,
+                  owner: team.nome_cartola,
+                  shieldUrl: team.url_escudo_png,
+                  values: [],
+                  isMine: team.time_id === myTeamId,
+                })),
+              }
+            : undefined,
+          emptyMessage: cup.times?.length ? undefined : 'Nenhum time inscrito ainda.',
+        }),
+  };
+  const shareCard = <ShareLeagueCard ref={shareRef} data={shareData} />;
+
   if (!rounds.length) {
     return (
-      <CupTeamsList
-        cup={cup}
-        myTeamId={myTeamId}
-        isRefetching={isRefetchingLeague}
-        onRefetch={onRefetch}
-      />
+      <>
+        <CupTeamsList
+          cup={cup}
+          myTeamId={myTeamId}
+          isRefetching={isRefetchingLeague}
+          onRefetch={onRefetch}
+        />
+        {shareCard}
+      </>
     );
   }
 
@@ -208,31 +293,34 @@ export function Cup({ league: cup }: CupProps) {
   );
 
   return (
-    <FlatList
-      data={matches}
-      keyExtractor={(item) => `${item.chave_id}`}
-      renderItem={({ item }) => (
-        <CupMatchCard
-          match={item}
-          teamsById={teamsById}
-          myTeamId={myTeamId}
-          currentRound={currentRound}
-          isMarketClose={isMarketClose}
-          partialsByTeamId={partialsByTeamId}
-          leagueSlug={cup.liga.slug}
-        />
-      )}
-      extraData={partialsByTeamId}
-      ListHeaderComponent={header}
-      ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
-      contentContainerStyle={{
-        paddingHorizontal: spacing.md,
-        paddingTop: spacing.xs,
-        paddingBottom: tabBarSpacing.contentBottom,
-      }}
-      showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
-    />
+    <>
+      <FlatList
+        data={matches}
+        keyExtractor={(item) => `${item.chave_id}`}
+        renderItem={({ item }) => (
+          <CupMatchCard
+            match={item}
+            teamsById={teamsById}
+            myTeamId={myTeamId}
+            currentRound={currentRound}
+            isMarketClose={isMarketClose}
+            partialsByTeamId={partialsByTeamId}
+            leagueSlug={cup.liga.slug}
+          />
+        )}
+        extraData={partialsByTeamId}
+        ListHeaderComponent={header}
+        ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.xs,
+          paddingBottom: tabBarSpacing.contentBottom,
+        }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingLeague} />}
+      />
+      {shareCard}
+    </>
   );
 }
 

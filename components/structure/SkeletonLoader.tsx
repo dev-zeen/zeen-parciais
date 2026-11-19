@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated } from 'react-native';
 
 import { View } from '@/components/Themed';
@@ -24,7 +24,8 @@ export function SkeletonLoader({
   variant = 'rect',
   className = '',
 }: SkeletonLoaderProps) {
-  const pulseAnim = useRef(new Animated.Value(0.3)).current;
+  // Valor estável criado uma vez (useState evita ler ref durante o render).
+  const [pulseAnim] = useState(() => new Animated.Value(0.3));
   const colorTheme = useThemeColor();
 
   useEffect(() => {
@@ -36,8 +37,7 @@ export function SkeletonLoader({
     );
     animation.start();
     return () => animation.stop();
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- pulseAnim is a stable Animated.Value ref from useRef
-  }, []);
+  }, [pulseAnim]);
 
   const backgroundColor = colorTheme === 'dark' ? 'bg-gray-700' : 'bg-gray-200';
 

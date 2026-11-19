@@ -130,3 +130,51 @@ export function countActiveFilters(filters: MarketFilterState) {
     (filters.minAverage !== null ? 1 : 0)
   );
 }
+
+export type ActiveFilterChip = {
+  key: string;
+  label: string;
+  /** Campos que voltam ao padrão ao remover o chip */
+  remove: Partial<MarketFilterState>;
+};
+
+/** Filtros ativos como chips removíveis um a um. Função pura. */
+export function getActiveFilterChips(
+  filters: MarketFilterState,
+  clubAbbreviation: (clubId: number) => string | undefined
+): ActiveFilterChip[] {
+  const chips: ActiveFilterChip[] = [];
+  const defaultStatuses = DEFAULT_MARKET_FILTERS.statuses;
+  const statusChanged =
+    filters.statuses.length !== defaultStatuses.length ||
+    filters.statuses.some((id) => !defaultStatuses.includes(id));
+
+  if (statusChanged) {
+    const names = statusPlayerOptions
+      .filter((status) => filters.statuses.includes(status.id))
+      .map((status) => status.title);
+    chips.push({
+      key: 'status',
+      label: names.length ? names.join(', ') : 'Todos os status',
+      remove: { statuses: defaultStatuses },
+    });
+  }
+  if (filters.maxPrice !== null)
+    chips.push({ key: 'price', label: `Até C$ ${filters.maxPrice}`, remove: { maxPrice: null } });
+  if (filters.fitsBalance)
+    chips.push({ key: 'balance', label: 'Cabe no saldo', remove: { fitsBalance: false } });
+  if (filters.minAverage !== null)
+    chips.push({
+      key: 'average',
+      label: `Média ${filters.minAverage}+`,
+      remove: { minAverage: null },
+    });
+  if (filters.clubs.length > 0) {
+    const label =
+      filters.clubs.length === 1
+        ? (clubAbbreviation(filters.clubs[0]) ?? '1 clube')
+        : `${filters.clubs.length} clubes`;
+    chips.push({ key: 'clubs', label, remove: { clubs: [] } });
+  }
+  return chips;
+}

@@ -18,12 +18,17 @@ type MarketPlayerCardProps = {
   positions: IPositions;
   /** Confronto e mínimo para valorizar, calculados uma vez pela lista */
   insight?: PlayerInsight;
+  /** % dos times que escalaram o jogador; só existe para os mais escalados */
+  selection?: number | null;
   onPressAddPlayerToLineup: (player: FullPlayer) => void;
   onPressRemovePlayerFromLineup: (player: FullPlayer) => void;
   isButtonDisabled: boolean;
   /** Texto do botão quando a compra está indisponível (ex.: "Sem saldo") */
   disabledReason?: string;
   isSellPlayer?: boolean;
+  /** Marcado para comparação (segurar o card) */
+  isCompared?: boolean;
+  onLongPress?: (player: FullPlayer) => void;
 };
 
 /**
@@ -36,11 +41,14 @@ export function MarketPlayerCard({
   positions,
   player,
   insight,
+  selection,
   onPressAddPlayerToLineup,
   onPressRemovePlayerFromLineup,
   isButtonDisabled,
   disabledReason,
   isSellPlayer,
+  isCompared,
+  onLongPress,
 }: MarketPlayerCardProps) {
   const { colors, radius, minTouch } = useTokens();
   const { isMarketClose } = useMarketStatus();
@@ -70,13 +78,20 @@ export function MarketPlayerCard({
   const minToValorize = insight?.minToValorize;
 
   return (
-    <View
+    <Pressable
+      onLongPress={onLongPress ? () => onLongPress(player) : undefined}
+      accessibilityHint={onLongPress ? 'Segure para comparar com outro jogador' : undefined}
+      accessibilityState={{ selected: !!isCompared }}
       style={[
         styles.card,
         {
-          backgroundColor: colors.surface,
+          backgroundColor: isCompared ? colors.warningContainer : colors.surface,
           borderRadius: radius.md,
-          borderColor: isSellPlayer ? colors.accentFill : 'transparent',
+          borderColor: isCompared
+            ? colors.warning
+            : isSellPlayer
+              ? colors.accentFill
+              : 'transparent',
         },
       ]}>
       <View>
@@ -155,6 +170,13 @@ export function MarketPlayerCard({
             value={minToValorize != null ? numberToString(minToValorize) : '-'}
             accessibleLabel="Mínimo para valorizar"
           />
+          {selection != null ? (
+            <Stat
+              label="Esc"
+              value={`${Math.round(selection)}%`}
+              accessibleLabel="Escalado por"
+            />
+          ) : null}
         </View>
       </View>
 
@@ -187,7 +209,7 @@ export function MarketPlayerCard({
           </AppText>
         </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
