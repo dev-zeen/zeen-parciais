@@ -1,0 +1,14 @@
+# Fins de linha sempre LF no repositório (evita diffs de arquivo inteiro e edições falhando).
+* text=auto eol=lf
+
+# Binários: nunca converter.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.jks binary
+*.keystore binary
+*.mp4 binary

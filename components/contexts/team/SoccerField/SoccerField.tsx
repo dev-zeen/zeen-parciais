@@ -1,18 +1,22 @@
-import { useCallback } from 'react';
-import { Dimensions, ImageBackground } from 'react-native';
+import { useCallback, useMemo, useRef } from 'react';
+import { Image, StyleSheet, View, useWindowDimensions } from 'react-native';
 
 import footballField from '@/assets/images/field.png';
-import { View } from '@/components/Themed';
 import { AddPlayerButton } from '@/components/contexts/team/AddPlayerButton';
-import { TeamPlayer } from '@/components/contexts/team/TeamPlayer';
+import { PlayerSheet, PlayerSheetRef } from '@/components/contexts/team/PlayerSheet';
+import { PLAYER_SLOT_MAX_WIDTH, TeamPlayer } from '@/components/contexts/team/TeamPlayer/TeamPlayer';
 import { Positions, Zone } from '@/constants/Formations';
+import { usePlayerInsights } from '@/hooks/usePlayerInsights';
 import usePlayerStats from '@/hooks/usePlayerStats';
 import { Substitutions } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
-import useTeamLineupStore from '@/store/useTeamLineupStore';
+import { FullPlayer } from '@/models/Stats';
+import type { FieldStat } from '@/store/useTeamLineupStore';
 
-const screenWidth = Dimensions.get('window').width;
-const fieldWidth = screenWidth;
+const FIELD_MIN_HEIGHT = 430;
+const FIELD_MAX_WIDTH = 560;
+const SCREEN_PADDING = 16;
+const FIELD_PADDING = 8;
 
 type SoccerFieldProps = {
   lineup: LineupPlayers;
@@ -20,7 +24,14 @@ type SoccerFieldProps = {
   substitutions?: Substitutions[];
   isViewOnly?: boolean;
   round: number;
+  /** Dado exibido na etiqueta de cada jogador com o mercado aberto */
+  fieldStat?: FieldStat;
   onOpenMarket: (position: LineupPosition, playerIndex: number) => void;
+  /**
+   * Toque em um jogador. Sem este callback o campinho abre a própria ficha,
+   * somente leitura quando `isViewOnly`.
+   */
+  onPressPlayer?: (player: LineupPlayer | FullPlayer) => void;
 };
 
 export function SoccerField({
@@ -29,142 +40,144 @@ export function SoccerField({
   captain,
   isViewOnly = false,
   round,
+  fieldStat = 'price',
   onOpenMarket,
+  onPressPlayer,
 }: SoccerFieldProps) {
+  const { width: windowWidth } = useWindowDimensions();
   const { playerStats } = usePlayerStats();
+  const { getInsight } = usePlayerInsights();
+  const sheetRef = useRef<PlayerSheetRef>(null);
 
-  const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
+  const rows = useMemo(() => {
+    const starting = lineup?.starting ?? [];
+    return {
+      attack: starting.filter((item) => item.position === Positions.ATACANTE),
+      midfield: starting.filter((item) => item.position === Positions.MEIO_CAMPO),
+      defense: starting
+        .filter((item) => item.zone === Zone.DEFESA)
+        .sort((a, b) => (a?.sequencePosition as number) - (b?.sequencePosition as number)),
+      goalkeeper: starting.filter((item) => item.position === Positions.GOLEIRO),
+      coach: starting.filter((item) => item.position === Positions.TECNICO),
+    };
+  }, [lineup?.starting]);
 
-  const handlePurchasePlayerOnMarket = useCallback(
-    (player: LineupPosition, playerIndex: number) => {
-      onOpenMarket(player, playerIndex);
+  const fieldWidth = Math.min(windowWidth - SCREEN_PADDING, FIELD_MAX_WIDTH);
+
+  // A linha mais cheia define a largura de cada jogador, para caber em telas estreitas.
+  const slotWidth = useMemo(() => {
+    const largestRow = Math.max(
+      rows.attack.length,
+      rows.midfield.length,
+      rows.defense.length,
+      // goleiro e técnico dividem a mesma linha, com o goleiro centralizado
+      rows.goalkeeper.length + rows.coach.length * 2,
+      1
+    );
+    return Math.min(
+      PLAYER_SLOT_MAX_WIDTH,
+      Math.floor((fieldWidth - FIELD_PADDING * 2) / largestRow)
+    );
+  }, [fieldWidth, rows]);
+
+  const handlePressPlayer = useCallback(
+    (player: LineupPlayer | FullPlayer) => {
+      if (onPressPlayer) onPressPlayer(player);
+      else sheetRef.current?.open(player);
     },
-    [onOpenMarket]
+    [onPressPlayer]
   );
 
   const renderItem = useCallback(
     (position: LineupPosition, index: number) => {
-      return (
-        <View
-          key={position.player ? position.player.atleta_id : position.abbr + index}
-          style={{
-            backgroundColor: 'transparent',
-          }}>
-          {position.player ? (
-            <TeamPlayer
-              isViewOnly={isViewOnly}
-              player={position.player as LineupPlayer}
-              isCaptain={captain === position.player?.atleta_id}
-              handleCaptain={updateCaptain}
-              isPlayed={playerStats?.atletas?.[position.player.atleta_id]?.entrou_em_campo}
-              isReplaced={substitutions?.some(
-                (item) => item.saiu.atleta_id === position.player?.atleta_id
-              )}
-              isEnteredInMatch={substitutions?.some(
-                (item) => item.entrou.atleta_id === position.player?.atleta_id
-              )}
-              round={round}
-            />
-          ) : (
-            <AddPlayerButton
-              onPurchasePlayerOnMarket={(e) => handlePurchasePlayerOnMarket(e, index)}
-              positionLineup={position}
-            />
+      const player = position.player;
+
+      return player ? (
+        <TeamPlayer
+          key={player.atleta_id}
+          width={slotWidth}
+          isViewOnly={isViewOnly}
+          player={player}
+          isCaptain={captain === player.atleta_id}
+          isPlayed={playerStats?.atletas?.[player.atleta_id]?.entrou_em_campo}
+          isReplaced={substitutions?.some((item) => item.saiu.atleta_id === player.atleta_id)}
+          isEnteredInMatch={substitutions?.some(
+            (item) => item.entrou.atleta_id === player.atleta_id
           )}
-        </View>
+          round={round}
+          fieldStat={fieldStat}
+          insight={isViewOnly ? undefined : getInsight(player)}
+          onPress={handlePressPlayer}
+        />
+      ) : (
+        <AddPlayerButton
+          key={position.abbr + index}
+          width={slotWidth}
+          isViewOnly={isViewOnly}
+          onPurchasePlayerOnMarket={(item) => onOpenMarket(item, index)}
+          positionLineup={position}
+        />
       );
     },
     [
+      slotWidth,
       isViewOnly,
       captain,
-      updateCaptain,
       playerStats?.atletas,
       substitutions,
       round,
-      handlePurchasePlayerOnMarket,
+      fieldStat,
+      getInsight,
+      handlePressPlayer,
+      onOpenMarket,
     ]
   );
 
   return (
-    <View className="flex-1 justify-center items-center rounded-lg pt-2 mx-2 bg-transparent">
-      <ImageBackground
-        source={footballField}
-        style={{
-          height: 430,
-          width: fieldWidth,
-        }}
-        alt="Campinho"
-      />
-
-      <View
-        style={{
-          borderRadius: 16,
-          position: 'absolute',
-          top: 13,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'transparent',
-        }}>
-        {lineup?.starting.filter((item) => item.position === Positions.ATACANTE).map(renderItem)}
+    <View style={styles.wrapper}>
+      <View accessibilityLabel="Campinho" style={[styles.field, { width: fieldWidth }]}>
+        <Image source={footballField} resizeMode="stretch" style={styles.image} />
+        <View style={styles.row}>{rows.attack.map(renderItem)}</View>
+        <View style={styles.row}>{rows.midfield.map(renderItem)}</View>
+        <View style={styles.row}>{rows.defense.map(renderItem)}</View>
+        <View style={styles.row}>
+          {rows.goalkeeper.map(renderItem)}
+          <View style={styles.coach}>{rows.coach.map(renderItem)}</View>
+        </View>
       </View>
 
-      <View
-        style={{
-          position: 'absolute',
-          top: 112,
-          borderRadius: 16,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'transparent',
-        }}>
-        {lineup?.starting.filter((item) => item.position === Positions.MEIO_CAMPO).map(renderItem)}
-      </View>
-
-      <View
-        style={{
-          position: 'absolute',
-          top: 210,
-          borderRadius: 16,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'transparent',
-          gap: 10,
-        }}>
-        {lineup?.starting
-          .filter((item) => item.zone === Zone.DEFESA)
-          .sort((a, b) => (a?.sequencePosition as number) - (b?.sequencePosition as number))
-          .map(renderItem)}
-      </View>
-
-      <View
-        style={{
-          position: 'absolute',
-          top: 305,
-          borderRadius: 16,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'transparent',
-        }}>
-        {lineup?.starting.filter((item) => item.position === Positions.GOLEIRO).map(renderItem)}
-      </View>
-
-      <View
-        style={{
-          position: 'absolute',
-          top: 305,
-          left: 20,
-          borderRadius: 16,
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'flex-start',
-          backgroundColor: 'transparent',
-        }}>
-        {lineup?.starting.filter((item) => item.position === Positions.TECNICO).map(renderItem)}
-      </View>
+      {onPressPlayer ? null : <PlayerSheet ref={sheetRef} isViewOnly={isViewOnly} />}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  wrapper: {
+    alignItems: 'center',
+  },
+  field: {
+    minHeight: FIELD_MIN_HEIGHT,
+    paddingVertical: 12,
+    paddingHorizontal: FIELD_PADDING,
+    justifyContent: 'space-evenly',
+    gap: 8,
+  },
+  image: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'flex-start',
+  },
+  coach: {
+    position: 'absolute',
+    left: 4,
+    top: 0,
+  },
+});

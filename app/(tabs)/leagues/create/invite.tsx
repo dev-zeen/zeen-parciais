@@ -1,394 +1,296 @@
 import { Feather } from '@expo/vector-icons';
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Redirect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import {
-  Alert,
+  ActivityIndicator,
   FlatList,
   Image,
   ListRenderItemInfo,
-  TextInput,
-  TouchableOpacity,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text, View } from '@/components/Themed';
-import { LoadingScreen } from '@/components/structure/LoadingScreen';
+import { LEAGUE_KIND } from '@/components/contexts/leagues/leagueKinds';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
+import { ScreenHeader } from '@/components/structure/ScreenHeader';
+import { AppText } from '@/components/ui/AppText';
+import { SearchField } from '@/components/ui/SearchField';
+import { StateView } from '@/components/ui/StateView';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
+import { useTokens } from '@/hooks/useTokens';
 import { useInvitePointsCompetition } from '@/queries/competitions.mutations';
 import { useInviteLeague } from '@/queries/leagues.mutations';
 import { SearchTeamItem, useSearchTeams } from '@/queries/teams.query';
+import { haptics } from '@/utils/haptics';
+import { appAlert } from '@/components/ui/AppAlert';
 
 type InviteType = 'classic' | 'matamata' | 'points';
 
-export default function () {
-  const colorTheme = useThemeColor();
+const MIN_QUERY = 2;
+
+/**
+ * Convidar times (dono da liga). Pontos corridos convida por id; clássica e mata-mata por
+ * slug, como a API espera. A seleção é guardada pelo time inteiro para mostrar o resumo.
+ */
+export default function InviteTeamsScreen() {
+  const { colors, spacing, radius, minTouch } = useTokens();
+  const tabBarSpacing = useTabBarSpacing();
+  const insets = useSafeAreaInsets();
   const { isAutheticated } = useContext(AuthContext);
   const { allowRequest } = useMarketStatus();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams<{ slug?: string; type?: string }>();
 
-  const slug = useMemo(() => {
-    const raw = params.slug;
-    return typeof raw === 'string' ? raw : '';
-  }, [params.slug]);
+  const slug = params.slug ?? '';
+  const type: InviteType =
+    params.type === 'matamata' || params.type === 'points' ? params.type : 'classic';
+  const kind = LEAGUE_KIND[type === 'points' ? 'points' : type === 'matamata' ? 'cup' : 'classic'];
 
-  const type = useMemo<InviteType>(() => {
-    const raw = params.type;
-    if (raw === 'classic' || raw === 'matamata' || raw === 'points') return raw;
-    return 'classic';
-  }, [params.type]);
-
-  const [q, setQ] = useState('');
-  const [debouncedQ, setDebouncedQ] = useState('');
-  const [selectedIds, setSelectedIds] = useState<Record<number, boolean>>({});
-  const [selectedSlugs, setSelectedSlugs] = useState<Record<string, boolean>>({});
+  const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [selected, setSelected] = useState<Map<number, SearchTeamItem>>(new Map());
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedQ(q), 350);
-    return () => clearTimeout(t);
-  }, [q]);
+    const timer = setTimeout(() => setDebouncedQuery(query), 350);
+    return () => clearTimeout(timer);
+  }, [query]);
 
-  const { data: teams, isFetching } = useSearchTeams(debouncedQ, allowRequest);
+  const { data: teams, isFetching, isError } = useSearchTeams(debouncedQuery, allowRequest);
 
-  const selectedTeamIds = useMemo(() => {
-    return Object.keys(selectedIds)
-      .filter((k) => selectedIds[Number(k)])
-      .map((k) => Number(k));
-  }, [selectedIds]);
+  const onSent = () => {
+    haptics.success();
+    const count = selected.size;
+    setSelected(new Map());
+    appAlert(
+      'Convites enviados',
+      `${count} ${count === 1 ? 'time foi convidado' : 'times foram convidados'}. Eles aparecem como "Aguardando" até aceitarem.`
+    );
+  };
+  const onFailed = (message?: string) => {
+    haptics.error();
+    appAlert(
+      'Convites não enviados',
+      typeof message === 'string' ? message : 'Confira a conexão e tente de novo.'
+    );
+  };
 
-  const selectedTeamSlugs = useMemo(() => {
-    return Object.keys(selectedSlugs).filter((k) => selectedSlugs[k]);
-  }, [selectedSlugs]);
-
-  const title = useMemo(() => {
-    if (type === 'points') return 'Convidar (Pontos Corridos)';
-    if (type === 'matamata') return 'Convidar (Mata-mata)';
-    return 'Convidar (Clássica)';
-  }, [type]);
-
-  const { mutate: invitePoints, isPending: isInvitingPoints } = useInvitePointsCompetition({
-    onSuccess: () => {
-      Alert.alert('Tudo certo!', 'Convites enviados.');
-      setSelectedIds({});
-    },
-    onError: (error) => {
-      const msg =
-        typeof error?.response?.data?.mensagem === 'string'
-          ? error.response.data.mensagem
-          : 'Não foi possível enviar os convites.';
-      Alert.alert('Alerta!', msg);
-    },
+  const invitePoints = useInvitePointsCompetition({
+    onSuccess: onSent,
+    onError: (error) => onFailed(error?.response?.data?.mensagem),
   });
-
-  const { mutate: inviteLeague, isPending: isInvitingLeague } = useInviteLeague({
-    onSuccess: () => {
-      Alert.alert('Tudo certo!', 'Convites enviados.');
-      setSelectedSlugs({});
-    },
-    onError: (error) => {
-      const msg =
-        typeof error?.response?.data?.mensagem === 'string'
-          ? error.response.data.mensagem
-          : 'Não foi possível enviar os convites.';
-      Alert.alert('Alerta!', msg);
-    },
+  const inviteLeague = useInviteLeague({
+    onSuccess: onSent,
+    onError: (error) => onFailed(error?.response?.data?.mensagem),
   });
+  const isSubmitting = invitePoints.isPending || inviteLeague.isPending;
 
-  const isSubmitting = isInvitingPoints || isInvitingLeague;
+  const toggle = useCallback((team: SearchTeamItem) => {
+    haptics.selection();
+    setSelected((current) => {
+      const next = new Map(current);
+      if (next.has(team.time_id)) next.delete(team.time_id);
+      else next.set(team.time_id, team);
+      return next;
+    });
+  }, []);
 
-  const toggleTeam = useCallback(
-    (team: SearchTeamItem) => {
-      if (type === 'points') {
-        setSelectedIds((prev) => {
-          const isOn = !!prev[team.time_id];
-          return { ...prev, [team.time_id]: !isOn };
-        });
-        return;
-      }
-
-      setSelectedSlugs((prev) => {
-        const isOn = !!prev[team.slug];
-        return { ...prev, [team.slug]: !isOn };
-      });
-    },
-    [type]
-  );
-
-  const onSubmit = useCallback(() => {
-    if (!slug) return;
-    const hasSelection =
-      type === 'points' ? selectedTeamIds.length > 0 : selectedTeamSlugs.length > 0;
-
-    if (!hasSelection) {
-      Alert.alert('Selecione times', 'Escolha pelo menos 1 time para convidar.');
-      return;
-    }
-
+  const submit = () => {
+    if (!slug || selected.size === 0 || isSubmitting) return;
+    const list = [...selected.values()];
     if (type === 'points') {
-      invitePoints({ slug, teamIds: selectedTeamIds });
+      invitePoints.mutate({ slug, teamIds: list.map((team) => team.time_id) });
     } else {
-      inviteLeague({ slug, teamSlugs: selectedTeamSlugs });
+      inviteLeague.mutate({ slug, teamSlugs: list.map((team) => team.slug) });
     }
-  }, [selectedTeamIds, selectedTeamSlugs, slug, type, invitePoints, inviteLeague]);
+  };
 
-  const keyExtractor = useCallback((item: SearchTeamItem) => `${item.time_id}`, []);
-
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<SearchTeamItem>) => {
-      const isSelected =
-        type === 'points' ? !!selectedIds[item.time_id] : !!selectedSlugs[item.slug];
-      return (
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => toggleTeam(item)}
-          style={{
-            paddingVertical: 12,
-            paddingHorizontal: 12,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: isSelected ? '#22c55e' : colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-            backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 12,
-          }}>
-          <Image
-            source={{ uri: item.url_escudo_png }}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: colorTheme === 'dark' ? '#111827' : '#f3f4f6',
-            }}
-            alt={`Escudo ${item.nome}`}
-          />
-          <View style={{ backgroundColor: 'transparent', flex: 1, gap: 2 }}>
-            <Text className="font-bold" numberOfLines={1}>
-              {item.nome}
-            </Text>
-            <Text className="text-xs text-gray-500" numberOfLines={1}>
-              {item.nome_cartola}
-            </Text>
-          </View>
-          <View
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: 14,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: isSelected ? '#22c55e' : 'transparent',
-              borderWidth: 1,
-              borderColor: isSelected ? '#22c55e' : colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-            }}>
-            {isSelected && <Feather name="check" size={16} color="#ffffff" />}
-          </View>
-        </TouchableOpacity>
-      );
-    },
-    [colorTheme, selectedIds, selectedSlugs, toggleTeam, type]
-  );
+  const renderItem = ({ item }: ListRenderItemInfo<SearchTeamItem>) => {
+    const isSelected = selected.has(item.time_id);
+    return (
+      <Pressable
+        onPress={() => toggle(item)}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: isSelected }}
+        accessibilityLabel={`${item.nome}, de ${item.nome_cartola}`}
+        android_ripple={{ color: colors.border }}
+        style={({ pressed }) => [
+          styles.row,
+          {
+            gap: spacing.sm,
+            padding: spacing.sm,
+            borderRadius: radius.md,
+            backgroundColor: isSelected ? colors.accentContainer : colors.surface,
+            opacity: pressed ? 0.85 : 1,
+          },
+        ]}>
+        <Image
+          source={{ uri: item.url_escudo_png }}
+          style={[styles.shield, { backgroundColor: colors.surfaceAlt }]}
+        />
+        <View style={{ flex: 1 }}>
+          <AppText variant="body" weight="bold" numberOfLines={1}>
+            {item.nome}
+          </AppText>
+          <AppText variant="label" color="textMuted" numberOfLines={1}>
+            {item.nome_cartola}
+          </AppText>
+        </View>
+        <View
+          style={[
+            styles.check,
+            {
+              backgroundColor: isSelected ? colors.accentFill : 'transparent',
+              borderColor: isSelected ? colors.accentFill : colors.border,
+            },
+          ]}>
+          {isSelected ? <Feather name="check" size={16} color={colors.onAccentFill} /> : null}
+        </View>
+      </Pressable>
+    );
+  };
 
   if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
-  if (!slug) return <LoadingScreen title="Carregando convite..." />;
+
+  const hasQuery = query.trim().length >= MIN_QUERY;
+  const footerHeight = minTouch + spacing.md * 2;
 
   return (
     <SafeAreaViewContainer edges={['top']}>
-      <View
-        className="flex-1"
-        style={{
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        }}>
-        <View className="px-4 pt-3 pb-2" style={{ gap: 10, backgroundColor: 'transparent' }}>
-          <View
-            className="flex-row items-center justify-between"
-            style={{ backgroundColor: 'transparent' }}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-                borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-              }}>
-              <Feather
-                name="chevron-left"
-                size={20}
-                color={colorTheme === 'dark' ? '#e5e7eb' : '#111827'}
-              />
-            </TouchableOpacity>
-
-            <View style={{ flex: 1, paddingHorizontal: 12, backgroundColor: 'transparent' }}>
-              <Text className="text-xl font-extrabold">{title}</Text>
-              <Text className="text-xs text-gray-500">
-                {type === 'points' ? selectedTeamIds.length : selectedTeamSlugs.length}{' '}
-                selecionado(s)
-              </Text>
-            </View>
-          </View>
-
-          <View
-            className="flex-row items-center rounded-xl px-3"
-            style={{
-              gap: 10,
-              height: 48,
-              backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-            }}>
-            <Feather
-              name="search"
-              size={18}
-              color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'}
-            />
-            <TextInput
-              value={q}
-              onChangeText={setQ}
-              placeholder="Buscar time..."
-              placeholderTextColor={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'}
-              style={{
-                flex: 1,
-                color: colorTheme === 'dark' ? '#f9fafb' : '#111827',
-                fontSize: 15,
-              }}
-            />
-          </View>
-        </View>
-
-        <FlatList
-          data={teams ?? []}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
-          contentContainerStyle={{
-            paddingHorizontal: 16,
-            paddingTop: 8,
-            paddingBottom: 80,
-            gap: 10,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-          }}
-          ListEmptyComponent={
-            q.trim().length < 2 ? (
-              <View style={{ backgroundColor: 'transparent' }}>
-                <Text className="text-sm text-gray-500">Digite ao menos 2 letras para buscar.</Text>
-              </View>
-            ) : isFetching ? (
-              <View style={{ backgroundColor: 'transparent' }}>
-                <Text className="text-sm text-gray-500">Buscando...</Text>
-              </View>
-            ) : (
-              <View style={{ backgroundColor: 'transparent' }}>
-                <Text className="text-sm text-gray-500">Nenhum time encontrado.</Text>
-              </View>
-            )
-          }
+      <ScreenHeader
+        title="Convidar times"
+        subtitle={`${kind.label} · ${
+          selected.size
+            ? `${selected.size} selecionado${selected.size > 1 ? 's' : ''}`
+            : 'busque pelo nome do time'
+        }`}
+      />
+      <View style={{ paddingHorizontal: spacing.md, paddingBottom: spacing.xs }}>
+        <SearchField
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Nome do time"
+          accessibilityLabel="Buscar time para convidar"
         />
+      </View>
 
-        {/* Fixed Bottom Action Buttons */}
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            paddingHorizontal: 16,
-            paddingVertical: 12,
-            backgroundColor:
-              colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-            borderTopWidth: 1,
-            borderTopColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 8,
-            elevation: 8,
-          }}>
-          <View style={{ flexDirection: 'row', gap: 12, backgroundColor: 'transparent' }}>
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => router.back()}
-              style={{
-                flex: 1,
-                paddingVertical: 14,
-                borderRadius: 12,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-              }}>
-              <Text
-                className="font-semibold"
-                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-                Cancelar
-              </Text>
-            </TouchableOpacity>
+      <FlatList
+        data={hasQuery ? (teams ?? []) : []}
+        keyExtractor={(item) => `${item.time_id}`}
+        renderItem={renderItem}
+        extraData={selected}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.xs,
+          paddingBottom: footerHeight + tabBarSpacing.contentBottom,
+        }}
+        ListEmptyComponent={
+          !hasQuery ? (
+            <StateView
+              icon="search"
+              title="Encontre times para convidar"
+              message={`Digite pelo menos ${MIN_QUERY} letras do nome do time.`}
+            />
+          ) : isFetching || query !== debouncedQuery ? (
+            <ActivityIndicator style={{ marginTop: spacing.lg }} color={colors.textMuted} />
+          ) : isError ? (
+            <StateView
+              icon="wifi-off"
+              title="A busca falhou"
+              message="Confira a conexão e tente de novo."
+            />
+          ) : (
+            <StateView
+              icon="user-x"
+              title="Nenhum time encontrado"
+              message="Confira o nome do time (não o do cartoleiro)."
+            />
+          )
+        }
+      />
 
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={onSubmit}
-              disabled={
-                isSubmitting ||
-                (type === 'points' ? selectedTeamIds.length === 0 : selectedTeamSlugs.length === 0)
-              }
-              style={{
-                flex: 2,
-                paddingVertical: 14,
-                borderRadius: 12,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor:
-                  isSubmitting ||
-                  (type === 'points'
-                    ? selectedTeamIds.length === 0
-                    : selectedTeamSlugs.length === 0)
-                    ? colorTheme === 'dark'
-                      ? '#1f2937'
-                      : '#f3f4f6'
-                    : '#22c55e',
-                flexDirection: 'row',
-                gap: 8,
-              }}>
-              {isSubmitting ? (
-                <Feather name="loader" size={18} color="#ffffff" />
-              ) : (
-                (type === 'points' ? selectedTeamIds.length > 0 : selectedTeamSlugs.length > 0) && (
-                  <View
-                    style={{
-                      backgroundColor: '#ffffff20',
-                      paddingHorizontal: 8,
-                      paddingVertical: 2,
-                      borderRadius: 10,
-                    }}>
-                    <Text className="text-xs font-bold" style={{ color: '#ffffff' }}>
-                      {type === 'points' ? selectedTeamIds.length : selectedTeamSlugs.length}
-                    </Text>
-                  </View>
-                )
-              )}
-              <Text
-                className="font-semibold"
-                style={{
-                  color:
-                    isSubmitting ||
-                    (type === 'points'
-                      ? selectedTeamIds.length === 0
-                      : selectedTeamSlugs.length === 0)
-                      ? '#9ca3af'
-                      : '#ffffff',
-                }}>
-                {isSubmitting ? 'Enviando...' : 'Enviar convites'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      {/* Barra fixa acima da tab bar */}
+      <View
+        style={[
+          styles.footer,
+          {
+            bottom: tabBarSpacing.overlap,
+            gap: spacing.xs,
+            padding: spacing.md,
+            paddingBottom:
+              spacing.md + (Platform.OS === 'ios' && !tabBarSpacing.overlap ? insets.bottom : 0),
+            backgroundColor: colors.bg,
+            borderTopColor: colors.border,
+          },
+        ]}>
+        <Pressable
+          onPress={submit}
+          disabled={selected.size === 0 || isSubmitting}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: selected.size === 0 || isSubmitting, busy: isSubmitting }}
+          android_ripple={{ color: colors.border }}
+          style={({ pressed }) => [
+            styles.submit,
+            {
+              minHeight: minTouch,
+              borderRadius: radius.full,
+              backgroundColor: selected.size ? colors.accentFill : colors.disabledFill,
+              opacity: pressed ? 0.85 : 1,
+            },
+          ]}>
+          {isSubmitting ? (
+            <ActivityIndicator color={colors.onAccentFill} />
+          ) : (
+            <AppText
+              variant="body"
+              weight="bold"
+              color={selected.size ? 'onAccentFill' : 'onDisabledFill'}>
+              {selected.size
+                ? `Enviar ${selected.size} ${selected.size === 1 ? 'convite' : 'convites'}`
+                : 'Selecione times'}
+            </AppText>
+          )}
+        </Pressable>
       </View>
     </SafeAreaViewContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  shield: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  check: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  submit: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+});

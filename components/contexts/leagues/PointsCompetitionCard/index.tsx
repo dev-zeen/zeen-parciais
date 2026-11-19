@@ -1,1 +1,0 @@
-export { PointsCompetitionCard } from './PointsCompetitionCard';

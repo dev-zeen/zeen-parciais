@@ -1,17 +1,19 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+
 import { useFonts } from 'expo-font';
-import { SplashScreen, Stack } from 'expo-router';
+import { DarkTheme, DefaultTheme, SplashScreen, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useState } from 'react';
+import { View } from 'react-native';
 
 import Providers from './_providers';
 
-import Colors from '@/constants/Colors';
+import { AnimatedSplash } from '@/components/structure/AnimatedSplash';
+import { AppAlertHost } from '@/components/ui/AppAlert';
 import { useThemeColor } from '@/hooks/useThemeColor';
 
 export const unstable_settings = {
-  initialRouteName: '(tabs)',
+  anchor: '(tabs)',
 };
 
 SplashScreen.preventAutoHideAsync();
@@ -23,11 +25,8 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+  // O splash nativo fica até a splash animada montar; ela o esconde no primeiro layout.
+  const [showSplash, setShowSplash] = useState(true);
 
   if (error) throw error;
 
@@ -35,7 +34,12 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <View style={{ flex: 1 }}>
+      <RootLayoutNav />
+      {showSplash ? <AnimatedSplash onFinish={() => setShowSplash(false)} /> : null}
+    </View>
+  );
 }
 
 function RootLayoutNav() {
@@ -44,14 +48,11 @@ function RootLayoutNav() {
   return (
     <Providers>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <StatusBar
-          backgroundColor={
-            colorScheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull
-          }
-        />
+        <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
+        <AppAlertHost />
       </ThemeProvider>
     </Providers>
   );

@@ -1,548 +1,652 @@
 import { Feather } from '@expo/vector-icons';
 import { Redirect, router, useLocalSearchParams } from 'expo-router';
-import { useContext, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useRef, useState } from 'react';
 import {
   FlatList,
   Image,
   LayoutAnimation,
+  ListRenderItemInfo,
   Platform,
-  TouchableOpacity,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
   UIManager,
-  View as RNView,
+  View,
 } from 'react-native';
 
-import { Text } from '@/components/Themed';
+import {
+  LeagueAdminSheet,
+  LeagueAdminSheetRef,
+} from '@/components/contexts/leagues/LeagueAdminSheet';
+import { LeagueSummaryCard } from '@/components/contexts/leagues/LeagueSummaryCard';
+import {
+  SHARE_TABLE_ROWS,
+  ShareLeagueCard,
+  ShareLeagueCardRef,
+  ShareTableRow,
+} from '@/components/contexts/leagues/ShareLeagueCard';
+import {
+  STAT_COLUMN,
+  StandingHeader,
+  StandingRow,
+} from '@/components/contexts/leagues/StandingRow';
+import {
+  LEAGUE_KIND,
+  PRIVACY_LABEL,
+  formatPoints,
+} from '@/components/contexts/leagues/leagueKinds';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
+import { ScreenHeader } from '@/components/structure/ScreenHeader';
+import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
+import { Chip } from '@/components/ui/Chip';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
+import { StateView } from '@/components/ui/StateView';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import type {
-  Confronto,
-  PointsCompetitionTeam,
-  PointsCompetitionTeamsMap,
-} from '@/models/Competition';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
+import { useTokens } from '@/hooks/useTokens';
+import type { Confronto, PointsCompetitionTeam } from '@/models/Competition';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPointsCompetitionBySlug } from '@/queries/competitions.query';
+import {
+  FormResult,
+  StandingEntry,
+  computeStandings,
+  isMatchPlayed,
+} from '@/utils/pointsStandings';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-type FormResult = 'V' | 'E' | 'D';
+type PointsTab = 'table' | 'matches';
 
-type ProximoConfronto = {
-  rodada: number;
-  adversario: PointsCompetitionTeam;
-  isMandante: boolean;
-};
+const keyExtractor = (item: StandingEntry) => `${item.time_id}`;
 
-type StandingEntry = PointsCompetitionTeam & {
-  pontos: number;
-  jogos: number;
-  vitorias: number;
-  empates: number;
-  derrotas: number;
-  gp: number;
-  gc: number;
-  saldo: number;
-  media: number;
-  forma: FormResult[];
-  proximoConfronto: ProximoConfronto | null;
-};
-
-function computeStandings(
-  participantes: PointsCompetitionTeamsMap,
-  confrontos: Record<string, Confronto[]> | undefined
-): StandingEntry[] {
-  const stats: Record<
-    number,
-    {
-      pontos: number;
-      jogos: number;
-      vitorias: number;
-      empates: number;
-      derrotas: number;
-      gp: number;
-      gc: number;
-      resultados: { rodada: number; result: FormResult }[];
-    }
-  > = {};
-
-  for (const team of Object.values(participantes)) {
-    stats[team.time_id] = {
-      pontos: 0,
-      jogos: 0,
-      vitorias: 0,
-      empates: 0,
-      derrotas: 0,
-      gp: 0,
-      gc: 0,
-      resultados: [],
-    };
-  }
-
-  // próximos confrontos: menor rodada com vencedor_id === null por time
-  const proximosPorTime: Record<number, { rodada: number; adversarioId: number; isMandante: boolean }> = {};
-
-  if (confrontos) {
-    for (const [rodadaStr, matches] of Object.entries(confrontos)) {
-      const rodada = parseInt(rodadaStr, 10);
-      for (const match of matches) {
-        if (match.vencedor_id === null) {
-          const { mandante, visitante } = match;
-          if (!proximosPorTime[mandante.id] || rodada < proximosPorTime[mandante.id].rodada) {
-            proximosPorTime[mandante.id] = { rodada, adversarioId: visitante.id, isMandante: true };
-          }
-          if (!proximosPorTime[visitante.id] || rodada < proximosPorTime[visitante.id].rodada) {
-            proximosPorTime[visitante.id] = { rodada, adversarioId: mandante.id, isMandante: false };
-          }
-          continue;
-        }
-
-        const { mandante, visitante } = match;
-        const mStats = stats[mandante.id];
-        const vStats = stats[visitante.id];
-
-        if (mStats && mandante.pontos_conquistados !== undefined) {
-          mStats.jogos += 1;
-          mStats.pontos += mandante.pontos_conquistados;
-          if (mandante.pontuacao_rodada !== undefined) mStats.gp += mandante.pontuacao_rodada;
-          if (visitante.pontuacao_rodada !== undefined) mStats.gc += visitante.pontuacao_rodada;
-          const result: FormResult =
-            mandante.pontos_conquistados === 3 ? 'V' : mandante.pontos_conquistados === 1 ? 'E' : 'D';
-          if (result === 'V') mStats.vitorias += 1;
-          else if (result === 'E') mStats.empates += 1;
-          else mStats.derrotas += 1;
-          mStats.resultados.push({ rodada, result });
-        }
-
-        if (vStats && visitante.pontos_conquistados !== undefined) {
-          vStats.jogos += 1;
-          vStats.pontos += visitante.pontos_conquistados;
-          if (visitante.pontuacao_rodada !== undefined) vStats.gp += visitante.pontuacao_rodada;
-          if (mandante.pontuacao_rodada !== undefined) vStats.gc += mandante.pontuacao_rodada;
-          const result: FormResult =
-            visitante.pontos_conquistados === 3 ? 'V' : visitante.pontos_conquistados === 1 ? 'E' : 'D';
-          if (result === 'V') vStats.vitorias += 1;
-          else if (result === 'E') vStats.empates += 1;
-          else vStats.derrotas += 1;
-          vStats.resultados.push({ rodada, result });
-        }
-      }
-    }
-  }
-
-  return Object.values(participantes)
-    .map((team) => {
-      const s = stats[team.time_id] ?? {
-        pontos: 0,
-        jogos: 0,
-        vitorias: 0,
-        empates: 0,
-        derrotas: 0,
-        gp: 0,
-        gc: 0,
-        resultados: [],
-      };
-      const forma = s.resultados
-        .sort((a, b) => b.rodada - a.rodada)
-        .slice(0, 5)
-        .map((r) => r.result);
-      const proximo = proximosPorTime[team.time_id];
-      const adversario = proximo ? participantes[proximo.adversarioId] : undefined;
-      return {
-        ...team,
-        pontos: s.pontos,
-        jogos: s.jogos,
-        vitorias: s.vitorias,
-        empates: s.empates,
-        derrotas: s.derrotas,
-        gp: s.gp,
-        gc: s.gc,
-        saldo: s.gp - s.gc,
-        media: s.jogos > 0 ? s.gp / s.jogos : 0,
-        forma,
-        proximoConfronto:
-          proximo && adversario
-            ? { rodada: proximo.rodada, adversario, isMandante: proximo.isMandante }
-            : null,
-      };
-    })
-    .sort(
-      (a, b) =>
-        b.pontos - a.pontos || b.vitorias - a.vitorias || b.saldo - a.saldo || b.gp - a.gp
-    );
-}
-
-function FormDot({ result }: { result: FormResult }) {
-  const color = result === 'V' ? '#22c55e' : result === 'E' ? '#f59e0b' : '#ef4444';
-  return <RNView style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: color }} />;
-}
-
-function StandingRow({
-  entry,
-  rank,
-  isExpanded,
-  isMyTeam,
-  onToggle,
-  isDark,
-}: {
-  entry: StandingEntry;
-  rank: number;
-  isExpanded: boolean;
-  isMyTeam: boolean;
-  onToggle: () => void;
-  isDark: boolean;
-}) {
-  const cardBg = isDark ? '#111827' : '#ffffff';
-  const myTeamBg = isDark ? '#0f2318' : '#f0fdf4';
-  const borderColor = isMyTeam ? '#22c55e50' : isDark ? '#374151' : '#e5e7eb';
-  const statColor = isDark ? '#9ca3af' : '#6b7280';
-  const valueColor = isDark ? '#e5e7eb' : '#111827';
-  const dividerColor = isDark ? '#1f2937' : '#f3f4f6';
-
+function FormDots({ forma }: { forma: FormResult[] }) {
+  const { colors } = useTokens();
+  const color = { V: colors.positiveFill, E: colors.warningFill, D: colors.negativeFill };
+  const label = { V: 'vitória', E: 'empate', D: 'derrota' };
   return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={onToggle}
-      style={{
-        borderRadius: 12,
-        backgroundColor: isMyTeam ? myTeamBg : cardBg,
-        borderWidth: 1,
-        borderColor,
-        overflow: 'hidden',
-      }}>
-      <RNView style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 12, gap: 8 }}>
-        {/* Rank */}
-        <Text
-          style={{
-            width: 20,
-            fontSize: 13,
-            fontWeight: '700',
-            color: rank <= 4 ? '#22c55e' : statColor,
-            textAlign: 'center',
-          }}>
-          {rank}
-        </Text>
-
-        {/* Shield + PRO dot */}
-        <RNView style={{ position: 'relative' }}>
-          <Image source={{ uri: entry.url_escudo_png }} style={{ width: 36, height: 36, borderRadius: 18 }} />
-          {entry.assinante && (
-            <RNView
-              style={{
-                position: 'absolute',
-                bottom: -1,
-                right: -1,
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: '#f59e0b',
-                borderWidth: 1.5,
-                borderColor: isMyTeam ? myTeamBg : cardBg,
-              }}
-            />
-          )}
-        </RNView>
-
-        {/* Name + cartola */}
-        <RNView style={{ flex: 1, minWidth: 0 }}>
-          <Text numberOfLines={1} style={{ fontSize: 13, fontWeight: '700', color: valueColor }}>
-            {entry.nome}
-          </Text>
-          <Text numberOfLines={1} style={{ fontSize: 11, color: statColor }}>
-            {entry.nome_cartola}
-          </Text>
-        </RNView>
-
-        {/* PTS  V  E  D */}
-        {([entry.pontos, entry.vitorias, entry.empates, entry.derrotas] as number[]).map((val, i) => (
-          <Text
-            key={i}
-            style={{
-              width: 28,
-              fontSize: 13,
-              fontWeight: i === 0 ? '800' : '600',
-              color: i === 0 ? valueColor : statColor,
-              textAlign: 'center',
-            }}>
-            {val}
-          </Text>
-        ))}
-
-        <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={14} color={statColor} />
-      </RNView>
-
-      {/* Expanded detail */}
-      {isExpanded && (
-        <RNView style={{ paddingHorizontal: 12, paddingBottom: 12, borderTopWidth: 1, borderTopColor: dividerColor, gap: 10 }}>
-          <RNView style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 10 }}>
-            {[
-              { label: 'J', value: entry.jogos.toString() },
-              { label: 'GP', value: entry.gp.toFixed(2) },
-              { label: 'GC', value: entry.gc.toFixed(2) },
-              { label: 'SG', value: `${entry.saldo >= 0 ? '+' : ''}${entry.saldo.toFixed(2)}` },
-              { label: 'Média', value: `${entry.media.toFixed(1)} pts` },
-            ].map(({ label, value }) => (
-              <RNView
-                key={label}
-                style={{
-                  backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
-                  borderRadius: 8,
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  alignItems: 'center',
-                }}>
-                <Text style={{ fontSize: 10, color: statColor, marginBottom: 2 }}>{label}</Text>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: valueColor }}>{value}</Text>
-              </RNView>
-            ))}
-          </RNView>
-
-          {entry.forma.length > 0 && (
-            <RNView style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <Text style={{ fontSize: 11, color: statColor }}>Forma</Text>
-              <RNView style={{ flexDirection: 'row', gap: 4 }}>
-                {entry.forma.map((r, i) => (
-                  <FormDot key={i} result={r} />
-                ))}
-              </RNView>
-            </RNView>
-          )}
-
-          {entry.proximoConfronto && (
-            <RNView
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
-                borderRadius: 8,
-                paddingHorizontal: 10,
-                paddingVertical: 7,
-              }}>
-              <Text style={{ fontSize: 10, color: statColor, width: 60 }}>
-                Rd {entry.proximoConfronto.rodada}
-              </Text>
-              <Text style={{ fontSize: 10, color: statColor }}>
-                {entry.proximoConfronto.isMandante ? 'vs' : 'em'}
-              </Text>
-              <Image
-                source={{ uri: entry.proximoConfronto.adversario.url_escudo_png }}
-                style={{ width: 22, height: 22, borderRadius: 11 }}
-              />
-              <Text
-                numberOfLines={1}
-                style={{ flex: 1, fontSize: 12, fontWeight: '600', color: isDark ? '#e5e7eb' : '#111827' }}>
-                {entry.proximoConfronto.adversario.nome}
-              </Text>
-            </RNView>
-          )}
-
-          <TouchableOpacity
-            activeOpacity={0.75}
-            onPress={() => router.push(`/leagues/club/${entry.time_id}`)}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 6,
-              borderRadius: 10,
-              paddingVertical: 9,
-              backgroundColor: '#22c55e18',
-              borderWidth: 1,
-              borderColor: '#22c55e40',
-            }}>
-            <Text style={{ fontSize: 12, fontWeight: '700', color: '#22c55e' }}>Ver time</Text>
-            <Feather name="arrow-right" size={13} color="#22c55e" />
-          </TouchableOpacity>
-        </RNView>
-      )}
-    </TouchableOpacity>
-  );
-}
-
-function TableHeader({ isDark }: { isDark: boolean }) {
-  const statColor = isDark ? '#6b7280' : '#9ca3af';
-  return (
-    <RNView style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, gap: 8 }}>
-      <RNView style={{ width: 20 }} />
-      <RNView style={{ width: 36 }} />
-      <RNView style={{ flex: 1 }} />
-      {['PTS', 'V', 'E', 'D'].map((col) => (
-        <Text key={col} style={{ width: 28, fontSize: 10, fontWeight: '700', color: statColor, textAlign: 'center' }}>
-          {col}
-        </Text>
+    <View
+      style={styles.inline}
+      accessible
+      accessibilityLabel={`Últimos jogos: ${forma.map((r) => label[r]).join(', ')}`}>
+      {forma.map((result, index) => (
+        <View key={index} style={[styles.dot, { backgroundColor: color[result] }]} />
       ))}
-      <RNView style={{ width: 18 }} />
-    </RNView>
+    </View>
   );
 }
 
-export default function () {
-  const colorTheme = useThemeColor();
+export default function PointsCompetitionScreen() {
+  const { colors, spacing, radius } = useTokens();
+  const tabBarSpacing = useTabBarSpacing();
   const { isAutheticated } = useContext(AuthContext);
   const { allowRequest } = useMarketStatus();
-  const params = useLocalSearchParams();
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const { slug } = useLocalSearchParams<{ slug: string }>();
 
-  const slug = useMemo(() => {
-    const raw = params.slug;
-    return typeof raw === 'string' ? raw : '';
-  }, [params.slug]);
-
-  const { data } = useGetPointsCompetitionBySlug(slug, allowRequest);
+  const { data, isLoading, isError, refetch, isRefetching } = useGetPointsCompetitionBySlug(
+    slug ?? '',
+    allowRequest
+  );
   const { data: myClub } = useGetMyClub(!!isAutheticated);
+
+  const [view, setView] = useState<PointsTab>('table');
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [selectedRound, setSelectedRound] = useState<number | undefined>();
+  const listRef = useRef<FlatList<StandingEntry>>(null);
+  const adminRef = useRef<LeagueAdminSheetRef>(null);
+  const shareRef = useRef<ShareLeagueCardRef>(null);
 
   const standings = useMemo(
     () => computeStandings(data?.participantes ?? {}, data?.confrontos),
     [data?.participantes, data?.confrontos]
   );
 
-  if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
-  if (!data) return <LoadingScreen title="Carregando liga (Pontos Corridos)" />;
+  const rounds = useMemo(
+    () =>
+      Object.keys(data?.confrontos ?? {})
+        .map(Number)
+        .sort((a, b) => a - b),
+    [data?.confrontos]
+  );
 
-  const isDark = colorTheme === 'dark';
-  const bgFull = isDark ? Colors.dark.backgroundFull : Colors.light.backgroundFull;
-  const cardBg = isDark ? '#111827' : '#ffffff';
-  const borderColor = isDark ? '#374151' : '#e5e7eb';
-  const statColor = isDark ? '#9ca3af' : '#6b7280';
+  // Rodada aberta por padrão na aba Jogos: a primeira com jogo pendente, ou a última.
+  const defaultRound = useMemo(
+    () =>
+      rounds.find((round) =>
+        (data?.confrontos?.[String(round)] ?? []).some((match) => !isMatchPlayed(match))
+      ) ?? rounds[rounds.length - 1],
+    [data?.confrontos, rounds]
+  );
+  const round = selectedRound ?? defaultRound;
 
-  const isOwner = (myClub?.time?.time_id ?? 0) === data.time_dono_id;
   const myTeamId = myClub?.time?.time_id ?? 0;
+  const myIndex = standings.findIndex((entry) => entry.time_id === myTeamId);
 
-  const invited = Object.values(data.convidados ?? {});
-
-  function toggleExpand(id: number) {
+  const toggle = useCallback((id: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setExpandedId((prev) => (prev === id ? null : id));
+    setExpandedId((current) => (current === id ? null : id));
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item, index }: ListRenderItemInfo<StandingEntry>) => {
+      const isMine = item.time_id === myTeamId;
+      const expanded = expandedId === item.time_id;
+      return (
+        <StandingRow
+          rank={index + 1}
+          name={item.nome}
+          owner={item.nome_cartola}
+          shieldUrl={item.url_escudo_png}
+          isPro={item.assinante}
+          isMine={isMine}
+          onPress={() => toggle(item.time_id)}
+          accessibilityLabel={`${index + 1}º, ${item.nome}${isMine ? ', seu time' : ''}, ${
+            item.pontos
+          } pontos, ${item.vitorias} vitórias, ${item.empates} empates, ${item.derrotas} derrotas`}
+          accessibilityHint={expanded ? 'Recolhe os detalhes' : 'Mostra os detalhes'}
+          footer={
+            expanded ? (
+              <View
+                style={{
+                  gap: spacing.sm,
+                  paddingHorizontal: spacing.sm,
+                  paddingBottom: spacing.sm,
+                }}>
+                <View style={[styles.details, { gap: spacing.xs }]}>
+                  {[
+                    { label: 'Jogos', value: String(item.jogos) },
+                    { label: 'Aproveit.', value: `${item.aproveitamento}%` },
+                    { label: 'Feitos', value: formatPoints(item.gp) },
+                    { label: 'Sofridos', value: formatPoints(item.gc) },
+                    {
+                      label: 'Saldo',
+                      value: `${item.saldo >= 0 ? '+' : ''}${formatPoints(item.saldo)}`,
+                    },
+                    { label: 'Média', value: formatPoints(item.media) },
+                  ].map((stat) => (
+                    <View
+                      key={stat.label}
+                      style={[
+                        styles.detail,
+                        { backgroundColor: colors.surfaceAlt, borderRadius: radius.sm },
+                      ]}>
+                      <AppText variant="caption" color="textMuted">
+                        {stat.label}
+                      </AppText>
+                      <AppText variant="label" weight="bold">
+                        {stat.value}
+                      </AppText>
+                    </View>
+                  ))}
+                </View>
+                {item.forma.length ? (
+                  <View style={[styles.inline, { gap: spacing.xs }]}>
+                    <AppText variant="caption" color="textMuted">
+                      Últimos jogos
+                    </AppText>
+                    <FormDots forma={item.forma} />
+                  </View>
+                ) : null}
+                {item.proximoConfronto ? <NextMatchLine next={item.proximoConfronto} /> : null}
+                <Pressable
+                  onPress={() =>
+                    router.push({
+                      pathname: '/leagues/club/[id]',
+                      params: { id: item.time_id, posicao: index + 1, liga: data?.nome ?? '' },
+                    })
+                  }
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.inline,
+                    { alignSelf: 'flex-start', minHeight: 32, opacity: pressed ? 0.6 : 1 },
+                  ]}>
+                  <AppText variant="label" weight="bold" color="accent">
+                    Ver escalação
+                  </AppText>
+                  <Feather name="chevron-right" size={14} color={colors.accent} />
+                </Pressable>
+              </View>
+            ) : undefined
+          }>
+          {[item.pontos, item.vitorias, item.empates, item.derrotas].map((value, column) => (
+            <AppText
+              key={column}
+              variant={column === 0 ? 'body' : 'label'}
+              weight={column === 0 ? 'bold' : 'medium'}
+              color={column === 0 ? 'text' : 'textMuted'}
+              align="center"
+              style={{ width: STAT_COLUMN }}>
+              {value}
+            </AppText>
+          ))}
+        </StandingRow>
+      );
+    },
+    [colors, data?.nome, expandedId, myTeamId, radius.sm, spacing, toggle]
+  );
+
+  if (!isAutheticated) return <Redirect href="/(tabs)/leagues" />;
+  if (isLoading) return <LoadingScreen title="Carregando liga" />;
+  if (!data) {
+    return (
+      <SafeAreaViewContainer edges={['top']}>
+        <ScreenHeader title="Pontos corridos" />
+        <StateView
+          icon="wifi-off"
+          title={isError ? 'Não deu para carregar a liga' : 'Liga não encontrada'}
+          message="Confira a conexão e tente de novo."
+          actionLabel="Tentar de novo"
+          onAction={() => refetch()}
+        />
+      </SafeAreaViewContainer>
+    );
   }
+
+  const isOwner = myTeamId === data.time_dono_id;
+  // Depois do sorteio (ou encerrada) a tabela está fechada: não há como convidar.
+  const canInvite = isOwner && !data.finalizada && !data.sorteada;
+  const invited = Object.values(data.convidados ?? {});
+  const mine = myIndex >= 0 ? standings[myIndex] : undefined;
+  const leader = standings[0];
+  const hasStarted = data.sorteada && rounds.length > 0;
+
+  const summary =
+    mine && hasStarted ? (
+      <LeagueSummaryCard
+        title={data.finalizada ? 'Sua campanha final' : 'Sua campanha'}
+        stats={[
+          { label: 'Posição', value: `${myIndex + 1}º`, hint: `de ${standings.length}` },
+          {
+            label: 'Pontos',
+            value: String(mine.pontos),
+            hint: `${mine.vitorias}V ${mine.empates}E ${mine.derrotas}D`,
+          },
+          myIndex === 0
+            ? { label: 'Líder', value: data.finalizada ? 'Campeão' : 'Você', tone: 'positive' }
+            : {
+                label: 'Para o líder',
+                value: `-${leader.pontos - mine.pontos}`,
+                tone: 'negative',
+                hint: 'pontos',
+              },
+        ]}
+        onLocate={
+          standings.length > 8 && view === 'table'
+            ? () => listRef.current?.scrollToIndex({ index: myIndex, viewPosition: 0.5 })
+            : undefined
+        }>
+        <View style={[styles.inline, { justifyContent: 'space-between' }]}>
+          {mine.forma.length ? <FormDots forma={mine.forma} /> : <View />}
+          <AppText variant="caption" color="textMuted">
+            Aproveitamento {mine.aproveitamento}%
+          </AppText>
+        </View>
+        {mine.proximoConfronto && !data.finalizada ? (
+          <NextMatchLine next={mine.proximoConfronto} />
+        ) : null}
+      </LeagueSummaryCard>
+    ) : null;
+
+  const statusCard =
+    data.finalizada && leader ? (
+      <Card padding={spacing.md} style={[styles.inline, { gap: spacing.sm }]}>
+        <Feather name="award" size={22} color={colors.warning} />
+        <Image source={{ uri: leader.url_escudo_png }} style={styles.leaderShield} />
+        <View style={{ flex: 1 }}>
+          <AppText variant="caption" color="textMuted">
+            Competição encerrada · campeão
+          </AppText>
+          <AppText variant="body" weight="bold" numberOfLines={1}>
+            {leader.nome}
+          </AppText>
+        </View>
+      </Card>
+    ) : !hasStarted ? (
+      <Card padding={spacing.md} style={{ gap: spacing.xs }}>
+        <AppText variant="label" weight="bold" color="textMuted">
+          AGUARDANDO O SORTEIO
+        </AppText>
+        <AppText variant="body">
+          {data.quantidade_participantes} de {data.quantidade_times} times confirmados
+          {invited.length ? ` · ${invited.length} convidados sem resposta` : ''}.
+        </AppText>
+        <AppText variant="label" color="textMuted">
+          A tabela de jogos sai quando as vagas forem preenchidas. Começa na rodada{' '}
+          {data.rodada_inicial}.
+        </AppText>
+      </Card>
+    ) : null;
+
+  const roundMatches = round != null ? (data.confrontos?.[String(round)] ?? []) : [];
+  const sortedRoundMatches = [...roundMatches].sort(
+    (a, b) =>
+      Number(b.mandante.id === myTeamId || b.visitante.id === myTeamId) -
+      Number(a.mandante.id === myTeamId || a.visitante.id === myTeamId)
+  );
+
+  const listHeader = (
+    <View style={{ gap: spacing.sm, paddingBottom: spacing.xxs }}>
+      {statusCard}
+      {summary}
+      {hasStarted ? (
+        <SegmentedControl
+          options={[
+            { value: 'table', label: 'Classificação' },
+            { value: 'matches', label: `Jogos · ${rounds.length} rodadas` },
+          ]}
+          value={view}
+          onChange={setView}
+        />
+      ) : null}
+      {view === 'table' ? (
+        <StandingHeader
+          columns={[{ label: 'PTS' }, { label: 'V' }, { label: 'E' }, { label: 'D' }]}
+        />
+      ) : (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: spacing.xs }}>
+          {rounds.map((r) => (
+            <Chip
+              key={r}
+              label={`Rodada ${r}`}
+              selected={r === round}
+              onPress={() => setSelectedRound(r)}
+            />
+          ))}
+        </ScrollView>
+      )}
+    </View>
+  );
+
+  // Imagem da tabela: todos os times da lista (até o limite de segurança).
+  const toShareRow = (entry: StandingEntry, index: number): ShareTableRow => ({
+    rank: index + 1,
+    name: entry.nome,
+    owner: entry.nome_cartola,
+    shieldUrl: entry.url_escudo_png,
+    values: [
+      String(entry.jogos),
+      `${entry.vitorias}-${entry.empates}-${entry.derrotas}`,
+      `${entry.saldo > 0 ? '+' : ''}${Math.round(entry.saldo)}`,
+      String(entry.pontos),
+    ],
+    isMine: entry.time_id === myTeamId,
+  });
+  const champion = data.finalizada ? standings[0] : undefined;
+  const shareCard = (
+    <ShareLeagueCard
+      ref={shareRef}
+      data={{
+        kind: 'points',
+        name: data.nome,
+        imageUrl: data.url_taca_png,
+        context: `Rodadas ${data.rodada_inicial}–${data.rodada_final}${
+          data.tem_returno ? ' com returno' : ''
+        }`,
+        status: data.finalizada
+          ? { tone: 'finished', label: 'Encerrada' }
+          : !data.sorteada
+            ? { tone: 'pending', label: 'Aguardando sorteio' }
+            : { tone: 'open', label: `Rodada ${defaultRound ?? data.rodada_inicial}` },
+        champion: champion
+          ? {
+              name: champion.nome,
+              owner: champion.nome_cartola,
+              shieldUrl: champion.url_escudo_png,
+            }
+          : undefined,
+        table: standings.length
+          ? {
+              columns: [
+                { label: 'J', width: 24 },
+                { label: 'V-E-D', width: 52 },
+                { label: 'SG', width: 44 },
+                { label: 'P', width: 30 },
+              ],
+              rows: standings.slice(0, SHARE_TABLE_ROWS).map(toShareRow),
+              myRow:
+                myIndex >= SHARE_TABLE_ROWS ? toShareRow(standings[myIndex], myIndex) : undefined,
+            }
+          : undefined,
+        emptyMessage: standings.length ? undefined : 'A liga ainda não tem times.',
+        totalTeams: data.quantidade_participantes,
+      }}
+    />
+  );
 
   return (
     <SafeAreaViewContainer edges={['top']}>
-      <RNView style={{ flex: 1, backgroundColor: bgFull }}>
-        {/* Liga header */}
-        <RNView style={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 8, backgroundColor: bgFull }}>
-          <RNView style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <TouchableOpacity
-              onPress={() => router.back()}
-              activeOpacity={0.7}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 20,
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: cardBg,
-                borderWidth: 1,
-                borderColor,
-              }}>
-              <Feather name="chevron-left" size={20} color={isDark ? '#e5e7eb' : '#111827'} />
-            </TouchableOpacity>
+      <ScreenHeader
+        title={data.nome}
+        subtitle={[
+          LEAGUE_KIND.points.label,
+          PRIVACY_LABEL[data.privacidade],
+          `${data.quantidade_participantes}/${data.quantidade_times} times`,
+          `rodadas ${data.rodada_inicial}–${data.rodada_final}${data.tem_returno ? ' com returno' : ''}`,
+        ].join(' · ')}
+        imageUrl={data.url_taca_png}
+        actions={[
+          {
+            icon: 'share-2',
+            accessibilityLabel: 'Compartilhar tabela',
+            onPress: () => shareRef.current?.share(),
+          },
+          ...(canInvite
+            ? [
+                {
+                  icon: 'settings' as const,
+                  accessibilityLabel: 'Gerenciar liga',
+                  onPress: () => adminRef.current?.open(),
+                },
+              ]
+            : []),
+        ]}
+      />
 
-            <RNView style={{ flex: 1, paddingHorizontal: 12 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800' }} numberOfLines={1}>
-                {data.nome}
-              </Text>
-              <Text style={{ fontSize: 11, color: statColor }}>
-                {data.quantidade_participantes}/{data.quantidade_times} times ·{' '}
-                {data.privacidade === 'A' ? 'Aberta' : 'Fechada'}
-              </Text>
-            </RNView>
-
-            {isOwner && (
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={() =>
-                  router.push({
-                    pathname: '/leagues/create/invite',
-                    params: { type: 'points', slug: data.slug },
-                  })
-                }
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: '#22c55e20',
-                  borderWidth: 1,
-                  borderColor: '#22c55e',
-                }}>
-                <Feather name="user-plus" size={18} color="#22c55e" />
-              </TouchableOpacity>
-            )}
-          </RNView>
-        </RNView>
-
+      {view === 'table' ? (
         <FlatList
+          ref={listRef}
           data={standings}
-          keyExtractor={(item) => `${item.time_id}`}
-          contentContainerStyle={{ paddingBottom: 32, paddingHorizontal: 16 }}
-          ListHeaderComponent={
-            <>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: statColor, marginBottom: 2, marginTop: 4 }}>
-                Classificação
-              </Text>
-              <TableHeader isDark={isDark} />
-            </>
-          }
-          ItemSeparatorComponent={() => <RNView style={{ height: 6 }} />}
-          renderItem={({ item, index }) => (
-            <StandingRow
-              entry={item}
-              rank={index + 1}
-              isExpanded={expandedId === item.time_id}
-              isMyTeam={item.time_id === myTeamId}
-              onToggle={() => toggleExpand(item.time_id)}
-              isDark={isDark}
+          keyExtractor={keyExtractor}
+          renderItem={renderItem}
+          extraData={expandedId}
+          ListHeaderComponent={listHeader}
+          ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.xs,
+            paddingBottom: tabBarSpacing.contentBottom,
+          }}
+          showsVerticalScrollIndicator={false}
+          onScrollToIndexFailed={({ index, averageItemLength }) => {
+            listRef.current?.scrollToOffset({ offset: index * averageItemLength, animated: true });
+            setTimeout(() => listRef.current?.scrollToIndex({ index, viewPosition: 0.5 }), 250);
+          }}
+          refreshControl={
+            <RefreshControl
+              onRefresh={() => {
+                refetch();
+              }}
+              refreshing={isRefetching}
             />
-          )}
-          ListFooterComponent={
-            invited.length > 0 ? (
-              <RNView style={{ marginTop: 20 }}>
-                <Text style={{ fontSize: 13, fontWeight: '700', color: statColor, marginBottom: 8 }}>
-                  Convidados ({invited.length})
-                </Text>
-                {invited.map((team) => (
-                  <TouchableOpacity
-                    key={team.time_id}
-                    activeOpacity={0.7}
-                    onPress={() => router.push(`/leagues/club/${team.time_id}`)}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 10,
-                      padding: 10,
-                      borderRadius: 10,
-                      backgroundColor: cardBg,
-                      borderWidth: 1,
-                      borderColor,
-                      marginBottom: 6,
-                    }}>
-                    <Image source={{ uri: team.url_escudo_png }} style={{ width: 32, height: 32, borderRadius: 16 }} />
-                    <RNView style={{ flex: 1 }}>
-                      <Text style={{ fontSize: 13, fontWeight: '600' }} numberOfLines={1}>
-                        {team.nome}
-                      </Text>
-                      <Text style={{ fontSize: 11, color: statColor }} numberOfLines={1}>
-                        {team.nome_cartola}
-                      </Text>
-                    </RNView>
-                    {team.assinante && (
-                      <RNView style={{ paddingHorizontal: 7, paddingVertical: 3, borderRadius: 10, backgroundColor: '#fbbf2420' }}>
-                        <Text style={{ fontSize: 10, fontWeight: '700', color: '#f59e0b' }}>PRO</Text>
-                      </RNView>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </RNView>
-            ) : null
           }
         />
-      </RNView>
+      ) : (
+        <FlatList
+          data={sortedRoundMatches}
+          keyExtractor={(match) => `${round}-${match.mandante.id}-${match.visitante.id}`}
+          renderItem={({ item }) => (
+            <MatchCard
+              match={item}
+              home={data.participantes[String(item.mandante.id)]}
+              away={data.participantes[String(item.visitante.id)]}
+              myTeamId={myTeamId}
+            />
+          )}
+          ListHeaderComponent={listHeader}
+          ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
+          contentContainerStyle={{
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.xs,
+            paddingBottom: tabBarSpacing.contentBottom,
+          }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+
+      {canInvite ? (
+        <LeagueAdminSheet
+          ref={adminRef}
+          leagueName={data.nome}
+          inviteHref={{
+            pathname: '/leagues/create/invite',
+            params: { type: 'points', slug: data.slug },
+          }}
+          pendingTeams={invited.map((team) => ({
+            id: team.time_id,
+            name: team.nome,
+            owner: team.nome_cartola,
+            shieldUrl: team.url_escudo_png,
+          }))}
+        />
+      ) : null}
+      {shareCard}
     </SafeAreaViewContainer>
   );
 }
+
+function NextMatchLine({ next }: { next: NonNullable<StandingEntry['proximoConfronto']> }) {
+  const { colors, spacing, radius } = useTokens();
+  return (
+    <View
+      style={[
+        styles.inline,
+        {
+          gap: spacing.xs,
+          padding: spacing.xs,
+          borderRadius: radius.sm,
+          backgroundColor: colors.surfaceAlt,
+        },
+      ]}>
+      <AppText variant="caption" weight="bold" color="textMuted">
+        PRÓXIMO · RD {next.rodada}
+      </AppText>
+      <AppText variant="caption" color="textMuted">
+        {next.isMandante ? 'em casa vs' : 'fora vs'}
+      </AppText>
+      <Image source={{ uri: next.adversario.url_escudo_png }} style={styles.smallShield} />
+      <AppText variant="label" weight="bold" numberOfLines={1} style={{ flex: 1 }}>
+        {next.adversario.nome}
+      </AppText>
+    </View>
+  );
+}
+
+/** Jogo de uma rodada: pontuação do Cartola de cada lado e pontos conquistados. */
+function MatchCard({
+  match,
+  home,
+  away,
+  myTeamId,
+}: {
+  match: Confronto;
+  home?: PointsCompetitionTeam;
+  away?: PointsCompetitionTeam;
+  myTeamId: number;
+}) {
+  const { colors, spacing, radius } = useTokens();
+  const played = isMatchPlayed(match);
+  const isMine = match.mandante.id === myTeamId || match.visitante.id === myTeamId;
+
+  const sides = [
+    { team: home, part: match.mandante },
+    { team: away, part: match.visitante },
+  ];
+
+  return (
+    <View
+      style={{
+        gap: spacing.xs,
+        padding: spacing.sm,
+        borderRadius: radius.md,
+        backgroundColor: isMine ? colors.accentContainer : colors.surface,
+        borderWidth: 1,
+        borderColor: isMine ? colors.accentFill : 'transparent',
+      }}>
+      {sides.map(({ team, part }) => {
+        const won = played && match.vencedor_id === part.id;
+        const lost = played && match.vencedor_id !== null && match.vencedor_id !== part.id;
+        return (
+          <View
+            key={part.id}
+            style={[styles.inline, { gap: spacing.xs, minHeight: 32, opacity: lost ? 0.5 : 1 }]}
+            accessible
+            accessibilityLabel={`${team?.nome ?? 'Time'}${part.id === myTeamId ? ', seu time' : ''}${
+              played ? `, ${formatPoints(part.pontuacao_rodada)} pontos` : ''
+            }${won ? ', venceu' : ''}`}>
+            <Image source={{ uri: team?.url_escudo_png }} style={styles.smallShield} />
+            <AppText
+              variant="body"
+              weight={won || part.id === myTeamId ? 'bold' : 'medium'}
+              numberOfLines={1}
+              style={{ flex: 1 }}>
+              {team?.nome ?? '...'}
+            </AppText>
+            {played ? (
+              <AppText variant="body" weight="bold" color={won ? 'positive' : 'text'}>
+                {formatPoints(part.pontuacao_rodada)}
+              </AppText>
+            ) : null}
+          </View>
+        );
+      })}
+      <AppText variant="caption" color="textMuted">
+        {played
+          ? match.vencedor_id === null
+            ? 'Empate · 1 ponto para cada'
+            : 'Encerrado · vitória vale 3 pontos'
+          : 'A disputar'}
+      </AppText>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  inline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  details: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  detail: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignItems: 'center',
+  },
+  leaderShield: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  smallShield: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+  },
+});

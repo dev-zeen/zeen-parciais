@@ -19,7 +19,12 @@ export function MaintenanceMarket({ hasHeader }: MaintenanceMarketProps) {
       <MarketStatusCard />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={<RefreshControl onRefresh={refetch} refreshing={isRefetching} />}>
+        refreshControl={<RefreshControl
+            onRefresh={() => {
+              refetch();
+            }}
+            refreshing={isRefetching}
+          />}>
         <View
           className="flex-1 items-center justify-center p-6"
           style={{ gap: 16, backgroundColor: 'transparent' }}>

@@ -2,16 +2,11 @@
   "expo": {
     "name": "Zeen Parciais",
     "slug": "zeen-parciais-4prui4pe-fpzw7jvnpu4",
-    "version": "1.1.5",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "zeenparciais",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splashscreen.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0D1117"
-    },
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
@@ -33,6 +28,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
+        "monochromeImage": "./assets/images/adaptive-icon-monochrome.png",
         "backgroundColor": "#FF8A00"
       },
       "package": "com.devzeen.zeenparciais",
@@ -50,11 +46,19 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splashscreen.png",
+          "image": "./assets/images/splash-logo.png",
+          "imageWidth": 227,
           "resizeMode": "contain",
-          "backgroundColor": "#0D1117"
+          "backgroundColor": "#F8F9FA",
+          "dark": {
+            "image": "./assets/images/splash-logo.png",
+            "backgroundColor": "#F8F9FA"
+          }
         }
-      ]
+      ],
+      "expo-status-bar",
+      "expo-sharing",
+      "expo-notifications"
     ],
     "experiments": {
       "tsconfigPaths": true,

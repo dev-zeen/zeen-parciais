@@ -1,5 +1,7 @@
-export const EXPO_PUBLIC_API_URL = 'https://api.cartola.globo.com';
-export const EXPO_PUBLIC_AUTH_URL = 'https://cartola.globo.com/#!/login';
+import { env } from '@/lib/env';
+
+export const EXPO_PUBLIC_API_URL = env.EXPO_PUBLIC_API_URL;
+export const EXPO_PUBLIC_AUTH_URL = env.EXPO_PUBLIC_AUTH_URL;
 
 export const GET_POSITIONS = '/posicoes';
 export const GET_MY_CLUB = '/auth/time'; // @Controller('/api/v1/team/my-team')

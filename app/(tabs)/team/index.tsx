@@ -1,58 +1,67 @@
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
 import Market from '@/app/(tabs)/team/market';
-import { View } from '@/components/Themed';
 import { FormationChangeModal } from '@/components/contexts/team/FormationChangeModal';
+import { FormationSelector } from '@/components/contexts/team/FormationSelector';
+import { LineupInsightsCard } from '@/components/contexts/team/LineupInsightsCard';
+import { ShareLineupCard } from '@/components/contexts/team/ShareLineupCard';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
+import { PlayerSheet, PlayerSheetRef } from '@/components/contexts/team/PlayerSheet';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
-import { TeamQuickActions } from '@/components/contexts/team/TeamQuickActions';
+import { TeamSaveBar, getSaveBlocker } from '@/components/contexts/team/TeamSaveBar';
 import { TeamStatsCard } from '@/components/contexts/team/TeamStatsCard';
-import type { PlayersToSell } from '@/components/contexts/team/_team.helpers';
+import { useFormationChange } from '@/components/contexts/team/useFormationChange';
+import { useMarketSheet } from '@/components/contexts/team/useMarketSheet';
 import {
   emptyCaptain,
   emptyLineupFormation,
   emptyReservePlayers,
-  fillLineupOnChangeFormation,
   onClearLineup,
   onGetDefaultLineupTeam,
   onGetEqualLineups,
   onGetFillLineupDefaultPlayers,
-  onGetPlayersOnChangePositionSell,
 } from '@/components/contexts/team/_team.helpers';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
-import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
-import type { BottomSheetRef } from '@/components/structure/BottomSheet';
 import { BottomSheet } from '@/components/structure/BottomSheet';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { Toast } from '@/components/structure/Toast';
+import { SegmentOption, SegmentedControl } from '@/components/ui/SegmentedControl';
+import { StateView } from '@/components/ui/StateView';
 import { FORMATIONS } from '@/constants/Formations';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { FullClubInfo } from '@/models/Club';
-import { LineupPlayers, LineupPosition } from '@/models/Formations';
+import { LineupPlayer, LineupPlayers } from '@/models/Formations';
+import { FullPlayer } from '@/models/Stats';
 import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
 import { useGetScoredPlayers } from '@/queries/stats.query';
-import useTeamLineupStore from '@/store/useTeamLineupStore';
-import { onGetIsLineupComplete, onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
+import useTeamLineupStore, { FieldStat } from '@/store/useTeamLineupStore';
+import { debugLog } from '@/utils/debugLog';
+import { haptics } from '@/utils/haptics';
+import { onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
+
+const FIELD_STAT_OPTIONS: SegmentOption<FieldStat>[] = [
+  { value: 'price', label: 'Preço' },
+  { value: 'average', label: 'Média' },
+  { value: 'min', label: 'Mín. val.', accessibilityLabel: 'Mínimo para valorizar' },
+  { value: 'match', label: 'Confronto' },
+];
 
 export default () => {
-  const colorTheme = useThemeColor();
   const hasInitialized = useRef(false);
-  const marketSheetRef = useRef<BottomSheetRef>(null);
-  const formationModalRef = useRef<BottomSheetRef>(null);
-  const tabBarHeight = useBottomTabBarHeight();
+  const playerSheetRef = useRef<PlayerSheetRef>(null);
+  const tabBarSpacing = useTabBarSpacing();
 
   const { isAutheticated } = useContext(AuthContext);
 
   const { marketStatus, allowRequest, isMarketClose } = useMarketStatus();
 
-  const { mutate } = useSaveTeam();
+  const { mutate, isPending: isSaving } = useSaveTeam();
 
   const {
     data: playerStats,
@@ -64,6 +73,7 @@ export default () => {
   const {
     data: myClub,
     isRefetching: isRefetchingMyClub,
+    isError: isErrorMyClub,
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
 
@@ -80,21 +90,19 @@ export default () => {
   const price = useTeamLineupStore((state) => state.price);
   const updateFormation = useTeamLineupStore((state) => state.updateFormation);
   const formation = useTeamLineupStore((state) => state.formation);
+  const fieldStat = useTeamLineupStore((state) => state.fieldStat);
+  const updateFieldStat = useTeamLineupStore((state) => state.updateFieldStat);
+  const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
-  // Market state
-  const [positionMarketSearch, setPositionMarketSearch] = useState<LineupPosition>();
-  const [playerIndex, setPlayerIndex] = useState(0);
-  const [playerLowestPrice, setPlayerLowestPrice] = useState<LineupPosition>();
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const showToast = useCallback(
+    (message: string, type: 'success' | 'error') => setToast({ message, type }),
+    []
+  );
 
-  // Formation change state
-  const [playersToSellData, setPlayersToSellData] = useState<PlayersToSell[]>([]);
-  const [selectedPlayersToRemove, setSelectedPlayersToRemove] = useState<Set<number>>(new Set());
-  const [pendingFormation, setPendingFormation] = useState<string | null>(null);
-
-  // Toast state
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState('');
-  const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('success');
+  const market = useMarketSheet();
+  const openMarket = market.open;
+  const formationChange = useFormationChange({ playerStats, isMarketClose, onMessage: showToast });
 
   // Key to force remount of BottomSheet after refresh
   const [bottomSheetKey, setBottomSheetKey] = useState(0);
@@ -114,17 +122,19 @@ export default () => {
     [myClub?.patrimonio, price]
   );
 
-  const reservesCount = useMemo(
-    () => lineup?.reserves?.filter((item) => item.player).length || 0,
-    [lineup?.reserves]
-  );
-
-  const isLineupComplete = useMemo(() => {
-    if (!lineup || !myClub || captain === undefined) return false;
+  // Motivo que impede salvar; undefined quando a escalação pode ser enviada.
+  const saveBlocker = useMemo(() => {
+    if (!lineup || !myClub) return undefined;
     const isEqualLineups = onGetEqualLineups(lineup, myClub);
     const isSameCaptain = myClub.capitao_id === captain;
-    return (!isSameCaptain || !isEqualLineups) && onGetIsLineupComplete(lineup);
-  }, [lineup, captain, myClub]);
+
+    return getSaveBlocker({
+      emptySlots: lineup.starting.filter((item) => !item.player).length,
+      balance,
+      hasCaptain: !!captain,
+      hasChanges: !isSameCaptain || !isEqualLineups,
+    });
+  }, [lineup, captain, myClub, balance]);
 
   const mountLineup = useCallback(
     (myTeam: FullClubInfo) => {
@@ -192,24 +202,29 @@ export default () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMarketClose, onRefetchMyClub, onRefetchPlayerStats, playerStats]);
 
-  const handleOpenMarket = useCallback(
-    (position: LineupPosition, index: number, lowestPrice?: LineupPosition) => {
-      setPositionMarketSearch(position);
-      setPlayerIndex(index);
-      if (lowestPrice) {
-        setPlayerLowestPrice(lowestPrice);
-      }
-      marketSheetRef.current?.snapToIndex(1);
-    },
-    []
-  );
-
-  const handleCloseMarket = useCallback(() => {
-    marketSheetRef.current?.close();
-    setPositionMarketSearch(undefined);
-    setPlayerIndex(0);
-    setPlayerLowestPrice(undefined);
+  const handlePressStarter = useCallback((player: LineupPlayer | FullPlayer) => {
+    playerSheetRef.current?.open(player);
   }, []);
+
+  const handlePressReserve = useCallback((player: LineupPlayer | FullPlayer) => {
+    playerSheetRef.current?.open(player, { isReservePlayer: true });
+  }, []);
+
+  // Trocar: vende o titular e abre o mercado já filtrado na posição dele.
+  const handleReplacePlayer = useCallback(
+    (player: LineupPlayer | FullPlayer) => {
+      const index = lineup?.starting.findIndex(
+        (item) => item.player?.atleta_id === player.atleta_id
+      );
+      debugLog('trocar', 'jogador', player.atleta_id, 'encontrado no índice', index);
+      if (!lineup || index === undefined || index < 0) return;
+
+      const slot = lineup.starting[index];
+      removePlayerFromLineup(player);
+      openMarket({ ...slot, player: undefined }, index);
+    },
+    [lineup, removePlayerFromLineup, openMarket]
+  );
 
   const handleClearAll = useCallback(() => {
     if (!lineup) return;
@@ -236,124 +251,6 @@ export default () => {
     updatePrice,
   ]);
 
-  const handleFormationChange = useCallback(
-    (formationIndex: number) => {
-      const newFormation = onGetDefaultLineupTeam(formationIndex);
-
-      if (!lineup) return;
-
-      const isExistsPlayerOnLineup = lineup.starting.some((item) => item.player);
-      if (!isExistsPlayerOnLineup) {
-        updateFormation(newFormation);
-        const lineupUpdated: LineupPlayers = onClearLineup(FORMATIONS[newFormation]);
-        updateLineup(lineupUpdated);
-        return;
-      }
-
-      const playersToSell = onGetPlayersOnChangePositionSell(lineup as LineupPlayers, newFormation);
-
-      // Se houver jogadores que não cabem na nova formação, mostra o modal
-      if (playersToSell.length > 0) {
-        setPlayersToSellData(playersToSell);
-        setPendingFormation(newFormation);
-        setSelectedPlayersToRemove(new Set());
-        formationModalRef.current?.snapToIndex(0);
-        return;
-      }
-
-      // Se não houver conflitos, aplica a formação diretamente
-      updateFormation(newFormation);
-      const lineupUpdated = fillLineupOnChangeFormation(
-        lineup,
-        newFormation,
-        playerStats,
-        isMarketClose
-      );
-      updateLineup(lineupUpdated);
-
-      const newPrice = onGetTeamPrice(lineupUpdated.starting);
-      updatePrice(newPrice);
-    },
-    [lineup, playerStats, isMarketClose, updateFormation, updateLineup, updatePrice]
-  );
-
-  const handleTogglePlayerToRemove = useCallback((atletaId: number) => {
-    setSelectedPlayersToRemove((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(atletaId)) {
-        newSet.delete(atletaId);
-      } else {
-        newSet.add(atletaId);
-      }
-      return newSet;
-    });
-  }, []);
-
-  const handleConfirmFormationChange = useCallback(() => {
-    if (!pendingFormation || !lineup) return;
-
-    // Verifica se a quantidade correta de jogadores foi selecionada
-    const totalToRemove = playersToSellData.reduce((sum, pos) => sum + pos.quantityToSell, 0);
-    if (selectedPlayersToRemove.size !== totalToRemove) {
-      setToastMessage(`Você deve selecionar exatamente ${totalToRemove} jogador(es) para remover`);
-      setToastType('error');
-      setShowToast(true);
-      return;
-    }
-
-    // Remove os jogadores selecionados
-    const updatedStarting = lineup.starting.map((position) => {
-      if (position.player && selectedPlayersToRemove.has(position.player.atleta_id)) {
-        return { ...position, player: undefined };
-      }
-      return position;
-    });
-
-    const updatedLineup: LineupPlayers = {
-      starting: updatedStarting,
-      reserves: lineup.reserves,
-    };
-
-    // Aplica a nova formação
-    updateFormation(pendingFormation);
-    const lineupWithNewFormation = fillLineupOnChangeFormation(
-      updatedLineup,
-      pendingFormation,
-      playerStats,
-      isMarketClose
-    );
-    updateLineup(lineupWithNewFormation);
-
-    // Recalcula o preço
-    const newPrice = onGetTeamPrice(lineupWithNewFormation.starting);
-    updatePrice(newPrice);
-
-    // Limpa os estados (o componente fecha automaticamente)
-    setPlayersToSellData([]);
-    setPendingFormation(null);
-    setSelectedPlayersToRemove(new Set());
-
-    setToastMessage('Formação alterada com sucesso!');
-    setToastType('success');
-    setShowToast(true);
-  }, [
-    pendingFormation,
-    lineup,
-    playersToSellData,
-    selectedPlayersToRemove,
-    playerStats,
-    isMarketClose,
-    updateFormation,
-    updateLineup,
-    updatePrice,
-  ]);
-
-  const handleFormationModalClose = useCallback(() => {
-    setPlayersToSellData([]);
-    setPendingFormation(null);
-    setSelectedPlayersToRemove(new Set());
-  }, []);
-
   const handleSaveTeam = useCallback(() => {
     if (!formation) {
       emptyLineupFormation();
@@ -365,55 +262,48 @@ export default () => {
       return;
     }
 
-    const isReservesCompleted = lineup?.reserves?.every((item) => item.player);
-    if (!isReservesCompleted) {
-      emptyReservePlayers(() => {
-        const payload = onGetPayloadSaveTeam({
-          lineup: lineup as LineupPlayers,
-          captain,
-          formation,
-        });
-
-        mutate(payload, {
-          onSuccess: () => {
-            onRefetchMyClub();
-            setToastMessage('Time salvo com sucesso!');
-            setToastType('success');
-            setShowToast(true);
-          },
-        });
+    const save = () =>
+      mutate(onGetPayloadSaveTeam({ lineup: lineup as LineupPlayers, captain, formation }), {
+        onSuccess: () => {
+          haptics.success();
+          onRefetchMyClub();
+          showToast('Time salvo com sucesso!', 'success');
+        },
+        onError: () => {
+          haptics.error();
+          showToast('Não foi possível salvar o time. Tente de novo.', 'error');
+        },
       });
+
+    // Banco incompleto: confirma antes de salvar
+    if (!lineup?.reserves?.every((item) => item.player)) {
+      emptyReservePlayers(save);
       return;
     }
-
-    const payload = onGetPayloadSaveTeam({
-      lineup: lineup as LineupPlayers,
-      captain,
-      formation,
-    });
-
-    mutate(payload, {
-      onSuccess: () => {
-        onRefetchMyClub();
-        setToastMessage('Time salvo com sucesso!');
-        setToastType('success');
-        setShowToast(true);
-      },
-    });
+    save();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [captain, formation, lineup]);
 
   if (!isAutheticated) {
-    return (
-      <SafeAreaViewContainer edges={['top']}>
-        <MarketStatusCard />
-        <Login title="Para acessar o seu time, é necessário efetuar o login." />
-      </SafeAreaViewContainer>
-    );
+    return <Login reason="Entre para escalar seu time e acompanhar as parciais." />;
   }
 
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
     return <MaintenanceMarket />;
+  }
+
+  if (isErrorMyClub && !myClub) {
+    return (
+      <SafeAreaViewContainer edges={['top']}>
+        <StateView
+          icon="wifi-off"
+          title="Não foi possível carregar seu time"
+          message="Verifique a conexão e tente de novo."
+          actionLabel="Tentar de novo"
+          onAction={() => onRefetchMyClub()}
+        />
+      </SafeAreaViewContainer>
+    );
   }
 
   if (
@@ -429,78 +319,120 @@ export default () => {
   return (
     <SafeAreaViewContainer edges={['top']}>
       <ScrollView
-        className="flex-1 px-2"
+        style={{ flex: 1 }}
         refreshControl={<RefreshControl onRefresh={onRefresh} refreshing={isRefetching} />}
         contentContainerStyle={{
-          paddingBottom: tabBarHeight + 16,
+          padding: 8,
+          gap: 8,
+          // Com a barra de salvar, ela já fica entre o conteúdo e a barra de abas
+          paddingBottom: isMarketClose ? tabBarSpacing.contentBottom : 16,
         }}>
-        <View
-          className={`justify-center items-center pb-2 ${
-            colorTheme === 'dark' ? 'bg-dark' : 'bg-light'
-          }`}
-          style={{ gap: 8 }}>
-          <TeamStatsCard
-            patrimonio={myClub?.patrimonio ?? 0}
-            price={price ?? 0}
-            balance={balance}
-            reservesCount={reservesCount}
-            totalReserves={lineup?.reserves?.length || 0}
-          />
+        <TeamStatsCard
+          patrimonio={myClub?.patrimonio ?? 0}
+          price={price ?? 0}
+          balance={balance}
+          onRefresh={onRefresh}
+          onClearAll={handleClearAll}
+          disabled={isMarketClose}
+        />
 
-          <TeamQuickActions
-            onRefresh={onRefresh}
-            onClearAll={handleClearAll}
-            disabled={isMarketClose}
-            formation={formation || initialLineupTeamFormation}
-            onFormationChange={handleFormationChange}
-            showSaveTeam={isLineupComplete && !isMarketClose}
-            disableSaveTeam={!isLineupComplete || isMarketClose}
-            onSaveTeam={handleSaveTeam}
-          />
+        <FormationSelector
+          formation={formation || initialLineupTeamFormation}
+          disabled={isMarketClose}
+          onFormationChange={formationChange.change}
+        />
 
-          <SoccerField
-            lineup={lineup}
-            captain={captain}
-            substitutions={substitutions}
-            round={marketStatus?.rodada_atual}
-            isViewOnly={isMarketClose}
-            onOpenMarket={handleOpenMarket}
+        {!isMarketClose && (
+          <SegmentedControl
+            options={FIELD_STAT_OPTIONS}
+            value={fieldStat}
+            onChange={(value) => {
+              haptics.selection();
+              updateFieldStat(value);
+            }}
           />
+        )}
 
-          <ListReservePlayers
-            lineup={lineup}
-            substitutions={substitutions}
-            round={marketStatus?.rodada_atual}
-            isViewOnly={isMarketClose}
-            onOpenMarket={handleOpenMarket}
-          />
-        </View>
+        <SoccerField
+          lineup={lineup}
+          captain={captain}
+          substitutions={substitutions}
+          round={marketStatus?.rodada_atual}
+          isViewOnly={isMarketClose}
+          fieldStat={fieldStat}
+          onOpenMarket={market.open}
+          onPressPlayer={handlePressStarter}
+        />
+
+        <ListReservePlayers
+          lineup={lineup}
+          substitutions={substitutions}
+          round={marketStatus?.rodada_atual}
+          isViewOnly={isMarketClose}
+          fieldStat={fieldStat}
+          onOpenMarket={market.open}
+          onPressPlayer={handlePressReserve}
+        />
+
+        {!isMarketClose && (
+          <LineupInsightsCard lineup={lineup} captain={captain} onReplace={handleReplacePlayer} />
+        )}
+
+        <ShareLineupCard
+          team={myClub}
+          lineup={lineup}
+          captain={captain}
+          formation={formation || initialLineupTeamFormation}
+          price={price ?? 0}
+          round={marketStatus.rodada_atual}
+          fieldStat={fieldStat}
+          isMarketClose={isMarketClose}
+        />
       </ScrollView>
 
-      <BottomSheet key={bottomSheetKey} ref={marketSheetRef} snapPoints={['70%', '95%']}>
+      {!isMarketClose && (
+        <TeamSaveBar
+          blocker={saveBlocker}
+          isSaving={isSaving}
+          onSave={handleSaveTeam}
+          bottomOffset={tabBarSpacing.contentBottom}
+        />
+      )}
+
+      <PlayerSheet
+        ref={playerSheetRef}
+        isViewOnly={isMarketClose}
+        onReplace={isMarketClose ? undefined : handleReplacePlayer}
+      />
+
+      <BottomSheet
+        key={bottomSheetKey}
+        ref={market.ref}
+        snapPoints={['70%', '95%']}
+        onClose={market.reset}>
         <Market
-          position={positionMarketSearch}
-          handleCloseMarketModal={handleCloseMarket}
-          playerIndex={playerIndex}
-          playerLowestPrice={playerLowestPrice?.player}
+          position={market.position}
+          handleCloseMarketModal={market.close}
+          playerIndex={market.index}
+          playerLowestPrice={market.lowestPrice?.player}
         />
       </BottomSheet>
 
-      <BottomSheet ref={formationModalRef} onClose={handleFormationModalClose}>
+      <BottomSheet ref={formationChange.modalRef} size="compact" onClose={formationChange.reset}>
         <FormationChangeModal
-          playersToSellData={playersToSellData}
-          selectedPlayersToRemove={selectedPlayersToRemove}
-          onTogglePlayer={handleTogglePlayerToRemove}
-          onConfirm={handleConfirmFormationChange}
-          onClose={() => formationModalRef.current?.close()}
+          playersToSellData={formationChange.playersToSell}
+          selectedPlayersToRemove={formationChange.selected}
+          onTogglePlayer={formationChange.toggle}
+          onConfirm={formationChange.confirm}
+          onClose={() => formationChange.modalRef.current?.close()}
         />
       </BottomSheet>
 
       <Toast
-        visible={showToast}
-        message={toastMessage}
-        type={toastType}
-        onHide={() => setShowToast(false)}
+        visible={!!toast}
+        message={toast?.message ?? ''}
+        type={toast?.type ?? 'success'}
+        onHide={() => setToast(null)}
       />
     </SafeAreaViewContainer>
   );

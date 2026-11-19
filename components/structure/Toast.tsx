@@ -1,9 +1,10 @@
 import { Feather } from '@expo/vector-icons';
-import { useEffect, useRef } from 'react';
-import { Animated, Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Platform, StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { AppText } from '@/components/ui/AppText';
+import { useTokens } from '@/hooks/useTokens';
+import { Palette } from '@/styles/tokens';
 
 type ToastProps = {
   visible: boolean;
@@ -13,10 +14,14 @@ type ToastProps = {
   duration?: number;
 };
 
-const TOAST_COLORS: Record<NonNullable<ToastProps['type']>, string> = {
-  success: '#00E094',
-  error: '#ef4444',
-  info: '#0057FF',
+/** Um tom só por tipo: fundo claro do container e texto/ícone na cor legível sobre ele. */
+const TOAST_TONES: Record<
+  NonNullable<ToastProps['type']>,
+  { bg: keyof Palette; fg: keyof Palette }
+> = {
+  success: { bg: 'positiveContainer', fg: 'positive' },
+  error: { bg: 'negativeContainer', fg: 'negative' },
+  info: { bg: 'infoContainer', fg: 'info' },
 };
 
 const TOAST_ICONS: Record<NonNullable<ToastProps['type']>, keyof typeof Feather.glyphMap> = {
@@ -26,9 +31,10 @@ const TOAST_ICONS: Record<NonNullable<ToastProps['type']>, keyof typeof Feather.
 };
 
 export function Toast({ visible, message, type = 'success', onHide, duration = 3000 }: ToastProps) {
-  const colorTheme = useThemeColor();
-  const translateY = useRef(new Animated.Value(-100)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
+  const { colors } = useTokens();
+  // Valores animados criados uma vez (useState evita ler ref durante o render)
+  const [translateY] = useState(() => new Animated.Value(-100));
+  const [opacity] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (visible) {
@@ -67,12 +73,11 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 3
 
       return () => clearTimeout(timer);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- translateY and opacity are stable Animated.Value refs from useRef
-  }, [visible, onHide, duration]);
+  }, [visible, onHide, duration, opacity, translateY]);
 
   if (!visible) return null;
 
-  const toastColor = TOAST_COLORS[type];
+  const tone = TOAST_TONES[type];
 
   return (
     <Animated.View
@@ -84,17 +89,13 @@ export function Toast({ visible, message, type = 'success', onHide, duration = 3
         },
       ]}>
       <View
-        style={[
-          styles.toast,
-          {
-            backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#ffffff',
-            borderLeftColor: toastColor,
-          },
-        ]}>
-        <View style={[styles.iconContainer, { backgroundColor: toastColor }]}>
-          <Feather name={TOAST_ICONS[type]} size={20} color="#ffffff" />
-        </View>
-        <Text style={styles.message}>{message}</Text>
+        accessibilityRole="alert"
+        accessibilityLiveRegion="polite"
+        style={[styles.toast, { backgroundColor: colors[tone.bg] }]}>
+        <Feather name={TOAST_ICONS[type]} size={20} color={colors[tone.fg]} />
+        <AppText variant="body" weight="bold" color={tone.fg} style={styles.message}>
+          {message}
+        </AppText>
       </View>
     </Animated.View>
   );
@@ -112,8 +113,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
+    gap: 12,
     borderRadius: 12,
-    borderLeftWidth: 4,
     ...Platform.select({
       ios: {
         shadowColor: '#000',
@@ -126,17 +127,7 @@ const styles = StyleSheet.create({
       },
     }),
   },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
   message: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
   },
 });

@@ -39,6 +39,7 @@ export function useCreatePointsCompetition(
 ) {
   const queryClient = useQueryClient();
   return useMutation<CreatePointsCompetitionResponse, AxiosError<{ mensagem?: string }>, CreatePointsCompetitionPayload>({
+    ...options,
     mutationFn: createPointsCompetitionRequest,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: [GET_POINTS_COMPETITIONS] });
@@ -48,7 +49,6 @@ export function useCreatePointsCompetition(
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -73,6 +73,7 @@ export function useInvitePointsCompetition(
 ) {
   const queryClient = useQueryClient();
   return useMutation<InvitePointsCompetitionResponse, AxiosError<{ mensagem?: string }>, InvitePointsCompetitionPayload>({
+    ...options,
     mutationFn: invitePointsCompetitionRequest,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -84,7 +85,6 @@ export function useInvitePointsCompetition(
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 

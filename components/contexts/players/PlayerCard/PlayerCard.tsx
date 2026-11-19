@@ -1,10 +1,11 @@
 import { Feather } from '@expo/vector-icons';
-import { memo, useContext, useMemo } from 'react';
-import {  Image } from 'react-native';
+import { memo, useContext } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 
-import { Text, TouchableOpacity, View } from '@/components/Themed';
+import { AppText } from '@/components/ui/AppText';
+import { SCOUTS } from '@/constants/Scouts';
 import { AuthContext } from '@/contexts/Auth.context';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 import { Club } from '@/models/Club';
 import { Player, Position } from '@/models/Stats';
 import { numberToString } from '@/utils/parseTo';
@@ -17,127 +18,147 @@ interface PlayerCardProps {
   isPlayerOnMyLineup?: boolean;
 }
 
+const scoreFormat = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 });
+
+/**
+ * Linha de jogador pontuado (Rodada e detalhe da partida). Hierarquia: nome e pontuação
+ * em destaque; posição e clube abaixo do nome; scouts abaixo da pontuação.
+ */
 export const PlayerCard = memo(
   ({ player, club, position, valorization, isPlayerOnMyLineup }: PlayerCardProps) => {
-    const colorTheme = useThemeColor();
-
+    const { colors, radius, spacing } = useTokens();
     const { isAutheticated } = useContext(AuthContext);
 
-    const scoutsColors: { [key: string]: string } = useMemo(() => {
-      return {
-        GS: 'negative',
-        PP: 'negative',
-        GC: 'negative',
-        CV: 'negative',
-        CA: 'negative',
-        FC: 'negative',
-        PC: 'negative',
-        I: 'negative',
-        FS: 'positive',
-        FF: 'positive',
-        SG: 'positive',
-        V: 'positive',
-        G: 'positive',
-        DS: 'positive',
-        FD: 'positive',
-        DE: 'positive',
-        A: 'positive',
-        FT: 'positive',
-        DP: 'positive',
-        PS: 'positive',
-      };
-    }, []);
-
-    const playerScore = useMemo(
-      () =>
-        new Intl.NumberFormat('pt-BR', {
-          minimumFractionDigits: 2,
-        }).format(player.pontuacao),
-      [player.pontuacao]
-    );
-
-    const stylePlayerInMyLineup = useMemo(
-      () => (isPlayerOnMyLineup ? (colorTheme === 'dark' ? 'bg-secondary/30' : 'bg-secondary/10') : ''),
-      [colorTheme, isPlayerOnMyLineup]
-    );
+    const scouts = Object.entries(player.scout ?? {}) as [keyof typeof SCOUTS, number][];
+    const scoreTone =
+      player.pontuacao > 0 ? 'positive' : player.pontuacao < 0 ? 'negative' : 'textMuted';
+    const showValorization = isAutheticated && !!valorization;
 
     return (
-      <TouchableOpacity
-        activeOpacity={0.6}
-        className={`flex-row justify-between items-center rounded-lg py-2 pl-2 pr-4 ${stylePlayerInMyLineup}`}>
-        <View className={`flex-row items-center gap-1 rounded-lg ${stylePlayerInMyLineup}`}>
-          <Image
-            source={{
-              uri: player?.foto?.replace('FORMATO', '220x220'),
-            }}
-            className="w-14 h-14 rounded-full"
-            alt={player.apelido}
-          />
-          <View className={`${stylePlayerInMyLineup}`}>
-            <Text className="font-semibold text-sm">{player.apelido}</Text>
-            <View
-              className={`flex-row items-center ${stylePlayerInMyLineup}`}
-              style={{
-                gap: 4,
-              }}>
-              <Text className="text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{position?.nome}</Text>
-              <View className="rounded-full bg-gray-300 h-1 w-1" />
-              <Text className="text-xs" style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>{club?.nome}</Text>
-            </View>
+      <View
+        accessible
+        accessibilityLabel={`${player.apelido}, ${position?.nome ?? ''}, ${club?.nome ?? ''}, ${scoreFormat.format(player.pontuacao)} pontos${
+          isPlayerOnMyLineup ? ', está no seu time' : ''
+        }`}
+        style={[
+          styles.card,
+          {
+            gap: spacing.sm,
+            padding: spacing.sm,
+            borderRadius: radius.md,
+            backgroundColor: isPlayerOnMyLineup ? colors.accentContainer : colors.surface,
+          },
+        ]}>
+        <Image
+          source={{ uri: player.foto?.replace('FORMATO', '140x140') }}
+          style={[styles.photo, { backgroundColor: colors.surfaceAlt }]}
+        />
+
+        <View style={styles.info}>
+          <AppText variant="body" weight="bold" numberOfLines={1}>
+            {player.apelido}
+          </AppText>
+          <View style={styles.meta}>
+            {club?.escudos?.['30x30'] ? (
+              <Image source={{ uri: club.escudos['30x30'] }} style={styles.shield} />
+            ) : null}
+            <AppText variant="label" color="textMuted" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {[position?.abreviacao?.toUpperCase(), club?.abreviacao].filter(Boolean).join(' · ')}
+            </AppText>
+            {isPlayerOnMyLineup ? (
+              <AppText variant="caption" weight="bold" color="accent">
+                NO TIME
+              </AppText>
+            ) : null}
           </View>
         </View>
-        <View className={`justify-center items-end ${stylePlayerInMyLineup}`}>
-          <View className={`flex-row items-center justify-center ${stylePlayerInMyLineup}`}>
-            {isAutheticated && valorization ? (
-              <View
-                className={`flex-row items-center justify-end w-10 mr-0.5 ${stylePlayerInMyLineup}`}>
-                <Text
-                  className={`text-xs font-semibold ${
-                    valorization < 0
-                      ? 'text-folly'
-                      : colorTheme === 'dark'
-                      ? 'text-secondary'
-                      : 'text-secondary'
-                  }`}>
+
+        <View style={styles.side}>
+          <View style={styles.scoreRow}>
+            {showValorization ? (
+              <View style={styles.valorization}>
+                <Feather
+                  name={valorization < 0 ? 'arrow-down' : 'arrow-up'}
+                  size={12}
+                  color={valorization < 0 ? colors.negative : colors.positive}
+                />
+                <AppText
+                  variant="label"
+                  weight="bold"
+                  color={valorization < 0 ? 'negative' : 'positive'}>
                   {numberToString(valorization)}
-                </Text>
-                {valorization !== 0 ? (
-                  <Feather
-                    name={valorization < 0 ? 'arrow-down' : 'arrow-up'}
-                    color={
-                      valorization < 0 ? '#ef4444' : '#0057FF'
-                    }
-                  />
-                ) : (
-                  <></>
-                )}
+                </AppText>
               </View>
-            ) : (
-              <></>
-            )}
-
-            <Text className="font-semibold">{playerScore}</Text>
+            ) : null}
+            <AppText variant="title" weight="bold" color={scoreTone}>
+              {scoreFormat.format(player.pontuacao)}
+            </AppText>
           </View>
 
-          {player && player.scout && Object.entries(player?.scout as object).length > 0 ? (
-            <View className={`flex-row ${stylePlayerInMyLineup}`}>
-              {Object.entries(player?.scout as object).map(([key, value]) => (
-                <Text
-                  key={key + value}
-                  className={`text-xs font-semibold text-center ${
-                    scoutsColors[key] === 'negative' && 'text-folly'
-                  }
-
-          ${scoutsColors[key] === 'positive' && 'text-green-500'}
-          
-          `}>{` ${value}${key}`}</Text>
-              ))}
+          {scouts.length > 0 ? (
+            <View style={styles.scouts}>
+              {scouts.map(([code, amount]) => {
+                const points = SCOUTS[code]?.points ?? 0;
+                return (
+                  <AppText
+                    key={code}
+                    variant="caption"
+                    weight="bold"
+                    color={points < 0 ? 'negative' : points > 0 ? 'positive' : 'textMuted'}>
+                    {`${amount}${code}`}
+                  </AppText>
+                );
+              })}
             </View>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </View>
-      </TouchableOpacity>
+      </View>
     );
   }
 );
+
+const styles = StyleSheet.create({
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  photo: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+  },
+  info: {
+    flex: 1,
+    gap: 2,
+  },
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  shield: {
+    width: 14,
+    height: 14,
+  },
+  side: {
+    alignItems: 'flex-end',
+    gap: 2,
+    maxWidth: '45%',
+  },
+  scoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  valorization: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 1,
+  },
+  scouts: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+    columnGap: 6,
+  },
+});

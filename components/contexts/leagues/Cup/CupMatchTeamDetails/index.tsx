@@ -1,14 +1,13 @@
 import { useCallback, useMemo } from 'react';
-import { RefreshControl, ScrollView } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 
-import { View } from '@/components/Themed';
 import { ListReservePlayers } from '@/components/contexts/team/ListReservePlayers';
 import { SoccerField } from '@/components/contexts/team/SoccerField';
 import { onGetFillLineupDefaultPlayers } from '@/components/contexts/team/_team.helpers';
 import { Loading } from '@/components/structure/Loading';
-import Colors from '@/constants/Colors';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
+import { useTokens } from '@/hooks/useTokens';
 import { FullClubInfo } from '@/models/Club';
 import { CupMatch } from '@/models/Leagues';
 import { PlayerStats } from '@/models/Stats';
@@ -22,7 +21,8 @@ type CupMatchTeamDetailsProps = {
 };
 
 export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDetailsProps) {
-  const colorTheme = useThemeColor();
+  const { spacing } = useTokens();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { marketStatus, isMarketClose } = useMarketStatus();
 
@@ -72,14 +72,20 @@ export function CupMatchTeamDetails({ match, team, playerStats }: CupMatchTeamDe
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}>
-      <View
-        className="items-center justify-center pt-2 pb-2 mb-2"
-        style={{
-          gap: 8,
-          backgroundColor:
-            colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        }}>
+      contentContainerStyle={{
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.xs,
+        paddingBottom: tabBarSpacing.contentBottom,
+      }}
+      refreshControl={
+        <RefreshControl
+          onRefresh={() => {
+            onRefetch();
+          }}
+          refreshing={isRefetching}
+        />
+      }>
+      <View style={{ gap: spacing.sm }}>
         <SoccerField
           lineup={lineup}
           substitutions={substitutions}

@@ -57,6 +57,7 @@ export function useCreateClassicLeague(
 ) {
   const queryClient = useQueryClient();
   return useMutation<CreateLeagueResponse, AxiosError<{ mensagem?: string }>, Omit<CreateClassicLeaguePayload, 'mata_mata'>>({
+    ...options,
     mutationFn: createClassicLeagueRequest,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
@@ -66,7 +67,6 @@ export function useCreateClassicLeague(
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -82,6 +82,7 @@ export function useCreateMataMataLeague(
 ) {
   const queryClient = useQueryClient();
   return useMutation<CreateLeagueResponse, AxiosError<{ mensagem?: string }>, CreateMataMataLeaguePayload>({
+    ...options,
     mutationFn: createMataMataLeagueRequest,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({ queryKey: [GET_ALL_LEAGUES] });
@@ -91,7 +92,6 @@ export function useCreateMataMataLeague(
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }
 
@@ -116,6 +116,7 @@ export function useInviteLeague(
 ) {
   const queryClient = useQueryClient();
   return useMutation<InviteLeagueResponse, AxiosError<{ mensagem?: string }>, InviteLeaguePayload>({
+    ...options,
     mutationFn: inviteLeagueRequest,
     onSuccess: (data, variables, onMutateResult, context) => {
       queryClient.invalidateQueries({
@@ -128,6 +129,5 @@ export function useInviteLeague(
       console.error(error.response?.data ?? error.message);
       options?.onError?.(error, variables, onMutateResult, context);
     },
-    ...options,
   });
 }

@@ -52,10 +52,6 @@ export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPl
 export const onGetTeamPrice = (players: LineupPosition[]) =>
   players.reduce((acc, { player }) => acc + (player?.preco_num || 0), 0);
 
-export function onGetIsLineupComplete(lineup: LineupPlayers) {
-  return lineup.starting.every((item) => item.player);
-}
-
 export function onGetPlayerLowestPrice(lineup: LineupPlayers, player: LineupPosition) {
   const playersPosition = lineup.starting.filter((item) => item.position === player.position);
 

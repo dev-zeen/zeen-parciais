@@ -1,20 +1,21 @@
-const tintColor = '#FF8A00';
+import { palette } from '@/styles/tokens';
 
+/** Derivado de styles/tokens.ts; mantido para a navegação e para Themed.tsx. */
 export default {
   light: {
-    text: '#111111',
-    background: '#FFFFFF',
-    backgroundFull: '#F5F5F5',
-    tint: tintColor,
-    tabIconDefault: '#9CA3AF',
-    tabIconSelected: tintColor,
+    text: palette.light.text,
+    background: palette.light.surface,
+    backgroundFull: palette.light.bg,
+    tint: palette.light.brand,
+    tabIconDefault: palette.light.textMuted,
+    tabIconSelected: palette.light.brand,
   },
   dark: {
-    text: '#F5F5F5',
-    background: '#161B22',
-    backgroundFull: '#0D1117',
-    tint: tintColor,
-    tabIconDefault: '#6B7280',
-    tabIconSelected: tintColor,
+    text: palette.dark.text,
+    background: palette.dark.surface,
+    backgroundFull: palette.dark.bg,
+    tint: palette.dark.brand,
+    tabIconDefault: palette.dark.textMuted,
+    tabIconSelected: palette.dark.brand,
   },
 };

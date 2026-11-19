@@ -1,20 +1,21 @@
 import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useContext, useMemo, useState } from 'react';
-import { FlatList, ListRenderItemInfo, RefreshControl, TouchableOpacity } from 'react-native';
+import { FlatList, ListRenderItemInfo, RefreshControl, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
 import { MarketPlayerCard } from '@/components/contexts/market/MarketPlayerCard';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard';
 import { onGetEmptyPositions } from '@/components/contexts/team/_team.helpers';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
-import Colors from '@/constants/Colors';
+import { ScreenHeader } from '@/components/structure/ScreenHeader';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
 import usePlayerStats from '@/hooks/usePlayerStats';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
+import { useTokens } from '@/hooks/useTokens';
 import useValorization from '@/hooks/useValorization';
 import { Market } from '@/models/Market';
 import { Match, Matches } from '@/models/Matches';
@@ -43,7 +44,8 @@ interface FullPlayerPartials extends FullPlayer {
 }
 
 export default () => {
-  const colorTheme = useThemeColor();
+  const { spacing } = useTokens();
+  const tabBarSpacing = useTabBarSpacing();
 
   const { isAutheticated } = useContext(AuthContext);
 
@@ -114,22 +116,18 @@ export default () => {
 
   const renderItem = useCallback(
     ({ item: player }: ListRenderItemInfo<FullPlayer>) => (
-      <View className="rounded-lg">
-        <MarketPlayerCard
-          player={player}
-          positions={positions as IPositions}
-          market={market as Market}
-          matches={matches as Matches}
-          onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
-          onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
-          isButtonDisabled={
-            player.preco_num > currentBalancePrice || !emptyPositions?.has(player.posicao_id)
-          }
-          isSellPlayer={lineup?.starting.some(
-            (item) => item.player?.atleta_id === player.atleta_id
-          )}
-        />
-      </View>
+      <MarketPlayerCard
+        player={player}
+        positions={positions as IPositions}
+        market={market as Market}
+        matches={matches as Matches}
+        onPressAddPlayerToLineup={() => handleAddPlayerToLineup(player)}
+        onPressRemovePlayerFromLineup={() => handleRemovePlayerFromLineup(player)}
+        isButtonDisabled={
+          player.preco_num > currentBalancePrice || !emptyPositions?.has(player.posicao_id)
+        }
+        isSellPlayer={lineup?.starting.some((item) => item.player?.atleta_id === player.atleta_id)}
+      />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [currentBalancePrice, emptyPositions, lineup, market, matches, positions]
@@ -185,67 +183,43 @@ export default () => {
     return <LoadingScreen title="Carregando Partidas" />;
   }
 
-  const bgColor = colorTheme === 'dark' ? Colors.dark.backgroundFull : Colors.light.backgroundFull;
+  const homeClub = isMarketClose
+    ? playerStats?.clubes[match?.home as number]
+    : market?.clubes[match?.clube_casa_id as number];
+  const awayClub = isMarketClose
+    ? playerStats?.clubes[match?.away as number]
+    : market?.clubes[match?.clube_visitante_id as number];
 
   return (
     <SafeAreaViewContainer edges={['top']}>
-      <View className="flex-1 mx-2" style={{ backgroundColor: bgColor }}>
-        <View className="mb-2" style={{ gap: 8, backgroundColor: 'transparent' }}>
-          <MatchCard
-            match={match as Match}
-            homeClub={
-              isMarketClose
-                ? playerStats?.clubes[match?.home as number]
-                : market?.clubes[match?.clube_casa_id as number]
-            }
-            awayClub={
-              isMarketClose
-                ? playerStats?.clubes[match?.away as number]
-                : market?.clubes[match?.clube_visitante_id as number]
-            }
-          />
-        </View>
-
-        <View
-          className="flex-row mx-1 mt-2 mb-1 rounded-xl overflow-hidden"
-          style={{ backgroundColor: colorTheme === 'dark' ? '#161B22' : '#F0F0F0' }}>
-          {teamTabs.map(({ id: tabId, name }) => {
-            const isActive = tabActive === tabId;
-            return (
-              <TouchableOpacity
-                key={tabId}
-                onPress={() => setTabActive(tabId)}
-                activeOpacity={0.8}
-                className="flex-1 py-2 items-center"
-                style={{
-                  backgroundColor: isActive ? Colors.light.tint : 'transparent',
-                  borderRadius: 10,
-                  margin: 2,
-                }}>
-                <Text
-                  className="text-sm font-semibold"
-                  numberOfLines={1}
-                  style={{
-                    color: isActive ? '#fff' : colorTheme === 'dark' ? '#9CA3AF' : '#6B7280',
-                  }}>
-                  {name}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <FlatList
-          style={{ paddingHorizontal: 8, backgroundColor: 'transparent' }}
-          refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
-          contentContainerStyle={{ gap: 8, paddingVertical: 8 }}
-          data={teamPlayers}
-          renderItem={isMarketClose ? renderItemWithPartials : renderItem}
-          keyExtractor={keyExtractor}
-          maxToRenderPerBatch={12}
-          initialNumToRender={12}
-        />
-      </View>
+      <ScreenHeader
+        title={`${homeClub?.abreviacao ?? ''} × ${awayClub?.abreviacao ?? ''}`}
+        subtitle={isMarketClose ? 'Jogadores que pontuaram' : 'Prováveis de cada time'}
+      />
+      <FlatList
+        data={teamPlayers}
+        renderItem={isMarketClose ? renderItemWithPartials : renderItem}
+        keyExtractor={keyExtractor}
+        ListHeaderComponent={
+          <View style={{ gap: spacing.sm, paddingBottom: spacing.xs }}>
+            <MatchCard match={match as Match} homeClub={homeClub} awayClub={awayClub} isDisabled />
+            <SegmentedControl
+              options={teamTabs.map((tab) => ({ value: String(tab.id), label: tab.name ?? '' }))}
+              value={String(tabActive)}
+              onChange={(value) => setTabActive(Number(value))}
+            />
+          </View>
+        }
+        ItemSeparatorComponent={() => <View style={{ height: spacing.xs }} />}
+        refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+        contentContainerStyle={{
+          paddingHorizontal: spacing.md,
+          paddingTop: spacing.xs,
+          paddingBottom: tabBarSpacing.contentBottom,
+        }}
+        maxToRenderPerBatch={12}
+        initialNumToRender={12}
+      />
     </SafeAreaViewContainer>
   );
 };

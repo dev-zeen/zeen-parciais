@@ -9,8 +9,10 @@ import useMarketStatus from '@/hooks/useMarketStatus';
 import usePointsCompetitionInvites from '@/hooks/usePointsCompetitionInvites';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetInvites } from '@/queries/invites.query';
+import { useTokens } from '@/hooks/useTokens';
 
 export function InvitesAlert() {
+  const { colors: tk } = useTokens();
   const colorTheme = useThemeColor();
   const { allowRequest } = useMarketStatus();
 
@@ -45,9 +47,9 @@ export function InvitesAlert() {
               style={{
                 width: 40,
                 height: 40,
-                backgroundColor: colorTheme === 'dark' ? '#1e40af30' : '#DDEEFF',
+                backgroundColor: tk.accentContainer,
               }}>
-              <Feather name="mail" size={20} color="#0057FF" />
+              <Feather name="mail" size={20} color={tk.accent} />
             </View>
 
             <View style={{ flex: 1, backgroundColor: 'transparent' }}>
@@ -66,8 +68,8 @@ export function InvitesAlert() {
             style={{ gap: 8, backgroundColor: 'transparent', flexShrink: 0 }}>
             <View
               className="px-3 py-1 rounded-full"
-              style={{ backgroundColor: '#0057FF', minWidth: 32 }}>
-              <Text className="text-sm font-bold text-center" style={{ color: '#ffffff' }}>
+              style={{ backgroundColor: tk.accentFill, minWidth: 32 }}>
+              <Text className="text-sm font-bold text-center" style={{ color: tk.onAccentFill }}>
                 {invitesCount}
               </Text>
             </View>

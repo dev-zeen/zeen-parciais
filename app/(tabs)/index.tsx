@@ -1,10 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useContext } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
 import { View } from '@/components/Themed';
 import { AlertsCard } from '@/components/contexts/home/AlertsCard';
 import { PlayerHighlightsCarousel } from '@/components/contexts/home/PlayerHighlightsCarousel';
-import { QuickActionsGrid } from '@/components/contexts/home/QuickActionsGrid';
 import { StatsOverviewCard } from '@/components/contexts/home/StatsOverviewCard';
 import { TeamSummaryCard } from '@/components/contexts/home/TeamSummaryCard';
 import { CaptainCard } from '@/components/contexts/utils/CaptainCard';
@@ -16,8 +15,9 @@ import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
-import { ENUM_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
+import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useGetMyClub } from '@/queries/club.query';
 import { useGetPositions, useGetTopPlayers } from '@/queries/players.query';
@@ -26,6 +26,8 @@ import theme from '@/styles/theme';
 
 export default () => {
   const colorTheme = useThemeColor();
+  const tabBarSpacing = useTabBarSpacing();
+  const { isAutheticated } = useContext(AuthContext);
 
   const {
     marketStatus,
@@ -46,12 +48,6 @@ export default () => {
   const { refetch: onRefetchStats } = useGetScoredPlayers(isMarketClose);
 
   const { refetch: onRefetchTopPlayers } = useGetTopPlayers();
-
-  const lineupPlayersUnlikely = useMemo(
-    () =>
-      myClub?.atletas?.filter((player) => player.status_id !== ENUM_STATUS_MARKET_PLAYER.PROVAVEL),
-    [myClub?.atletas]
-  );
 
   const { isLoading: isLoadingPositions, refetch: onRefetchPositions } = useGetPositions();
 
@@ -76,6 +72,11 @@ export default () => {
     ? isLoadingMarketStatus || isLoadingPositions || isLoadingMyClub
     : isLoadingMarketStatus || isLoadingPositions;
 
+  // Mesmo padrão das demais abas protegidas (Time, Ligas, Perfil)
+  if (!isAutheticated) {
+    return <Login />;
+  }
+
   if (marketStatus?.status_mercado === MARKET_STATUS_NAME.EM_MANUTENCAO) {
     return <MaintenanceMarket />;
   }
@@ -98,12 +99,15 @@ export default () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetchingMyClub} />}
+        contentContainerStyle={{ paddingBottom: tabBarSpacing.contentBottom }}
         className={`rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}>
         <View
           className={`flex-1 rounded-lg ${colorTheme === 'dark' ? 'bg-dark' : 'bg-light'}`}
           style={{
-            gap: theme.Tokens.SPACING.xs,
-            marginHorizontal: theme.Tokens.SPACING.xs,
+            // Padrão das abas: 16 nas laterais, 8 no topo, 12 entre blocos
+            gap: theme.Tokens.SPACING.sm,
+            marginHorizontal: theme.Tokens.SPACING.md,
+            paddingTop: theme.Tokens.SPACING.xs,
           }}>
           {/* Market Status Bar */}
           <MarketStatusCard />
@@ -116,9 +120,6 @@ export default () => {
               {/* Team Summary */}
               <TeamSummaryCard team={myClub} />
 
-              {/* Quick Actions Grid */}
-              <QuickActionsGrid />
-
               {/* Stats Overview with Chart */}
               <StatsOverviewCard />
 
@@ -126,14 +127,12 @@ export default () => {
               <CaptainCard />
 
               {/* Alerts & Notices */}
-              <AlertsCard lineupPlayersUnlikely={lineupPlayersUnlikely} />
+              <AlertsCard players={myClub.atletas} hasNoCaptain={!myClub.capitao_id} />
 
               {/* Player Highlights Carousel */}
               <PlayerHighlightsCarousel />
             </>
-          ) : (
-            <Login />
-          )}
+          ) : null}
         </View>
       </ScrollView>
     </SafeAreaViewContainer>

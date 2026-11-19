@@ -1,407 +1,163 @@
-import { Feather } from '@expo/vector-icons';
-import { useCallback } from 'react';
-import { FlatList, Image, ListRenderItemInfo, RefreshControl } from 'react-native';
+import { router } from 'expo-router';
+import { FlatList, Image, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
-import Colors from '@/constants/Colors';
-import useLeague, { TeamCup } from '@/hooks/useLeague';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { League } from '@/models/Leagues';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
+import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
+import { useTokens } from '@/hooks/useTokens';
+import { League, TeamLeague } from '@/models/Leagues';
+
+type Row = { team: TeamLeague; pending: boolean };
 
 type CupTeamsListProps = {
   cup: League;
+  myTeamId?: number;
+  isRefetching: boolean;
+  onRefetch: () => void;
 };
 
-type SlotItem = { type: 'team'; data: TeamCup; index: number } | { type: 'empty'; index: number };
+/** Mata-mata antes do sorteio: vagas preenchidas, quem ainda não aceitou e o que falta. */
+export function CupTeamsList({ cup, myTeamId, isRefetching, onRefetch }: CupTeamsListProps) {
+  const { colors, spacing, radius } = useTokens();
+  const tabBarSpacing = useTabBarSpacing();
 
-export function CupTeamsList({ cup }: CupTeamsListProps) {
-  const colorTheme = useThemeColor();
-  const isDark = colorTheme === 'dark';
+  const confirmed = [...(cup.times ?? [])].sort((a, b) => a.time_id - b.time_id);
+  const pending = (cup.convites_enviados ?? []).map((invite) => invite.time);
+  const total = cup.liga.quantidade_times ?? confirmed.length;
+  const filled = confirmed.length + pending.length;
+  const open = Math.max(0, total - filled);
+  const progress = total > 0 ? Math.min(1, confirmed.length / total) : 0;
 
-  const {
-    onRefetchLeague,
-    isRefetchingLeague,
-    isCupInProgress,
-    teamsAwatingAcceptInvite,
-    teamsByCup,
-    totalTeamCup,
-  } = useLeague({ slug: cup.liga.slug });
-
-  const confirmedCount = teamsByCup.length;
-  const pendingCount = teamsAwatingAcceptInvite?.length ?? 0;
-  const totalSlots = totalTeamCup ?? cup.liga.quantidade_times ?? 0;
-  const filledSlots = confirmedCount + pendingCount;
-  const emptySlots = Math.max(0, totalSlots - filledSlots);
-  const isReadyForDraw = filledSlots === totalSlots && totalSlots > 0;
-
-  const allTeams: TeamCup[] =
-    teamsAwatingAcceptInvite && teamsAwatingAcceptInvite.length > 0
-      ? [...teamsByCup, ...teamsAwatingAcceptInvite]
-      : [...teamsByCup];
-
-  const slots: SlotItem[] = [
-    ...allTeams.map((t, i) => ({ type: 'team' as const, data: t, index: i })),
-    ...Array.from({ length: emptySlots }, (_, i) => ({
-      type: 'empty' as const,
-      index: filledSlots + i,
-    })),
+  const rows: Row[] = [
+    ...confirmed.map((team) => ({ team, pending: false })),
+    ...pending.map((team) => ({ team, pending: true })),
   ];
 
-  const renderTeamCard = useCallback(
-    (item: TeamCup, seed: number) => {
-      const isPending = !!item.isPending;
-
-      const cardBg = isPending ? (isDark ? '#422006' : '#fffbeb') : isDark ? '#052e16' : '#f0fdf4';
-
-      const borderColor = isPending
-        ? isDark
-          ? '#92400e'
-          : '#fde68a'
-        : isDark
-          ? '#14532d'
-          : '#bbf7d0';
-
-      const seedBg = isPending ? (isDark ? '#78350f' : '#fef3c7') : isDark ? '#166534' : '#dcfce7';
-
-      const seedColor = isPending
-        ? isDark
-          ? '#fbbf24'
-          : '#b45309'
-        : isDark
-          ? '#4ade80'
-          : '#15803d';
-
-      return (
-        <View
-          style={{
-            flex: 1,
-            margin: 5,
-            borderRadius: 14,
-            borderWidth: 1.5,
-            borderColor,
-            backgroundColor: cardBg,
-            overflow: 'hidden',
-          }}>
-          {/* Seed badge */}
-          <View
-            style={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              backgroundColor: seedBg,
-              borderRadius: 6,
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-              zIndex: 1,
-            }}>
-            <Text style={{ fontSize: 10, fontWeight: '700', color: seedColor }}>#{seed + 1}</Text>
-          </View>
-
-          {/* Pending badge */}
-          {isPending && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                backgroundColor: isDark ? '#92400e' : '#fef3c7',
-                borderRadius: 6,
-                paddingHorizontal: 6,
-                paddingVertical: 2,
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 3,
-                zIndex: 1,
-              }}>
-              <Feather name="clock" size={9} color={isDark ? '#fbbf24' : '#b45309'} />
-              <Text
-                style={{ fontSize: 9, fontWeight: '600', color: isDark ? '#fbbf24' : '#b45309' }}>
-                Aguardando
-              </Text>
-            </View>
-          )}
-
-          {/* Content */}
-          <View
-            style={{
-              alignItems: 'center',
-              paddingTop: 28,
-              paddingBottom: 14,
-              paddingHorizontal: 8,
-              backgroundColor: 'transparent',
-              gap: 6,
-            }}>
-            <View
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                backgroundColor: isDark ? '#ffffff10' : '#00000008',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-              <Image
-                source={{ uri: item.url_escudo_png }}
-                style={{ width: 44, height: 44 }}
-                resizeMode="contain"
-                alt={`Escudo ${item.nome}`}
-              />
-            </View>
-
-            <View style={{ alignItems: 'center', backgroundColor: 'transparent', gap: 1 }}>
-              <Text
-                numberOfLines={2}
-                style={{
-                  fontSize: 12,
-                  fontWeight: '700',
-                  textAlign: 'center',
-                  lineHeight: 15,
-                  color: isDark ? '#f0fdf4' : '#14532d',
-                }}>
-                {item.nome}
-              </Text>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontSize: 10,
-                  fontWeight: '400',
-                  textAlign: 'center',
-                  color: isDark ? '#86efac' : '#4d7c0f',
-                  opacity: 0.8,
-                }}>
-                {item.nome_cartola}
-              </Text>
-            </View>
-          </View>
-        </View>
-      );
-    },
-    [isDark]
-  );
-
-  const renderEmptySlot = useCallback(
-    (seed: number) => (
-      <View
-        style={{
-          flex: 1,
-          margin: 5,
-          borderRadius: 14,
-          borderWidth: 1.5,
-          borderColor: isDark ? '#1f2937' : '#e5e7eb',
-          borderStyle: 'dashed',
-          backgroundColor: isDark ? '#111827' : '#f9fafb',
-          alignItems: 'center',
-          justifyContent: 'center',
-          paddingVertical: 32,
-          gap: 6,
-        }}>
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <Feather name="user-plus" size={16} color={isDark ? '#4b5563' : '#9ca3af'} />
-        </View>
-        <Text style={{ fontSize: 10, color: isDark ? '#4b5563' : '#9ca3af', fontWeight: '500' }}>
-          #{seed + 1} — Vaga livre
-        </Text>
+  const header = (
+    <Card padding={spacing.md} style={{ gap: spacing.sm, marginBottom: spacing.sm }}>
+      <View style={styles.between}>
+        <AppText variant="label" weight="bold" color="textMuted">
+          AGUARDANDO O SORTEIO
+        </AppText>
+        <AppText variant="label" weight="bold">
+          {confirmed.length}/{total} times
+        </AppText>
       </View>
-    ),
-    [isDark]
+      <View
+        style={[styles.track, { backgroundColor: colors.surfaceAlt, borderRadius: radius.full }]}
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityValue={{ min: 0, max: total, now: confirmed.length }}>
+        <View
+          style={{
+            width: `${progress * 100}%`,
+            height: '100%',
+            borderRadius: radius.full,
+            backgroundColor: colors.brand,
+          }}
+        />
+      </View>
+      <AppText variant="body" color="textMuted">
+        {open > 0
+          ? `Faltam ${open} ${open === 1 ? 'vaga' : 'vagas'}${
+              pending.length
+                ? ` e ${pending.length} ${pending.length === 1 ? 'convite' : 'convites'} sem resposta`
+                : ''
+            }. O chaveamento sai quando todas as vagas forem preenchidas.`
+          : pending.length
+            ? `Todas as vagas têm time; ${pending.length} ainda ${
+                pending.length === 1 ? 'precisa' : 'precisam'
+              } aceitar o convite.`
+            : 'Vagas completas. O chaveamento sai no sorteio.'}
+      </AppText>
+    </Card>
   );
-
-  const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<SlotItem>) => {
-      if (item.type === 'team') return renderTeamCard(item.data, item.index);
-      return renderEmptySlot(item.index);
-    },
-    [renderTeamCard, renderEmptySlot]
-  );
-
-  const keyExtractor = useCallback(
-    (item: SlotItem) =>
-      item.type === 'team' ? `team-${item.data.time_id}` : `empty-${item.index}`,
-    []
-  );
-
-  if (isCupInProgress) return null;
 
   return (
     <FlatList
-      refreshControl={
-        <RefreshControl onRefresh={onRefetchLeague} refreshing={isRefetchingLeague} />
-      }
-      data={slots}
-      keyExtractor={keyExtractor}
-      renderItem={renderItem}
-      numColumns={2}
-      initialNumToRender={16}
-      showsVerticalScrollIndicator={false}
-      ListHeaderComponent={
-        <View
-          style={{
-            paddingHorizontal: 16,
-            paddingTop: 16,
-            paddingBottom: 8,
-            backgroundColor: 'transparent',
-            gap: 12,
-          }}>
-          {/* Status bar */}
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: isDark ? '#111827' : '#ffffff',
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              paddingVertical: 12,
-              borderWidth: 1,
-              borderColor: isDark ? '#1f2937' : '#e5e7eb',
-            }}>
-            <View style={{ backgroundColor: 'transparent', gap: 2 }}>
-              <Text
-                style={{ fontSize: 12, color: isDark ? '#9ca3af' : '#6b7280', fontWeight: '500' }}>
-                Times confirmados
-              </Text>
-              <Text
-                style={{ fontSize: 22, fontWeight: '800', color: isDark ? '#f9fafb' : '#111827' }}>
-                {confirmedCount}
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontWeight: '400',
-                    color: isDark ? '#6b7280' : '#9ca3af',
-                  }}>
-                  /{totalSlots}
-                </Text>
-              </Text>
-            </View>
-
-            {/* Progress ring area */}
-            <View style={{ alignItems: 'flex-end', backgroundColor: 'transparent', gap: 4 }}>
-              {pendingCount > 0 && (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 4,
-                    backgroundColor: isDark ? '#422006' : '#fef3c7',
-                    paddingHorizontal: 10,
-                    paddingVertical: 4,
-                    borderRadius: 20,
-                  }}>
-                  <Feather name="clock" size={11} color={isDark ? '#fbbf24' : '#b45309'} />
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      fontWeight: '600',
-                      color: isDark ? '#fbbf24' : '#b45309',
-                    }}>
-                    {pendingCount} aguardando
-                  </Text>
-                </View>
-              )}
-              {emptySlots > 0 && (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 4,
-                    backgroundColor: isDark ? '#1f2937' : '#f3f4f6',
-                    paddingHorizontal: 10,
-                    paddingVertical: 4,
-                    borderRadius: 20,
-                  }}>
-                  <Feather name="user-plus" size={11} color={isDark ? '#6b7280' : '#9ca3af'} />
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      fontWeight: '500',
-                      color: isDark ? '#6b7280' : '#9ca3af',
-                    }}>
-                    {emptySlots} vagas livres
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
-
-          {/* Progress bar */}
-          {totalSlots > 0 && (
-            <View
-              style={{
-                backgroundColor: isDark ? '#1f2937' : '#e5e7eb',
-                borderRadius: 4,
-                height: 6,
-                overflow: 'hidden',
-              }}>
-              <View
-                style={{
-                  height: '100%',
-                  borderRadius: 4,
-                  width: `${Math.min(100, (confirmedCount / totalSlots) * 100)}%`,
-                  backgroundColor: isReadyForDraw ? '#22c55e' : isDark ? '#4ade80' : '#16a34a',
-                }}
-              />
-              {pendingCount > 0 && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    height: '100%',
-                    borderRadius: 4,
-                    left: `${Math.min(100, (confirmedCount / totalSlots) * 100)}%` as any,
-                    width: `${Math.min(100, (pendingCount / totalSlots) * 100)}%`,
-                    backgroundColor: isDark ? '#f59e0b' : '#fbbf24',
-                    opacity: 0.7,
-                  }}
-                />
-              )}
-            </View>
-          )}
-
-          {/* Ready for draw banner */}
-          {isReadyForDraw && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 8,
-                backgroundColor: isDark ? '#052e16' : '#f0fdf4',
-                borderRadius: 10,
-                paddingVertical: 10,
-                borderWidth: 1,
-                borderColor: isDark ? '#14532d' : '#bbf7d0',
-              }}>
-              <Feather name="check-circle" size={15} color={isDark ? '#4ade80' : '#16a34a'} />
-              <Text
-                style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#4ade80' : '#16a34a' }}>
-                Todos os times confirmados — pronto para sorteio!
-              </Text>
-            </View>
-          )}
-
-          <Text
-            style={{
-              fontSize: 12,
-              fontWeight: '600',
-              color: isDark ? '#6b7280' : '#9ca3af',
-              paddingTop: 4,
-            }}>
-            PARTICIPANTES
-          </Text>
-        </View>
-      }
+      data={rows}
+      keyExtractor={(row) => `${row.pending ? 'p' : 't'}-${row.team.time_id}`}
+      ListHeaderComponent={header}
+      ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
       contentContainerStyle={{
-        backgroundColor: isDark ? Colors.dark.backgroundFull : Colors.light.backgroundFull,
-        paddingHorizontal: 11,
-        paddingBottom: 32,
+        paddingHorizontal: spacing.md,
+        paddingTop: spacing.xs,
+        paddingBottom: tabBarSpacing.contentBottom,
       }}
+      refreshControl={<RefreshControl onRefresh={onRefetch} refreshing={isRefetching} />}
+      renderItem={({ item, index }) => {
+        const isMine = item.team.time_id === myTeamId;
+        return (
+          <Pressable
+            onPress={() => router.push(`/leagues/club/${item.team.time_id}`)}
+            accessibilityRole="button"
+            accessibilityLabel={`${item.team.nome}${isMine ? ', seu time' : ''}${
+              item.pending ? ', aguardando aceitar o convite' : ''
+            }`}
+            android_ripple={{ color: colors.border }}
+            style={({ pressed }) => [
+              styles.row,
+              {
+                gap: spacing.sm,
+                padding: spacing.sm,
+                borderRadius: radius.md,
+                backgroundColor: isMine ? colors.accentContainer : colors.surface,
+                opacity: pressed ? 0.85 : item.pending ? 0.75 : 1,
+              },
+            ]}>
+            <AppText variant="label" weight="bold" color="textMuted" style={{ width: 22 }}>
+              {index + 1}
+            </AppText>
+            <Image
+              source={{ uri: item.team.url_escudo_png }}
+              style={[styles.shield, { backgroundColor: colors.surfaceAlt }]}
+            />
+            <View style={{ flex: 1 }}>
+              <AppText variant="body" weight="bold" numberOfLines={1}>
+                {item.team.nome}
+              </AppText>
+              <AppText variant="caption" color="textMuted" numberOfLines={1}>
+                {isMine ? 'Você' : item.team.nome_cartola}
+              </AppText>
+            </View>
+            {item.pending ? <Badge label="Convidado" tone="warning" /> : null}
+          </Pressable>
+        );
+      }}
+      ListFooterComponent={
+        open > 0 ? (
+          <AppText
+            variant="label"
+            color="textMuted"
+            align="center"
+            style={{ marginTop: spacing.md }}>
+            {open} {open === 1 ? 'vaga aberta' : 'vagas abertas'}
+          </AppText>
+        ) : undefined
+      }
     />
   );
 }
+
+const styles = StyleSheet.create({
+  between: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  track: {
+    height: 8,
+    overflow: 'hidden',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  shield: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+});

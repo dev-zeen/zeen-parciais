@@ -1,332 +1,307 @@
 import { Feather } from '@expo/vector-icons';
-import { Image, StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import { Text, TouchableOpacity, View } from '@/components/Themed';
-import { Loading } from '@/components/structure/Loading';
+import { AppText } from '@/components/ui/AppText';
 import { OBJECT_STATUS_MARKET_PLAYER } from '@/constants/StatusPlayer';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 import { Market } from '@/models/Market';
 import { Matches } from '@/models/Matches';
-import { FullPlayer, GatoMestreAtletas, IPositions } from '@/models/Stats';
-import { useGetGatoMestreAtletas } from '@/queries/players.query';
+import { FullPlayer, IPositions } from '@/models/Stats';
+import { findPlayerMatch, type PlayerInsight } from '@/utils/insights';
 import { numberToString } from '@/utils/parseTo';
-import { useCallback } from 'react';
 
 type MarketPlayerCardProps = {
   player: FullPlayer;
   market: Market;
   matches: Matches;
   positions: IPositions;
-  gatoMestre?: GatoMestreAtletas;
+  /** Confronto e mínimo para valorizar, calculados uma vez pela lista */
+  insight?: PlayerInsight;
+  /** % dos times que escalaram o jogador; só existe para os mais escalados */
+  selection?: number | null;
   onPressAddPlayerToLineup: (player: FullPlayer) => void;
   onPressRemovePlayerFromLineup: (player: FullPlayer) => void;
   isButtonDisabled: boolean;
+  /** Texto do botão quando a compra está indisponível (ex.: "Sem saldo") */
+  disabledReason?: string;
   isSellPlayer?: boolean;
+  /** Marcado para comparação (segurar o card) */
+  isCompared?: boolean;
+  onLongPress?: (player: FullPlayer) => void;
 };
 
+/**
+ * Card do mercado. Hierarquia: nome e preço em destaque; posição, clube e confronto
+ * numa linha; média, última e mínimo para valorizar numa linha de números.
+ */
 export function MarketPlayerCard({
   market,
   matches,
   positions,
   player,
+  insight,
+  selection,
   onPressAddPlayerToLineup,
   onPressRemovePlayerFromLineup,
   isButtonDisabled,
+  disabledReason,
   isSellPlayer,
+  isCompared,
+  onLongPress,
 }: MarketPlayerCardProps) {
-  const colorTheme = useThemeColor();
-
+  const { colors, radius, minTouch } = useTokens();
   const { isMarketClose } = useMarketStatus();
 
-  const { data: gatoMestre } = useGetGatoMestreAtletas();
+  const status = OBJECT_STATUS_MARKET_PLAYER[player.status_id];
+  const matchInfo = insight?.match ?? findPlayerMatch(player.clube_id, matches);
+  const club = market?.clubes?.[player.clube_id];
+  const position = positions?.[player.posicao_id]?.abreviacao?.toUpperCase();
+  const price = `C$ ${numberToString(player.preco_num)}`;
 
-  const min = useCallback(
-    (player?: FullPlayer) => {
-      const playerId = player?.atleta_id;
+  const disabled = isMarketClose || (!isSellPlayer && isButtonDisabled);
+  const actionLabel = isMarketClose
+    ? 'Fechado'
+    : isSellPlayer
+      ? 'Vender'
+      : isButtonDisabled
+        ? (disabledReason ?? 'Indisponível')
+        : 'Comprar';
 
-      if (!gatoMestre) {
-        return '-';
-      }
+  const button = disabled
+    ? { bg: colors.surfaceAlt, fg: colors.textMuted, icon: 'slash' as const }
+    : isSellPlayer
+      ? { bg: colors.negativeContainer, fg: colors.negative, icon: 'minus' as const }
+      : { bg: colors.accentFill, fg: colors.onAccentFill, icon: 'plus' as const };
 
-      if (!player) {
-        return '-';
-      }
-
-      const minGatoMestre = gatoMestre[playerId as number]?.minimo_para_valorizar;
-
-      return minGatoMestre != null ? numberToString(minGatoMestre) : '-';
-    },
-    [gatoMestre]
-  );
-
-  const minVal = min(player);
-
-  const match = matches?.partidas.find(
-    (match) =>
-      match.clube_casa_id === player.clube_id || match.clube_visitante_id === player.clube_id
-  );
-
-  if (!match) {
-    return <Loading />;
-  }
+  const opponent = matchInfo?.opponent;
+  const minToValorize = insight?.minToValorize;
 
   return (
-    <View
-      className="rounded-lg flex-row items-center justify-between p-3"
-      style={{
-        backgroundColor: colorTheme === 'dark' ? '#111827' : '#ffffff',
-        borderWidth: 1,
-        borderColor: colorTheme === 'dark' ? '#1f2937' : '#f3f4f6',
-      }}>
-      <View
-        className="flex-row items-center"
-        style={{
-          gap: 10,
-          backgroundColor: 'transparent',
-        }}>
+    <Pressable
+      onLongPress={onLongPress ? () => onLongPress(player) : undefined}
+      accessibilityHint={onLongPress ? 'Segure para comparar com outro jogador' : undefined}
+      accessibilityState={{ selected: !!isCompared }}
+      style={[
+        styles.card,
+        {
+          backgroundColor: isCompared ? colors.warningContainer : colors.surface,
+          borderRadius: radius.md,
+          borderColor: isCompared
+            ? colors.warning
+            : isSellPlayer
+              ? colors.accentFill
+              : 'transparent',
+        },
+      ]}>
+      <View>
         <Image
-          source={{
-            uri: player.foto?.replace('FORMATO', '220x220'),
-          }}
-          className="w-14 h-14 rounded-full"
-          alt={`Imagem do ${player.nome}`}
+          source={{ uri: player.foto?.replace('FORMATO', '140x140') }}
+          style={[styles.photo, { backgroundColor: colors.surfaceAlt }]}
+          accessible={false}
         />
-        <View
-          className="flex-row absolute"
-          style={{
-            top: '60%',
-            left: '18%',
-            width: 20,
-            height: 20,
-            borderRadius: 10,
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.background,
-          }}>
-          <Feather
-            name={
-              OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.icon as keyof typeof Feather.glyphMap
-            }
-            color={OBJECT_STATUS_MARKET_PLAYER[player?.status_id]?.color}
-            size={14}
-          />
+        {status ? (
+          <View
+            accessible
+            accessibilityLabel={status.name}
+            style={[
+              styles.status,
+              { backgroundColor: status.background, borderColor: colors.surface },
+            ]}>
+            <Feather
+              name={status.icon as keyof typeof Feather.glyphMap}
+              color={status.color}
+              size={10}
+            />
+          </View>
+        ) : null}
+      </View>
+
+      <View style={styles.info}>
+        <View style={styles.titleRow}>
+          <AppText variant="title" weight="bold" numberOfLines={1} style={{ flexShrink: 1 }}>
+            {player.apelido_abreviado}
+          </AppText>
+          {isSellPlayer ? (
+            <AppText variant="caption" weight="bold" color="accent">
+              NO TIME
+            </AppText>
+          ) : null}
         </View>
 
         <View
-          className="items-start justify-center"
-          style={{
-            gap: 6,
-            backgroundColor: 'transparent',
-          }}>
-          <View
-            className="flex-row items-center"
-            style={{
-              gap: 4,
-              backgroundColor: 'transparent',
-            }}>
-            <Text
-              className="flex-row text-base font-bold"
-              style={{ color: colorTheme === 'dark' ? '#f3f4f6' : '#111827' }}>
-              {player.apelido_abreviado}
-            </Text>
-            <View
-              className="rounded-full h-1 w-1"
-              style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }}
+          style={styles.meta}
+          accessible
+          accessibilityLabel={`${position ?? ''}, ${club?.nome ?? ''}${
+            matchInfo
+              ? `, joga ${matchInfo.isHome ? 'em casa' : 'fora'} contra ${opponent?.nome ?? 'adversário'}`
+              : ''
+          }`}>
+          <AppText variant="label" weight="bold" color="textMuted">
+            {position}
+          </AppText>
+          <AppText variant="label" color="textMuted" numberOfLines={1}>
+            {club?.abreviacao}
+          </AppText>
+          {matchInfo ? (
+            <>
+              <AppText variant="label" color="textMuted">
+                {matchInfo.isHome ? 'vs' : '@'}
+              </AppText>
+              {opponent?.escudos?.['30x30'] ? (
+                <Image source={{ uri: opponent.escudos['30x30'] }} style={styles.shield} />
+              ) : null}
+              <AppText variant="label" color="textMuted" numberOfLines={1}>
+                {opponent?.abreviacao}
+              </AppText>
+            </>
+          ) : null}
+        </View>
+
+        <View style={styles.stats}>
+          <Stat label="Méd" value={numberToString(player.media_num)} />
+          <Stat
+            label="Últ"
+            value={numberToString(player.pontos_num)}
+            tone={player.pontos_num > 0 ? 'positive' : player.pontos_num < 0 ? 'negative' : 'text'}
+          />
+          <Stat
+            label="Mín"
+            value={minToValorize != null ? numberToString(minToValorize) : '-'}
+            accessibleLabel="Mínimo para valorizar"
+          />
+          {selection != null ? (
+            <Stat
+              label="Esc"
+              value={`${Math.round(selection)}%`}
+              accessibleLabel="Escalado por"
             />
-            <Text
-              className="flex-row text-xs font-medium"
-              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-              {player.jogos_num} Jogos
-            </Text>
-          </View>
-
-          <View
-            className="flex-row items-center justify-start"
-            style={{
-              gap: 4,
-              backgroundColor: 'transparent',
-            }}>
-            <Text
-              className="font-medium uppercase text-xs"
-              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-              {positions?.[player.posicao_id].abreviacao}
-            </Text>
-
-            <View
-              className="rounded-full h-1 w-1"
-              style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }}
-            />
-
-            <Text
-              className="font-medium uppercase text-xs"
-              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-              {market?.clubes[player.clube_id].abreviacao}
-            </Text>
-
-            <View
-              className="rounded-full h-1 w-1"
-              style={{ backgroundColor: colorTheme === 'dark' ? '#6b7280' : '#d1d5db' }}
-            />
-
-            <View
-              className="flex-row items-center"
-              style={{
-                gap: 2,
-                backgroundColor: 'transparent',
-              }}>
-              <Image
-                source={{
-                  uri: matches?.clubes[match?.clube_casa_id as number]?.escudos['60x60'],
-                }}
-                className="w-4 h-4"
-                alt={`Escudo do ${matches?.clubes[match?.clube_casa_id as number]?.nome}`}
-              />
-
-              <Feather name="x" size={12} color={colorTheme === 'dark' ? '#6b7280' : '#9ca3af'} />
-
-              <Image
-                source={{
-                  uri: matches?.clubes[match?.clube_visitante_id as number]?.escudos['60x60'],
-                }}
-                className="w-4 h-4"
-                alt={`Escudo do ${matches?.clubes[match?.clube_visitante_id as number]?.nome}`}
-              />
-            </View>
-          </View>
-
-          <View
-            className="flex-row items-start justify-start"
-            style={{
-              gap: 8,
-              backgroundColor: 'transparent',
-            }}>
-            <View
-              className="items-center justify-center"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text
-                className="text-xs"
-                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-                Média
-              </Text>
-              <Text
-                className="font-bold text-xs"
-                style={{
-                  color: player.media_num > 0 ? '#00E094' : '#ef4444',
-                }}>
-                {numberToString(player.media_num)}
-              </Text>
-            </View>
-
-            <View
-              className="items-center justify-center"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text
-                className="text-xs"
-                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-                Última
-              </Text>
-              <Text
-                className="font-bold text-xs"
-                style={{
-                  color: player.pontos_num > 0 ? '#00E094' : '#ef4444',
-                }}>
-                {numberToString(player.pontos_num)}
-              </Text>
-            </View>
-
-            <View
-              className="items-center justify-center"
-              style={{ backgroundColor: 'transparent' }}>
-              <Text
-                className="text-xs"
-                style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-                Min. Val.
-              </Text>
-              <Text
-                className="font-bold text-xs"
-                style={{ color: colorTheme === 'dark' ? '#5B8EFF' : '#0057FF' }}>
-                {minVal}
-              </Text>
-            </View>
-          </View>
+          ) : null}
         </View>
       </View>
 
-      {!isSellPlayer ? (
-        <TouchableOpacity
-          disabled={isButtonDisabled}
-          style={[
-            styles.playerButton,
-            isButtonDisabled
-              ? styles.purchasePlayerButtonDisabled
-              : styles.purchasePlayerButtonActived,
-          ]}
-          onPress={() => onPressAddPlayerToLineup(player)}
-          activeOpacity={0.6}>
-          {isButtonDisabled || isMarketClose ? (
-            <>
-              <Text className="text-white text-sm font-semibold">Indisp.</Text>
-              <Text className="text-white text-sm font-semibold">
-                C$ {numberToString(player.preco_num)}
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text className="text-white text-sm font-semibold">Comprar</Text>
-              <Text className="text-white text-sm font-semibold">
-                C$ {numberToString(player.preco_num)}
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          disabled={isMarketClose}
-          style={[
-            styles.playerButton,
-            !isMarketClose ? styles.sellPlayerButton : styles.purchasePlayerButtonDisabled,
-          ]}
-          onPress={() => onPressRemovePlayerFromLineup(player)}
-          activeOpacity={0.6}>
-          {isMarketClose ? (
-            <>
-              <Text className="text-white text-sm font-semibold">Indisp.</Text>
-              <Text className="text-white text-sm font-semibold">
-                C$ {numberToString(player.preco_num)}
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text className="text-white text-sm font-semibold">Vender</Text>
-              <Text className="text-white text-sm font-semibold">
-                C$ {numberToString(player.preco_num)}
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-      )}
+      <View style={styles.side}>
+        <AppText variant="title" weight="bold" numberOfLines={1}>
+          {price}
+        </AppText>
+        <Pressable
+          disabled={disabled}
+          onPress={() =>
+            isSellPlayer ? onPressRemovePlayerFromLineup(player) : onPressAddPlayerToLineup(player)
+          }
+          accessibilityRole="button"
+          accessibilityLabel={`${actionLabel} ${player.apelido}, ${price}`}
+          accessibilityState={{ disabled }}
+          android_ripple={{ color: colors.border }}
+          hitSlop={{ top: 4, bottom: 4 }}
+          style={({ pressed }) => [
+            styles.button,
+            {
+              minHeight: minTouch - 8,
+              borderRadius: radius.full,
+              backgroundColor: button.bg,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}>
+          <Feather name={button.icon} size={14} color={button.fg} />
+          <AppText variant="label" weight="bold" color={button.fg} numberOfLines={1}>
+            {actionLabel}
+          </AppText>
+        </Pressable>
+      </View>
+    </Pressable>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone = 'text',
+  accessibleLabel,
+}: {
+  label: string;
+  value: string;
+  tone?: 'text' | 'positive' | 'negative';
+  accessibleLabel?: string;
+}) {
+  return (
+    <View
+      style={styles.stat}
+      accessible
+      accessibilityLabel={`${accessibleLabel ?? label}: ${value}`}>
+      <AppText variant="caption" color="textMuted">
+        {label}
+      </AppText>
+      <AppText variant="label" weight="bold" color={tone}>
+        {value}
+      </AppText>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  playerButton: {
-    width: 90,
-    height: 70,
-    borderRadius: 8,
-    paddingVertical: 8,
-    flexDirection: 'column',
+  card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderWidth: 1.5,
+  },
+  photo: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  status: {
+    position: 'absolute',
+    right: -3,
+    bottom: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  purchasePlayerButtonDisabled: {
-    backgroundColor: '#6b7280',
+  info: {
+    flex: 1,
+    gap: 3,
   },
-  purchasePlayerButtonActived: {
-    backgroundColor: '#0057FF',
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
-  sellPlayerButton: {
-    backgroundColor: '#dc2626',
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  shield: {
+    width: 14,
+    height: 14,
+  },
+  stats: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 1,
+  },
+  stat: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 3,
+  },
+  side: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    paddingHorizontal: 14,
+    minWidth: 104,
+    overflow: 'hidden',
   },
 });

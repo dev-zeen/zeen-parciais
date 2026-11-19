@@ -2,11 +2,11 @@ import { Feather } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo } from 'react';
-import { Image, TouchableOpacity } from 'react-native';
+import { Image, Pressable, StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
+import { useTokens } from '@/hooks/useTokens';
 import { Club } from '@/models/Club';
 import { Match } from '@/models/Matches';
 import { FullPlayer } from '@/models/Stats';
@@ -22,6 +22,10 @@ interface MatchCardProps {
   isDisabled?: boolean;
 }
 
+/**
+ * Card de partida. Placar no centro, clubes dos lados com a parcial somada dos jogadores
+ * de cada um; status (ao vivo, encerrada, não vale pontos) no topo.
+ */
 export function MatchCard({
   match,
   players,
@@ -30,41 +34,34 @@ export function MatchCard({
   isDisabled = false,
 }: MatchCardProps) {
   const router = useRouter();
-  const colorTheme = useThemeColor();
-
+  const { colors, spacing, radius } = useTokens();
   const { data: playerStats } = useGetScoredPlayers();
 
-  const homeTeamPartials = useMemo(() => {
-    if (homeClub && homeClub?.id && playerStats) {
-      const teamId = Number(homeClub?.id);
-      return onGetPartialScoreTeamByMatch(teamId, playerStats);
-    }
-  }, [homeClub, playerStats]);
+  const hasStarted = match.status_transmissao_tr !== 'CRIADA';
+  const showTeamScore = !!playerStats && hasStarted && match.valida;
+  const isLive = match.status_transmissao_tr === 'EM_ANDAMENTO';
 
-  const awayTeamPartials = useMemo(() => {
-    if (awayClub && awayClub?.id && playerStats) {
-      const teamId = Number(awayClub?.id);
-      return onGetPartialScoreTeamByMatch(teamId, playerStats);
-    }
-  }, [awayClub, playerStats]);
+  const side = (club: Club | undefined, clubId: number, rank: number) => ({
+    club,
+    rank,
+    partial:
+      showTeamScore && playerStats && club?.id
+        ? onGetPartialScoreTeamByMatch(Number(club.id), playerStats)
+        : undefined,
+    mine: players?.filter((player) => player.clube_id === clubId).length ?? 0,
+  });
 
-  const showTeamScore = playerStats && match.status_transmissao_tr !== 'CRIADA' && match.valida;
+  const home = side(homeClub, match.clube_casa_id, match.clube_casa_posicao);
+  const away = side(awayClub, match.clube_visitante_id, match.clube_visitante_posicao);
 
-  const amountPlayersMyClubHomeTeam = useCallback(() => {
-    if (players) {
-      return players?.filter((player) => player.clube_id === match.clube_casa_id).length;
-    }
-    return 0;
-  }, [players, match]);
+  const date = format(new Date(match.partida_data), "EEE, dd/MM '·' HH:mm", { locale: ptBR });
+  // Sem placar oficial ainda (jogo futuro): só o "×", sem traços.
+  const hasScore = match.placar_oficial_mandante != null && match.placar_oficial_visitante != null;
+  const score = hasScore
+    ? `${match.placar_oficial_mandante} × ${match.placar_oficial_visitante}`
+    : '×';
 
-  const amountPlayersMyClubAwayTeam = useCallback(() => {
-    if (players) {
-      return players?.filter((player) => player.clube_id === match.clube_visitante_id).length;
-    }
-    return 0;
-  }, [players, match]);
-
-  const onPressHandler = useCallback(() => {
+  const onPress = () => {
     const payload = {
       ...match,
       transmissao: '',
@@ -72,241 +69,167 @@ export function MatchCard({
       away: match.clube_visitante_id,
     };
     router.push(`/rodada/matches/${JSON.stringify(payload)}`);
-  }, [match, router]);
+  };
 
   return (
-    <TouchableOpacity disabled={isDisabled} activeOpacity={0.6} onPress={onPressHandler}>
-      <View
-        className="p-4 rounded-lg"
-        style={{
-          backgroundColor: colorTheme === 'dark' ? '#111827' : '#f9fafb',
-          borderWidth: 1,
-          borderColor: !match.valida
-            ? colorTheme === 'dark'
-              ? '#991b1b'
-              : '#fca5a5'
-            : colorTheme === 'dark'
-              ? '#1f2937'
-              : '#f3f4f6',
-          opacity: !match.valida ? 0.85 : 1,
-        }}>
-        <Text
-          className="font-medium text-xs text-center mb-2"
-          style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-          {format(new Date(match.partida_data), "EEEEEE',' dd/MM/y kk:mm", {
-            locale: ptBR,
-          })}
-        </Text>
-
-        <View
-          className={`flex-row py-1 px-4 justify-between ${
-            match.status_transmissao_tr === 'CRIADA' && 'mb-4'
-          }`}
-          style={{
-            gap: 24,
-            backgroundColor: 'transparent',
-          }}>
-          <View
-            className="items-center justify-center"
-            style={{ gap: 4, backgroundColor: 'transparent' }}>
-            {showTeamScore ? (
-              <Text
-                className="font-semibold"
-                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-                {numberToString(homeTeamPartials)}
-              </Text>
-            ) : (
-              <></>
-            )}
-
-            <Image
-              source={{
-                uri: homeClub?.escudos['60x60'],
-              }}
-              className="w-12 h-12"
-              alt={`Escudo do ${homeClub?.nome}`}
-            />
-
-            <Text
-              className="font-semibold"
-              style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-              {homeClub?.abreviacao} {`${match.clube_casa_posicao}º`}
-            </Text>
-
-            {amountPlayersMyClubHomeTeam() > 0 && (
-              <View
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 9999,
-                  position: 'absolute',
-                  width: 20,
-                  height: 20,
-                  top: showTeamScore ? 39 : 15,
-                  left: 55,
-                  backgroundColor: '#10b981',
-                }}>
-                <Text className="font-semibold text-xs text-white">
-                  {amountPlayersMyClubHomeTeam()}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          <View
-            className="items-center justify-center"
-            style={{
-              gap: 4,
-              backgroundColor: 'transparent',
-            }}>
-            <View
-              className="flex-row justify-center items-center rounded-lg px-4 py-2"
-              style={{
-                gap: 8,
-                backgroundColor: colorTheme === 'dark' ? '#1f2937' : '#ffffff',
-                borderWidth: 1,
-                borderColor: colorTheme === 'dark' ? '#374151' : '#e5e7eb',
-              }}>
-              <Text
-                className="font-semibold text-base"
-                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-                {match.placar_oficial_mandante ?? '-'}
-              </Text>
-
-              <Feather name="x" size={16} color={colorTheme === 'dark' ? '#9ca3af' : '#6b7280'} />
-
-              <Text
-                className="font-semibold text-base"
-                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-                {match.placar_oficial_visitante ?? '-'}
-              </Text>
-            </View>
-
-            <Text
-              className="text-xs"
-              style={{ color: colorTheme === 'dark' ? '#9ca3af' : '#6b7280' }}>
-              {match.local}
-            </Text>
-          </View>
-
-          <View
-            className="justify-center items-center"
-            style={{ gap: 4, backgroundColor: 'transparent' }}>
-            {showTeamScore ? (
-              <Text
-                className="font-semibold"
-                style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-                {numberToString(awayTeamPartials)}
-              </Text>
-            ) : (
-              <></>
-            )}
-
-            <Image
-              source={{
-                uri: awayClub?.escudos['60x60'],
-              }}
-              className="w-12 h-12"
-              alt={`Escudo do ${awayClub?.nome}`}
-            />
-            <Text
-              className="font-semibold"
-              style={{ color: colorTheme === 'dark' ? '#d1d5db' : '#374151' }}>
-              {awayClub?.abreviacao} {`${match.clube_visitante_posicao}º`}
-            </Text>
-
-            {amountPlayersMyClubAwayTeam() > 0 && (
-              <View
-                style={{
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 9999,
-                  position: 'absolute',
-                  width: 20,
-                  height: 20,
-                  top: showTeamScore ? 39 : 15,
-                  left: -25,
-                  backgroundColor: '#10b981',
-                }}>
-                <Text className="font-semibold text-xs text-white">
-                  {amountPlayersMyClubAwayTeam()}
-                </Text>
-              </View>
-            )}
-          </View>
+    <Pressable
+      disabled={isDisabled}
+      onPress={onPress}
+      accessibilityRole={isDisabled ? undefined : 'button'}
+      accessibilityLabel={`${homeClub?.nome ?? ''} ${hasScore ? score.replace('×', 'a') : 'contra'} ${
+        awayClub?.nome ?? ''
+      }, ${date}${match.valida ? '' : ', não vale pontos'}`}
+      accessibilityHint={isDisabled ? undefined : 'Abre os jogadores da partida'}
+      android_ripple={{ color: colors.border }}
+      style={({ pressed }) => [
+        styles.card,
+        {
+          gap: spacing.sm,
+          padding: spacing.md,
+          borderRadius: radius.md,
+          backgroundColor: colors.surface,
+          borderColor: match.valida ? 'transparent' : colors.negative,
+          opacity: pressed ? 0.8 : 1,
+        },
+      ]}>
+      <View style={styles.header}>
+        <AppText variant="label" color="textMuted">
+          {date}
+        </AppText>
+        <View style={styles.badges}>
+          {!match.valida ? <Badge label="Não vale pontos" tone="negative" /> : null}
+          {isLive ? <Badge label="Ao vivo" tone="negative" /> : null}
+          {match.valida && match.status_transmissao_tr === 'ENCERRADA' ? (
+            <Badge label="Encerrada" />
+          ) : null}
         </View>
-
-        {match.valida ? (
-          <>
-            {match.status_transmissao_tr === 'ENCERRADA' && (
-              <View
-                className="mt-3 mx-2 rounded-xl p-3"
-                style={{
-                  backgroundColor: colorTheme === 'dark' ? '#1e293b' : '#f1f5f9',
-                  borderWidth: 1,
-                  borderColor: colorTheme === 'dark' ? '#334155' : '#e2e8f0',
-                }}>
-                <View
-                  className="flex-row items-center justify-center"
-                  style={{ gap: 8, backgroundColor: 'transparent' }}>
-                  <Feather
-                    name="check-circle"
-                    size={16}
-                    color={colorTheme === 'dark' ? '#94a3b8' : '#64748b'}
-                  />
-                  <Text
-                    className="text-xs font-semibold"
-                    style={{
-                      color: colorTheme === 'dark' ? '#cbd5e1' : '#475569',
-                    }}>
-                    Partida Encerrada
-                  </Text>
-                </View>
-              </View>
-            )}
-          </>
-        ) : (
-          <View
-            className="mt-3 mx-2 rounded-xl p-3"
-            style={{
-              backgroundColor: colorTheme === 'dark' ? '#7f1d1d' : '#fee2e2',
-              borderWidth: 1,
-              borderColor: colorTheme === 'dark' ? '#991b1b' : '#fecaca',
-            }}>
-            <View
-              className="flex-row items-start"
-              style={{ gap: 10, backgroundColor: 'transparent' }}>
-              <View
-                className="w-7 h-7 rounded-full items-center justify-center mt-0.5"
-                style={{
-                  backgroundColor: colorTheme === 'dark' ? '#991b1b' : '#fecaca',
-                }}>
-                <Feather
-                  name="alert-circle"
-                  size={16}
-                  color={colorTheme === 'dark' ? '#fca5a5' : '#dc2626'}
-                />
-              </View>
-              <View className="flex-1" style={{ backgroundColor: 'transparent' }}>
-                <Text
-                  className="text-sm font-semibold mb-1"
-                  style={{
-                    color: colorTheme === 'dark' ? '#fca5a5' : '#dc2626',
-                  }}>
-                  Partida Inválida
-                </Text>
-                <Text
-                  className="text-xs leading-4"
-                  style={{
-                    color: colorTheme === 'dark' ? '#fecaca' : '#ef4444',
-                  }}>
-                  Esta partida não conta pontos para a rodada atual
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
       </View>
-    </TouchableOpacity>
+
+      <View style={styles.row}>
+        <Team {...home} align="left" />
+        <View style={styles.center}>
+          <AppText variant="display" weight="bold" color={hasScore ? 'text' : 'textMuted'}>
+            {score}
+          </AppText>
+        </View>
+        <Team {...away} align="right" />
+      </View>
+
+      <View style={styles.footer}>
+        <Feather name="map-pin" size={12} color={colors.textMuted} />
+        <AppText variant="label" color="textMuted" numberOfLines={1} style={{ flexShrink: 1 }}>
+          {match.local}
+        </AppText>
+        {!isDisabled ? (
+          <Feather name="chevron-right" size={16} color={colors.textMuted} style={styles.chevron} />
+        ) : null}
+      </View>
+    </Pressable>
   );
 }
+
+function Team({
+  club,
+  rank,
+  partial,
+  mine,
+  align,
+}: {
+  club?: Club;
+  rank: number;
+  partial?: number;
+  mine: number;
+  align: 'left' | 'right';
+}) {
+  const { colors } = useTokens();
+  const alignItems = align === 'left' ? 'flex-start' : 'flex-end';
+
+  return (
+    <View style={[styles.team, { alignItems }]}>
+      <View style={[styles.teamName, { flexDirection: align === 'left' ? 'row' : 'row-reverse' }]}>
+        <Image
+          source={{ uri: club?.escudos?.['60x60'] }}
+          style={styles.shield}
+          accessibilityIgnoresInvertColors
+        />
+        <View style={{ alignItems }}>
+          <AppText variant="title" weight="bold">
+            {club?.abreviacao}
+          </AppText>
+          <AppText variant="caption" color="textMuted">
+            {rank}º
+          </AppText>
+        </View>
+      </View>
+      {partial != null ? (
+        <AppText
+          variant="label"
+          weight="bold"
+          color={partial > 0 ? 'positive' : partial < 0 ? 'negative' : 'textMuted'}>
+          {numberToString(partial)} pts
+        </AppText>
+      ) : null}
+      {mine > 0 ? (
+        <View style={[styles.mine, { backgroundColor: colors.accentContainer }]}>
+          <Feather name="user" size={10} color={colors.accent} />
+          <AppText variant="caption" weight="bold" color="accent">
+            {mine} no seu time
+          </AppText>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  badges: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  center: {
+    paddingHorizontal: 8,
+    alignItems: 'center',
+  },
+  team: {
+    flex: 1,
+    gap: 4,
+  },
+  teamName: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  shield: {
+    width: 36,
+    height: 36,
+  },
+  mine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 999,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  chevron: {
+    marginLeft: 'auto',
+  },
+});

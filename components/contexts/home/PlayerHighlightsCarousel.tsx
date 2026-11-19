@@ -1,19 +1,36 @@
 import { useState } from 'react';
-import { Image, Pressable, ScrollView } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
 
-import { Text, View } from '@/components/Themed';
 import { AnimatedCard } from '@/components/structure/AnimatedCard';
+import { AppText } from '@/components/ui/AppText';
+import { Badge } from '@/components/ui/Badge';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import useMarketStatus from '@/hooks/useMarketStatus';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useTokens } from '@/hooks/useTokens';
 import { TopPlayer } from '@/models/Player';
 import { useGetTopPlayers, useGetTopReservePlayers } from '@/queries/players.query';
+import { selectionRate } from '@/utils/insights';
+
+type HighlightTab = 'titulares' | 'reservas';
+
+const TABS = [
+  { value: 'titulares', label: 'Titulares' },
+  { value: 'reservas', label: 'Reservas' },
+] as const;
+
+const numberFormat = new Intl.NumberFormat('pt-BR');
+const percentFormat = new Intl.NumberFormat('pt-BR', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 
 export function PlayerHighlightsCarousel() {
-  const colorTheme = useThemeColor();
-  const { allowRequest } = useMarketStatus();
+  const { spacing } = useTokens();
+  const { allowRequest, marketStatus } = useMarketStatus();
   const { data: topPlayers } = useGetTopPlayers(allowRequest);
   const { data: topReservePlayers } = useGetTopReservePlayers(allowRequest);
-  const [selectedTab, setSelectedTab] = useState<'titulares' | 'reservas'>('titulares');
+  const [selectedTab, setSelectedTab] = useState<HighlightTab>('titulares');
 
   if (
     (!topPlayers || topPlayers.length === 0) &&
@@ -23,66 +40,32 @@ export function PlayerHighlightsCarousel() {
   }
 
   const displayPlayers = selectedTab === 'titulares' ? topPlayers : topReservePlayers;
+  const totalTeams = marketStatus?.times_escalados;
 
   return (
     <AnimatedCard delay={500} variant="flat">
-      <View className="gap-3" style={{ backgroundColor: 'transparent' }}>
-        {/* Header */}
-        <View
-          className="flex-row items-center justify-between"
-          style={{ backgroundColor: 'transparent' }}>
-          <Text className="font-bold text-base">Mais Escalados</Text>
-        </View>
+      <View style={{ gap: spacing.sm }}>
+        <SectionHeader
+          title="Mais escalados"
+          subtitle={
+            totalTeams
+              ? `Entre ${numberFormat.format(totalTeams)} times escalados na rodada`
+              : undefined
+          }
+        />
 
-        {/* Tabs */}
-        <View className="flex-row" style={{ gap: 8, backgroundColor: 'transparent' }}>
-          <Pressable onPress={() => setSelectedTab('titulares')} style={{ flex: 1 }}>
-            <View
-              className={`py-2 rounded-lg ${
-                selectedTab === 'titulares'
-                  ? colorTheme === 'dark'
-                    ? 'bg-blue-500'
-                    : 'bg-blue-500'
-                  : colorTheme === 'dark'
-                    ? 'bg-gray-800'
-                    : 'bg-gray-200'
-              }`}>
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  selectedTab === 'titulares' ? 'text-white' : 'text-gray-600 dark:text-gray-400'
-                }`}>
-                Titulares
-              </Text>
-            </View>
-          </Pressable>
-          <Pressable onPress={() => setSelectedTab('reservas')} style={{ flex: 1 }}>
-            <View
-              className={`py-2 rounded-lg ${
-                selectedTab === 'reservas'
-                  ? colorTheme === 'dark'
-                    ? 'bg-blue-500'
-                    : 'bg-blue-500'
-                  : colorTheme === 'dark'
-                    ? 'bg-gray-800'
-                    : 'bg-gray-200'
-              }`}>
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  selectedTab === 'reservas' ? 'text-white' : 'text-gray-600 dark:text-gray-400'
-                }`}>
-                Reservas
-              </Text>
-            </View>
-          </Pressable>
-        </View>
+        <SegmentedControl options={[...TABS]} value={selectedTab} onChange={setSelectedTab} />
 
-        {/* Horizontal Scroll */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ gap: 12 }}>
-          {displayPlayers?.slice(0, 5).map((player, index) => (
-            <PlayerHighlightCard key={player.Atleta.atleta_id} player={player} index={index} />
+          contentContainerStyle={{ gap: spacing.sm }}>
+          {displayPlayers?.slice(0, 5).map((player) => (
+            <PlayerHighlightCard
+              key={player.Atleta.atleta_id}
+              player={player}
+              totalTeams={totalTeams}
+            />
           ))}
         </ScrollView>
       </View>
@@ -90,51 +73,89 @@ export function PlayerHighlightsCarousel() {
   );
 }
 
-function PlayerHighlightCard({ player, index }: { player: TopPlayer; index: number }) {
-  const colorTheme = useThemeColor();
+function PlayerHighlightCard({ player, totalTeams }: { player: TopPlayer; totalTeams?: number }) {
+  const { colors, radius } = useTokens();
+  const rate = selectionRate(player.escalacoes, totalTeams);
+  const lineups = numberFormat.format(player.escalacoes);
 
   return (
-    <Pressable>
-      <View
-        className={`w-32 rounded-xl p-3 ${colorTheme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
-        style={{
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
-        }}>
-        <View className="items-center" style={{ gap: 8, backgroundColor: 'transparent' }}>
-          {/* Player Photo */}
-          <Image
-            source={{ uri: player.Atleta.foto?.replace('FORMATO', '140x140') }}
-            className="w-16 h-16 rounded-full"
-            alt={player.Atleta.apelido}
-          />
+    <View
+      accessible
+      accessibilityLabel={`${player.Atleta.apelido}, ${player.posicao}, ${player.clube_nome}, ${
+        rate != null ? `escalado por ${percentFormat.format(rate)}% dos times` : `${lineups} escalações`
+      }`}
+      style={[styles.card, { backgroundColor: colors.surfaceAlt, borderRadius: radius.md }]}>
+      <Image
+        source={{ uri: player.Atleta.foto?.replace('FORMATO', '140x140') }}
+        style={[styles.photo, { backgroundColor: colors.surface }]}
+      />
 
-          {/* Player Info */}
-          <View className="items-center" style={{ gap: 4, backgroundColor: 'transparent' }}>
-            <Text className="font-semibold text-xs text-center" numberOfLines={1}>
-              {player.Atleta.apelido_abreviado}
-            </Text>
-            <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: '#0057FF20' }}>
-              <Text className="text-blue-500 text-xs font-bold">
-                {player.posicao_abreviacao.toUpperCase()}
-              </Text>
-            </View>
-          </View>
+      <AppText variant="label" weight="bold" align="center" numberOfLines={1}>
+        {player.Atleta.apelido_abreviado}
+      </AppText>
 
-          {/* Stats */}
-          <View
-            className="w-full items-center pt-1 border-t border-gray-200 dark:border-gray-700"
-            style={{ gap: 4, backgroundColor: 'transparent' }}>
-            <Text className="text-xs text-gray-500 dark:text-gray-400">Escalações</Text>
-            <Text className="font-bold text-sm">
-              {new Intl.NumberFormat('pt-BR').format(player.escalacoes)}
-            </Text>
-          </View>
-        </View>
+      <View style={styles.meta}>
+        <Badge label={player.posicao_abreviacao.toUpperCase()} tone="accent" />
+        <Image source={{ uri: player.escudo_clube }} style={styles.shield} />
       </View>
-    </Pressable>
+
+      <View style={styles.rate}>
+        <AppText variant="title" weight="bold" align="center">
+          {rate != null ? `${percentFormat.format(rate)}%` : lineups}
+        </AppText>
+        {rate != null ? (
+          <>
+            <View style={[styles.track, { backgroundColor: colors.border }]}>
+              <View
+                style={[styles.fill, { width: `${rate}%`, backgroundColor: colors.brand }]}
+              />
+            </View>
+            <AppText variant="caption" color="textMuted" align="center" numberOfLines={1}>
+              {lineups} escalações
+            </AppText>
+          </>
+        ) : (
+          <AppText variant="caption" color="textMuted" align="center">
+            escalações
+          </AppText>
+        )}
+      </View>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    width: 132,
+    padding: 12,
+    alignItems: 'center',
+    gap: 6,
+  },
+  photo: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+  },
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  shield: {
+    width: 18,
+    height: 18,
+  },
+  rate: {
+    alignSelf: 'stretch',
+    gap: 3,
+  },
+  track: {
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: 4,
+    borderRadius: 2,
+  },
+});

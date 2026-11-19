@@ -15,6 +15,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Validate env vars
+        run: |
+          : "${EXPO_PUBLIC_API_URL:?EXPO_PUBLIC_API_URL is not set}"
+          : "${EXPO_PUBLIC_GLOBOID_BASE_URL:?EXPO_PUBLIC_GLOBOID_BASE_URL is not set}"
+          : "${EXPO_PUBLIC_AUTH_URL:?EXPO_PUBLIC_AUTH_URL is not set}"
+          : "${EXPO_PUBLIC_GLOBOID_CLIENT_ID:?EXPO_PUBLIC_GLOBOID_CLIENT_ID is not set}"
+          : "${EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE:?EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE is not set}"
+
       - name: Lint
         run: npm run lint
 

@@ -1,1 +1,0 @@
-export { ClubPlayerCard } from './ClubPlayerCard';

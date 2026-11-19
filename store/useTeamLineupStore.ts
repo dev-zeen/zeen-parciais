@@ -4,6 +4,9 @@ import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
 import { onAddPlayerToLineup, onGetTeamPrice, onRemovePlayerFromLineup } from '@/utils/team';
 
+/** Dado exibido na etiqueta de cada jogador do campinho (Raio-X). */
+export type FieldStat = 'price' | 'average' | 'min' | 'match';
+
 export type AddPlayerToLineupProps = {
   player: FullPlayer;
   index?: number;
@@ -15,6 +18,8 @@ type TeamLineupStore = {
   captain: number;
   price: number;
   formation: string;
+  fieldStat: FieldStat;
+  updateFieldStat: (fieldStat: FieldStat) => void;
   updateLineup: (lineup: LineupPlayers) => void;
   updateCaptain: (value: number) => void;
   updatePrice: (value: number) => void;
@@ -46,6 +51,13 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
   updatePrice: (price: number) => {
     set((_state) => ({
       price,
+    }));
+  },
+  // Preferência de exibição: fica fora do initialState para sobreviver ao reset()
+  fieldStat: 'price',
+  updateFieldStat: (fieldStat: FieldStat) => {
+    set((_state) => ({
+      fieldStat,
     }));
   },
   updateFormation: (formation: string) => {

@@ -1,28 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 
 import { ACCESS_TOKEN_KEY_STORAGE, GLOBOID_CLIENT_SETTINGS_KEY } from '@/constants/Keys';
+import { env } from '@/lib/env';
+import {
+  REFRESH_REJECTED,
+  RefreshResponse,
+  TokenSet,
+  buildRefreshBody,
+  globoIdFromTokens,
+  parseRefreshResponse,
+} from '@/utils/globoid';
 
-type TokenData = {
-  access_token: string;
-  refresh_token?: string;
-  id_token?: string;
-};
-
-type RefreshTokenResponse = {
-  access_token: string;
-  id_token: string;
-  refresh_token: string;
-};
+type TokenData = TokenSet;
 
 type GloboidClientSettings = {
   clientId: string;
   enableRefreshTokenMode: boolean;
 };
 
-const DEFAULT_CLIENT_ID = 'cartola-web@apps.globoid';
-const GLOBOID_REFRESH_URL = 'https://web-api.globoid.globo.com/v1/refresh-token';
-const GLOBOID_CLIENT_SETTINGS_URL = `https://web-api.globoid.globo.com/v1/clients/${DEFAULT_CLIENT_ID}/settings`;
+const DEFAULT_CLIENT_ID = env.EXPO_PUBLIC_GLOBOID_CLIENT_ID;
+const GLOBOID_BASE_URL = env.EXPO_PUBLIC_GLOBOID_BASE_URL;
+const GLOBOID_REFRESH_URL = `${GLOBOID_BASE_URL}/v2/refresh-token`;
+// O GloboID valida a origem: o refresh é feito como o site do Cartola faz.
+const CARTOLA_ORIGIN = new URL(env.EXPO_PUBLIC_AUTH_URL).origin;
+const GLOBOID_CLIENT_SETTINGS_URL = `${GLOBOID_BASE_URL}/v1/clients/${DEFAULT_CLIENT_ID}/settings`;
 
 // ============================================
 // GLOBOID CLIENT SETTINGS
@@ -134,54 +136,51 @@ export async function setAuthToken(token: string) {
   }
 }
 
-export async function refreshToken() {
+export async function refreshToken(): Promise<TokenData> {
   const tokens = await getTokensFromStorage();
 
   if (!tokens?.refresh_token) {
     throw new Error('No refresh token available');
   }
 
-  // Busca as configurações do cliente
+  const globoId = globoIdFromTokens(tokens);
+  if (!globoId) {
+    // Sem globo_id não há como pedir o refresh: trata como sessão encerrada.
+    throw new Error('No refresh token available');
+  }
+
   const clientSettings = await getGloboidClientSettings();
-  
-  // Verifica se o refresh token está habilitado
   if (!clientSettings.enableRefreshTokenMode) {
-    console.log('⚠️ Refresh token mode is disabled');
     throw new Error('Refresh token mode disabled');
   }
 
-  console.log('🔄 Refreshing tokens with Globoid API...');
-  console.log('🔑 Using clientId:', clientSettings.clientId);
-
-  const response = await axios.post<RefreshTokenResponse>(
-    GLOBOID_REFRESH_URL,
-    {
-      client_id: clientSettings.clientId,
-      refresh_token: tokens.refresh_token,
-      access_token: tokens.access_token,
-      id_token: tokens.id_token,
-    }
-  );
-
-  console.log('✅ Tokens refreshed successfully');
-  return response.data;
-}
-
-export async function updateTokenInStorage(): Promise<RefreshTokenResponse> {
   try {
-    const data = await refreshToken();
-    
-    // Atualiza todos os tokens (access, id e refresh)
-    await setAuthTokens({
-      access_token: data.access_token,
-      id_token: data.id_token,
-      refresh_token: data.refresh_token,
-    });
-
-    console.log('✅ Tokens updated in storage');
-    return data;
+    const response = await axios.post<RefreshResponse>(
+      GLOBOID_REFRESH_URL,
+      buildRefreshBody(clientSettings.clientId, globoId, tokens),
+      {
+        timeout: 15000,
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: CARTOLA_ORIGIN,
+          Referer: `${CARTOLA_ORIGIN}/`,
+          'x-globoid-js-client-id': clientSettings.clientId,
+        },
+      }
+    );
+    return parseRefreshResponse(response.data, globoId, tokens);
   } catch (error) {
-    console.error('❌ Error refreshing token:', error);
+    // 4xx do GloboID = refresh token inválido/expirado: a sessão acabou.
+    // Erros de rede ou 5xx seguem como estão, para não deslogar por instabilidade.
+    if (isAxiosError(error) && error.response && error.response.status < 500) {
+      throw new Error(REFRESH_REJECTED);
+    }
     throw error;
   }
+}
+
+export async function updateTokenInStorage(): Promise<TokenData> {
+  const data = await refreshToken();
+  await setAuthTokens(data);
+  return data;
 }

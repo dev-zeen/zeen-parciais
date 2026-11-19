@@ -1,1 +1,0 @@
-export { EmptyInviteList } from './EmptyInviteList';

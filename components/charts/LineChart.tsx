@@ -30,7 +30,7 @@ export function LineChart({ data, labels, height = 100, showGrid = false, width 
     backgroundGradientFrom: colorTheme === 'dark' ? '#111827' : '#F9FAFB',
     backgroundGradientTo: colorTheme === 'dark' ? '#111827' : '#F9FAFB',
     decimalPlaces: 1,
-    color: (opacity = 1) => (colorTheme === 'dark' ? `rgba(59, 130, 246, ${opacity})` : `rgba(37, 99, 235, ${opacity})`),
+    color: (opacity = 1) => `rgba(255, 138, 0, ${opacity})`,
     labelColor: (opacity = 1) => (colorTheme === 'dark' ? `rgba(156, 163, 175, ${opacity})` : `rgba(107, 114, 128, ${opacity})`),
     style: {
       borderRadius: 0,
@@ -46,7 +46,7 @@ export function LineChart({ data, labels, height = 100, showGrid = false, width 
     propsForDots: {
       r: '4',
       strokeWidth: '2',
-      stroke: colorTheme === 'dark' ? '#3B82F6' : '#2563EB',
+      stroke: '#FF8A00',
       fill: colorTheme === 'dark' ? '#111827' : '#F9FAFB',
     },
     propsForBackgroundLines: {
@@ -61,7 +61,7 @@ export function LineChart({ data, labels, height = 100, showGrid = false, width 
     datasets: [
       {
         data,
-        color: (opacity = 1) => (colorTheme === 'dark' ? `rgba(59, 130, 246, ${opacity})` : `rgba(37, 99, 235, ${opacity})`),
+        color: (opacity = 1) => `rgba(255, 138, 0, ${opacity})`,
         strokeWidth: 2,
       },
     ],
@@ -98,7 +98,7 @@ export function LineChart({ data, labels, height = 100, showGrid = false, width 
               left: x - 15,
               fontSize: 10,
               fontWeight: '600',
-              color: colorTheme === 'dark' ? '#60A5FA' : '#2563EB',
+              color: colorTheme === 'dark' ? '#FFA940' : '#964B00',
               backgroundColor: colorTheme === 'dark' ? 'rgba(17, 24, 39, 0.95)' : 'rgba(249, 250, 251, 0.95)',
               paddingHorizontal: 6,
               paddingVertical: 2,
