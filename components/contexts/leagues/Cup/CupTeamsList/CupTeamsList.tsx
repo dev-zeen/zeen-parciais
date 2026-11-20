@@ -38,7 +38,7 @@ export function CupTeamsList({ cup, myTeamId, isRefetching, onRefetch }: CupTeam
     <Card padding={spacing.md} style={{ gap: spacing.sm, marginBottom: spacing.sm }}>
       <View style={styles.between}>
         <AppText variant="label" weight="bold" color="textMuted">
-          AGUARDANDO O SORTEIO
+          AGUARDANDO O CHAVEAMENTO
         </AppText>
         <AppText variant="label" weight="bold">
           {confirmed.length}/{total} times
@@ -69,7 +69,7 @@ export function CupTeamsList({ cup, myTeamId, isRefetching, onRefetch }: CupTeam
             ? `Todas as vagas têm time; ${pending.length} ainda ${
                 pending.length === 1 ? 'precisa' : 'precisam'
               } aceitar o convite.`
-            : 'Vagas completas. O chaveamento sai no sorteio.'}
+            : 'Vagas completas. Aguardando o chaveamento.'}
       </AppText>
     </Card>
   );

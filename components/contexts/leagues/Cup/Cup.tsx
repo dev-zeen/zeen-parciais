@@ -164,7 +164,7 @@ export function Cup({ league: cup, shareRef }: CupProps) {
         }
       : {
           context: `Inscrições · ${cup.liga.total_times_liga}/${cup.liga.quantidade_times ?? '?'} times`,
-          status: { tone: 'pending', label: 'Aguardando sorteio' },
+          status: { tone: 'pending', label: 'Aguardando chaveamento' },
           table: cup.times?.length
             ? {
                 columns: [],

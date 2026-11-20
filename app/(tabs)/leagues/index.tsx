@@ -58,7 +58,7 @@ const fromLeague = (league: LeagueUserDetails, myTeamId?: number): LeagueListIte
       : !league.sorteada
         ? total && filled < total
           ? { label: `Faltam ${total - filled} times`, tone: 'warning' as const }
-          : { label: 'Aguardando sorteio', tone: 'warning' as const }
+          : { label: 'Aguardando chaveamento', tone: 'warning' as const }
         : undefined;
     return {
       key: `league-${league.liga_id}`,

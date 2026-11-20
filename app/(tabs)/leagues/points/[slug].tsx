@@ -310,7 +310,7 @@ export default function PointsCompetitionScreen() {
     ) : !hasStarted ? (
       <Card padding={spacing.md} style={{ gap: spacing.xs }}>
         <AppText variant="label" weight="bold" color="textMuted">
-          AGUARDANDO O SORTEIO
+          AGUARDANDO O CHAVEAMENTO
         </AppText>
         <AppText variant="body">
           {data.quantidade_participantes} de {data.quantidade_times} times confirmados
@@ -394,7 +394,7 @@ export default function PointsCompetitionScreen() {
         status: data.finalizada
           ? { tone: 'finished', label: 'Encerrada' }
           : !data.sorteada
-            ? { tone: 'pending', label: 'Aguardando sorteio' }
+            ? { tone: 'pending', label: 'Aguardando chaveamento' }
             : { tone: 'open', label: `Rodada ${defaultRound ?? data.rodada_inicial}` },
         champion: champion
           ? {
