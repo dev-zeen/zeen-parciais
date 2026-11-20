@@ -380,15 +380,27 @@ export function Login({ reason }: LoginProps) {
                 style={{ flex: 1, backgroundColor: colors.bg }}
                 source={{ uri: EXPO_PUBLIC_AUTH_URL }}
                 incognito
-                userAgent={CHROME_MOBILE_USER_AGENT}
+                // Só no iOS. No Android a WebView envia Client Hints com a versão real
+                // ("Android WebView"); um user agent fixo diferente disso faz a proteção
+                // anti-robô da página bloquear o passo da senha.
+                userAgent={Platform.OS === 'ios' ? CHROME_MOBILE_USER_AGENT : undefined}
                 injectedJavaScript={INJECT_AUTH_LOGIN}
                 onMessage={handleWebViewMessage}
-                onLoadStart={() => setWebViewLoading(true)}
+                // A cobertura de "Carregando" vale só para a primeira carga. Nas navegações
+                // seguintes (e-mail → senha) a própria página mostra o progresso; cobri-la
+                // escondia a página se o Android não disparasse o fim do carregamento.
                 onLoadEnd={() => setWebViewLoading(false)}
                 onError={({ nativeEvent }) => {
                   console.warn('❌ WebView error: ', nativeEvent);
                   setWebViewLoading(false);
                 }}
+                onHttpError={() => setWebViewLoading(false)}
+                // Android: com várias janelas ligadas (padrão), um passo do login aberto com
+                // target="_blank"/window.open vai para uma WebView invisível e a tela parece
+                // travada. Desligado, ele abre aqui mesmo, como já acontece no iOS.
+                setSupportMultipleWindows={false}
+                // Permite inspecionar a página pelo chrome://inspect em builds de desenvolvimento
+                webviewDebuggingEnabled={__DEV__}
                 javaScriptEnabled
                 domStorageEnabled
                 sharedCookiesEnabled={false}

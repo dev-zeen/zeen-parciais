@@ -53,7 +53,6 @@ const FIELD_STAT_OPTIONS: SegmentOption<FieldStat>[] = [
 ];
 
 export default () => {
-  const hasInitialized = useRef(false);
   const playerSheetRef = useRef<PlayerSheetRef>(null);
   const tabBarSpacing = useTabBarSpacing();
 
@@ -152,8 +151,9 @@ export default () => {
   );
 
   useEffect(() => {
-    if (hasInitialized.current || !myClub || isRefetching) return;
-    hasInitialized.current = true;
+    // Monta a escalação sempre que a store estiver vazia: na primeira carga e também depois
+    // de sair e entrar de novo (o logout limpa a store, mas esta tela continua montada).
+    if (lineup || !myClub || isRefetching) return;
 
     const defaultLineup = mountLineup(myClub);
     updateLineup(defaultLineup as LineupPlayers);
@@ -161,6 +161,7 @@ export default () => {
     updatePrice(onGetTeamPrice(defaultLineup.starting));
     if (!formation) updateFormation(initialLineupTeamFormation);
   }, [
+    lineup,
     myClub,
     isRefetching,
     mountLineup,

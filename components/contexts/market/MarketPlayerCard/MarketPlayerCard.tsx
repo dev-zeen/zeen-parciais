@@ -171,11 +171,7 @@ export function MarketPlayerCard({
             accessibleLabel="Mínimo para valorizar"
           />
           {selection != null ? (
-            <Stat
-              label="Esc"
-              value={`${Math.round(selection)}%`}
-              accessibleLabel="Escalado por"
-            />
+            <Stat label="Esc" value={`${Math.round(selection)}%`} accessibleLabel="Escalado por" />
           ) : null}
         </View>
       </View>
@@ -283,7 +279,10 @@ const styles = StyleSheet.create({
   },
   stats: {
     flexDirection: 'row',
-    gap: 12,
+    // Em telas estreitas (ou com "Esc") os números quebram linha em vez de invadir o botão
+    flexWrap: 'wrap',
+    columnGap: 12,
+    rowGap: 2,
     marginTop: 1,
   },
   stat: {
@@ -294,6 +293,7 @@ const styles = StyleSheet.create({
   side: {
     alignItems: 'flex-end',
     gap: 6,
+    flexShrink: 0,
   },
   button: {
     flexDirection: 'row',
