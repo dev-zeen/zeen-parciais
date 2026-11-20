@@ -58,7 +58,12 @@
       ],
       "expo-status-bar",
       "expo-sharing",
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "enableRemoteNotifications": false
+        }
+      ]
     ],
     "experiments": {
       "tsconfigPaths": true,

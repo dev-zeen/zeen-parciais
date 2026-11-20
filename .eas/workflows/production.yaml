@@ -9,6 +9,8 @@ jobs:
   lint:
     name: Lint & Type Check
     type: custom
+    # Sem isso as variáveis do EAS (ambiente production) não chegam ao job
+    environment: production
     steps:
       - uses: eas/checkout
 
@@ -50,7 +52,7 @@ jobs:
     type: submit
     needs: [build_ios]
     params:
-      platform: ios
+      build_id: ${{ needs.build_ios.outputs.build_id }}
       profile: production
 
   submit_android:
@@ -58,5 +60,5 @@ jobs:
     type: submit
     needs: [build_android]
     params:
-      platform: android
+      build_id: ${{ needs.build_android.outputs.build_id }}
       profile: production
