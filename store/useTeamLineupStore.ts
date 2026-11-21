@@ -2,7 +2,12 @@ import { create } from 'zustand';
 
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { onAddPlayerToLineup, onGetTeamPrice, onRemovePlayerFromLineup } from '@/utils/team';
+import {
+  getLuxuryReserve,
+  onAddPlayerToLineup,
+  onGetTeamPrice,
+  onRemovePlayerFromLineup,
+} from '@/utils/team';
 
 /** Dado exibido na etiqueta de cada jogador do campinho (Raio-X). */
 export type FieldStat = 'price' | 'average' | 'min' | 'match';
@@ -16,12 +21,15 @@ export type AddPlayerToLineupProps = {
 type TeamLineupStore = {
   lineup: LineupPlayers | undefined;
   captain: number;
+  /** atleta_id do reserva de luxo; 0 = nenhum */
+  luxuryReserve: number;
   price: number;
   formation: string;
   fieldStat: FieldStat;
   updateFieldStat: (fieldStat: FieldStat) => void;
   updateLineup: (lineup: LineupPlayers) => void;
   updateCaptain: (value: number) => void;
+  updateLuxuryReserve: (value: number) => void;
   updatePrice: (value: number) => void;
   updateFormation: (formation: string) => void;
   removePlayerFromLineup: (player: LineupPlayer | FullPlayer) => void;
@@ -32,6 +40,7 @@ type TeamLineupStore = {
 const initialState = {
   lineup: undefined,
   captain: 0,
+  luxuryReserve: 0,
   price: 0,
   formation: '',
 };
@@ -46,6 +55,11 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
   updateCaptain: (captain: number) => {
     set((_state) => ({
       captain,
+    }));
+  },
+  updateLuxuryReserve: (luxuryReserve: number) => {
+    set((_state) => ({
+      luxuryReserve,
     }));
   },
   updatePrice: (price: number) => {
@@ -76,6 +90,8 @@ const useTeamLineupStore = create<TeamLineupStore>((set) => ({
       return {
         lineup: lineupUpdated,
         captain: player.atleta_id === state.captain ? 0 : state.captain,
+        // Vender o reserva (ou o titular, que esvazia o reserva da posição) desfaz o luxo
+        luxuryReserve: getLuxuryReserve(lineupUpdated, state.luxuryReserve),
         price: priceUpdated,
       };
     });

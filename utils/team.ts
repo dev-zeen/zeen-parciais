@@ -14,6 +14,8 @@ type SaveTeamProps = {
   lineup: LineupPlayers;
   captain: number;
   formation: string;
+  /** atleta_id do reserva de luxo; 0 = nenhum */
+  luxuryReserve?: number;
 };
 
 export type SaveTeamPayload = {
@@ -21,7 +23,17 @@ export type SaveTeamPayload = {
   reservas: Record<string, number>;
   esquema: number;
   capitao: number;
+  reserva_luxo_id?: number;
 };
+
+/**
+ * Reserva de luxo válido: o id só vale se o jogador estiver no banco.
+ * Devolve 0 quando não há luxo ou quando o jogador saiu do banco.
+ */
+export function getLuxuryReserve(lineup: LineupPlayers | undefined, id: number | null | undefined) {
+  if (!id || !lineup) return 0;
+  return lineup.reserves.some((item) => item.player?.atleta_id === id) ? id : 0;
+}
 
 export function onRemovePlayerFromLineup(lineup: LineupPlayers, player: LineupPlayer | FullPlayer) {
   const { starting, reserves } = lineup;
@@ -122,7 +134,12 @@ export function onAddPlayerToLineup({ lineup, player, index, isReservePlayer }: 
   return lineup;
 }
 
-export function onGetPayloadSaveTeam({ lineup, captain, formation }: SaveTeamProps): SaveTeamPayload {
+export function onGetPayloadSaveTeam({
+  lineup,
+  captain,
+  formation,
+  luxuryReserve,
+}: SaveTeamProps): SaveTeamPayload {
   const atletas = lineup.starting.map((position) => position.player?.atleta_id);
 
   const reservas = lineup.reserves.reduce((obj, reserve) => {
@@ -137,12 +154,14 @@ export function onGetPayloadSaveTeam({ lineup, captain, formation }: SaveTeamPro
 
   const esquema = Number(getKeyFormationByValue(formation));
   const capitao = captain;
+  const reservaLuxo = getLuxuryReserve(lineup, luxuryReserve);
 
   return {
     atletas,
     reservas,
     esquema,
     capitao,
+    ...(reservaLuxo ? { reserva_luxo_id: reservaLuxo } : {}),
   };
 }
 

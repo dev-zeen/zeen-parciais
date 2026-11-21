@@ -21,7 +21,7 @@ Regras de cada funcionalidade: [funcionalidades-e-regras.md](funcionalidades-e-r
 | 9 | % de escalação no mercado | ✅ Implementado | "Esc X%" no card do mercado |
 | 10 | Compartilhar como imagem | ✅ Implementado | Escalação atual na aba Time (`components/contexts/team/ShareLineupCard.tsx`); qualquer liga (clássica, mata-mata, pontos corridos) pelo cabeçalho (`components/contexts/leagues/ShareLeagueCard.tsx`) |
 | 11 | Histórico da temporada | ⏭️ Já existia | Perfil (gráfico, melhor e pior rodada) |
-| 12 | Reserva de luxo / banco | ❌ Não implementado | Falta confirmar o payload de `SAVE_TEAM` com a API |
+| 12 | Reserva de luxo | ✅ Implementado | Ficha do reserva (`TeamPlayerCard`), selo "L" no banco, `reserva_luxo_id` em `onGetPayloadSaveTeam` (`utils/team.ts`) |
 | 13 | Widget / Live Activity | ❌ Não implementado | Precisa de target nativo; fica como projeto separado |
 
 ### Limitações conhecidas

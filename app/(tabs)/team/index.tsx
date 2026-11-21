@@ -16,6 +16,7 @@ import { useMarketSheet } from '@/components/contexts/team/useMarketSheet';
 import {
   emptyCaptain,
   emptyLineupFormation,
+  emptyLuxuryReserve,
   emptyReservePlayers,
   onClearLineup,
   onGetDefaultLineupTeam,
@@ -43,7 +44,7 @@ import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore, { FieldStat } from '@/store/useTeamLineupStore';
 import { debugLog } from '@/utils/debugLog';
 import { haptics } from '@/utils/haptics';
-import { onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
+import { getLuxuryReserve, onGetPayloadSaveTeam, onGetTeamPrice } from '@/utils/team';
 
 const FIELD_STAT_OPTIONS: SegmentOption<FieldStat>[] = [
   { value: 'price', label: 'Preço' },
@@ -85,6 +86,8 @@ export default () => {
   const lineup = useTeamLineupStore((state) => state.lineup);
   const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
   const captain = useTeamLineupStore((state) => state.captain);
+  const luxuryReserve = useTeamLineupStore((state) => state.luxuryReserve);
+  const updateLuxuryReserve = useTeamLineupStore((state) => state.updateLuxuryReserve);
   const updatePrice = useTeamLineupStore((state) => state.updatePrice);
   const price = useTeamLineupStore((state) => state.price);
   const updateFormation = useTeamLineupStore((state) => state.updateFormation);
@@ -126,14 +129,15 @@ export default () => {
     if (!lineup || !myClub) return undefined;
     const isEqualLineups = onGetEqualLineups(lineup, myClub);
     const isSameCaptain = myClub.capitao_id === captain;
+    const isSameLuxuryReserve = (myClub.reserva_luxo_id ?? 0) === luxuryReserve;
 
     return getSaveBlocker({
       emptySlots: lineup.starting.filter((item) => !item.player).length,
       balance,
       hasCaptain: !!captain,
-      hasChanges: !isSameCaptain || !isEqualLineups,
+      hasChanges: !isSameCaptain || !isSameLuxuryReserve || !isEqualLineups,
     });
-  }, [lineup, captain, myClub, balance]);
+  }, [lineup, captain, luxuryReserve, myClub, balance]);
 
   const mountLineup = useCallback(
     (myTeam: FullClubInfo) => {
@@ -158,6 +162,7 @@ export default () => {
     const defaultLineup = mountLineup(myClub);
     updateLineup(defaultLineup as LineupPlayers);
     updateCaptain(myClub.capitao_id ?? 0);
+    updateLuxuryReserve(myClub.reserva_luxo_id ?? 0);
     updatePrice(onGetTeamPrice(defaultLineup.starting));
     if (!formation) updateFormation(initialLineupTeamFormation);
   }, [
@@ -169,6 +174,7 @@ export default () => {
     initialLineupTeamFormation,
     updateLineup,
     updateCaptain,
+    updateLuxuryReserve,
     updatePrice,
     updateFormation,
   ]);
@@ -194,6 +200,7 @@ export default () => {
 
         updateLineup(defaultLineup);
         updateCaptain(myTeamData?.capitao_id as number);
+        updateLuxuryReserve(myTeamData?.reserva_luxo_id ?? 0);
         updatePrice(newPrice);
       })
       .catch((err) => {
@@ -242,6 +249,7 @@ export default () => {
 
     updateLineup(lineupWithoutPlayers);
     updateCaptain(0);
+    updateLuxuryReserve(0);
     updatePrice(newPrice);
   }, [
     lineup,
@@ -249,6 +257,7 @@ export default () => {
     updateFormation,
     updateLineup,
     updateCaptain,
+    updateLuxuryReserve,
     updatePrice,
   ]);
 
@@ -264,26 +273,44 @@ export default () => {
     }
 
     const save = () =>
-      mutate(onGetPayloadSaveTeam({ lineup: lineup as LineupPlayers, captain, formation }), {
-        onSuccess: () => {
-          haptics.success();
-          onRefetchMyClub();
-          showToast('Time salvo com sucesso!', 'success');
-        },
-        onError: () => {
-          haptics.error();
-          showToast('Não foi possível salvar o time. Tente de novo.', 'error');
-        },
-      });
+      mutate(
+        onGetPayloadSaveTeam({
+          lineup: lineup as LineupPlayers,
+          captain,
+          formation,
+          luxuryReserve,
+        }),
+        {
+          onSuccess: () => {
+            haptics.success();
+            onRefetchMyClub();
+            showToast('Time salvo com sucesso!', 'success');
+          },
+          onError: () => {
+            haptics.error();
+            showToast('Não foi possível salvar o time. Tente de novo.', 'error');
+          },
+        }
+      );
 
-    // Banco incompleto: confirma antes de salvar
+    // Sem reserva de luxo (havendo algum reserva no banco): confirma antes de salvar
+    const confirmLuxuryReserve = () => {
+      const hasReserve = !!lineup?.reserves?.some((item) => item.player);
+      if (hasReserve && !getLuxuryReserve(lineup, luxuryReserve)) {
+        emptyLuxuryReserve(save);
+        return;
+      }
+      save();
+    };
+
+    // Banco incompleto: confirma antes; depois passa pela checagem do luxo
     if (!lineup?.reserves?.every((item) => item.player)) {
-      emptyReservePlayers(save);
+      emptyReservePlayers(confirmLuxuryReserve);
       return;
     }
-    save();
+    confirmLuxuryReserve();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [captain, formation, lineup]);
+  }, [captain, formation, lineup, luxuryReserve]);
 
   if (!isAutheticated) {
     return <Login reason="Entre para escalar seu time e acompanhar as parciais." />;
@@ -367,6 +394,7 @@ export default () => {
 
         <ListReservePlayers
           lineup={lineup}
+          luxuryReserve={luxuryReserve}
           substitutions={substitutions}
           round={marketStatus?.rodada_atual}
           isViewOnly={isMarketClose}

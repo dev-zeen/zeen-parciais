@@ -35,7 +35,13 @@ documento deve mudar junto. Status do plano de melhorias: [plano-melhorias.md](p
 - **Saldo** = patrimônio − valor da escalação. O mercado bloqueia a compra sem saldo ou sem vaga.
 - **Reserva** precisa custar **menos que o titular mais barato** da posição.
 - A escalação editada fica no store até salvar. A aba Time mostra o badge "1" quando a escalação na tela é diferente da salva.
-- **Salvar** envia `atletas`, `reservas` (por posição), `esquema` e `capitao` (`SAVE_TEAM`). Reserva de luxo **não** é enviada.
+- **Salvar** envia `atletas`, `reservas` (por posição), `esquema`, `capitao` e, se houver, `reserva_luxo_id` (`SAVE_TEAM`).
+- **Reserva de luxo** (`luxuryReserve` na store; `getLuxuryReserve` em `utils/team.ts`):
+  - É um dos reservas já escalados; só existe 1 por rodada. Escolhido na ficha do reserva e marcado com "L" no banco.
+  - Salvar com algum reserva no banco e sem luxo mostra um alerta com as opções "Voltar e escolher" e "Salvar sem". Ele vem depois do aviso de banco incompleto.
+  - Só é enviado se o jogador ainda estiver no banco. Vender o reserva, ou o titular da posição (que esvazia o reserva), desfaz o luxo.
+  - Regra da Globo: substitui o titular da posição com a pior pontuação, se pontuar mais que ele, e só se todos os titulares da posição jogarem. No empate da pior nota, o capitão sai primeiro.
+  - A substituição é feita pela Globo e chega em `/time/substituicoes`; o app não a calcula.
 
 ### Mercado — `components/contexts/market/MarketFilters/filters.helper.ts`
 

@@ -51,6 +51,8 @@ export function TeamPlayerCard({
 
   const captain = useTeamLineupStore((state) => state.captain);
   const updateCaptain = useTeamLineupStore((state) => state.updateCaptain);
+  const luxuryReserve = useTeamLineupStore((state) => state.luxuryReserve);
+  const updateLuxuryReserve = useTeamLineupStore((state) => state.updateLuxuryReserve);
   const removePlayerFromLineup = useTeamLineupStore((state) => state.removePlayerFromLineup);
 
   const { data: positions } = useGetPositions();
@@ -59,15 +61,20 @@ export function TeamPlayerCard({
   const { data: playerHistory } = useGetPlayerHistory(player.atleta_id, !!allowRequest);
   const { getInsight } = usePlayerInsights();
 
-
   const canEdit = !isViewOnly && !isMarketClose;
   const isCaptain = !isViewOnly && captain === player.atleta_id;
   const canBeCaptain = !isReservePlayer && player.posicao_id !== Positions.TECNICO;
+  const isLuxuryReserve = !isViewOnly && isReservePlayer && luxuryReserve === player.atleta_id;
 
   const handleSelectCaptain = useCallback(() => {
     haptics.selection();
     updateCaptain(player.atleta_id);
   }, [player.atleta_id, updateCaptain]);
+
+  const handleSelectLuxuryReserve = useCallback(() => {
+    haptics.selection();
+    updateLuxuryReserve(player.atleta_id);
+  }, [player.atleta_id, updateLuxuryReserve]);
 
   const handleSell = useCallback(() => {
     removePlayerFromLineup(player);
@@ -103,6 +110,7 @@ export function TeamPlayerCard({
             ) : null}
             {isCaptain ? <Badge label="Capitão" tone="brand" /> : null}
             {isReservePlayer ? <Badge label="Reserva" /> : null}
+            {isLuxuryReserve ? <Badge label="Luxo" tone="brand" /> : null}
           </View>
         </View>
         <Pressable
@@ -138,6 +146,18 @@ export function TeamPlayerCard({
                 disabled={isCaptain}
                 background={isCaptain ? colors.brandContainer : colors.brand}
                 foreground={isCaptain ? colors.text : colors.onBrand}
+                minHeight={minTouch}
+                radius={radius.md}
+              />
+            ) : null}
+            {isReservePlayer ? (
+              <ActionButton
+                icon="star"
+                label={isLuxuryReserve ? 'É o reserva de luxo' : 'Reserva de luxo'}
+                onPress={handleSelectLuxuryReserve}
+                disabled={isLuxuryReserve}
+                background={isLuxuryReserve ? colors.brandContainer : colors.brand}
+                foreground={isLuxuryReserve ? colors.text : colors.onBrand}
                 minHeight={minTouch}
                 radius={radius.md}
               />
@@ -216,7 +236,12 @@ function ActionButton({
       accessibilityState={{ disabled: !!disabled }}
       style={({ pressed }) => [
         styles.action,
-        { minHeight, borderRadius: radius, backgroundColor: background, opacity: pressed ? 0.75 : 1 },
+        {
+          minHeight,
+          borderRadius: radius,
+          backgroundColor: background,
+          opacity: pressed ? 0.75 : 1,
+        },
       ]}>
       <Feather name={icon} size={16} color={foreground} />
       <AppText variant="body" weight="bold" color={foreground} numberOfLines={1}>

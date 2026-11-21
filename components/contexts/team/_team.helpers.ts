@@ -1,4 +1,3 @@
-
 import { FORMATIONS, LINEUPS_DEFAULT_OBJECT } from '@/constants/Formations';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayer, LineupPlayers, LineupPosition } from '@/models/Formations';
@@ -248,6 +247,19 @@ export const emptyReservePlayers = (onSuccess: () => void) =>
         style: 'cancel',
       },
       { text: 'Sim', onPress: () => onSuccess() },
+    ]
+  );
+
+export const emptyLuxuryReserve = (onSuccess: () => void) =>
+  appAlert(
+    'Reserva de luxo pendente',
+    'Você ainda não escolheu o reserva de luxo. Quer salvar sem ele ou voltar para escolher? Para escolher, toque em um reserva.',
+    [
+      {
+        text: 'Voltar e escolher',
+        style: 'cancel',
+      },
+      { text: 'Salvar sem', onPress: () => onSuccess() },
     ]
   );
 

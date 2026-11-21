@@ -1,20 +1,28 @@
 name: PR Checks
 
+# Só checagens: nada é gerado nem enviado às lojas.
 on:
   pull_request:
     branches:
       - main
 
+# Um push novo no mesmo PR cancela a checagem anterior.
+concurrency:
+  group: ${{ workflow.filename }}-${{ github.ref }}
+  cancel_in_progress: true
+
 jobs:
-  lint:
-    name: Lint & Type Check
-    type: managed
+  check:
+    name: Typecheck, lint, testes e expo-doctor
+    environment: production
     steps:
-      - name: Install dependencies
+      - uses: eas/checkout
+
+      - name: Instalar dependências
         run: npm ci
 
-      - name: Lint
-        run: npx expo lint
+      - name: Typecheck, lint e testes unitários
+        run: npm run check
 
-      - name: Type Check
-        run: npx tsc --noEmit
+      - name: Versões compatíveis com o SDK
+        run: npx -y expo-doctor

@@ -398,6 +398,7 @@ export default function ClubScreen() {
             />
             <ListReservePlayers
               lineup={lineup}
+              luxuryReserve={team?.reserva_luxo_id}
               substitutions={substitutions}
               round={round}
               isViewOnly

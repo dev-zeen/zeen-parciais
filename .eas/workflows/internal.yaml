@@ -1,0 +1,71 @@
+name: Teste interno
+
+# Todo push na main gera os builds e envia para TESTE, nunca para produção:
+#   Android → faixa "internal" da Play Console (perfil de envio "internal" do eas.json)
+#   iOS     → TestFlight (a publicação na App Store é sempre manual no App Store Connect)
+# Para publicar em produção, use o workflow production.yaml (tag v* ou execução manual).
+on:
+  push:
+    branches:
+      - main
+
+# Pushes seguidos na main: só o último vira build.
+concurrency:
+  group: ${{ workflow.filename }}-${{ github.ref }}
+  cancel_in_progress: true
+
+jobs:
+  check:
+    name: Typecheck, lint, testes e expo-doctor
+    environment: production
+    steps:
+      - uses: eas/checkout
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Variáveis de ambiente do EAS
+        run: |
+          : "${EXPO_PUBLIC_API_URL:?EXPO_PUBLIC_API_URL não definida}"
+          : "${EXPO_PUBLIC_GLOBOID_BASE_URL:?EXPO_PUBLIC_GLOBOID_BASE_URL não definida}"
+          : "${EXPO_PUBLIC_AUTH_URL:?EXPO_PUBLIC_AUTH_URL não definida}"
+          : "${EXPO_PUBLIC_GLOBOID_CLIENT_ID:?EXPO_PUBLIC_GLOBOID_CLIENT_ID não definida}"
+          : "${EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE:?EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE não definida}"
+
+      - name: Typecheck, lint e testes unitários
+        run: npm run check
+
+      - name: Versões compatíveis com o SDK
+        run: npx -y expo-doctor
+
+  build_android:
+    name: Build Android
+    type: build
+    needs: [check]
+    params:
+      platform: android
+      profile: production
+
+  build_ios:
+    name: Build iOS
+    type: build
+    needs: [check]
+    params:
+      platform: ios
+      profile: production
+
+  submit_android:
+    name: Enviar Android (teste interno)
+    type: submit
+    needs: [build_android]
+    params:
+      build_id: ${{ needs.build_android.outputs.build_id }}
+      profile: internal
+
+  submit_ios:
+    name: Enviar iOS (TestFlight)
+    type: submit
+    needs: [build_ios]
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+      profile: internal

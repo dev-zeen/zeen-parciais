@@ -1,64 +1,74 @@
-name: Production Pipeline
+name: Produção
 
+# Só roda quando você decide publicar:
+#   - criando uma tag de versão:  git tag v1.2.0 && git push origin v1.2.0
+#   - ou manualmente:             npx eas-cli workflow:run production.yaml  (ou pelo expo.dev)
+# Android vai para a faixa "production" e entra em revisão.
+# iOS vai para o TestFlight; a versão é enviada à revisão da Apple no App Store Connect.
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+# Duas publicações seguidas entram em fila: a segunda espera a primeira terminar.
+# Não cancela a anterior, para não interromper um envio às lojas no meio.
+concurrency:
+  group: ${{ workflow.filename }}
+  cancel_in_progress: false
 
 jobs:
-  lint:
-    name: Lint & Type Check
-    type: custom
-    # Sem isso as variáveis do EAS (ambiente production) não chegam ao job
+  check:
+    name: Typecheck, lint, testes e expo-doctor
     environment: production
     steps:
       - uses: eas/checkout
 
-      - name: Install dependencies
+      - name: Instalar dependências
         run: npm ci
 
-      - name: Validate env vars
+      - name: Variáveis de ambiente do EAS
         run: |
-          : "${EXPO_PUBLIC_API_URL:?EXPO_PUBLIC_API_URL is not set}"
-          : "${EXPO_PUBLIC_GLOBOID_BASE_URL:?EXPO_PUBLIC_GLOBOID_BASE_URL is not set}"
-          : "${EXPO_PUBLIC_AUTH_URL:?EXPO_PUBLIC_AUTH_URL is not set}"
-          : "${EXPO_PUBLIC_GLOBOID_CLIENT_ID:?EXPO_PUBLIC_GLOBOID_CLIENT_ID is not set}"
-          : "${EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE:?EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE is not set}"
+          : "${EXPO_PUBLIC_API_URL:?EXPO_PUBLIC_API_URL não definida}"
+          : "${EXPO_PUBLIC_GLOBOID_BASE_URL:?EXPO_PUBLIC_GLOBOID_BASE_URL não definida}"
+          : "${EXPO_PUBLIC_AUTH_URL:?EXPO_PUBLIC_AUTH_URL não definida}"
+          : "${EXPO_PUBLIC_GLOBOID_CLIENT_ID:?EXPO_PUBLIC_GLOBOID_CLIENT_ID não definida}"
+          : "${EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE:?EXPO_PUBLIC_GLOBOID_TOKEN_KEY_LOCAL_STORAGE não definida}"
 
-      - name: Lint
-        run: npm run lint
+      - name: Typecheck, lint e testes unitários
+        run: npm run check
 
-      - name: Type Check
-        run: npm run typecheck
-
-  build_ios:
-    name: Build iOS
-    type: build
-    needs: [lint]
-    params:
-      platform: ios
-      profile: production
+      - name: Versões compatíveis com o SDK
+        run: npx -y expo-doctor
 
   build_android:
     name: Build Android
     type: build
-    needs: [lint]
+    needs: [check]
     params:
       platform: android
       profile: production
 
-  submit_ios:
-    name: Submit iOS
-    type: submit
-    needs: [build_ios]
+  build_ios:
+    name: Build iOS
+    type: build
+    needs: [check]
     params:
-      build_id: ${{ needs.build_ios.outputs.build_id }}
+      platform: ios
       profile: production
 
   submit_android:
-    name: Submit Android
+    name: Enviar Android (produção)
     type: submit
     needs: [build_android]
     params:
       build_id: ${{ needs.build_android.outputs.build_id }}
+      profile: production
+
+  submit_ios:
+    name: Enviar iOS (TestFlight)
+    type: submit
+    needs: [build_ios]
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
       profile: production

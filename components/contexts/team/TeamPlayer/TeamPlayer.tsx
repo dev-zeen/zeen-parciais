@@ -24,6 +24,8 @@ type TeamPlayerProps = {
   isReplaced?: boolean;
   isEnteredInMatch?: boolean;
   isReservePlayer?: boolean;
+  /** Reserva de luxo: selo "L" no avatar */
+  isLuxuryReserve?: boolean;
   isViewOnly: boolean;
   round?: number;
   width?: number;
@@ -40,6 +42,7 @@ export function TeamPlayer({
   isReplaced,
   isEnteredInMatch,
   isReservePlayer = false,
+  isLuxuryReserve = false,
   isViewOnly = false,
   round,
   width = PLAYER_SLOT_MAX_WIDTH,
@@ -94,6 +97,7 @@ export function TeamPlayer({
   const accessibilityLabel = [
     player.apelido,
     isCaptain ? 'capitão' : null,
+    isLuxuryReserve ? 'reserva de luxo' : null,
     !isViewOnly && status ? status.name : null,
     showScore ? `pontuação ${label}` : accessibleStat(fieldStat, label, insight),
     isReplaced ? 'substituído' : null,
@@ -144,21 +148,17 @@ export function TeamPlayer({
           accessible={false}
         />
 
-        {isCaptain ? (
+        {isCaptain || isLuxuryReserve ? (
           <View style={[styles.badge, styles.badgeTopLeft, { backgroundColor: colors.brand }]}>
             <AppText variant="caption" weight="bold" color="onBrand" maxFontSizeMultiplier={1}>
-              C
+              {isCaptain ? 'C' : 'L'}
             </AppText>
           </View>
         ) : null}
 
         {!isViewOnly && status ? (
           <View
-            style={[
-              styles.badge,
-              styles.badgeBottomRight,
-              { backgroundColor: status.background },
-            ]}>
+            style={[styles.badge, styles.badgeBottomRight, { backgroundColor: status.background }]}>
             <Feather
               name={status.icon as keyof typeof Feather.glyphMap}
               color={status.color}

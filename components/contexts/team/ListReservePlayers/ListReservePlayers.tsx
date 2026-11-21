@@ -21,6 +21,8 @@ import { appAlert } from '@/components/ui/AppAlert';
 
 type ListReservePlayersProps = {
   lineup: LineupPlayers;
+  /** atleta_id do reserva de luxo; 0 ou vazio = nenhum */
+  luxuryReserve?: number | null;
   substitutions?: Substitutions[];
   isViewOnly?: boolean;
   round?: number;
@@ -39,6 +41,7 @@ const CARD_PADDING = 12;
 
 export function ListReservePlayers({
   lineup,
+  luxuryReserve,
   substitutions,
   isViewOnly = false,
   round,
@@ -91,7 +94,11 @@ export function ListReservePlayers({
     <Card padding={CARD_PADDING} style={styles.card}>
       <SectionHeader
         title="Reservas"
-        subtitle={isViewOnly ? undefined : 'Entram se o titular da posição não jogar'}
+        subtitle={
+          isViewOnly
+            ? undefined
+            : 'Entram se o titular da posição não jogar. Toque em um para escolher o de luxo.'
+        }
         right={
           <Badge
             label={`${reservesCount}/${totalReserves}`}
@@ -111,6 +118,7 @@ export function ListReservePlayers({
               isViewOnly={isViewOnly}
               player={player}
               isReservePlayer
+              isLuxuryReserve={!!luxuryReserve && luxuryReserve === player.atleta_id}
               isPlayed={playerStats?.atletas?.[player.atleta_id]?.entrou_em_campo}
               isEnteredInMatch={substitutions?.some(
                 (item) => item.entrou.atleta_id === player.atleta_id
