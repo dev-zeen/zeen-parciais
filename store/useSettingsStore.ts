@@ -11,6 +11,9 @@ type SettingsState = {
    */
   marketReminders: boolean | null;
   setMarketReminders: (enabled: boolean) => void;
+  /** Rodada em que o usuário escolheu "Não receber ainda" a doação de cartoletas. */
+  donationDismissedRound: number | null;
+  setDonationDismissedRound: (round: number) => void;
 };
 
 const useSettingsStore = create<SettingsState>()(
@@ -19,11 +22,16 @@ const useSettingsStore = create<SettingsState>()(
       hydrated: false,
       marketReminders: null,
       setMarketReminders: (enabled) => set({ marketReminders: enabled }),
+      donationDismissedRound: null,
+      setDonationDismissedRound: (round) => set({ donationDismissedRound: round }),
     }),
     {
       name: '@settings',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: ({ marketReminders }) => ({ marketReminders }),
+      partialize: ({ marketReminders, donationDismissedRound }) => ({
+        marketReminders,
+        donationDismissedRound,
+      }),
       onRehydrateStorage: () => () => useSettingsStore.setState({ hydrated: true }),
     }
   )

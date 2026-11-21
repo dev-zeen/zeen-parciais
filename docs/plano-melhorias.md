@@ -49,6 +49,7 @@ Regras de cada funcionalidade: [funcionalidades-e-regras.md](funcionalidades-e-r
 
 ### Fora do plano, corrigido
 
+- **Doação de cartoletas** (✅ implementado): um card na aba Time oferece a doação de volta a C$ 100 quando a API permite e o patrimônio está abaixo disso. Ver `utils/donation.ts` e `components/contexts/team/DonationCard.tsx`.
 - **Refresh do GloboID** (`lib/core/auth.ts`, `utils/globoid.ts`). Antes, a chamada usava `/v1`, com corpo e resposta fora do contrato real. Na prática, o refresh nunca funcionava e deslogava o usuário sem aviso. Agora usa `/v2/refresh-token` (`globo_id` + `tokens[]`) e lê `results[].tokens`. Se o GloboID recusar (4xx), o usuário é deslogado. Erros de rede e 5xx não deslogam.
 - **Alertas com uma cor só:** removida a barra lateral do `AlertsCard`.
 

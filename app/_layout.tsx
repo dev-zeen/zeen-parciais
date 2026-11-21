@@ -51,6 +51,9 @@ function RootLayoutNav() {
         <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="pontuacao" options={{ headerShown: false }} />
+          <Stack.Screen name="noticias" options={{ headerShown: false }} />
+          <Stack.Screen name="historico-escalacoes" options={{ headerShown: false }} />
         </Stack>
         <AppAlertHost />
       </ThemeProvider>

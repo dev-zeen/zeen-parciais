@@ -2,15 +2,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 import {
+  CARTOLETAS_DONATION,
   GET_CLUB_BY_ID,
   GET_CLUB_BY_ID_AND_ROUND,
   GET_CLUB_HISTORY,
+  GET_LINEUP_HISTORY,
+  GET_RANKING_LEVELS,
   GET_MATCH_SUBSTITUTIONS,
   GET_MATCH_SUBSTITUTIONS_BY_ROUND,
   GET_MY_CLUB,
   SAVE_TEAM,
 } from '@/constants/Endpoits';
-import { FullClubInfo, Substitutions, TeamHistoryRound } from '@/models/Club';
+import {
+  CartoletasDonationStatus,
+  FullClubInfo,
+  LineupHistoryEntry,
+  RankingLevel,
+  Substitutions,
+  TeamHistoryRound,
+} from '@/models/Club';
 import api from '@/services/api';
 import { SaveTeamPayload } from '@/utils/team';
 
@@ -125,3 +135,48 @@ export const useSaveTeam = (callbacks?: SaveTeamCallbacks) => {
     },
   });
 };
+
+/** Status da doação de cartoletas (uma por temporada). */
+export const useGetCartoletasDonation = (enabled: boolean) =>
+  useQuery<CartoletasDonationStatus>({
+    queryKey: [CARTOLETAS_DONATION],
+    queryFn: () => api.get<CartoletasDonationStatus>(CARTOLETAS_DONATION).then((r) => r.data),
+    enabled,
+  });
+
+/** Recebe a doação: o patrimônio volta a C$ 100. */
+export const useReceiveCartoletasDonation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, AxiosError<{ mensagem?: string }>>({
+    mutationFn: () => api.post(CARTOLETAS_DONATION),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GET_MY_CLUB] });
+      queryClient.invalidateQueries({ queryKey: [CARTOLETAS_DONATION] });
+    },
+  });
+};
+
+/** Cada salvamento do time na rodada, do mais recente ao mais antigo. */
+export const useGetLineupHistory = (round: number | undefined, enabled: boolean) => {
+  const url = GET_LINEUP_HISTORY.replace(':round', String(round));
+  return useQuery<LineupHistoryEntry[]>({
+    queryKey: [url],
+    queryFn: () =>
+      api
+        .get<LineupHistoryEntry[] | null>(url)
+        .then((r) => (Array.isArray(r.data) ? r.data : [])),
+    enabled: enabled && !!round,
+  });
+};
+
+/** Níveis do cartoleiro; tabela fixa da temporada. */
+export const useGetRankingLevels = () =>
+  useQuery<RankingLevel[]>({
+    queryKey: [GET_RANKING_LEVELS],
+    queryFn: () =>
+      api
+        .get<RankingLevel[] | null>(GET_RANKING_LEVELS)
+        .then((r) => (Array.isArray(r.data) ? r.data : [])),
+    staleTime: Infinity,
+  });

@@ -39,7 +39,17 @@ import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { FullClubInfo } from '@/models/Club';
 import { LineupPlayer, LineupPlayers } from '@/models/Formations';
 import { FullPlayer } from '@/models/Stats';
-import { useGetMatchSubstitutions, useGetMyClub, useSaveTeam } from '@/queries/club.query';
+import {
+  useGetCartoletasDonation,
+  useGetMatchSubstitutions,
+  useGetMyClub,
+  useReceiveCartoletasDonation,
+  useSaveTeam,
+} from '@/queries/club.query';
+import useSettingsStore from '@/store/useSettingsStore';
+import { shouldOfferDonation } from '@/utils/donation';
+import { appAlert } from '@/components/ui/AppAlert';
+import { DonationCard } from '@/components/contexts/team/DonationCard';
 import { useGetScoredPlayers } from '@/queries/stats.query';
 import useTeamLineupStore, { FieldStat } from '@/store/useTeamLineupStore';
 import { debugLog } from '@/utils/debugLog';
@@ -76,6 +86,15 @@ export default () => {
     isError: isErrorMyClub,
     refetch: onRefetchMyClub,
   } = useGetMyClub(allowRequest);
+
+  // Doação de cartoletas: só faz sentido com o mercado aberto
+  const { data: donation, refetch: onRefetchDonation } = useGetCartoletasDonation(
+    !!allowRequest && !isMarketClose
+  );
+  const { mutate: receiveDonation, isPending: isReceivingDonation } =
+    useReceiveCartoletasDonation();
+  const donationDismissedRound = useSettingsStore((state) => state.donationDismissedRound);
+  const setDonationDismissedRound = useSettingsStore((state) => state.setDonationDismissedRound);
 
   const { data: substitutions, isLoading: isInitialLoadingSubstitutions } =
     useGetMatchSubstitutions({
@@ -182,6 +201,8 @@ export default () => {
   const onRefresh = useCallback(() => {
     // Force remount of BottomSheet to reset SafeAreaView
     setBottomSheetKey((prev) => prev + 1);
+
+    if (!isMarketClose) onRefetchDonation();
 
     Promise.allSettled([onRefetchPlayerStats(), onRefetchMyClub()])
       .then((results) => {
@@ -312,6 +333,38 @@ export default () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [captain, formation, lineup, luxuryReserve]);
 
+  const showDonation =
+    !isMarketClose &&
+    shouldOfferDonation({
+      allowed: donation?.reset_permitido,
+      patrimony: myClub?.patrimonio,
+      round: marketStatus?.rodada_atual,
+      dismissedRound: donationDismissedRound,
+    });
+
+  const handleReceiveDonation = () =>
+    appAlert('Receber doação?', 'Seu time só pode receber uma doação por temporada.', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Receber',
+        onPress: () =>
+          receiveDonation(undefined, {
+            onSuccess: () => {
+              haptics.success();
+              showToast('Doação recebida! Seu patrimônio voltou a C$ 100.', 'success');
+            },
+            onError: (error) => {
+              haptics.error();
+              showToast(
+                error.response?.data?.mensagem ??
+                  'Não foi possível receber a doação. Tente de novo.',
+                'error'
+              );
+            },
+          }),
+      },
+    ]);
+
   if (!isAutheticated) {
     return <Login reason="Entre para escalar seu time e acompanhar as parciais." />;
   }
@@ -355,6 +408,15 @@ export default () => {
           // Com a barra de salvar, ela já fica entre o conteúdo e a barra de abas
           paddingBottom: isMarketClose ? tabBarSpacing.contentBottom : 16,
         }}>
+        {showDonation && (
+          <DonationCard
+            patrimony={myClub?.patrimonio ?? 0}
+            isReceiving={isReceivingDonation}
+            onReceive={handleReceiveDonation}
+            onDismiss={() => setDonationDismissedRound(marketStatus.rodada_atual)}
+          />
+        )}
+
         <TeamStatsCard
           patrimonio={myClub?.patrimonio ?? 0}
           price={price ?? 0}

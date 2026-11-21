@@ -35,7 +35,12 @@ import {
   useGetPointsCompetitions,
 } from '@/queries/competitions.query';
 import { useGetInvites } from '@/queries/invites.query';
-import { useGetLeagues } from '@/queries/leagues.query';
+import {
+  useGetFinishedClassicPrivateLeagues,
+  useGetFinishedClassicPublicLeagues,
+  useGetFinishedCups,
+  useGetLeagues,
+} from '@/queries/leagues.query';
 import { normalizeQuery } from '@/utils/format';
 
 type Filter = 'all' | LeagueKind;
@@ -47,25 +52,44 @@ const SEARCH_THRESHOLD = 6;
 
 const keyExtractor = (item: LeagueListItem) => item.key;
 
-const fromLeague = (league: LeagueUserDetails, myTeamId?: number): LeagueListItem => {
+const FINISHED_STATUS = { label: 'Encerrada', tone: 'neutral' as const };
+
+/**
+ * Nome do campeão. Nas listas o vencedor vem achatado (dados do time, com `nome`);
+ * no detalhe da liga vem com `time`.
+ */
+const winnerName = (winner: LeagueUserDetails['vencedor']) =>
+  (winner as unknown as { nome?: string } | undefined)?.nome ?? winner?.time?.nome;
+
+const fromLeague = (
+  league: LeagueUserDetails,
+  myTeamId?: number,
+  isFinished = false
+): LeagueListItem => {
   const privacy = PRIVACY_LABEL[league.tipo];
 
   if (league.mata_mata) {
     const total = league.quantidade_times;
     const filled = league.total_times_liga;
-    const status = league.vencedor
-      ? { label: 'Encerrada', tone: 'neutral' as const }
-      : !league.sorteada
-        ? total && filled < total
-          ? { label: `Faltam ${total - filled} times`, tone: 'warning' as const }
-          : { label: 'Aguardando chaveamento', tone: 'warning' as const }
-        : undefined;
+    const champion = winnerName(league.vencedor);
+    const status =
+      isFinished || league.vencedor
+        ? FINISHED_STATUS
+        : !league.sorteada
+          ? total && filled < total
+            ? { label: `Faltam ${total - filled} times`, tone: 'warning' as const }
+            : { label: 'Aguardando chaveamento', tone: 'warning' as const }
+          : undefined;
     return {
       key: `league-${league.liga_id}`,
       kind: 'cup',
       name: league.nome,
       imageUrl: league.url_trofeu_png ?? league.imagem,
-      meta: [privacy, total ? `${filled}/${total} times` : pluralTeams(filled)]
+      meta: [
+        privacy,
+        total ? `${filled}/${total} times` : pluralTeams(filled),
+        champion ? `campeão: ${champion}` : null,
+      ]
         .filter(Boolean)
         .join(' · '),
       isOwner: !!myTeamId && league.time_dono_id === myTeamId,
@@ -83,8 +107,9 @@ const fromLeague = (league: LeagueUserDetails, myTeamId?: number): LeagueListIte
       .filter(Boolean)
       .join(' · '),
     position: league.camp_ranking_num,
-    variation: league.camp_variacao_num,
+    variation: isFinished ? undefined : league.camp_variacao_num,
     isOwner: !!myTeamId && league.time_dono_id === myTeamId,
+    status: isFinished ? FINISHED_STATUS : undefined,
     href: `/leagues/league/${league.slug}`,
   };
 };
@@ -106,7 +131,7 @@ const fromPoints = (
   variation: competition.finalizada ? undefined : competition.ranking_time?.variacao,
   isOwner: !!myTeamId && competition.time_dono_id === myTeamId,
   status: competition.finalizada
-    ? { label: 'Encerrada', tone: 'neutral' }
+    ? FINISHED_STATUS
     : !competition.sorteada
       ? { label: 'Aguardando times', tone: 'warning' }
       : undefined,
@@ -135,6 +160,11 @@ export default function LeaguesScreen() {
     useGetPointsCompetitions(!!allowRequest);
   const { data: finalizedCompetitions, refetch: onRefetchFinalized } =
     useGetFinalizedPointsCompetitions(!!allowRequest);
+  const { data: finishedPublic, refetch: onRefetchFinishedPublic } =
+    useGetFinishedClassicPublicLeagues(!!allowRequest);
+  const { data: finishedPrivate, refetch: onRefetchFinishedPrivate } =
+    useGetFinishedClassicPrivateLeagues(!!allowRequest);
+  const { data: finishedCups, refetch: onRefetchFinishedCups } = useGetFinishedCups(!!allowRequest);
 
   const invitesCount = (invites?.convites?.length ?? 0) + pointsInvites.length;
   const myTeamId = myClub?.time?.time_id;
@@ -142,20 +172,53 @@ export default function LeaguesScreen() {
 
   // Todas as ligas normalizadas num formato só; filtros e busca atuam sobre isso.
   const groups = useMemo(() => {
+    // Encerradas de todas as modalidades; uma liga pode vir em mais de uma lista, então a chave
+    // evita repetição e tira a liga das seções ativas.
+    const finishedLeagues = [
+      ...(finishedCups ?? []),
+      ...(finishedPublic ?? []),
+      ...(finishedPrivate ?? []),
+    ].map((l) => fromLeague(l, myTeamId, true));
+    const finishedItems = [
+      ...finishedLeagues,
+      ...(finalizedCompetitions ?? []).map((c) => fromPoints(c, myTeamId)),
+    ];
+    const finished = finishedItems.filter(
+      (item, index) => finishedItems.findIndex((other) => other.key === item.key) === index
+    );
+    const finishedKeys = new Set(finished.map((item) => item.key));
+    const isActive = (item: LeagueListItem) => !finishedKeys.has(item.key);
+
     const ligas = leagues?.ligas ?? [];
     return {
       classic: ligas
         .filter((l) => l.time_dono_id && !l.mata_mata)
-        .map((l) => fromLeague(l, myTeamId)),
-      cup: ligas.filter((l) => l.mata_mata).map((l) => fromLeague(l, myTeamId)),
+        .map((l) => fromLeague(l, myTeamId))
+        .filter(isActive),
+      cup: ligas
+        .filter((l) => l.mata_mata)
+        .map((l) => fromLeague(l, myTeamId))
+        .filter(isActive),
       // Ligas do próprio Cartola (sem dono); só fazem sentido com o mercado aberto, como antes.
       official: isMarketClose
         ? []
         : ligas.filter((l) => !l.time_dono_id).map((l) => fromLeague(l, myTeamId)),
-      points: (pointsCompetitions ?? []).map((c) => fromPoints(c, myTeamId)),
-      finished: (finalizedCompetitions ?? []).map((c) => fromPoints(c, myTeamId)),
+      points: (pointsCompetitions ?? []).map((c) => fromPoints(c, myTeamId)).filter(isActive),
+      finished,
     };
-  }, [finalizedCompetitions, isMarketClose, leagues?.ligas, myTeamId, pointsCompetitions]);
+  }, [
+    finalizedCompetitions,
+    finishedCups,
+    finishedPrivate,
+    finishedPublic,
+    isMarketClose,
+    leagues?.ligas,
+    myTeamId,
+    pointsCompetitions,
+  ]);
+
+  const finishedOf = (kind: LeagueKind) =>
+    groups.finished.filter((item) => item.kind === kind).length;
 
   const counts = {
     all:
@@ -164,9 +227,9 @@ export default function LeaguesScreen() {
       groups.official.length +
       groups.points.length +
       groups.finished.length,
-    classic: groups.classic.length + groups.official.length,
-    cup: groups.cup.length,
-    points: groups.points.length + groups.finished.length,
+    classic: groups.classic.length + groups.official.length + finishedOf('classic'),
+    cup: groups.cup.length + finishedOf('cup'),
+    points: groups.points.length + finishedOf('points'),
   };
 
   const sections = useMemo(() => {
@@ -190,7 +253,10 @@ export default function LeaguesScreen() {
       },
       show('points') && { title: 'Pontos corridos', data: groups.points },
       show('classic') && { title: 'Ligas do Cartola', data: groups.official },
-      show('points') && { title: 'Encerradas', data: groups.finished },
+      {
+        title: 'Encerradas',
+        data: groups.finished.filter((item) => show(item.kind)),
+      },
     ];
 
     return candidates
@@ -207,9 +273,15 @@ export default function LeaguesScreen() {
       onRefetchPointsInvites(),
       onRefetchPoints(),
       onRefetchFinalized(),
+      onRefetchFinishedPublic(),
+      onRefetchFinishedPrivate(),
+      onRefetchFinishedCups(),
     ]);
   }, [
     onRefetchFinalized,
+    onRefetchFinishedCups,
+    onRefetchFinishedPrivate,
+    onRefetchFinishedPublic,
     onRefetchInvites,
     onRefetchLeagues,
     onRefetchMyClub,

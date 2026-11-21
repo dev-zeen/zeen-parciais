@@ -93,6 +93,41 @@ export interface FullClubInfo {
   mensagem?: string;
 }
 
+/** Resposta de GET /auth/reset/cartoletas */
+export interface CartoletasDonationStatus {
+  resets: { data_reset: string; time_id: number; rodada_id: number }[];
+  reset_permitido: boolean;
+}
+
+/** Jogador resumido no histórico de escalações */
+export interface LineupHistoryPlayer {
+  id: number;
+  apelido: string;
+  posicao: string;
+}
+
+/** Um salvamento do time (GET /auth/time/historico/:rodada) */
+export interface LineupHistoryEntry {
+  historico_transacao_id: number;
+  data_transacao: string;
+  tipo: string;
+  rodada_id: number;
+  time_id: number;
+  capitao: LineupHistoryPlayer | null;
+  reserva_luxo: LineupHistoryPlayer | null;
+  escalacao: LineupHistoryPlayer[];
+  reservas: LineupHistoryPlayer[];
+}
+
+/** Nível do cartoleiro (GET /rankings) */
+export interface RankingLevel {
+  ranking_id: number;
+  nome: string;
+  descricao: string;
+  cor_base: string;
+  cor_adorno: string;
+}
+
 export interface TeamHistoryRound {
   patrimonio: number;
   pontos: number;

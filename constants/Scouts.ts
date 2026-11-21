@@ -7,7 +7,7 @@ export const SCOUTS = {
   DE: {
     code: 'DE',
     name: 'Defesas',
-    points: 1,
+    points: 1.3,
   },
   GS: {
     code: 'GS',
@@ -42,7 +42,7 @@ export const SCOUTS = {
   FF: {
     code: 'FF',
     name: 'Finalizações para fora',
-    points: -1,
+    points: 0.8,
   },
   FD: {
     code: 'FD',
@@ -52,7 +52,7 @@ export const SCOUTS = {
   DS: {
     code: 'DS',
     name: 'Desarmes',
-    points: 1.2,
+    points: 1.5,
   },
   FC: {
     code: 'FC',
@@ -83,5 +83,20 @@ export const SCOUTS = {
     code: 'CV',
     name: 'Cartões Vermelhos',
     points: -3,
+  },
+  GC: {
+    code: 'GC',
+    name: 'Gols contra',
+    points: -3,
+  },
+  PP: {
+    code: 'PP',
+    name: 'Pênaltis perdidos',
+    points: -4,
+  },
+  DP: {
+    code: 'DP',
+    name: 'Defesas de pênalti',
+    points: 7,
   },
 };

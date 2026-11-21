@@ -26,6 +26,8 @@ documento deve mudar junto. Status do plano de melhorias: [plano-melhorias.md](p
 
 - **Parcial do time** = soma da pontuação de quem entrou em campo + **50% do capitão** (capitão vale ×1,5). Ver `utils/partials.ts`.
 - **Ligas `sem_capitao`** não somam o bônus do capitão.
+- **Valor de cada scout** em `constants/Scouts.ts` (temporada 2026). Os valores 2026 corrigidos foram FF +0,8, DE +1,3 e DS +1,5, e entraram GC −3, PP −4 e DP +7. A parcial vem pronta da API; a tabela só serve para exibição.
+- **Tela "Como funciona a pontuação"** (`app/pontuacao.tsx`, `components/contexts/scoring/`, `utils/scoring.ts`): replay animado de lances, demonstração do capitão ×1,5, tabela de scouts e regras do time. Abre pela aba Rodada (aba Jogadores, acima da lista) e pelo Perfil. Respeita "reduzir movimento" do sistema.
 - **Substituições automáticas** vêm da API (`/time/substituicoes`): o reserva que entrou ocupa o lugar do titular nas parciais.
 - **Parcial ao vivo da liga** (`utils/leagues.ts`): soma a parcial a rodada, mês, turno e campeonato. Na rodada 20 o turno recomeça (vale só a parcial).
 
@@ -42,6 +44,14 @@ documento deve mudar junto. Status do plano de melhorias: [plano-melhorias.md](p
   - Só é enviado se o jogador ainda estiver no banco. Vender o reserva, ou o titular da posição (que esvazia o reserva), desfaz o luxo.
   - Regra da Globo: substitui o titular da posição com a pior pontuação, se pontuar mais que ele, e só se todos os titulares da posição jogarem. No empate da pior nota, o capitão sai primeiro.
   - A substituição é feita pela Globo e chega em `/time/substituicoes`; o app não a calcula.
+
+### Doação de cartoletas — `utils/donation.ts`, `components/contexts/team/DonationCard.tsx`
+
+- **Endpoints:** `GET /auth/reset/cartoletas` devolve `{ resets[], reset_permitido }`. `POST` no mesmo caminho, sem corpo, recebe a doação.
+- A doação leva o patrimônio de volta a **C$ 100** e vale **uma vez por temporada**. Quando já foi usada, a API devolve `reset_permitido: false`.
+- **Quando aparece:** um card na aba Time, só com o mercado aberto, se `reset_permitido` for verdadeiro, o patrimônio estiver abaixo de C$ 100 e a oferta não tiver sido adiada nesta rodada.
+- **Receber doação:** pede confirmação antes. No sucesso, atualiza o time e o status. No erro, mostra a `mensagem` da API.
+- **Não receber ainda:** guarda a rodada no aparelho (`donationDismissedRound` na settings store), e a oferta volta na rodada seguinte.
 
 ### Mercado — `components/contexts/market/MarketFilters/filters.helper.ts`
 
@@ -68,6 +78,16 @@ documento deve mudar junto. Status do plano de melhorias: [plano-melhorias.md](p
 
 - Com a rodada ao vivo, a clássica mostra ▲▼ de posições ganhas na rodada (mês, turno e campeonato). Com o mercado aberto, mostra a variação oficial.
 - **Diferenciais** contra um rival (`utils/rivals.ts`): os jogadores em comum se anulam; a diferença vem dos exclusivos e dos capitães.
+- **Encerradas** (seção da tela de Ligas): junta `/auth/competicoes/classica/publicas/finalizados`, `/classica/privadas/finalizados`, `/mata-mata/finalizados` e `/pontoscorridos/finalizadas`.
+  - Cada lista devolve `[]` quando não há liga encerrada.
+  - Uma liga encerrada sai das seções ativas, e a chave evita que ela apareça duas vezes.
+  - O filtro de cada modalidade também mostra as encerradas dela. O mata-mata mostra o campeão (`vencedor.nome`).
+
+### Notícias, histórico de escalações e nível
+
+- **Notícias e dicas:** `GET /auth/noticias` (Cartola) e `/auth/noticias/gatomestre`. Ficam 30 min em cache. A Início só tem um atalho no fim, de propósito, para não poluir a tela. O link abre no navegador interno.
+- **Histórico de escalações** (`utils/lineupHistory.ts`): `GET /auth/time/historico/:rodada` lista cada salvamento, do mais recente ao mais antigo. O mais recente leva o selo "Valendo". Cada card mostra quem entrou, quem saiu e as trocas de capitão e de reserva de luxo em relação ao salvamento anterior. O seletor vai da rodada 1 à atual.
+- **Nível do cartoleiro** (`utils/rankingLevel.ts`): `GET /rankings` traz os 11 níveis. O nível atual é `ranking.atual.ranking_id` e o melhor é `ranking.melhor_ranking_id`. Antes, o Perfil mostrava esse id como se fosse "melhor posição"; agora mostra o nome do nível.
 
 ### Calendário — `utils/fixtures.ts`
 
@@ -77,12 +97,12 @@ Dificuldade pela posição atual do adversário: 1º–5º = 4 (difícil), 6º�
 
 | Aba | O que tem |
 | --- | --- |
-| **Início** | Status do mercado, convites, resumo do time, estatísticas, capitão, alertas (fechamento em menos de 24h, sem capitão, titular sem jogo, jogador com problema) e destaques da rodada |
+| **Início** | Status do mercado, convites, resumo do time, estatísticas, capitão, alertas (fechamento em menos de 24h, sem capitão, titular sem jogo, jogador com problema) e destaques da rodada; no fim, atalho discreto para **Dicas e notícias** (`app/noticias.tsx`) |
 | **Time** | Campinho editável, formação, banco, Raio-X (projeção, mando, valorização, capitão sugerido, jogadores em risco com "Trocar"), salvar e compartilhar a escalação |
 | **Mercado** (modal da aba Time) | Filtros, ordenação, mínimo para valorizar, % de escalação, comparar 2 jogadores (segurar o card) |
 | **Rodada** | Jogadores pontuados (ao vivo ou da última rodada), partidas e calendário de dificuldade |
 | **Ligas** | Clássica, mata-mata e pontos corridos; criação, convites, pedidos; tela do adversário com temporada, confronto direto e diferenciais; compartilhar qualquer liga |
-| **Perfil** | Dados do cartoleiro, histórico da temporada (gráfico, melhor e pior rodada), tema e lembrete de fechamento |
+| **Perfil** | Dados do cartoleiro, nível (Inicial … Diamante), histórico da temporada (gráfico, melhor e pior rodada), atalhos para pontuação e **Histórico de escalações** (`app/historico-escalacoes.tsx`), tema e lembrete de fechamento |
 
 ## Regras técnicas
 
@@ -95,7 +115,7 @@ Dificuldade pela posição atual do adversário: 1º–5º = 4 (difícil), 6º�
 ### Autenticação — `lib/core/auth.ts`, `services/api.ts`, `utils/globoid.ts`
 
 - **Login:** WebView com o login da Globo; os tokens (`access`, `refresh`, `id`) são lidos do `localStorage` da página e gravados em `@access_token`.
-- **Requisições:** toda requisição envia `Bearer access_token`.
+- **Requisições:** toda requisição envia `Bearer access_token`, `X-GLB-App: cartola_web` e `X-GLB-Auth: oidc`, como o site.
 - **Erro 401:** um único refresh é compartilhado por todas as requisições pendentes, e cada uma é repetida **uma vez**.
 - **Refresh:** `POST {GLOBOID_BASE_URL}/v2/refresh-token` com `{ client_id, globo_id, tokens: [...] }`; os tokens novos vêm em `results[].tokens`. O `globo_id` vem dos claims do JWT.
 - **Logout automático** quando o refresh é impossível ou recusado (4xx). Erros de rede e 5xx **não** deslogam.

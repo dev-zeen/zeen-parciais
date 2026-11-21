@@ -13,6 +13,7 @@ import {
 import { FixtureTicker } from '@/components/contexts/matches/FixtureTicker';
 import { MatchCard } from '@/components/contexts/matches/MatchCard';
 import { PlayerCard } from '@/components/contexts/players/PlayerCard/PlayerCard';
+import { ScoringGuideLink } from '@/components/contexts/scoring/ScoringGuideLink';
 import { onGetPlayersPlayed } from '@/components/contexts/players/_players.helper';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
 import { ErrorScreen } from '@/components/structure/ErrorScreen';
@@ -195,13 +196,12 @@ export default function RodadaScreen() {
           }
           ListHeaderComponent={
             filteredPlayers?.length ? (
-              <AppText
-                variant="label"
-                weight="bold"
-                color="textMuted"
-                style={{ marginBottom: spacing.xs }}>
-                {isMarketClose ? 'PARCIAIS AO VIVO' : 'PONTUAÇÃO DA ÚLTIMA RODADA'}
-              </AppText>
+              <View style={{ gap: spacing.xs, marginBottom: spacing.xs }}>
+                <ScoringGuideLink />
+                <AppText variant="label" weight="bold" color="textMuted">
+                  {isMarketClose ? 'PARCIAIS AO VIVO' : 'PONTUAÇÃO DA ÚLTIMA RODADA'}
+                </AppText>
+              </View>
             ) : undefined
           }
           ListEmptyComponent={

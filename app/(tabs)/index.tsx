@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useCallback, useContext } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
@@ -14,6 +15,7 @@ import { ErrorScreen } from '@/components/structure/ErrorScreen';
 import { LoadingScreen } from '@/components/structure/LoadingScreen';
 import { Login } from '@/components/structure/Login';
 import { SafeAreaViewContainer } from '@/components/structure/SafeAreaViewContainer';
+import { LinkRow } from '@/components/ui/LinkRow';
 import { MARKET_STATUS_NAME } from '@/constants/Market';
 import { AuthContext } from '@/contexts/Auth.context';
 import useMarketStatus from '@/hooks/useMarketStatus';
@@ -131,6 +133,14 @@ export default () => {
 
               {/* Player Highlights Carousel */}
               <PlayerHighlightsCarousel />
+
+              {/* Dicas e notícias: só um atalho discreto no fim da tela */}
+              <LinkRow
+                icon="file-text"
+                title="Dicas e notícias"
+                subtitle="Do Cartola e do Gato Mestre"
+                onPress={() => router.push('/noticias')}
+              />
             </>
           ) : null}
         </View>

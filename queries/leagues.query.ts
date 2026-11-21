@@ -1,7 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAsyncStorage } from '@react-native-async-storage/async-storage';
 
-import { GET_ALL_LEAGUES, GET_CLUBS_BY_LEAGUE_ID, GET_LEAGUE_BY_SLUG } from '@/constants/Endpoits';
+import {
+  GET_ALL_LEAGUES,
+  GET_CLUBS_BY_LEAGUE_ID,
+  GET_FINISHED_CLASSIC_PRIVATE,
+  GET_FINISHED_CLASSIC_PUBLIC,
+  GET_FINISHED_CUPS,
+  GET_LEAGUE_BY_SLUG,
+} from '@/constants/Endpoits';
 import { CLUBS_BY_LEAGUE_KEY_STORAGE } from '@/constants/Keys';
 import { League, LeagueUserDetails } from '@/models/Leagues';
 import api from '@/services/api';
@@ -14,6 +21,24 @@ export const useGetLeagues = (allowRequest?: boolean) =>
       api.get<{ ligas: LeagueUserDetails[] }>(GET_ALL_LEAGUES).then((r) => r.data),
     enabled: !!allowRequest,
   });
+
+/** Ligas encerradas (clássicas públicas, clássicas privadas ou mata-mata); a API devolve [] quando não há. */
+const useGetFinishedLeagues = (url: string, allowRequest?: boolean) =>
+  useQuery<LeagueUserDetails[]>({
+    queryKey: [url],
+    queryFn: () =>
+      api.get<LeagueUserDetails[] | null>(url).then((r) => (Array.isArray(r.data) ? r.data : [])),
+    enabled: !!allowRequest,
+  });
+
+export const useGetFinishedClassicPublicLeagues = (allowRequest?: boolean) =>
+  useGetFinishedLeagues(GET_FINISHED_CLASSIC_PUBLIC, allowRequest);
+
+export const useGetFinishedClassicPrivateLeagues = (allowRequest?: boolean) =>
+  useGetFinishedLeagues(GET_FINISHED_CLASSIC_PRIVATE, allowRequest);
+
+export const useGetFinishedCups = (allowRequest?: boolean) =>
+  useGetFinishedLeagues(GET_FINISHED_CUPS, allowRequest);
 
 export const useGetLeague = (slug: string, allowRequest?: boolean) =>
   useQuery<League>({

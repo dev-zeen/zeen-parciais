@@ -92,3 +92,4 @@ android
 
 # Capturas de requisições (contêm tokens e dados pessoais)
 docs/requests.json
+*.har

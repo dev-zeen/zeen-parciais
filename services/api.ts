@@ -57,6 +57,9 @@ const api = axios.create({
     Referer: authOrigin,
     'User-Agent':
       'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1',
+    // Mesmos headers que o site do Cartola envia em toda chamada à API.
+    'X-GLB-App': 'cartola_web',
+    'X-GLB-Auth': 'oidc',
   },
 });
 

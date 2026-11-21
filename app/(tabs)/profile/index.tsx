@@ -13,6 +13,9 @@ import {
   ProfileStatTile,
 } from '@/components/contexts/profile/ProfileCard';
 import { ReminderSettingsCard } from '@/components/contexts/profile/ReminderSettingsCard';
+import { RankingLevelBar } from '@/components/contexts/profile/RankingLevelBar';
+import { ScoringGuideLink } from '@/components/contexts/scoring/ScoringGuideLink';
+import { LinkRow } from '@/components/ui/LinkRow';
 import { ThemeSettingsCard } from '@/components/contexts/profile/ThemeSettingsCard';
 import { MaintenanceMarket } from '@/components/contexts/utils/MaintenanceMarket';
 import { MarketStatusCard } from '@/components/contexts/utils/MarketStatusCard';
@@ -30,7 +33,9 @@ import { useTabBarSpacing } from '@/hooks/useTabBarSpacing';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useTokens } from '@/hooks/useTokens';
 import theme from '@/styles/theme';
+import { useGetRankingLevels } from '@/queries/club.query';
 import { numberToString } from '@/utils/parseTo';
+import { findRankingLevel, rankingProgress } from '@/utils/rankingLevel';
 import { buildSeasonStats } from '@/utils/profileStats';
 
 const GREEN = '#22C55E';
@@ -70,6 +75,11 @@ export default () => {
     ? myClub.ranking.anterior.posicao - myClub.ranking.atual.posicao
     : 0;
   const variationColor = rankingVariation > 0 ? GREEN : rankingVariation < 0 ? RED : GRAY;
+
+  // Nível do cartoleiro (Inicial … Diamante)
+  const { data: rankingLevels } = useGetRankingLevels();
+  const level = findRankingLevel(rankingLevels, myClub?.ranking?.atual.ranking_id);
+  const bestLevel = findRankingLevel(rankingLevels, myClub?.ranking?.melhor_ranking_id);
 
   const totalScore = numberToString(
     (myClub?.pontos_campeonato as number) + (isMarketClose ? partialScore : 0)
@@ -201,14 +211,25 @@ export default () => {
                 />
                 <ProfileStatTile
                   fit
-                  label="Melhor"
+                  label="Nível"
                   icon="star"
                   iconColor={AMBER}
                   iconBackground={`${AMBER}20`}
-                  value={`${myClub.ranking.melhor_ranking_id.toLocaleString('pt-BR')}º`}
-                  caption="Posição"
+                  value={level?.nome ?? '-'}
+                  caption={
+                    bestLevel && bestLevel.ranking_id > (level?.ranking_id ?? 0)
+                      ? `Melhor: ${bestLevel.nome}`
+                      : 'Atual'
+                  }
                 />
               </ProfileRow>
+              {level ? (
+                <RankingLevelBar
+                  level={level}
+                  progress={rankingProgress(rankingLevels, level.ranking_id)}
+                  total={rankingLevels?.length ?? 0}
+                />
+              ) : null}
             </ProfileCard>
           )}
 
@@ -336,6 +357,13 @@ export default () => {
           </ProfileCard>
 
           <CartoleiroInfoCard team={myClub.time} />
+          <ScoringGuideLink />
+          <LinkRow
+            icon="clock"
+            title="Histórico de escalações"
+            subtitle="Cada vez que você salvou o time na rodada"
+            onPress={() => router.push('/historico-escalacoes')}
+          />
           <ThemeSettingsCard />
           <ReminderSettingsCard />
         </View>
